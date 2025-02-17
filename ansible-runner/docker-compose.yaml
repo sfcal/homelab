@@ -1,0 +1,24 @@
+services:
+  # Ansible-runner
+  ansible-runner:
+    image: ansible-runner
+    build:
+      context: .
+    command: tail -f /dev/null
+    container_name: ansible-runner
+    restart: unless-stopped
+    volumes:
+      - ./../ansible:/runner
+        #- ./../kubernetes:/kubernetes
+        #- ./../metal/x86/pxe-files:/metal/x86/pxe-files
+        #- ./runner/.gnupg:/home/runner/.gnupg
+        #- ./runner/.vault:/home/runner/.vault
+        #- ./runner/.secrets:/home/runner/.secrets
+        #- ./runner/scripts:/home/runner/scripts
+      - ./runner/.ssh:/home/runner/.ssh
+        #- ./runner/.kube:/home/runner/.kube
+        #- ./certbot/log:/var/log/letsencrypt
+        #- ./certbot/config:/etc/letsencrypt
+        #- ./certbot/work:/var/lib/letsencrypt
+    env_file:
+      - ./runner/env
