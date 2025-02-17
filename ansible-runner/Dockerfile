@@ -24,7 +24,7 @@ WORKDIR /build
 #RUN ANSIBLE_GALAXY_DISABLE_GPG_VERIFY=1 ansible-galaxy collection install $ANSIBLE_GALAXY_CLI_COLLECTION_OPTS -r requirements.yml --collections-path "/usr/share/ansible/collections"
 
 # Configure ansible-runner
-#RUN ansible-playbook ansible_runner_setup.yml
+RUN ansible-playbook ansible_runner_setup.yml
 
 # Copy helmfile
 #COPY --from=helmfile /usr/local/bin/helmfile /usr/local/bin/helmfile
