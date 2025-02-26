@@ -1,0 +1,182 @@
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  influxdb-data:
+    driver: local
+  influxdb2-data:
+  influxdb2-config:
+
+networks:
+  monitoring:
+    driver: bridge
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/sfcal/prometheus:/config
+      - prometheus-data:/prometheus
+    networks:
+      - monitoring
+    restart: unless-stopped
+    command:
+      - "--config.file=/config/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    networks:
+      - monitoring
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+
+#  cadvisor:
+#    image: gcr.io/cadvisor/cadvisor:v0.51.0
+#    container_name: cadvisor
+#    ports:
+#      - 8081:8080
+#    volumes:
+#      - /:/rootfs:ro
+#      - /run:/run:ro
+#      - /sys:/sys:ro
+#      - /var/lib/docker/:/var/lib/docker:ro
+#      - /dev/disk/:/dev/disk:ro
+#    devices:
+#      - /dev/kmsg
+#    networks:
+#      - monitoring
+#    privileged: true
+#    restart: unless-stopped
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - 8086:8086
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME_FILE: /run/secrets/influxdb2-admin-username
+      DOCKER_INFLUXDB_INIT_PASSWORD_FILE: /run/secrets/influxdb2-admin-password
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE: /run/secrets/influxdb2-admin-token
+      DOCKER_INFLUXDB_INIT_ORG: docs
+      DOCKER_INFLUXDB_INIT_BUCKET: home
+    secrets:
+      - influxdb2-admin-username
+      - influxdb2-admin-password
+      - influxdb2-admin-token
+    volumes:
+      - type: volume
+        source: influxdb2-data
+        target: /var/lib/influxdb2
+      - type: volume
+        source: influxdb2-config
+        target: /etc/influxdb2
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    network_mode: "host"
+    user: telegraf:988
+    volumes:
+      - /home/sfcal/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/hostfs:ro
+      - /etc:/hostfs/etc:ro
+      - /proc:/hostfs/proc:ro
+      - /sys:/hostfs/sys:ro
+      - /dev:/dev:ro
+      - /run/udev:/run/udev:ro
+    environment:
+      - HOST_PROC=/hostfs/proc
+      - HOST_SYS=/hostfs/sys
+      - HOST_ETC=/hostfs/etc
+      - NVIDIA_VISIBLE_DEVICES=all
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  sabnzbd_exporter:
+    image: ghcr.io/onedr0p/exportarr:latest
+    container_name: sabnzbd_exporter
+    command: ["sabnzbd"]
+    environment:
+      - PORT=9706
+      - URL=http://192.168.1.5:8080
+      - APIKEY=REMOVED
+    ports:
+      - "9706:9706"
+    networks:
+      - monitoring
+    restart: unless-stopped
+  sonarr_exporter:
+    image: ghcr.io/onedr0p/exportarr:latest
+    container_name: sonarr_exporter
+    command: ["sonarr"]
+    environment:
+      - PORT=9707
+      - URL=http://192.168.1.5:8989
+      - APIKEY=REMOVED
+    ports:
+      - "9707:9707"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  radarr_exporter:
+    image: ghcr.io/onedr0p/exportarr:latest
+    container_name: radarr_exporter
+    command: ["radarr"]
+    environment:
+      - PORT=9708
+      - URL=http://192.168.1.5:7878
+      - APIKEY=REMOVED
+    ports:
+      - "9708:9708"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  prom-plex-exporter:
+    image: ghcr.io/jsclayton/prometheus-plex-exporter
+    container_name: plex_exporter
+    ports:
+      - 9709:9000/tcp
+    environment:
+      - PLEX_SERVER=http://192.168.1.5:32401
+      - PLEX_TOKEN=REMOVED
+secrets:
+  influxdb2-admin-username:
+    file: /home/sfcal/.env.influxdb2-admin-username
+  influxdb2-admin-password:
+    file: /home/sfcal/.env.influxdb2-admin-password
+  influxdb2-admin-token:
+    file: /home/sfcal/.env.influxdb2-admin-token
