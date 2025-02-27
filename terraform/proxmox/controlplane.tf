@@ -1,24 +1,20 @@
-resource "proxmox_vm_qemu" "ctlplane" {
+resource "proxmox_vm_qemu" "controlplane" {
   
   # -- General settings
 
-  name = "ctlplane"
+  name = "controlplane"
   desc = "description"
-  agent = 1  # <-- (Optional) Enable QEMU Guest Agent
-  target_node = "pve-dev01"  # <-- Change to the name of your Proxmox node (if you have multiple nodes)
-  #tags = "your-tag-1,your-tag-2"
-  vmid = "301"
+  agent = 1
+  target_node = "pve-dev01"
+  vmid = "401"
 
-  # -- Template settings
-
-  clone = "ubuntu-server-noble"  # <-- Change to the name of the template or VM you want to clone
-  full_clone = true  # <-- (Optional) Set to "false" to create a linked clone
+  clone = "ubuntu-server-noble"
+  full_clone = true
 
   # -- Boot Process
 
   onboot = true 
-  startup = ""  # <-- (Optional) Change startup and shutdown behavior
-  automatic_reboot = false  # <-- Automatically reboot the VM after config change
+  automatic_reboot = true
 
   # -- Hardware Settings
 
@@ -27,11 +23,8 @@ resource "proxmox_vm_qemu" "ctlplane" {
   cores = 2
   sockets = 1
   cpu_type = "host"
-  memory = 2048
-  balloon = 2048  # <-- (Optional) Minimum memory of the balloon device, set to 0 to disable ballooning
+  memory = 4096
   
-
-  # -- Network Settings
 
   network {
     id     = 0  # <-- ! required since 3.x.x
@@ -39,7 +32,6 @@ resource "proxmox_vm_qemu" "ctlplane" {
     model  = "virtio"
   }
 
-  # -- Disk Settings
   
   scsihw = "virtio-scsi-single"  # <-- (Optional) Change the SCSI controller type, since Proxmox 7.3, virtio-scsi-single is the default one         
   
@@ -65,8 +57,91 @@ resource "proxmox_vm_qemu" "ctlplane" {
 
   # -- Cloud Init Settings
   os_type = "cloud-init"
-  ipconfig0 = "ip=10.1.10.40/24,gw=10.1.10.1"  # <-- Change to your desired IP configuration
+  #ipconfig0 = "ip=10.1.10.40/24,gw=10.1.10.1"
+  ipconfig0 = "ip=dhcp"
   nameserver = "8.8.8.8"  # <-- Change to your desired DNS server
   ciuser = "sfcal"
-  sshkeys = var.PUBLIC_SSH_KEY  # <-- (Optional) Change to your public SSH key
+  sshkeys = var.ssh_public_key  # <-- (Optional) Change to your public SSH key
+
+
+ # Ensure that VM gets unique ID
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
+
+  # SSH connection for provisioning
+  connection {
+    type        = "ssh"
+    host        = self.default_ipv4_address
+    user        = "sfcal"
+    password    = "Proxmox4me!"
+    private_key = file("~/.ssh/id_ed25519")
+    timeout     = "2m"
+  }
+
+  provisioner "file" {
+    source      = "~/.ssh/id_ed25519"
+    destination = "/home/sfcal/.ssh/id_ed25519"
+  }
+
+  provisioner "file" {
+    source      = "~/.ssh/id_ed25519.pub"
+    destination = "/home/sfcal/.ssh/id_ed25519.pub"
+  }
+
+  # Set correct permissions for SSH keys
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 700 /home/sfcal/.ssh",
+      "chmod 600 /home/sfcal/.ssh/id_ed25519",
+      "chmod 644 /home/sfcal/.ssh/id_ed25519.pub",
+      
+      # Add public key to authorized_keys
+      "cat /home/sfcal/.ssh/id_ed25519.pub >> /home/sfcal/.ssh/authorized_keys",
+      "chmod 600 /home/sfcal/.ssh/authorized_keys"
+    ]
+  }
+
+  # Install git and setup SSH for GitHub
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y git",
+      "touch ~/.ssh/known_hosts",
+      "ssh-keyscan github.com >> ~/.ssh/known_hosts",
+      "git --version"
+    ]
+  }
+
+  # Clone the repository
+  provisioner "remote-exec" {
+    inline = [
+      "git clone ${var.git_repo_url}",
+      "cd ~/homelab",
+      "git checkout ${var.git_branch}",
+      "echo 'Repository cloned successfully!'"
+    ]
+  }
+
+  # Start Docker containers from the repository
+/*   provisioner "remote-exec" {
+    inline = [
+      "cd ~/docker-app",
+      # Create .env file if needed
+      "if [ -f .env.example ]; then cp .env.example .env; fi",
+      # Run any setup scripts if they exist
+      "if [ -f setup.sh ]; then chmod +x setup.sh && ./setup.sh; fi",
+      # Start Docker Compose
+      "docker-compose up -d",
+      "docker ps",
+      "echo 'Docker containers are now running!'"
+    ]
+  }
+} */
+}
+
+output "vm_ip" {
+  value = proxmox_vm_qemu.controlplane.default_ipv4_address
 }
