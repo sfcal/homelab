@@ -1,7 +1,13 @@
 # Ubuntu Server Noble (24.04.x)
 # ---
-# Packer Template to create an Ubuntu Server (Noble 24.04.x) on Proxmox
-
+packer {
+  required_plugins {
+    proxmox = {
+      version = ">= 1.1.2"
+      source  = "github.com/hashicorp/proxmox"
+    }
+  }
+}
 # Variable Definitions
 variable "proxmox_api_url" {
     type = string
@@ -16,27 +22,23 @@ variable "proxmox_api_token_secret" {
     sensitive = true
 }
 
-# Resource Definiation for the VM Template
-source "proxmox-iso" "ubuntu-server-noble" {
+variable "ssh_password" {
+    type = string
+    sensitive = true
+}
 
-    # Proxmox Connection Settings
+source "proxmox-iso" "ubuntu-noble-docker" {
+
     proxmox_url = "${var.proxmox_api_url}"
     username = "${var.proxmox_api_token_id}"
     token = "${var.proxmox_api_token_secret}"
-    # (Optional) Skip TLS Verification
     insecure_skip_tls_verify = true
 
-    # VM General Settings
     node = "pve-dev01"
-    vm_id = "400"
+    vm_id = "9000"
     vm_name = "ubuntu-server-noble"
-    template_description = "Ubuntu Server Noble Image"
+    template_description = "Ubuntu Noble w Docker"
 
-    # VM OS Settings
-    # (Option 1) Local ISO File
-    # iso_file = "local:iso/ubuntu-24.04-live-server-amd64.iso"
-    # - or -
-    # (Option 2) Download ISO
     iso_url = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso"
     iso_checksum = "d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
     iso_storage_pool = "local"
@@ -56,10 +58,8 @@ source "proxmox-iso" "ubuntu-server-noble" {
         type = "virtio"
     }
 
-    # VM CPU Settings
+    # VM CPU/RAM
     cores = "1"
-
-    # VM Memory Settings
     memory = "2048"
 
     # VM Network Settings
@@ -89,20 +89,11 @@ source "proxmox-iso" "ubuntu-server-noble" {
 
     # PACKER Autoinstall Settings
     http_directory          = "http"
-    # (Optional) Bind IP Address and Port
-    # http_bind_address       = "0.0.0.0"
-    # http_port_min           = 8802
-    # http_port_max           = 8802
 
     ssh_username            = "sfcal"
-
-    # (Option 1) Add your Password here
-    # ssh_password        = "your-password"
-    # - or -
-    # (Option 2) Add your Private SSH KEY file here
+    ssh_password            = "${var.ssh_password}"
     ssh_private_key_file    = "~/.ssh/id_ed25519"
 
-    # Raise the timeout, when installation takes longer
     ssh_timeout             = "30m"
     ssh_pty                 = true
 }
@@ -110,8 +101,8 @@ source "proxmox-iso" "ubuntu-server-noble" {
 # Build Definition to create the VM Template
 build {
 
-    name = "ubuntu-server-noble"
-    sources = ["source.proxmox-iso.ubuntu-server-noble"]
+    name = "ubuntu-noble-docker"
+    sources = ["source.proxmox-iso.ubuntu-noble-docker"]
 
     # Provisioning the VM Template for Cloud-Init Integration in Proxmox #1
     provisioner "shell" {
@@ -140,6 +131,7 @@ build {
         inline = [ "sudo cp /tmp/99-pve.cfg /etc/cloud/cloud.cfg.d/99-pve.cfg" ]
     }
 
+    # Installing Docker
     provisioner "shell" {
         inline = [
             "sudo apt-get install -y ca-certificates curl gnupg lsb-release",
@@ -147,6 +139,13 @@ build {
             "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
             "sudo apt-get -y update",
             "sudo apt-get install -y docker-ce docker-ce-cli containerd.io"
+        ]
+    }
+
+    # Docker without sudo
+    provisioner "shell" {
+        inline = [ 
+            "sudo usermod -aG docker sfcal"
         ]
     }
 }
