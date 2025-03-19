@@ -94,7 +94,7 @@ source "proxmox-iso" "ubuntu-noble-docker" {
     ssh_password            = "${var.ssh_password}"
     ssh_private_key_file    = "~/.ssh/id_ed25519"
 
-    ssh_timeout             = "5m"
+    ssh_timeout             = "10m"
     ssh_pty                 = true
 }
 

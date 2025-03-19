@@ -30,4 +30,3 @@ autoinstall:
         # passwd: your-password
         # - or -
         ssh_authorized_keys:
-           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF//CBlzVx+0wdqbMh/gLnHfflsjxbhvnNnNC+lb5j1z ssh@samuelcalvert.com

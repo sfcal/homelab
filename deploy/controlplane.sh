@@ -89,7 +89,14 @@ proxmox_api_token_secret="$PROXMOX_TOKEN_SECRET"
 ssh_password="$SSH_PASSWORD"
 EOF
 
-cd ubuntu-server-noble
+# Add SSH key to user-data file
+echo "Adding SSH key to user-data file..."
+cd ~/homelab/packer/proxmox/ubuntu-server-noble/http/
+
+# Add the SSH key after the ssh_authorized_keys: line
+sed -i '/ssh_authorized_keys:/a \ \ \ \ \ \ - '"$(cat $HOME/.ssh/id_ed25519.pub)" user-data
+
+cd ..
 
 # Initialize Packer plugins
 echo "Initializing Packer..."
