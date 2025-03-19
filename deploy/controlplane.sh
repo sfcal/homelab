@@ -102,6 +102,8 @@ sed -i '/ssh_authorized_keys:/!b;n;s!^.*$!        - '"$SSH_PUBLIC_KEY"'!' user-d
 # If the ssh_authorized_keys section is commented out, uncomment it
 sed -i 's/# ssh_authorized_keys:/ssh_authorized_keys:/' user-data
 
+cd ..
+
 # Initialize Packer plugins
 echo "Initializing Packer..."
 packer init ubuntu-server-noble-docker.pkr.hcl
