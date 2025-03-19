@@ -116,25 +116,33 @@ packer build -var-file=../credentials.pkr.hcl ubuntu-server-noble-docker.pkr.hcl
 echo "Waiting for template to be fully available..."
 sleep 30
 
-# echo "======= Step 2: Creating Terraform Configuration ======="
-# # Create terraform.tfvars file
-# cat > terraform.tfvars << EOF
-# proxmox_api_url = "$PROXMOX_URL"
-# proxmox_api_token_id = "$PROXMOX_TOKEN_ID"
-# proxmox_api_token_secret = "$PROXMOX_TOKEN_SECRET"
-# EOF
 
-# # Initialize Terraform
-# echo "Initializing Terraform..."
-# terraform init > "$LOG_DIR/terraform_init.log" 2>&1
+echo "======= Step 2: Creating Terraform Configuration ======="
 
-# # Create a Terraform plan
-# echo "Creating Terraform plan..."
-# terraform plan -out=tfplan > "$LOG_DIR/terraform_plan.log" 2>&1
+cd ~/homelab/terraform/proxmox
 
-# # Apply the Terraform configuration
-# echo "Applying Terraform configuration..."
-# terraform apply -auto-approve tfplan > "$LOG_DIR/terraform_apply.log" 2>&1
+# Create terraform.tfvars file
+cat > credentials.auto.tfvars << EOF
+proxmox_api_url = "$PROXMOX_URL"
+proxmox_api_token_id = "$PROXMOX_TOKEN_ID"
+proxmox_api_token_secret = "$PROXMOX_TOKEN_SECRET"
+ssh_public_key = "$SSH_PUBLIC_KEY"
+ssh_private_key = "~/.ssh/id_ed25519"
+git_repo_url = "git@github.com:sfcal/homelab.git"
+git_branch = "main"
+EOF
+
+# Initialize Terraform
+echo "Initializing Terraform..."
+terraform init
+
+# Create a Terraform plan
+echo "Creating Terraform plan..."
+terraform plan 
+
+# Apply the Terraform configuration
+echo "Applying Terraform configuration..."
+terraform apply -auto-approve controlplane.tf
 
 # # Get the IPs of the deployed VMs
 # echo "Getting VM IPs..."
