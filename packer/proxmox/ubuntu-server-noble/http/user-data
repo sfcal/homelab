@@ -29,4 +29,5 @@ autoinstall:
         shell: /bin/bash
         # passwd: your-password
         # - or -
-        ssh_authorized_keys:
+        # ssh_authorized_keys:
+        #   - your-ssh-key

@@ -93,12 +93,14 @@ EOF
 echo "Adding SSH key to user-data file..."
 cd ~/homelab/packer/proxmox/ubuntu-server-noble/http/
 
-# Add the SSH key after the ssh_authorized_keys: line
-sed -i '/ssh-ed25519/d' user-data
-sed -i '/ssh_authorized_keys:/a \ \ \ \ \ \ - '"$(cat $HOME/.ssh/id_ed25519.pub)" user-data
+# Get the public SSH key content
+SSH_PUBLIC_KEY=$(cat "$HOME/.ssh/id_ed25519.pub")
 
-cd ..
+# Update the user-data file to include the SSH key
+sed -i '/ssh_authorized_keys:/!b;n;s!^.*$!        - '"$SSH_PUBLIC_KEY"'!' user-data
 
+# If the ssh_authorized_keys section is commented out, uncomment it
+sed -i 's/# ssh_authorized_keys:/ssh_authorized_keys:/' user-data
 
 # Initialize Packer plugins
 echo "Initializing Packer..."
