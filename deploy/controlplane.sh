@@ -82,7 +82,7 @@ echo "======= Step 1: Building Packer Template ======="
 git clone https://github.com/sfcal/homelab
 cd homelab/packer/proxmox
 #Create variables file for Packer
-cat > proxmox_credentials.env << EOF
+cat > credentials.pkr.hcl << EOF
 PROXMOX_URL="$PROXMOX_URL"
 PROXMOX_TOKEN_ID="$PROXMOX_TOKEN_ID"
 PROXMOX_TOKEN_SECRET="$PROXMOX_TOKEN_SECRET"
