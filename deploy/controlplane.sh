@@ -142,7 +142,7 @@ terraform plan
 
 # Apply the Terraform configuration
 echo "Applying Terraform configuration..."
-terraform apply -auto-approve controlplane.tf
+terraform apply -auto-approve
 
 # # Get the IPs of the deployed VMs
 # echo "Getting VM IPs..."
