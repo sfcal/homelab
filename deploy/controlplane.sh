@@ -6,7 +6,7 @@ PROXMOX_URL="https://10.1.10.23:8006/api2/json"
 PROXMOX_NODE="pve-dev01"
 PROXMOX_TOKEN_ID="root@pam!packer"
 # Read secrets from environment variables or prompt for them
-PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-$(read -sp "Proxmox Password: " pwd; echo $pwd)}
+#PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-$(read -sp "Proxmox Password: " pwd; echo $pwd)}
 PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET:-$(read -sp "Proxmox API Token Secret: " token; echo $token)}
 SSH_PASSWORD=${SSH_PASSWORD:-$(read -sp "SSH Password for VMs: " ssh_pwd; echo $ssh_pwd)}
 
@@ -78,13 +78,18 @@ else
 fi
 
 echo "======= Step 1: Building Packer Template ======="
-# Create variables file for Packer
-# cat > packer_vars.json << EOF
-# {
-#   "proxmox_password": "$PROXMOX_PASSWORD",
-#   "ssh_password": "$SSH_PASSWORD"
-# }
-# EOF
+#clone repo
+git clone https://github.com/sfcal/homelab
+cd homelab/packer/proxmox
+#Create variables file for Packer
+cat > proxmox_credentials.env << EOF
+PROXMOX_URL="$PROXMOX_URL"
+PROXMOX_TOKEN_ID="$PROXMOX_TOKEN_ID"
+PROXMOX_TOKEN_SECRET="$PROXMOX_TOKEN_SECRET"
+SSH_PASSWORD="$SSH_PASSWORD"
+EOF
+
+cd ubuntu-server-noble
 
 # Initialize Packer plugins
 echo "Initializing Packer..."
