@@ -94,9 +94,10 @@ echo "Adding SSH key to user-data file..."
 cd ~/homelab/packer/proxmox/ubuntu-server-noble/http/
 
 # Add the SSH key after the ssh_authorized_keys: line
+sed -i '/ssh-ed25519/d' user-data
 sed -i '/ssh_authorized_keys:/a \ \ \ \ \ \ - '"$(cat $HOME/.ssh/id_ed25519.pub)" user-data
-
-cd ..
+# Navigate to the file
+cd ~/homelab/packer/proxmox/ubuntu-server-noble/http/
 
 # Initialize Packer plugins
 echo "Initializing Packer..."
