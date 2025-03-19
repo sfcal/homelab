@@ -7,8 +7,8 @@ PROXMOX_NODE="pve-dev01"
 PROXMOX_TOKEN_ID="root@pam!packer"
 # Read secrets from environment variables or prompt for them
 #PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-$(read -sp "Proxmox Password: " pwd; echo $pwd)}
-PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET:-$(read -sp "Proxmox API Token Secret: " token; echo $token)}
-SSH_PASSWORD=${SSH_PASSWORD:-$(read -sp "SSH Password for VMs: " ssh_pwd; echo $ssh_pwd)}
+PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET:-$(read -sp "Proxmox API Token Secret: " token; echo $token; echo)}
+SSH_PASSWORD=${SSH_PASSWORD:-$(read -sp "SSH Password for VMs: " ssh_pwd; echo $ssh_pwd; echo)}
 
 
 # Function to check and install a package if missing
@@ -83,10 +83,10 @@ git clone https://github.com/sfcal/homelab
 cd homelab/packer/proxmox
 #Create variables file for Packer
 cat > credentials.pkr.hcl << EOF
-PROXMOX_URL="$PROXMOX_URL"
-PROXMOX_TOKEN_ID="$PROXMOX_TOKEN_ID"
-PROXMOX_TOKEN_SECRET="$PROXMOX_TOKEN_SECRET"
-SSH_PASSWORD="$SSH_PASSWORD"
+proxmox_api_url="$PROXMOX_URL"
+proxmox_api_token_id="$PROXMOX_TOKEN_ID"
+proxmox_api_token_secret="$PROXMOX_TOKEN_SECRET"
+ssh_password="$SSH_PASSWORD"
 EOF
 
 cd ubuntu-server-noble
