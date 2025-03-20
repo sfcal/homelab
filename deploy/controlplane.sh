@@ -108,6 +108,7 @@ cd ..
 echo "Initializing Packer..."
 packer init ubuntu-server-noble-docker.pkr.hcl
 
+# Gross way to skip rebuilding template but whatever
 echo "Building VM template with Packer..."
 packer build -var-file=../credentials.pkr.hcl ubuntu-server-noble-docker.pkr.hcl || {
   echo "Packer build failed, but continuing with deployment..."
