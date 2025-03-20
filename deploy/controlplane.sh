@@ -79,8 +79,8 @@ fi
 
 echo "======= Step 1: Building Packer Template ======="
 #clone repo
-git clone https://github.com/sfcal/homelab
-cd homelab/packer/proxmox
+git clone https://github.com/sfcal/homelab || echo "Repository already exists, continuing..."
+cd homelab/packer/proxmox || exit
 #Create variables file for Packer
 cat > credentials.pkr.hcl << EOF
 proxmox_api_url="$PROXMOX_URL"
@@ -108,9 +108,12 @@ cd ..
 echo "Initializing Packer..."
 packer init ubuntu-server-noble-docker.pkr.hcl
 
-# Build the template
 echo "Building VM template with Packer..."
-packer build -var-file=../credentials.pkr.hcl ubuntu-server-noble-docker.pkr.hcl
+packer build -var-file=../credentials.pkr.hcl ubuntu-server-noble-docker.pkr.hcl || {
+  echo "Packer build failed, but continuing with deployment..."
+  echo "This may be because the template already exists."
+  sleep 3
+}
 
 # Wait for template to be fully available
 echo "Waiting for template to be fully available..."
