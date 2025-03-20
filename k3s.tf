@@ -81,6 +81,7 @@ resource "proxmox_vm_qemu" "k3s-master" {
 #     private_key = file("~/.ssh/id_ed25519")
 #     timeout     = "2m"
 #   }
+}
 
 resource "proxmox_vm_qemu" "k3s-worker" {
   
@@ -155,9 +156,15 @@ resource "proxmox_vm_qemu" "k3s-worker" {
       network,
     ]
   }
+}
 
-output "vm_ip" {
-  value = proxmox_vm_qemu.k3s-master.default_ipv4_address
-  value = proxmox_vm_qemu.k3s-worker.default_ipv4_address
+# Outputs - Fixed to handle multiple nodes
+output "k3s_master_ips" {
+  value = proxmox_vm_qemu.k3s-master[*].default_ipv4_address
+  description = "IP addresses of the K3s master nodes"
+}
 
+output "k3s_worker_ips" {
+  value = proxmox_vm_qemu.k3s-worker[*].default_ipv4_address
+  description = "IP addresses of the K3s worker nodes"
 }
