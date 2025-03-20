@@ -9,7 +9,7 @@ PROXMOX_TOKEN_ID="root@pam!packer"
 #PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-$(read -sp "Proxmox Password: " pwd; echo $pwd)}
 PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET:-$(read -sp "Proxmox API Token Secret: " token; echo $token; echo)}
 SSH_PASSWORD=${SSH_PASSWORD:-$(read -sp "SSH Password for VMs: " ssh_pwd; echo $ssh_pwd; echo)}
-PHYSICAL_PUB=$(cat $HOME/.ssh/authorized_keys)
+PHYSICAL_PUB=$(sed -n '2p' /root/.ssh/authorized_keys)
 
 
 
@@ -103,6 +103,7 @@ sed -i '/ssh_authorized_keys:/!b;n;s!^.*$!        - '"$PHYSICAL_PUB"'!' user-dat
 
 # If the ssh_authorized_keys section is commented out, uncomment it
 sed -i 's/# ssh_authorized_keys:/ssh_authorized_keys:/' user-data
+sed -i '/ssh_authorized_keys:/a\        - '"$SSH_PUBLIC_KEY"'' user-data
 
 cd ..
 
