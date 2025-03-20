@@ -9,6 +9,8 @@ PROXMOX_TOKEN_ID="root@pam!packer"
 #PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-$(read -sp "Proxmox Password: " pwd; echo $pwd)}
 PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET:-$(read -sp "Proxmox API Token Secret: " token; echo $token; echo)}
 SSH_PASSWORD=${SSH_PASSWORD:-$(read -sp "SSH Password for VMs: " ssh_pwd; echo $ssh_pwd; echo)}
+PHYSICAL_PUB=$(cat $HOME/.ssh/authorized_keys)
+
 
 
 # Function to check and install a package if missing
@@ -97,7 +99,7 @@ cd ~/homelab/packer/proxmox/ubuntu-server-noble/http/
 SSH_PUBLIC_KEY=$(cat "$HOME/.ssh/id_ed25519.pub")
 
 # Update the user-data file to include the SSH key
-sed -i '/ssh_authorized_keys:/!b;n;s!^.*$!        - '"$SSH_PUBLIC_KEY"'!' user-data
+sed -i '/ssh_authorized_keys:/!b;n;s!^.*$!        - '"$PHYSICAL_PUB"'!' user-data
 
 # If the ssh_authorized_keys section is commented out, uncomment it
 sed -i 's/# ssh_authorized_keys:/ssh_authorized_keys:/' user-data
