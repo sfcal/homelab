@@ -5,8 +5,8 @@ resource "proxmox_vm_qemu" "k3s-master" {
   name = "k3s-master-0${count.index + 1}"
   desc = "description"
   count = 3
-  agent = 0
-  target_node = "pve-prod01"
+  agent = 1
+  target_node = "pve-dev01"
   #vmid = "401"
 
   clone = "ubuntu-server-noble"
@@ -48,7 +48,7 @@ resource "proxmox_vm_qemu" "k3s-master" {
       virtio0 {
         disk {
           storage = "local-lvm"
-          size = "12G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
+          size = "20G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
           iothread = true  # <-- (Optional) Enable IOThread for better disk performance in virtio-scsi-single
           replicate = false  # <-- (Optional) Enable for disk replication
         }
@@ -58,8 +58,7 @@ resource "proxmox_vm_qemu" "k3s-master" {
 
   # -- Cloud Init Settings
   os_type = "cloud-init"
-  #ipconfig0 = "ip=10.1.10.40/24,gw=10.1.10.1"
-  ipconfig0 = "ip=dhcp"
+  ipconfig0 = "ip=10.1.10.${count.index + 51}/24,gw=10.1.10.1"
   nameserver = "8.8.8.8"  # <-- Change to your desired DNS server
   ciuser = "sfcal"
   sshkeys = var.ssh_public_key  # <-- (Optional) Change to your public SSH key
@@ -90,8 +89,8 @@ resource "proxmox_vm_qemu" "k3s-worker" {
   name = "k3s-worker-0${count.index + 1}"
   desc = "description"
   count = 2
-  agent = 0
-  target_node = "pve-prod01"
+  agent = 1
+  target_node = "pve-dev01"
   #vmid = "401"
 
   clone = "ubuntu-server-noble"
@@ -133,7 +132,7 @@ resource "proxmox_vm_qemu" "k3s-worker" {
       virtio0 {
         disk {
           storage = "local-lvm"
-          size = "12G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
+          size = "20G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
           iothread = true  # <-- (Optional) Enable IOThread for better disk performance in virtio-scsi-single
           replicate = false  # <-- (Optional) Enable for disk replication
         }
@@ -143,8 +142,7 @@ resource "proxmox_vm_qemu" "k3s-worker" {
 
   # -- Cloud Init Settings
   os_type = "cloud-init"
-  #ipconfig0 = "ip=10.1.10.40/24,gw=10.1.10.1"
-  ipconfig0 = "ip=dhcp"
+  ipconfig0 = "ip=10.1.10.${count.index + 41}/24,gw=10.1.10.1"
   nameserver = "8.8.8.8"  # <-- Change to your desired DNS server
   ciuser = "sfcal"
   sshkeys = var.ssh_public_key  # <-- (Optional) Change to your public SSH key
