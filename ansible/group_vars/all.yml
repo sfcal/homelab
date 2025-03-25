@@ -10,7 +10,7 @@ system_timezone: America/New_York
 flannel_iface: eth0
 
 # apiserver_endpoint is virtual ip-address which will be configured on each master
-apiserver_endpoint: 10.1.10.4
+apiserver_endpoint: 10.1.10.222
 
 # k3s_token is required  masters can talk together securely
 # this token should be alpha numeric only
@@ -60,7 +60,7 @@ kube_vip_tag_version: v0.8.8
 
 # kube-vip ip range for load balancer
 # (uncomment to use kube-vip for services instead of MetalLB)
-# kube_vip_lb_ip_range: "192.168.30.80-192.168.30.90"
+# kube_vip_lb_ip_range: "192.168.30.140-192.168.30.90"
 
 # metallb type frr or native
 metal_lb_type: native
@@ -78,7 +78,7 @@ metal_lb_speaker_tag_version: v0.14.8
 metal_lb_controller_tag_version: v0.14.8
 
 # metallb ip range for load balancer
-metal_lb_ip_range: 10.1.10.80-10.1.10.90
+metal_lb_ip_range: 10.1.10.140-10.1.10.150
 metal_lb_available_timeout: 240s
 
 
