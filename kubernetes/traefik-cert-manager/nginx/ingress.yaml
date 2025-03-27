@@ -10,12 +10,12 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.nginx.local.example.com`)
+    - match: Host(`www.nginx.local.samuelcalvert.com`)
       kind: Rule
       services:
         - name: nginx
           port: 80
-    - match: Host(`nginx.local.example.com`)
+    - match: Host(`nginx.local.samuelcalvert.com`)
       kind: Rule
       services:
         - name: nginx
@@ -23,4 +23,4 @@ spec:
       middlewares:
         - name: default-headers
   tls:
-    secretName: local-example-com-tls
+    secretName: local-samuelcalvert-com-tls
