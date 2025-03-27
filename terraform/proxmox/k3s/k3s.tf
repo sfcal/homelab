@@ -59,7 +59,7 @@ resource "proxmox_vm_qemu" "k3s-master" {
   # -- Cloud Init Settings
   os_type = "cloud-init"
   ipconfig0 = "ip=10.1.10.${count.index + 51}/24,gw=10.1.10.1"
-  nameserver = "8.8.8.8"  # <-- Change to your desired DNS server
+  nameserver = "10.1.0.1"  # <-- Change to your desired DNS server
   ciuser = "sfcal"
   sshkeys = var.ssh_public_key  # <-- (Optional) Change to your public SSH key
 
@@ -143,7 +143,7 @@ resource "proxmox_vm_qemu" "k3s-worker" {
   # -- Cloud Init Settings
   os_type = "cloud-init"
   ipconfig0 = "ip=10.1.10.${count.index + 41}/24,gw=10.1.10.1"
-  nameserver = "8.8.8.8"  # <-- Change to your desired DNS server
+  nameserver = "10.1.0.1"  # <-- Change to your desired DNS server
   ciuser = "sfcal"
   sshkeys = var.ssh_public_key  # <-- (Optional) Change to your public SSH key
 
