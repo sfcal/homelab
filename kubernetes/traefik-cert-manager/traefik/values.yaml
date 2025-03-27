@@ -23,7 +23,7 @@ ports:
   websecure:
     http3:
       enabled: true
-    advertisedPort: 4443
+    advertisedPort: 443
     tls:
       enabled: true
       
