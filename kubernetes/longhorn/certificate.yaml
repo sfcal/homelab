@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: longhorn-web-ui-cert
+  namespace: longhorn-system
+spec:
+  secretName: longhorn-web-ui-tls
+  dnsNames:
+    - longhorn.local.samuelcalvert.com
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
