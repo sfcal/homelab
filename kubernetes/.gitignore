@@ -1,10 +1,4 @@
 # Secret files that should not be committed
-infrastructure/cert-manager/issuers/secret-cf-token.yaml
+infrastructure/cert-manager/issuers/cloudflare-token-secret.yaml
 infrastructure/traefik/dashboard/secret-dashboard.yaml
 apps/homelab/kube-prometheus-stack/grafana-admin-secret.yaml
-
-# Other potential secrets
-**/secret-*.yaml
-**/secrets/*.yaml
-**/*-secret.yaml
-**/*-secrets.yaml
