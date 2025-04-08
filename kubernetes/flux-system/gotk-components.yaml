@@ -1,0 +1,625 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
+  labels:
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+    app.kubernetes.io/version: v2.0.0
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: helmreleases.helm.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: helm-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: helm.toolkit.fluxcd.io
+  names:
+    kind: HelmRelease
+    listKind: HelmReleaseList
+    plural: helmreleases
+    shortNames:
+    - hr
+    singular: helmrelease
+  scope: Namespaced
+  versions:
+  - name: v2beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        required:
+        - spec
+        - metadata
+        properties:
+          spec:
+            type: object
+            required:
+            - chart
+            - interval
+            properties:
+              chart:
+                type: object
+                required:
+                - spec
+                properties:
+                  spec:
+                    type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kustomizations.kustomize.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: kustomize-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: kustomize.toolkit.fluxcd.io
+  names:
+    kind: Kustomization
+    listKind: KustomizationList
+    plural: kustomizations
+    shortNames:
+    - ks
+    singular: kustomization
+  scope: Namespaced
+  versions:
+  - name: v1beta2
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        required:
+        - spec
+        properties:
+          spec:
+            type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gitrepositories.source.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: source.toolkit.fluxcd.io
+  names:
+    kind: GitRepository
+    listKind: GitRepositoryList
+    plural: gitrepositories
+    shortNames:
+    - gitrepo
+    singular: gitrepository
+  scope: Namespaced
+  versions:
+  - name: v1beta2
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        required:
+        - spec
+        properties:
+          spec:
+            type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: helmrepositories.source.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: source.toolkit.fluxcd.io
+  names:
+    kind: HelmRepository
+    listKind: HelmRepositoryList
+    plural: helmrepositories
+    shortNames:
+    - helmrepo
+    singular: helmrepository
+  scope: Namespaced
+  versions:
+  - name: v1beta2
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        required:
+        - spec
+        properties:
+          spec:
+            type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: imagepolicies.image.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: image-reflector-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: image.toolkit.fluxcd.io
+  names:
+    kind: ImagePolicy
+    listKind: ImagePolicyList
+    plural: imagepolicies
+    singular: imagepolicy
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: imagerepositories.image.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: image-reflector-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: image.toolkit.fluxcd.io
+  names:
+    kind: ImageRepository
+    listKind: ImageRepositoryList
+    plural: imagerepositories
+    singular: imagerepository
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: imageupdateautomations.image.toolkit.fluxcd.io
+  labels:
+    app.kubernetes.io/component: image-automation-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  group: image.toolkit.fluxcd.io
+  names:
+    kind: ImageUpdateAutomation
+    listKind: ImageUpdateAutomationList
+    plural: imageupdateautomations
+    singular: imageupdateautomation
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: helm-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: helm-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kustomize-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: kustomize-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: source-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: image-reflector-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: image-reflector-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: image-automation-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: image-automation-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: flux-system-helm-controller
+  labels:
+    app.kubernetes.io/component: helm-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets", "events"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: flux-system-helm-controller
+  labels:
+    app.kubernetes.io/component: helm-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flux-system-helm-controller
+subjects:
+- kind: ServiceAccount
+  name: helm-controller
+  namespace: flux-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: flux-system-kustomize-controller
+  labels:
+    app.kubernetes.io/component: kustomize-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets", "events"]
+  verbs: ["create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: flux-system-kustomize-controller
+  labels:
+    app.kubernetes.io/component: kustomize-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flux-system-kustomize-controller
+subjects:
+- kind: ServiceAccount
+  name: kustomize-controller
+  namespace: flux-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: flux-system-source-controller
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+rules:
+- apiGroups: [""]
+  resources: ["secrets", "events"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: flux-system-source-controller
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flux-system-source-controller
+subjects:
+- kind: ServiceAccount
+  name: source-controller
+  namespace: flux-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helm-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: helm-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helm-controller
+  template:
+    metadata:
+      labels:
+        app: helm-controller
+    spec:
+      containers:
+      - name: manager
+        image: ghcr.io/fluxcd/helm-controller:v0.37.0
+        args:
+        - --watch-all-namespaces
+        - --log-level=info
+        - --log-encoding=json
+        - --enable-leader-election
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        env:
+        - name: RUNTIME_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: http-prom
+      serviceAccountName: helm-controller
+      securityContext:
+        fsGroup: 1337
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kustomize-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: kustomize-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kustomize-controller
+  template:
+    metadata:
+      labels:
+        app: kustomize-controller
+    spec:
+      containers:
+      - name: manager
+        image: ghcr.io/fluxcd/kustomize-controller:v0.37.0
+        args:
+        - --watch-all-namespaces
+        - --log-level=info
+        - --log-encoding=json
+        - --enable-leader-election
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        env:
+        - name: RUNTIME_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: http-prom
+      serviceAccountName: kustomize-controller
+      securityContext:
+        fsGroup: 1337
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: source-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: source-controller
+  template:
+    metadata:
+      labels:
+        app: source-controller
+    spec:
+      containers:
+      - name: manager
+        image: ghcr.io/fluxcd/source-controller:v0.37.0
+        args:
+        - --watch-all-namespaces
+        - --log-level=info
+        - --log-encoding=json
+        - --enable-leader-election
+        - --storage-path=/data
+        - --storage-adv-addr=source-controller.$(RUNTIME_NAMESPACE).svc.cluster.local
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        env:
+        - name: RUNTIME_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: http-prom
+        - containerPort: 9090
+          name: http
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      serviceAccountName: source-controller
+      securityContext:
+        fsGroup: 1337
+      volumes:
+      - name: data
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-reflector-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: image-reflector-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-reflector-controller
+  template:
+    metadata:
+      labels:
+        app: image-reflector-controller
+    spec:
+      containers:
+      - name: manager
+        image: ghcr.io/fluxcd/image-reflector-controller:v0.29.0
+        args:
+        - --watch-all-namespaces
+        - --log-level=info
+        - --log-encoding=json
+        - --enable-leader-election
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        env:
+        - name: RUNTIME_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: http-prom
+      serviceAccountName: image-reflector-controller
+      securityContext:
+        fsGroup: 1337
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-automation-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: image-automation-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-automation-controller
+  template:
+    metadata:
+      labels:
+        app: image-automation-controller
+    spec:
+      containers:
+      - name: manager
+        image: ghcr.io/fluxcd/image-automation-controller:v0.32.0
+        args:
+        - --watch-all-namespaces
+        - --log-level=info
+        - --log-encoding=json
+        - --enable-leader-election
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        env:
+        - name: RUNTIME_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8080
+          name: http-prom
+      serviceAccountName: image-automation-controller
+      securityContext:
+        fsGroup: 1337

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  TIMEZONE: "America/Los_Angeles"
+  DOMAIN: "local.samuelcalvert.com"
+  METALLB_LB_RANGE: "10.1.10.140-10.1.10.150"
+  CLUSTER_CIDR: "10.42.0.0/16"
+  SERVICE_CIDR: "10.43.0.0/16"
