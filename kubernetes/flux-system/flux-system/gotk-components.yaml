@@ -8022,8 +8022,8 @@ spec:
       name: Status
       type: string
     deprecated: true
-    deprecationWarning: v2 HelmRelease is deprecated, upgrade to v2
-    name: v2
+    deprecationWarning: v2beta1 HelmRelease is deprecated, upgrade to v2
+    name: v2beta1
     schema:
       openAPIV3Schema:
         description: HelmRelease is the Schema for the helmreleases API
@@ -8192,7 +8192,7 @@ spec:
                   Helm chart artifact.
 
                   Note: this field is provisional to the v2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 properties:
                   apiVersion:
                     description: APIVersion of the referent.
@@ -8247,7 +8247,7 @@ spec:
                   currently existing in the cluster.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 properties:
                   ignore:
                     description: |-
@@ -9052,7 +9052,7 @@ spec:
                   up to the last successfully completed release.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 items:
                   description: |-
                     Snapshot captures a point-in-time copy of the status information for a Helm release,
@@ -9171,7 +9171,7 @@ spec:
                   "values") of the last reconciliation attempt.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 type: string
               lastAttemptedGeneration:
                 description: |-
@@ -9179,7 +9179,7 @@ spec:
                   to reconcile.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 format: int64
                 type: integer
               lastAttemptedReleaseAction:
@@ -9188,7 +9188,7 @@ spec:
                   HelmRelease. It is used to determine the active remediation strategy.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 type: string
               lastAttemptedRevision:
                 description: LastAttemptedRevision is the revision of the last reconciliation
@@ -9205,7 +9205,7 @@ spec:
                   value, so a change of the annotation value can be detected.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 type: string
               lastHandledReconcileAt:
                 description: |-
@@ -9219,7 +9219,7 @@ spec:
                   value, so a change of the annotation value can be detected.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 type: string
               lastReleaseRevision:
                 description: LastReleaseRevision is the revision of the last successful
@@ -9240,7 +9240,7 @@ spec:
                   current release.
 
                   Note: this field is provisional to the v2beta2 API, and not actively used
-                  by v2 HelmReleases.
+                  by v2beta1 HelmReleases.
                 type: string
               upgradeFailures:
                 description: |-
