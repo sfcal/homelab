@@ -147,16 +147,17 @@ build {
     }
 
     # Needed for longhorn
-    provisioner "shell" {
-        inline = [
-            "sudo apt-get install -y nfs-common open-iscsi",
-            "modprobe iscsi_tcp",
-            "sudo systemctl enable iscsid",
-            "sudo systemctl start iscsid",
-            "sudo systemctl stop multipathd multipathd.socket"
+    # not working right now but want to move on 
+    # provisioner "shell" {
+    #     inline = [
+    #         "sudo apt-get install -y nfs-common open-iscsi",
+    #         "modprobe iscsi_tcp",
+    #         "sudo systemctl enable iscsid",
+    #         "sudo systemctl start iscsid",
+    #         "sudo systemctl stop multipathd multipathd.socket"
             
-        ]
-    }
+    #     ]
+    # }
 
     # Docker without sudo
     provisioner "shell" {
