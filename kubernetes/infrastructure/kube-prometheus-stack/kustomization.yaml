@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
 - monitoring-namespace.yaml
 - release.yaml
+- ingress.yaml
+- pvc.yaml

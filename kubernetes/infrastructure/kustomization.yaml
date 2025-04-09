@@ -4,4 +4,6 @@ resources:
 - sources
 - cert-manager
 - traefik
-#- external-secrets
+- external-secrets
+- longhorn
+- kube-prometheus-stack
