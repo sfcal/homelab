@@ -48,7 +48,7 @@ resource "proxmox_vm_qemu" "k3s-master" {
       virtio0 {
         disk {
           storage = "local-lvm"
-          size = "20G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
+          size = "50G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
           iothread = true  # <-- (Optional) Enable IOThread for better disk performance in virtio-scsi-single
           replicate = false  # <-- (Optional) Enable for disk replication
         }
@@ -132,7 +132,7 @@ resource "proxmox_vm_qemu" "k3s-worker" {
       virtio0 {
         disk {
           storage = "local-lvm"
-          size = "20G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
+          size = "50G"  # <-- Change the desired disk size, ! since 3.x.x size change will trigger a disk resize
           iothread = true  # <-- (Optional) Enable IOThread for better disk performance in virtio-scsi-single
           replicate = false  # <-- (Optional) Enable for disk replication
         }
