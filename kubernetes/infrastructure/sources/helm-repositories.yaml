@@ -1,4 +1,4 @@
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: prometheus-community
@@ -33,3 +33,12 @@ metadata:
 spec:
   interval: 1h
   url: https://helm.traefik.io/traefik
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: external-secrets
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.external-secrets.io
