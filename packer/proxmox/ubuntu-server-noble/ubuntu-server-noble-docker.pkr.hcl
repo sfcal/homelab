@@ -39,9 +39,13 @@ source "proxmox-iso" "ubuntu-noble-docker" {
     vm_name = "ubuntu-server-noble"
     template_description = "Ubuntu Noble w Docker"
 
-    iso_url = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso"
-    iso_checksum = "d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
-    iso_storage_pool = "local"
+    # something is broke and I want to move on with testing
+    iso_file = "local:iso/ubuntu-24.04.2-live-server-amd64.iso"
+
+
+    #iso_url = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso"
+    #iso_checksum = "d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
+    #iso_storage_pool = "local"
     unmount_iso = true
 
     # VM System Settings
