@@ -24,10 +24,10 @@
   ansible.builtin.include_tasks: metallb.yml
   tags: metallb
 
+# Disgusting
 - name: Init cluster inside the transient k3s-init service
-  ansible.builtin.shell: |
-    systemd-run -p RestartSec=2 -p Restart=on-failure --unit=k3s-init k3s server {{ server_init_args | replace('\n', ' ') }}
-  args:
+  ansible.builtin.command:
+    cmd: systemd-run -p RestartSec=2 -p Restart=on-failure --unit=k3s-init k3s server {{ server_init_args | replace('\n', ' ') | regex_replace('\\s+', ' ') | trim }}
     creates: "{{ systemd_dir }}/k3s-init.service"
 
 - name: Verification
