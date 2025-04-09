@@ -5,3 +5,4 @@ resources:
 - release.yaml
 - secret-store.yaml
 - rbac.yaml
+- ca-config.yaml
