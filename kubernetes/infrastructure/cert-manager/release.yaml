@@ -14,7 +14,7 @@ spec:
         name: jetstack
         namespace: flux-system
   values:
-    installCRDs: false
+    installCRDs: true
     replicaCount: 3
     extraArgs:
       - --dns01-recursive-nameservers=8.8.8.8:53,9.9.9.9:53
