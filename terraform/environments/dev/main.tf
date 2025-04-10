@@ -5,7 +5,7 @@
  */
 
 locals {
-  env_name    = "dev"
+  env_name = "dev"
   vm_defaults = {
     target_node   = "pve-dev01"
     template_name = "ubuntu-server-noble"
@@ -16,25 +16,25 @@ locals {
 # Control Plane VM
 module "controlplane" {
   source = "../../modules/proxmox-vm"
-  
+
   vm_name        = "controlplane"
   vm_description = "Kubernetes control plane node"
   target_node    = local.vm_defaults.target_node
   template_name  = local.vm_defaults.template_name
-  vmid           = 401  # Specific VM ID
-  
-  cores    = 2
-  memory   = 4096
+  vmid           = 401 # Specific VM ID
+
+  cores     = 2
+  memory    = 4096
   disk_size = "20G"
-  
+
   # Network configuration
-  use_dhcp = true  # Using DHCP
-  
+  use_dhcp = true # Using DHCP
+
   # Cloud-init settings
-  ciuser     = local.vm_defaults.ssh_user
-  nameserver = "8.8.8.8"
+  ciuser         = local.vm_defaults.ssh_user
+  nameserver     = "8.8.8.8"
   ssh_public_key = var.ssh_public_key
-  
+
   # Provisioning settings
   enable_provisioning  = true
   ssh_private_key_path = var.ssh_private_key_path
@@ -49,25 +49,25 @@ module "controlplane" {
 # K3s Cluster
 module "k3s_cluster" {
   source = "../../modules/k3s-cluster"
-  
+
   cluster_name  = "k3s"
   master_count  = 3
   worker_count  = 2
   proxmox_node  = local.vm_defaults.target_node
   template_name = local.vm_defaults.template_name
-  
+
   # Network configuration
-  use_dhcp       = false  # Using static IPs
-  network_prefix = "10.1.10"
+  use_dhcp        = false # Using static IPs
+  network_prefix  = "10.1.10"
   master_ip_start = 51
   worker_ip_start = 41
-  gateway        = "10.1.10.1"
-  nameserver     = "10.1.0.1"
-  
+  gateway         = "10.1.10.1"
+  nameserver      = "10.1.0.1"
+
   # SSH configuration
   ssh_user       = local.vm_defaults.ssh_user
   ssh_public_key = var.ssh_public_key
-  
+
   # Provisioning is disabled for cluster nodes
   enable_provisioning = false
 }

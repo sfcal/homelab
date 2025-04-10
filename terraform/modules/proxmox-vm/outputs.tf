@@ -19,11 +19,6 @@ output "ipv4_address" {
   value       = proxmox_vm_qemu.vm.default_ipv4_address
 }
 
-output "status" {
-  description = "The current status of the VM"
-  value       = proxmox_vm_qemu.vm.status
-}
-
 output "target_node" {
   description = "The Proxmox node where the VM is running"
   value       = proxmox_vm_qemu.vm.target_node
