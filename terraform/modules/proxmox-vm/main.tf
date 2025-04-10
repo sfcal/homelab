@@ -39,8 +39,8 @@ resource "proxmox_vm_qemu" "vm" {
   disk {
     storage = var.disk_storage
     size    = var.disk_size
-    type    = "virtio"
-    slot    = 0
+    type    = "disk"
+    slot    = "scsi0"
   }
 
   # Cloud-init settings
