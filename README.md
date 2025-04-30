@@ -10,9 +10,6 @@
 [Getting started] | [Documentation] | [Contributing]
 </div>
 
-This is the main source code repository for [Rust]. It contains the compiler,
-standard library, and documentation.
-
 [Getting Started]: #get-started
 [Documentation]: https://homelab.samuel.computer
 [Contributing]: CONTRIBUTING.md
