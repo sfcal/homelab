@@ -34,7 +34,7 @@ source "proxmox-iso" "ubuntu-noble-docker" {
     token = "${var.proxmox_api_token_secret}"
     insecure_skip_tls_verify = true
 
-    node = "pve-dev01"
+    node = "nyc-pve-01"
     vm_id = "9000"
     vm_name = "ubuntu-server-noble"
     template_description = "Ubuntu Noble w Docker"
