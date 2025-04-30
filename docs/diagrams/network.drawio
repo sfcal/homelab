@@ -1,0 +1,364 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36" version="26.2.14">
+  <diagram name="Page-1" id="lpGjizRIBNB4KOwUtDhZ">
+    <mxGraphModel dx="2246" dy="2520" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-50" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;dashed=1;dashPattern=8 8;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="20" y="200" width="860" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-169" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;fillColor=#d5e8d4;gradientColor=#97d077;strokeColor=#82b366;strokeWidth=3;endArrow=none;startFill=0;" parent="1" source="pDLpb-r-_teEG-7h8mRC-13" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="210" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-13" value="" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#fad9d5;strokeColor=#ae4132;strokeWidth=2;" parent="1" vertex="1">
+          <mxGeometry x="60" y="505" width="300" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-93" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;dashed=1;dashPattern=8 8;strokeWidth=1;" parent="1" vertex="1">
+          <mxGeometry x="900" y="200" width="640" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-33" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#fad9d5;strokeColor=#ae4132;" parent="1" source="pDLpb-r-_teEG-7h8mRC-13" target="pDLpb-r-_teEG-7h8mRC-3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-1" value="UDM Pro WIL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="320" y="230" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-2" value="Aggregation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="150" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-25" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" source="pDLpb-r-_teEG-7h8mRC-3" target="pDLpb-r-_teEG-7h8mRC-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-119" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" source="pDLpb-r-_teEG-7h8mRC-3" target="pDLpb-r-_teEG-7h8mRC-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-3" value="POE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="480" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-4" value="Flex" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="720" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-104" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;endArrow=none;startFill=0;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" source="pDLpb-r-_teEG-7h8mRC-14" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-109" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;endArrow=none;startFill=0;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" source="pDLpb-r-_teEG-7h8mRC-14" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="295" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-14" value="PVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="280" y="520" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-110" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;endArrow=none;startFill=0;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="220.00238095238075" y="600" as="targetPoint" />
+            <mxPoint x="220.05000000000007" y="580" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-111" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;endArrow=none;startFill=0;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="600" as="targetPoint" />
+            <mxPoint x="200.00000000000006" y="580" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-15" value="PVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="180" y="520" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-102" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;endArrow=none;startFill=0;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" source="pDLpb-r-_teEG-7h8mRC-16" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-108" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;endArrow=none;startFill=0;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" source="pDLpb-r-_teEG-7h8mRC-16" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="124.95238095238074" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-16" value="PVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="80" y="520" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-114" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=3;endArrow=none;startFill=0;strokeColor=#10739e;fillColor=#b1ddf0;" parent="1" source="pDLpb-r-_teEG-7h8mRC-29" target="pDLpb-r-_teEG-7h8mRC-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-168" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;strokeWidth=3;endArrow=none;startFill=0;fillColor=#d5e8d4;gradientColor=#97d077;strokeColor=#82b366;jumpStyle=arc;" parent="1" source="pDLpb-r-_teEG-7h8mRC-29" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="210" y="420" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="300" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-29" value="NAS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="380" y="555" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-39" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;strokeWidth=3;fillColor=#e6d0de;gradientColor=#d5739d;strokeColor=#996185;endArrow=none;startFill=0;" parent="1" source="pDLpb-r-_teEG-7h8mRC-34" target="pDLpb-r-_teEG-7h8mRC-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-34" value="AP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6d0de;gradientColor=none;strokeColor=#996185;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="710" y="470" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-120" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;strokeColor=#d6b656;fillColor=#fff2cc;gradientColor=#ffd966;" parent="1" source="pDLpb-r-_teEG-7h8mRC-35" target="pDLpb-r-_teEG-7h8mRC-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-35" value="Docker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;gradientColor=none;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="630" y="517.5" width="60" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-40" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#e6d0de;gradientColor=#d5739d;strokeColor=#996185;" parent="1" source="pDLpb-r-_teEG-7h8mRC-36" target="pDLpb-r-_teEG-7h8mRC-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-36" value="Wired" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6d0de;gradientColor=none;strokeColor=#996185;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="790" y="470" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-115" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=3;endArrow=none;startFill=0;strokeColor=#10739e;fillColor=#b1ddf0;" parent="1" source="pDLpb-r-_teEG-7h8mRC-41" target="pDLpb-r-_teEG-7h8mRC-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-41" value="DNS-02" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="460" y="555" width="105" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-116" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=3;endArrow=none;startFill=0;strokeColor=#10739e;fillColor=#b1ddf0;" parent="1" source="pDLpb-r-_teEG-7h8mRC-42" target="pDLpb-r-_teEG-7h8mRC-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-42" value="DNS-01" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="420" y="555" width="105" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-117" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;strokeWidth=3;endArrow=none;startFill=0;strokeColor=#10739e;fillColor=#b1ddf0;" parent="1" source="pDLpb-r-_teEG-7h8mRC-45" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-45" value="NTP" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="520" y="535" width="107.5" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-52" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=3;" parent="1" source="pDLpb-r-_teEG-7h8mRC-50" target="pDLpb-r-_teEG-7h8mRC-50" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-54" value="UDM Pro NYC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1210" y="230" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-58" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;startFill=0;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" source="pDLpb-r-_teEG-7h8mRC-55" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-123" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#ffcd28;gradientColor=#ffa500;strokeColor=#d79b00;" parent="1" source="pDLpb-r-_teEG-7h8mRC-55" target="pDLpb-r-_teEG-7h8mRC-64" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-55" value="PTP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="940" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-87" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;endArrow=none;startFill=0;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" source="pDLpb-r-_teEG-7h8mRC-56" target="pDLpb-r-_teEG-7h8mRC-54" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-56" value="POE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1210" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-86" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeColor=#CC0000;strokeWidth=3;" parent="1" source="pDLpb-r-_teEG-7h8mRC-59" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-59" value="" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;gradientColor=none;strokeColor=#b85450;strokeWidth=2;" parent="1" vertex="1">
+          <mxGeometry x="1290" y="505" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-60" value="PVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;gradientColor=none;strokeColor=#b85450;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1440" y="515" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-61" value="PVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;gradientColor=none;strokeColor=#b85450;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1370" y="515" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-62" value="PVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;gradientColor=none;strokeColor=#b85450;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1300" y="515" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-84" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" source="pDLpb-r-_teEG-7h8mRC-64" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-64" value="GM" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#ffcc99;strokeColor=#FFB570;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="990" y="545" width="107.5" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-74" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#ffcd28;gradientColor=#ffa500;strokeColor=#d79b00;" parent="1" source="pDLpb-r-_teEG-7h8mRC-65" target="pDLpb-r-_teEG-7h8mRC-55" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="990" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-65" value="client" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#ffcc99;strokeColor=#FFB570;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="930" y="567.5" width="105" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-76" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" source="pDLpb-r-_teEG-7h8mRC-66" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-66" value="DNS-01" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1070" y="545" width="105" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-73" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#ffcd28;gradientColor=#ffa500;strokeColor=#d79b00;" parent="1" source="pDLpb-r-_teEG-7h8mRC-68" target="pDLpb-r-_teEG-7h8mRC-55" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="970" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-68" value="Client" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#ffcc99;strokeColor=#FFB570;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="890" y="567.5" width="105" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-77" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" source="pDLpb-r-_teEG-7h8mRC-69" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-69" value="DNS-01" style="rounded=1;whiteSpace=wrap;html=1;rotation=-90;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1110" y="545" width="105" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-133" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;fillColor=#e6d0de;strokeColor=#996185;strokeWidth=3;endArrow=none;startFill=0;gradientColor=#d5739d;" parent="1" source="pDLpb-r-_teEG-7h8mRC-88" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-88" value="Wired" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#e6d0de;gradientColor=none;strokeColor=#996185;" parent="1" vertex="1">
+          <mxGeometry x="1440" y="320" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-134" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fillColor=#e6d0de;strokeColor=#996185;strokeWidth=3;endArrow=none;startFill=0;gradientColor=#d5739d;" parent="1" source="pDLpb-r-_teEG-7h8mRC-89" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-89" value="AP" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#e6d0de;gradientColor=none;strokeColor=#996185;" parent="1" vertex="1">
+          <mxGeometry x="1440" y="400" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-94" value="WAN" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="830" y="40" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-95" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.55;entryY=0.95;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;startFill=0;strokeWidth=3;" parent="1" source="pDLpb-r-_teEG-7h8mRC-1" target="pDLpb-r-_teEG-7h8mRC-94" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-97" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;entryX=0.55;entryY=0.95;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;startFill=0;strokeWidth=3;" parent="1" source="pDLpb-r-_teEG-7h8mRC-54" target="pDLpb-r-_teEG-7h8mRC-94" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-101" value="" style="endArrow=none;html=1;rounded=0;elbow=vertical;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="620" as="sourcePoint" />
+            <mxPoint x="310" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-106" value="" style="endArrow=none;html=1;rounded=0;elbow=vertical;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="125" y="599.05" as="sourcePoint" />
+            <mxPoint x="200" y="599" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-107" value="" style="endArrow=none;html=1;rounded=0;elbow=vertical;strokeColor=#ae4132;strokeWidth=3;fillColor=#fad9d5;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="599" as="sourcePoint" />
+            <mxPoint x="295" y="599.05" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-132" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;elbow=vertical;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;endArrow=none;startFill=0;strokeWidth=3;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" source="pDLpb-r-_teEG-7h8mRC-122" target="pDLpb-r-_teEG-7h8mRC-56" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-122" value="NAS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1210" y="550" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-136" value="" style="whiteSpace=wrap;html=1;rounded=1;arcSize=8;shadow=1;glass=0;dashed=1;comic=0;strokeColor=#696963;strokeWidth=3;fillColor=#FFFFFF;fontSize=16;fontColor=#000000;align=left;labelPosition=center;verticalLabelPosition=top;verticalAlign=bottom;fontStyle=3;container=1;collapsible=0;recursiveResize=0;dashPattern=4 3 4 3 4 3 36 3;fontFamily=Titillium Web;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DTitillium%2BWeb;absoluteArcSize=1;" parent="1" vertex="1">
+          <mxGeometry x="40" y="-220" width="455" height="315" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-137" value="Ethernet &lt;font&gt;*&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=#EEEEEE;strokeWidth=2;fontColor=#000000;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=14;labelBackgroundColor=none;spacingLeft=10;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" edge="1">
+          <mxGeometry x="1" relative="1" as="geometry">
+            <mxPoint x="345" y="17.5" as="sourcePoint" />
+            <mxPoint x="375" y="17.5" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-138" value="VPN" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=#EEEEEE;strokeWidth=4;fontColor=#000000;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=14;labelBackgroundColor=none;dashed=1;dashPattern=1 1;spacingLeft=10;dashPattern=4 2;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" edge="1">
+          <mxGeometry x="1" relative="1" as="geometry">
+            <mxPoint x="345" y="237.5" as="sourcePoint" />
+            <mxPoint x="375" y="237.5" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-139" value="Stack" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=#EEEEEE;strokeWidth=3;fontColor=#000000;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=14;labelBackgroundColor=none;spacingLeft=10;shape=link;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" edge="1">
+          <mxGeometry x="1" relative="1" as="geometry">
+            <mxPoint x="345" y="57.5" as="sourcePoint" />
+            <mxPoint x="375" y="57.5" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-140" value="&lt;span style=&quot;text-align: left; font-size: 14px;&quot;&gt;Trunk / Other&lt;/span&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;fillColor=#eeeeee;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="30" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-141" value="&lt;b style=&quot;&quot;&gt;VLAN &lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;10&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- Servers - 10.0.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;10&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b style=&quot;&quot;&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#F5C100;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="50" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-142" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;VLAN &lt;/b&gt;&lt;/span&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;20&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- Storage&amp;nbsp;- 10.0.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;line-height: 0; font-size: 16px;&quot;&gt;20&lt;/span&gt;&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#A82A8F;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="70" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-143" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN&amp;nbsp;&lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;30&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- Media&amp;nbsp;- 10.0.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;30&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#41C200;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="110" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-144" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN&amp;nbsp;&lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;70&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- Security - 10.0.&lt;font size=&quot;1&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 16px; line-height: 0;&quot;&gt;70&lt;/span&gt;&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#FF80AA;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="150" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-145" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN&amp;nbsp;&lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot; face=&quot;Titillium Web&quot;&gt;99&lt;/font&gt;&lt;/b&gt;&lt;b style=&quot;font-size: 14px;&quot;&gt;&amp;nbsp;&lt;/b&gt;- Management&amp;nbsp;- 10.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b&gt;&lt;span style=&quot;font-size: 16px; line-height: 0;&quot;&gt;99&lt;/span&gt;&lt;/b&gt;&lt;/font&gt;.0.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot; face=&quot;Titillium Web&quot;&gt;/16&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#c00;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="190" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-146" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN&amp;nbsp;&lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;100&lt;/font&gt;&lt;/b&gt;&lt;b style=&quot;font-size: 14px;&quot;&gt;&amp;nbsp;&lt;/b&gt;- End Devices&amp;nbsp;- 10.0.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;100&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#078DDB;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="210" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-147" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN &lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;101&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- IoT - 10.0.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;101&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#F58B00;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="270" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-148" value="Tailscale" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#264D8C;fontSize=14;fontColor=#000000;strokeWidth=2;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="345" y="270" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-149" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;VLAN &lt;/b&gt;&lt;/span&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;199&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- Guest - 10.0.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;199&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#808080;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="290" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-150" value="USB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;strokeColor=#EEEEEE;strokeWidth=2;fontColor=#000000;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=14;labelBackgroundColor=none;spacingLeft=10;startSize=4;endSize=4;startArrow=box;startFill=0;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" edge="1">
+          <mxGeometry x="1" relative="1" as="geometry">
+            <mxPoint x="345" y="97.5" as="sourcePoint" />
+            <mxPoint x="375" y="97.5" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-151" value="Sync" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=doubleBlock;endFill=0;strokeColor=#EEEEEE;strokeWidth=2;fontColor=#000000;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=14;labelBackgroundColor=none;spacingLeft=10;startSize=6;endSize=6;startArrow=none;startFill=0;flowAnimation=1;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" edge="1">
+          <mxGeometry x="1" relative="1" as="geometry">
+            <mxPoint x="345" y="77.5" as="sourcePoint" />
+            <mxPoint x="375" y="77.5" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-153" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;VLAN &lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;font-size: 12px;&quot;&gt;&lt;font face=&quot;Titillium Web&quot;&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot;&gt;69&lt;/font&gt;&lt;font style=&quot;line-height: 0; font-size: 12px;&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot;&gt; &lt;i style=&quot;&quot;&gt;&lt;font&gt;(nice)&lt;/font&gt;&lt;/i&gt;&lt;/font&gt;&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- WAN" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#945500;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="10" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-154" value="Wireguard" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#A11316;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="345" y="290" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-155" value="Fiber &lt;font&gt;*&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=#EEEEEE;strokeWidth=4;fontColor=#000000;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=14;labelBackgroundColor=none;spacingLeft=10;fontFamily=Roboto Condensed;startArrow=none;startFill=0;" parent="pDLpb-r-_teEG-7h8mRC-136" edge="1">
+          <mxGeometry x="1" relative="1" as="geometry">
+            <mxPoint x="345" y="37.5" as="sourcePoint" />
+            <mxPoint x="375" y="37.5" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-156" value="&lt;b&gt;rmt01&lt;/b&gt; - End Devices - 192.168.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;20&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#04CDE3;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="230" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-157" value="&lt;b&gt;rmt02&lt;/b&gt;&amp;nbsp;- End Devices - 192.168.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px; line-height: 0;&quot;&gt;69&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#45870B;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="250" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-158" value="&lt;p style=&quot;line-height: 100%;&quot;&gt;&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN&amp;nbsp;&lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;42&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- DN42 - 10.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;42&lt;/b&gt;&lt;/font&gt;.&lt;font size=&quot;1&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 16px; line-height: 0;&quot;&gt;42&lt;/span&gt;&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;&lt;/p&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#EA590C;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="130" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-159" value="&lt;font style=&quot;&quot;&gt;&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN &lt;/b&gt;&lt;b style=&quot;&quot;&gt;&lt;font face=&quot;Titillium Web&quot; style=&quot;line-height: 0; font-size: 16px;&quot;&gt;21&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- PBS iSCSI - 172.&lt;font face=&quot;Titillium Web&quot; style=&quot;&quot; size=&quot;1&quot;&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;20&lt;/b&gt;&lt;/font&gt;.&lt;font face=&quot;Titillium Web&quot; style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;2&lt;font style=&quot;font-size: 16px;&quot;&gt;0&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b style=&quot;&quot;&gt;&lt;font data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot; face=&quot;Titillium Web&quot; style=&quot;line-height: 0; font-size: 16px;&quot;&gt;/30&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;" style="fontColor=#000000;verticalAlign=middle;verticalLabelPosition=middle;labelPosition=right;align=left;html=1;outlineConnect=0;fillColor=#3D3D3A;strokeColor=#E355FF;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=stencil(bZBhDsIgDIVPw/8J8QBm08TfngBHJ40IC3ROb28dmIzMhJS+78FLQag2WT2CkI1OI/QkVCekfOqI+uoYS3Zshrt9ll4/IJOzN9hrCpFpF4jrjGR5u1AM93I7Lf2MhkoOegsRKbvzOlsdRXNg+F2qHUKEWwyTN5Xxs8E5HBOs5lN1ZJGvIrN6V0rI09/sAZ1L5Q2bQ6plshluofkvF/AB);labelBackgroundColor=none;aspect=fixed;fontFamily=Roboto Condensed;fontSize=14;spacingLeft=8;spacingBottom=2;spacing=2;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="90" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-160" value="&lt;font style=&quot;font-size: 14px;&quot; face=&quot;Roboto Condensed&quot;&gt;OpenVPN&lt;/font&gt;" style="fontColor=#000000;verticalAlign=middle;verticalLabelPosition=middle;labelPosition=right;align=left;html=1;outlineConnect=0;fillColor=#1A3967;strokeColor=#ED7F22;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=stencil(bZBhDsIgDIVPw/8J8QBm08TfngBHJ40IC3ROb28dmIzMhJS+78FLQag2WT2CkI1OI/QkVCekfOqI+uoYS3Zshrt9ll4/IJOzN9hrCpFpF4jrjGR5u1AM93I7Lf2MhkoOegsRKbvzOlsdRXNg+F2qHUKEWwyTN5Xxs8E5HBOs5lN1ZJGvIrN6V0rI09/sAZ1L5Q2bQ6plshluofkvF/AB);labelBackgroundColor=none;aspect=fixed;fontFamily=Roboto Condensed;fontSize=14;spacingLeft=8;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="345" y="250" width="15" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pDLpb-r-_teEG-7h8mRC-161" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;VLAN&amp;nbsp;&lt;/b&gt;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;80&lt;/font&gt;&lt;/b&gt;&amp;nbsp;- DMZ - 10.0.&lt;font size=&quot;1&quot; data-font-src=&quot;https://fonts.googleapis.com/css?family=Titillium+Web&quot; face=&quot;Titillium Web&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 16px; line-height: 0;&quot;&gt;80&lt;/span&gt;&lt;/b&gt;&lt;/font&gt;.0&amp;nbsp;&lt;b&gt;&lt;font style=&quot;line-height: 0; font-size: 16px;&quot; face=&quot;Titillium Web&quot;&gt;/24&lt;/font&gt;&lt;/b&gt;" style="ellipse;html=1;aspect=fixed;strokeColor=none;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#0ff58a;fontSize=14;fontColor=#000000;fontFamily=Roboto Condensed;" parent="pDLpb-r-_teEG-7h8mRC-136" vertex="1">
+          <mxGeometry x="10" y="170" width="15" height="15" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

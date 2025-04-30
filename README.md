@@ -23,6 +23,9 @@ homelab/
 └── terraform/         # Terraform modules for infrastructure provisioning
 ```
 
+## Network Structure
+add image here
+
 ## Components
 
 ### [Packer](./packer/README.md)
