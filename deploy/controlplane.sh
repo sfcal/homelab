@@ -2,8 +2,8 @@
 set -e
 
 # Configuration
-PROXMOX_URL="https://10.1.10.23:8006/api2/json"
-PROXMOX_NODE="pve-dev01"
+PROXMOX_URL="https://10.1.20.23:8006/api2/json"
+PROXMOX_NODE="nyc-pve-01"
 PROXMOX_TOKEN_ID="root@pam!packer"
 # Read secrets from environment variables or prompt for them
 #PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-$(read -sp "Proxmox Password: " pwd; echo $pwd)}
