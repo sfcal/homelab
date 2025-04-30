@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+site_name: Your Homelab
+copyright: Copyright &copy; 2025 sfcal
+
+repo_url: https://github.com/sfcal/homelab
+
+theme:
+  favicon: assets/images/favicon.png
+  name: material
+  palette:
+    primary: black
+  features:
+    - navigation.expand
+    - navigation.instant
+    - navigation.sections
+    - search.highlight
+    - search.share
+
+markdown_extensions:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.snippets:
+      check_paths: true
+  - def_list
+  - pymdownx.tasklist:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Installation:
+    - getting-started/installation.md
+    - getting-started/configuration.md
+    - getting-started/post-installation.md
+  - Concepts:
+    - concepts/architecture.md
+    - concepts/networking.md
+  - How-to guides:
+    - how-to-guides/add-new-service.md
+    - how-to-guides/backups.md
+    - Troubleshooting:
+      - how-to-guides/troubleshooting/common-issues.md
+  - Reference:
+    - Architecture:
+      - reference/architecture/overview.md
+      - reference/architecture/decisions.md
+    - reference/components.md
+    - reference/contributing.md
