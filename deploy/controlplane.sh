@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-PROXMOX_URL="https://10.1.20.23:8006/api2/json"
+PROXMOX_URL="https://10.1.20.11:8006/api2/json"
 PROXMOX_NODE="nyc-pve-01"
 PROXMOX_TOKEN_ID="root@pam!packer"
 # Read secrets from environment variables or prompt for them
