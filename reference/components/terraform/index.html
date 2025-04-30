@@ -1,0 +1,1368 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Terraform Infrastructure for Homelab - Your Homelab</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#terraform-infrastructure-for-homelab" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Your Homelab" class="md-header__button md-logo" aria-label="Your Homelab" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Your Homelab
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Terraform Infrastructure for Homelab
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sfcal/homelab" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Your Homelab" class="md-nav__button md-logo" aria-label="Your Homelab" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Your Homelab
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sfcal/homelab" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/installation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/configuration.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/post-installation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/architecture.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/networking.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    How-to guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            How-to guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../how-to-guides/add-new-service.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../how-to-guides/backups.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Troubleshooting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../how-to-guides/troubleshooting/common-issues.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../components.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    None
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Directory Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modules
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmox-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      proxmox-vm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k3s-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      k3s-cluster
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-hierarchy-and-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Hierarchy and Relationships
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-dev" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development (dev)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-configuration-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Configuration Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Configuration Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commonly-adjusted-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commonly Adjusted Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cluster-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cluster Architecture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outputs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Customization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="terraform-infrastructure-for-homelab">Terraform Infrastructure for Homelab</h1>
+<p>This directory contains the Terraform configuration files for deploying a K3s Kubernetes cluster on Proxmox VMs. The infrastructure is designed to be modular, reusable, and easily configurable.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#directory-structure">Directory Structure</a></li>
+<li><a href="#modules">Modules</a></li>
+<li><a href="#proxmox-vm">proxmox-vm</a></li>
+<li><a href="#k3s-cluster">k3s-cluster</a></li>
+<li><a href="#environments">Environments</a></li>
+<li><a href="#development-dev">Development (dev)</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#key-configuration-variables">Key Configuration Variables</a></li>
+<li><a href="#cluster-architecture">Cluster Architecture</a></li>
+<li><a href="#outputs">Outputs</a></li>
+<li><a href="#customization">Customization</a></li>
+<li><a href="#notes">Notes</a></li>
+</ul>
+<h2 id="directory-structure">Directory Structure</h2>
+<div class="highlight"><pre><span></span><code>terraform/
+├── .gitignore                # Ignores state files, credentials, and other sensitive data
+├── environments/             # Environment-specific configurations
+│   ├── dev/                  # Development environment configuration
+│   │   ├── .gitignore        # Environment-specific files to ignore
+│   │   ├── backend.tf        # Local state backend configuration
+│   │   ├── main.tf           # Main configuration for deploying infrastructure
+│   │   ├── outputs.tf        # Output definitions (IP addresses, summaries)
+│   │   ├── providers.tf      # Proxmox provider configuration
+│   │   ├── terraform.tfvars.example # Example variables template
+│   │   ├── variables.tf      # Variable definitions for the environment
+│   │   └── versions.tf       # Terraform and provider version constraints
+│   └── prod/                 # Production environment (placeholder for future use)
+└── modules/                  # Reusable infrastructure components
+    ├── k3s-cluster/          # Kubernetes cluster deployment module
+    │   ├── main.tf           # Creates master and worker node sets
+    │   ├── outputs.tf        # Exposes cluster node information
+    │   ├── variables.tf      # Configurable cluster parameters
+    │   └── versions.tf       # Required provider versions
+    └── proxmox-vm/           # Proxmox virtual machine module
+        ├── main.tf           # VM creation and provisioning logic
+        ├── outputs.tf        # Exposes VM details
+        ├── variables.tf      # Configurable VM parameters
+        └── versions.tf       # Required provider versions
+</code></pre></div>
+<h2 id="modules">Modules</h2>
+<h3 id="proxmox-vm">proxmox-vm</h3>
+<p>A reusable module for creating and provisioning Proxmox VMs with consistent configuration.</p>
+<p><strong>Features:</strong>
+- Full and linked cloning from templates
+- Configurable resources (CPU, memory, disk)
+- Static IP or DHCP networking
+- Cloud-init integration
+- Optional provisioning for:
+  - SSH key setup
+  - Git installation
+  - Terraform installation
+  - Git repository cloning</p>
+<h3 id="k3s-cluster">k3s-cluster</h3>
+<p>Creates a complete K3s cluster with configurable master and worker nodes.</p>
+<p><strong>Features:</strong>
+- Configurable number of master and worker nodes
+- Separate resource configurations for masters and workers
+- Static IP addressing with configurable ranges
+- Uses the proxmox-vm module for VM creation</p>
+<h2 id="module-hierarchy-and-relationships">Module Hierarchy and Relationships</h2>
+<p>The configuration follows a hierarchical pattern:</p>
+<ol>
+<li><strong>Environment Layer</strong>: The <code>dev</code> environment in <code>environments/dev/main.tf</code> defines the specific infrastructure needs</li>
+<li><strong>Orchestration Layer</strong>: The <code>k3s-cluster</code> module in <code>modules/k3s-cluster/main.tf</code> manages the cluster composition</li>
+<li><strong>Implementation Layer</strong>: The <code>proxmox-vm</code> module in <code>modules/proxmox-vm/main.tf</code> handles the actual VM creation</li>
+</ol>
+<p>This architecture follows infrastructure-as-code best practices by:
+- Separating environments (dev/prod)
+- Creating reusable components (modules)
+- Maintaining a clean separation of concerns
+- Providing flexible configuration options
+- Abstracting implementation details</p>
+<h2 id="environments">Environments</h2>
+<h3 id="development-dev">Development (dev)</h3>
+<p>The development environment is fully configured and ready to deploy:</p>
+<ul>
+<li>Defines one control plane VM (for cluster management)</li>
+<li>Creates a 3-node K3s master cluster (for control plane redundancy)</li>
+<li>Deploys 2 K3s worker nodes (for workload execution)</li>
+<li>Configures the network (DHCP for control plane, static IPs for cluster nodes)</li>
+<li>Sets up SSH access with provided keys</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li>
+<p><strong>Setup credentials</strong>:
+   <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>terraform/environments/dev
+cp<span class="w"> </span>terraform.tfvars.example<span class="w"> </span>terraform.tfvars
+<span class="c1"># Edit terraform.tfvars with your Proxmox credentials and SSH keys</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Initialize Terraform</strong>:
+   <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Plan deployment</strong>:
+   <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>plan
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Apply deployment</strong>:
+   <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>apply
+</code></pre></div></p>
+</li>
+</ol>
+<h2 id="key-configuration-variables">Key Configuration Variables</h2>
+<p>These are the essential variables you'll need to configure before deploying:</p>
+<h3 id="required-variables">Required Variables</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>proxmox_api_url</code></td>
+<td>Proxmox API URL (e.g., "https://proxmox.example.com:8006/api2/json")</td>
+<td>terraform.tfvars</td>
+</tr>
+<tr>
+<td><code>proxmox_api_token_id</code></td>
+<td>Proxmox API token ID (e.g., "terraform@pam!token")</td>
+<td>terraform.tfvars</td>
+</tr>
+<tr>
+<td><code>proxmox_api_token_secret</code></td>
+<td>Proxmox API token secret</td>
+<td>terraform.tfvars</td>
+</tr>
+<tr>
+<td><code>ssh_public_key</code></td>
+<td>SSH public key for VM access</td>
+<td>terraform.tfvars</td>
+</tr>
+<tr>
+<td><code>ssh_private_key_path</code></td>
+<td>Path to SSH private key for provisioning</td>
+<td>terraform.tfvars</td>
+</tr>
+</tbody>
+</table>
+<h3 id="commonly-adjusted-settings">Commonly Adjusted Settings</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Default</th>
+<th>File Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Master node count</td>
+<td>Number of K3s master nodes</td>
+<td>3</td>
+<td>environments/dev/main.tf</td>
+</tr>
+<tr>
+<td>Worker node count</td>
+<td>Number of K3s worker nodes</td>
+<td>2</td>
+<td>environments/dev/main.tf</td>
+</tr>
+<tr>
+<td>VM resources</td>
+<td>CPU, memory, and disk settings</td>
+<td>Various</td>
+<td>environments/dev/main.tf</td>
+</tr>
+<tr>
+<td>Network settings</td>
+<td>IP addressing scheme</td>
+<td>10.1.10.x</td>
+<td>environments/dev/main.tf</td>
+</tr>
+</tbody>
+</table>
+<p>A full list of all configuration variables is available in the respective module directories:
+- <a href="modules/proxmox-vm/variables.tf">Proxmox VM Module Variables</a>
+- <a href="modules/k3s-cluster/variables.tf">K3s Cluster Module Variables</a></p>
+<h2 id="cluster-architecture">Cluster Architecture</h2>
+<p>The default deployment creates:
+- <strong>Control Plane</strong>: 1 VM with 2 cores, 4GB RAM
+- <strong>K3s Masters</strong>: 3 VMs with 2 cores, 4GB RAM each
+- <strong>K3s Workers</strong>: 2 VMs with 2 cores, 4GB RAM each</p>
+<p>Network configuration:
+- Masters: 10.1.10.51-53
+- Workers: 10.1.10.41-42
+- Control Plane: DHCP</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Proxmox VE server</li>
+<li>Proxmox API token with appropriate permissions</li>
+<li>Ubuntu Server Noble (24.04) VM template named "ubuntu-server-noble"</li>
+<li>SSH keypair for VM access and provisioning</li>
+</ul>
+<h2 id="outputs">Outputs</h2>
+<p>After deployment, Terraform will output:
+- IP addresses of the control plane VM
+- IP addresses of all K3s master nodes
+- IP addresses of all K3s worker nodes
+- Complete infrastructure summary</p>
+<h2 id="customization">Customization</h2>
+<p>The most common customizations can be made by editing just a few files:</p>
+<ol>
+<li><strong>Basic Settings</strong>: Edit <code>terraform.tfvars</code> in your environment directory</li>
+<li><strong>Cluster Configuration</strong>: Modify <code>main.tf</code> in your environment directory</li>
+<li><strong>Advanced Settings</strong>: Update module parameters in <code>main.tf</code></li>
+</ol>
+<h3 id="examples">Examples</h3>
+<p><strong>Adjusting Cluster Size</strong></p>
+<p>In <code>environments/dev/main.tf</code>:
+<div class="highlight"><pre><span></span><code><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k3s_cluster&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;../../modules/k3s-cluster&quot;</span>
+
+<span class="w">  </span><span class="na">master_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">5</span><span class="c1">    # Increase from 3 to 5 masters</span>
+<span class="w">  </span><span class="na">worker_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="c1">   # Increase from 2 to 10 workers</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Customizing VM Resources</strong></p>
+<p>In <code>environments/dev/main.tf</code>:
+<div class="highlight"><pre><span></span><code><span class="kr">module</span><span class="w"> </span><span class="nv">&quot;k3s_cluster&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;../../modules/k3s-cluster&quot;</span>
+
+<span class="w">  </span><span class="na">master_memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8192</span><span class="c1">  # 8GB RAM for masters</span>
+<span class="w">  </span><span class="na">worker_memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">16384</span><span class="c1"> # 16GB RAM for workers</span>
+<span class="w">  </span><span class="na">master_cores</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="c1">     # 4 CPU cores for masters</span>
+<span class="w">  </span><span class="na">worker_cores</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="c1">     # 8 CPU cores for workers</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>The Terraform configuration uses the telmate/proxmox provider</li>
+<li>VM provisioning is optional and can be enabled/disabled as needed</li>
+<li>The template assumes Ubuntu-based VMs with cloud-init support</li>
+<li>For HA K3s clusters, a minimum of 3 master nodes is recommended</li>
+<li>The configuration can be extended to support multiple environments (dev, staging, prod)</li>
+<li>The modules can be reused across different projects</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 sfcal
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.instant", "navigation.sections", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
