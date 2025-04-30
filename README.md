@@ -1,3 +1,22 @@
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/homelab-logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/images/homelab-logo-light.svg">
+    <img alt="Homelab Infrastructure as Code: Complete automation for your home Kubernetes cluster"
+         src="docs/images/homelab-logo-light.svg"
+         width="50%">
+  </picture>
+
+[Getting started] | [Documentation] | [Contributing]
+</div>
+
+This is the main source code repository for [Rust]. It contains the compiler,
+standard library, and documentation.
+
+[Getting Started]: #get-started
+[Documentation]: https://homelab.samuel.computer
+[Contributing]: CONTRIBUTING.md
+
 # Homelab Infrastructure as Code
 
 A complete infrastructure-as-code solution for managing a home Kubernetes cluster running on Proxmox VMs. This repository contains automation for the entire lifecycle - from VM template creation to Kubernetes application deployment.
