@@ -24,7 +24,7 @@ homelab/
 ```
 
 ## Network Structure
-add image here
+![Network](docs/images/network.drawio.svg)
 
 ## Components
 
@@ -125,6 +125,10 @@ docker exec -it ansible-runner ansible-playbook /runner/site.yml
 - **Infrastructure**: Use Terraform to scale or modify VM resources
 - **Kubernetes**: Update through GitOps with FluxCD
 - **Applications**: Manage through Kubernetes manifests or Docker Compose for standalone services
+
+## Other Resources
+
+- [Dotfiles](https://github.com/sfcal/.home) - My personal configuration files
 
 ## License
 
