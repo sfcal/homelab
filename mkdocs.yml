@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
-site_name: Your Homelab
+site_name: Homelab Infrastructure as Code
 copyright: Copyright &copy; 2025 sfcal
 
 repo_url: https://github.com/sfcal/homelab
@@ -38,21 +38,18 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Installation:
-    - getting-started/installation.md
-    - getting-started/configuration.md
-    - getting-started/post-installation.md
+  - Getting Started:
+    - Quick Start: getting-started/quick-start.md
+    - Prerequisites: getting-started/prerequisites.md
+    - External Resources: getting-started/external-resources.md
   - Concepts:
-    - concepts/architecture.md
-    - concepts/networking.md
-  - How-to guides:
-    - how-to-guides/add-new-service.md
-    - how-to-guides/backups.md
-    - Troubleshooting:
-      - how-to-guides/troubleshooting/common-issues.md
+    - Network Layout: concepts/network-layout.md
+    - GitOps with FluxCD: concepts/gitops-fluxcd.md
+  - How-to Guides:
+    - Proxmox: how-to-guides/proxmox.md
+    - Packer: how-to-guides/packer.md
+    - Terraform: how-to-guides/terraform.md
   - Reference:
-    - Architecture:
-      - reference/architecture/overview.md
-      - reference/architecture/decisions.md
-    - reference/components.md
-    - reference/contributing.md
+    - FAQ: reference/faq.md
+    - License: reference/license.md
+    - Roadmap: reference/roadmap.md
