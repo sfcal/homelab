@@ -55,11 +55,11 @@ variable "ssh_password" {
   description = "SSH password"
 }
 
-variable "ssh_private_key_file" {
-  type = string
-  default = "~/.ssh/id_ed25519"
-  description = "SSH private key file"
-}
+//variable "ssh_private_key_file" {
+//  type = string
+//  default = "~/.ssh/id_ed25519"
+//  description = "SSH private key file"
+//}
 
 variable "iso_url" {
   type = string
@@ -95,11 +95,13 @@ source "proxmox-iso" "ubuntu-server-base" {
   vm_name = local.vm_name
   template_description = local.template_description
 
-  // ISO file settings
-  iso_url = var.iso_url
-  iso_checksum = var.iso_checksum
-  iso_storage_pool = var.iso_storage_pool
-  unmount_iso = true
+// ISO file settings
+  boot_iso {
+    iso_url = var.iso_url
+    iso_checksum = var.iso_checksum
+    iso_storage_pool = var.iso_storage_pool  // Correct parameter name
+    unmount = true
+  }
 
   // VM System Settings
   qemu_agent = true
@@ -111,7 +113,6 @@ source "proxmox-iso" "ubuntu-server-base" {
     disk_size = "20G"
     format = "raw"
     storage_pool = "local-lvm"
-    storage_pool_type = "lvm"
     type = "virtio"
   }
 
@@ -149,7 +150,7 @@ source "proxmox-iso" "ubuntu-server-base" {
 
   ssh_username = var.ssh_username
   ssh_password = var.ssh_password
-  ssh_private_key_file = var.ssh_private_key_file
+  //ssh_private_key_file = var.ssh_private_key_file
 
   ssh_timeout = "10m"
   ssh_pty = true

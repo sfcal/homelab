@@ -27,7 +27,5 @@ autoinstall:
         lock-passwd: false
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /bin/bash
-        # passwd: your-password
-        # - or -
-        # ssh_authorized_keys:
-        #   - your-ssh-key
+        plain_text_passwd: SuperSecure00
+
