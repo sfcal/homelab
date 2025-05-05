@@ -1,6 +1,6 @@
 // Production environment variables
 environment = "prod"
-proxmox_node = "wil-pve-01"
+proxmox_node = "10.2.20.11"
 template_prefix = "ubuntu-server"
 
 // ISO configuration

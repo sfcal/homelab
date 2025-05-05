@@ -1,6 +1,6 @@
 // Development environment variables
 environment = "dev"
-proxmox_node = "nyc-pve-01"
+proxmox_node = "10.1.20.11"
 template_prefix = "ubuntu-server"
 
 // ISO configuration

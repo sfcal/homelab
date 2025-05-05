@@ -12,23 +12,22 @@ packer {
 // Variable declarations
 variable "proxmox_api_url" {
   type = string
-  description = "Proxmox API URL"
+  default = "https://10.2.20.11:8006/api2/json"
 }
 
 variable "proxmox_api_token_id" {
   type = string
-  description = "Proxmox API token ID"
+  default = "root@pam!packer"
 }
 
 variable "proxmox_api_token_secret" {
   type = string
   sensitive = true
-  description = "Proxmox API token secret"
 }
 
 variable "proxmox_node" {
   type = string
-  description = "Proxmox node to build on"
+  default = "wil-pve-01"
 }
 
 variable "environment" {
@@ -55,27 +54,6 @@ variable "ssh_password" {
   description = "SSH password"
 }
 
-//variable "ssh_private_key_file" {
-//  type = string
-//  default = "~/.ssh/id_ed25519"
-//  description = "SSH private key file"
-//}
-
-variable "iso_url" {
-  type = string
-  default = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso"
-}
-
-variable "iso_checksum" {
-  type = string
-  default = "sha256:d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
-}
-
-variable "iso_storage_pool" {
-  type = string
-  default = "local"
-}
-
 // Local variables
 locals {
   vm_name = "${var.template_prefix}-${var.environment}-base"
@@ -91,17 +69,15 @@ source "proxmox-iso" "ubuntu-server-base" {
 
   // VM General Settings
   node = var.proxmox_node
-  vm_id = "9000"
   vm_name = local.vm_name
   template_description = local.template_description
 
-// ISO file settings
-  boot_iso {
-    iso_url = var.iso_url
-    iso_checksum = var.iso_checksum
-    iso_storage_pool = var.iso_storage_pool  // Correct parameter name
-    unmount = true
-  }
+  // ISO file settings - using direct parameters
+  //iso_url = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso"
+  iso_file = "local:iso/ubuntu-22.04.3-live-server-amd64.iso"
+  //iso_checksum = "sha256:d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d"
+  iso_storage_pool = "local"
+  unmount_iso = true
 
   // VM System Settings
   qemu_agent = true
@@ -132,14 +108,17 @@ source "proxmox-iso" "ubuntu-server-base" {
   cloud_init_storage_pool = "local-lvm"
 
   // PACKER Boot Commands
-  boot_command = [
-    "<esc><wait>",
-    "e<wait>",
-    "<down><down><down><end>",
-    "<bs><bs><bs><bs><wait>",
-    "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
-    "<f10><wait>"
-  ]
+boot_command = [
+  "c<wait>",
+  "linux /casper/vmlinuz ",
+  "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
+  "ip=dhcp ",
+  "ipv6.disable=1 ",
+  "<enter><wait>",
+  "initrd /casper/initrd<enter><wait>",
+  "boot<enter>"
+]
+  //boot_command = [ "c<wait>linux /casper/vmlinuz --- autoinstall ds=nocloud<enter><wait>initrd /casper/initrd<enter><wait>boot<enter>" ]
 
   boot = "c"
   boot_wait = "10s"
@@ -150,8 +129,6 @@ source "proxmox-iso" "ubuntu-server-base" {
 
   ssh_username = var.ssh_username
   ssh_password = var.ssh_password
-  //ssh_private_key_file = var.ssh_private_key_file
-
   ssh_timeout = "10m"
   ssh_pty = true
 }

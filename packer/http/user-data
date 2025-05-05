@@ -3,29 +3,18 @@ autoinstall:
   version: 1
   locale: en_US
   keyboard:
-    layout: de
+    layout: us
+  identity:
+    hostname: ubuntu-server
+    username: sfcal
+    password: SuperSecure00
+    # Using plain_text_passwd instead of hashed password for debugging
+    plain_text_passwd: SuperSecure00
   ssh:
     install-server: true
     allow-pw: true
-    disable_root: true
-    ssh_quiet_keygen: true
-    allow_public_ssh_keys: true
-  packages:
-    - qemu-guest-agent
-    - sudo
   storage:
     layout:
       name: direct
-    swap:
-      size: 0
-  user-data:
-    package_upgrade: false
-    timezone: America/New_York
-    users:
-      - name: sfcal
-        groups: [adm, sudo]
-        lock-passwd: false
-        sudo: ALL=(ALL) NOPASSWD:ALL
-        shell: /bin/bash
-        plain_text_passwd: SuperSecure00
-
+  packages:
+    - qemu-guest-agent
