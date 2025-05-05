@@ -1,1 +1,3 @@
 credentials.pkr.hcl
+downloaded_iso_path
+packer.log
