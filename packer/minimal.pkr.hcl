@@ -21,7 +21,7 @@ variable "proxmox_api_token_id" {
 variable "proxmox_api_token_secret" {
   type = string
   sensitive = true
-  default = "d04b70b8-c355-485d-ab4e-ab484dea954d"  // Replace with your actual token
+  default = "d667b95c-cc3c-4519-bc96-1835e621dbcf"  // Replace with your actual token
 }
 
 variable "proxmox_node" {

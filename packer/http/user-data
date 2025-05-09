@@ -1,20 +1,37 @@
 #cloud-config
 autoinstall:
   version: 1
+  refresh-installer:
+    update: false 
   locale: en_US
   keyboard:
     layout: us
-  identity:
-    hostname: ubuntu-server
-    username: sfcal
-    password: SuperSecure00
-    # Using plain_text_passwd instead of hashed password for debugging
-    plain_text_passwd: SuperSecure00
   ssh:
     install-server: true
     allow-pw: true
+    disable_root: true
+    ssh_quiet_keygen: true
+    allow_public_ssh_keys: true
   storage:
     layout:
       name: direct
+    swap:
+      size: 0
+  user-data:
+    package_update: true
+    package_upgrade: true
+    timezone: America/New_York 
+    ssh_pwauth: true 
+    users:
+      - name: sfcal
+        groups: [adm, sudo]
+        lock_passwd: false 
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        passwd: $6$UimDUCDabWu$e5B..jq/qmcuCtq.siSw8pJcIP7crMYQJA7MGR7NpCwsI0.zpSTUPWTsI0QH1Wmslu5j2eAtCm8wRebFd7ccH0
   packages:
     - qemu-guest-agent
+    - sudo                  
+    - vim
+    - zip
+    - unzip

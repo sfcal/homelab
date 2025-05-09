@@ -108,16 +108,14 @@ source "proxmox-iso" "ubuntu-server-base" {
   cloud_init_storage_pool = "local-lvm"
 
   // PACKER Boot Commands
-boot_command = [
-  "c<wait>",
-  "linux /casper/vmlinuz ",
-  "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
-  "ip=dhcp ",
-  "ipv6.disable=1 ",
-  "<enter><wait>",
-  "initrd /casper/initrd<enter><wait>",
-  "boot<enter>"
-]
+  boot_command = [
+    "<esc><wait>",
+    "e<wait>",
+    "<down><down><down><end>",
+    "<bs><bs><bs><bs><wait>",
+    "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>", // Note the escaped semicolon
+    "<f10><wait>"
+  ]
   //boot_command = [ "c<wait>linux /casper/vmlinuz --- autoinstall ds=nocloud<enter><wait>initrd /casper/initrd<enter><wait>boot<enter>" ]
 
   boot = "c"
@@ -139,20 +137,21 @@ build {
   sources = ["source.proxmox-iso.ubuntu-server-base"]
 
   // Provisioning the VM Template for Cloud-Init Integration in Proxmox #1
-  provisioner "shell" {
-    inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "sudo rm /etc/ssh/ssh_host_*",
-      "sudo truncate -s 0 /etc/machine-id",
-      "sudo apt -y autoremove --purge",
-      "sudo apt -y clean",
-      "sudo apt -y autoclean",
-      "sudo cloud-init clean",
-      "sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg",
-      "sudo rm -f /etc/netplan/00-installer-config.yaml",
-      "sudo sync"
-    ]
-  }
+provisioner "shell" {
+  inline = [
+    "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done", // Loop
+    "echo 'Cloud-init finished. Starting cleanup...' ", // Add this for visibility
+    "sudo rm /etc/ssh/ssh_host_*",
+    "sudo truncate -s 0 /etc/machine-id",
+    "sudo apt -y autoremove --purge", // << Potential for hanging
+    "sudo apt -y clean",
+    "sudo apt -y autoclean",
+    "sudo cloud-init clean", // This will remove /var/lib/cloud/instance and boot-finished
+    "sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg",
+    "sudo rm -f /etc/netplan/00-installer-config.yaml",
+    "sudo sync"
+  ]
+}
 
   // Provisioning the VM Template for Cloud-Init Integration in Proxmox #2
   provisioner "file" {
