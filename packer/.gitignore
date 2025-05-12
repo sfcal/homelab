@@ -1,3 +1,3 @@
-credentials.pkrvars.hcl
+credentials.*.pkrvars.hcl
 downloaded_iso_path
 packer.log
