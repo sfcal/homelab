@@ -130,11 +130,11 @@ variable "ssh_password" {
   description = "SSH password for Packer to connect to the VM"
 }
 
-//variable "ssh_private_key_file" {
-//  type        = string
-//  default     = null // Make optional if password auth is primary
-//  description = "Path to SSH private key file for Packer connection"
-//}
+variable "ssh_private_key_file" {
+  type        = string
+  default     = null // Make optional if password auth is primary
+  description = "Path to SSH private key file for Packer connection"
+}
 
 // Cloud-Init Configuration (Expected from environment var file)
 variable "cloud_init_storage_pool" {
@@ -216,7 +216,7 @@ source "proxmox-iso" "ubuntu-server-base" {
   communicator           = "ssh"
   ssh_username           = var.ssh_username
   ssh_password           = var.ssh_password
-  #ssh_private_key_file = var.ssh_private_key_file != null ? var.ssh_private_key_file : "" // Use key if provided
+  ssh_private_key_file = var.ssh_private_key_file
   ssh_timeout            = "20m" // Increase timeout for installation and provisioning
   ssh_pty                = true  // Needed for sudo commands often
 
@@ -253,8 +253,6 @@ build {
       "unset HISTFILE",                                                             // Disable history writing for current session
       "sudo rm -f /root/.bash_history",                                             // Clear root history
       "rm -f /home/${var.ssh_username}/.bash_history",                              // Clear user history
-      "history -c",                                                                 // Clear current session history
-      "sudo history -c",                                                            // Clear root current session history
       "echo 'Syncing filesystem...'",
       "sudo sync",
       "echo 'Cleanup complete. VM will disconnect.'",
