@@ -7,11 +7,11 @@
 output "master_nodes" {
   description = "Information about the master nodes"
   value = {
-    for idx, node in module.master_nodes : 
+    for idx, node in proxmox_vm_qemu.master_nodes : 
     idx => {
-      name = node.vm_name
-      ip   = node.ipv4_address
-      id   = node.vm_id
+      name = node.name
+      ip   = node.default_ipv4_address
+      id   = node.id
     }
   }
 }
@@ -19,36 +19,36 @@ output "master_nodes" {
 output "worker_nodes" {
   description = "Information about the worker nodes"
   value = {
-    for idx, node in module.worker_nodes : 
+    for idx, node in proxmox_vm_qemu.worker_nodes : 
     idx => {
-      name = node.vm_name
-      ip   = node.ipv4_address
-      id   = node.vm_id
+      name = node.name
+      ip   = node.default_ipv4_address
+      id   = node.id
     }
   }
 }
 
 output "master_ips" {
   description = "IP addresses of all master nodes"
-  value = [for node in module.master_nodes : node.ipv4_address]
+  value = [for node in proxmox_vm_qemu.master_nodes : node.default_ipv4_address]
 }
 
 output "worker_ips" {
   description = "IP addresses of all worker nodes"
-  value = [for node in module.worker_nodes : node.ipv4_address]
+  value = [for node in proxmox_vm_qemu.worker_nodes : node.default_ipv4_address]
 }
 
 output "all_nodes" {
   description = "All nodes in the cluster"
   value = concat(
-    [for node in module.master_nodes : {
-      name = node.vm_name
-      ip   = node.ipv4_address
+    [for node in proxmox_vm_qemu.master_nodes : {
+      name = node.name
+      ip   = node.default_ipv4_address
       role = "master"
     }],
-    [for node in module.worker_nodes : {
-      name = node.vm_name
-      ip   = node.ipv4_address
+    [for node in proxmox_vm_qemu.worker_nodes : {
+      name = node.name
+      ip   = node.default_ipv4_address
       role = "worker"
     }]
   )

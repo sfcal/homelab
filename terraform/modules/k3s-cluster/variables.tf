@@ -119,31 +119,17 @@ variable "ssh_user" {
 variable "ssh_public_key" {
   description = "SSH public key for VM access"
   type        = string
-  sensitive   = true
 }
 
-# -- Provisioning
-variable "enable_provisioning" {
-  description = "Enable VM provisioning"
-  type        = bool
-  default     = false
-}
-
-variable "ssh_private_key_path" {
-  description = "Path to SSH private key for provisioning"
+# -- Additional VM Settings
+variable "storage_pool" {
+  description = "Storage pool for VM disks"
   type        = string
-  default     = "~/.ssh/id_ed25519"
-  sensitive   = true
+  default     = "local-lvm"
 }
 
-variable "provision_ssh_keys" {
-  description = "Provision SSH keys"
-  type        = bool
-  default     = false
-}
-
-variable "provision_git" {
-  description = "Install git on nodes"
-  type        = bool
-  default     = false
+variable "network_bridge" {
+  description = "Network bridge for VMs"
+  type        = string
+  default     = "vmbr0"
 }

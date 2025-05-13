@@ -1,7 +1,7 @@
 /**
  * # K3s Cluster Module
  *
- * Creates a K3s cluster with master and worker nodes
+ * Creates a K3s cluster with master and worker nodes directly on Proxmox
  */
 
 locals {
@@ -31,66 +31,120 @@ locals {
   }
 }
 
-# Create master nodes
-module "master_nodes" {
-  source = "../proxmox-vm"
-  
+# Create master nodes directly with Proxmox
+resource "proxmox_vm_qemu" "master_nodes" {
   for_each = local.masters
   
-  vm_name        = each.value.name
-  vm_description = "K3s master node for ${var.cluster_name} cluster"
-  target_node    = var.proxmox_node
-  template_name  = var.template_name
+  # General settings
+  name        = each.value.name
+  desc        = "K3s master node for ${var.cluster_name} cluster"
+  target_node = var.proxmox_node
+  vmid        = null  # Let Proxmox assign automatically
+  agent       = 1     # Enable QEMU Guest Agent
   
+  # Clone settings
+  clone      = var.template_name
+  full_clone = false
+  
+  # Boot settings
+  onboot          = true
+  automatic_reboot = true
+  
+  # Hardware settings
+  qemu_os  = "other"
+  bios     = "seabios"
   cores    = each.value.cores
+  sockets  = 1
+  cpu_type = "host"
   memory   = each.value.memory
-  disk_size = each.value.disk_size
   
-  use_dhcp   = var.use_dhcp
-  static_ip  = each.value.ip
-  gateway    = var.gateway
+  # Network settings
+  network {
+    id     = 0
+    bridge = var.network_bridge
+    model  = "virtio"
+  }
+  
+  # Storage settings
+  scsihw = "virtio-scsi-single"
+  
+  disk {
+    storage = var.storage_pool
+    size    = each.value.disk_size
+    type    = "disk"
+    slot    = "virtio0"
+  }
+  
+  # Cloud-init settings
+  os_type    = "cloud-init"
+  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.ip}/24,gw=${var.gateway}"
   nameserver = var.nameserver
   ciuser     = var.ssh_user
+  sshkeys    = var.ssh_public_key
   
-  ssh_public_key = var.ssh_public_key
-  
-  # Provision only if enabled
-  enable_provisioning = var.enable_provisioning
-  ssh_private_key_path = var.ssh_private_key_path
-  provision_ssh_keys = var.provision_ssh_keys
-  provision_git = var.provision_git
-  
-  # Other hardware settings kept at defaults
+  # Ensure VMs get unique IDs
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
 }
 
-# Create worker nodes
-module "worker_nodes" {
-  source = "../proxmox-vm"
-  
+# Create worker nodes directly with Proxmox
+resource "proxmox_vm_qemu" "worker_nodes" {
   for_each = local.workers
   
-  vm_name        = each.value.name
-  vm_description = "K3s worker node for ${var.cluster_name} cluster"
-  target_node    = var.proxmox_node
-  template_name  = var.template_name
+  # General settings
+  name        = each.value.name
+  desc        = "K3s worker node for ${var.cluster_name} cluster"
+  target_node = var.proxmox_node
+  vmid        = null  # Let Proxmox assign automatically
+  agent       = 1     # Enable QEMU Guest Agent
   
+  # Clone settings
+  clone      = var.template_name
+  full_clone = true
+  
+  # Boot settings
+  onboot          = true
+  automatic_reboot = true
+  
+  # Hardware settings
+  qemu_os  = "other"
+  bios     = "seabios"
   cores    = each.value.cores
+  sockets  = 1
+  cpu_type = "host"
   memory   = each.value.memory
-  disk_size = each.value.disk_size
   
-  use_dhcp   = var.use_dhcp
-  static_ip  = each.value.ip
-  gateway    = var.gateway
+  # Network settings
+  network {
+    id     = 0
+    bridge = var.network_bridge
+    model  = "virtio"
+  }
+  
+  # Storage settings
+  scsihw = "virtio-scsi-single"
+  
+  disk {
+    storage = var.storage_pool
+    size    = each.value.disk_size
+    type    = "disk"
+    slot    = "scsi0"
+  }
+  
+  # Cloud-init settings
+  os_type    = "cloud-init"
+  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.ip}/24,gw=${var.gateway}"
   nameserver = var.nameserver
   ciuser     = var.ssh_user
+  sshkeys    = var.ssh_public_key
   
-  ssh_public_key = var.ssh_public_key
-  
-  # Provision only if enabled
-  enable_provisioning = var.enable_provisioning
-  ssh_private_key_path = var.ssh_private_key_path
-  provision_ssh_keys = var.provision_ssh_keys
-  provision_git = var.provision_git
-  
-  # Other hardware settings kept at defaults
+  # Ensure VMs get unique IDs
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
 }

@@ -28,23 +28,3 @@ variable "ssh_public_key" {
   type        = string
   sensitive   = true
 }
-
-variable "ssh_private_key_path" {
-  description = "Path to SSH private key for provisioning"
-  type        = string
-  default     = "~/.ssh/id_ed25519"
-  sensitive   = true
-}
-
-# -- Git Repository Settings
-variable "git_repo_url" {
-  description = "URL of the Git repository containing configuration"
-  type        = string
-  default     = "git@github.com:sfcal/homelab.git"
-}
-
-variable "git_branch" {
-  description = "Git branch to use"
-  type        = string
-  default     = "main"
-}
