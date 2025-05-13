@@ -82,7 +82,7 @@ variable "use_dhcp" {
 variable "network_prefix" {
   description = "Network prefix for static IPs (e.g., 10.1.10)"
   type        = string
-  default     = "10.1.10"
+  default     = "10.1.20"
 }
 
 variable "master_ip_start" {
@@ -100,13 +100,13 @@ variable "worker_ip_start" {
 variable "gateway" {
   description = "Network gateway"
   type        = string
-  default     = "10.1.10.1"
+  default     = "10.1.20.1"
 }
 
 variable "nameserver" {
   description = "DNS server"
   type        = string
-  default     = "10.1.0.1"
+  default     = "8.8.8.8"
 }
 
 # -- SSH Access

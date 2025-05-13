@@ -7,8 +7,8 @@
 locals {
   env_name = "dev"
   vm_defaults = {
-    target_node   = "pve-dev01"
-    template_name = "ubuntu-server-noble"
+    target_node   = "nyc-pve-01"
+    template_name = "ubuntu-server-dev-base"
     ssh_user      = "sfcal"
   }
 }
@@ -21,7 +21,7 @@ module "controlplane" {
   vm_description = "Kubernetes control plane node"
   target_node    = local.vm_defaults.target_node
   template_name  = local.vm_defaults.template_name
-  vmid           = 401 # Specific VM ID
+  vmid           = null
 
   cores     = 2
   memory    = 4096
@@ -61,8 +61,8 @@ module "k3s_cluster" {
   network_prefix  = "10.1.10"
   master_ip_start = 51
   worker_ip_start = 41
-  gateway         = "10.1.10.1"
-  nameserver      = "10.1.0.1"
+  gateway         = "10.1.20.1"
+  nameserver      = "10.1.20.1"
 
   # SSH configuration
   ssh_user       = local.vm_defaults.ssh_user
