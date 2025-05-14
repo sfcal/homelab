@@ -7,6 +7,6 @@ services:
       - BIND9_USER=root
       - TZ=America/New_York
     volumes:
-      - ./config/:/etc/bind:rw
+      - ./config/:/etc/bind
     network_mode: host
     restart: unless-stopped
