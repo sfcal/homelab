@@ -1,0 +1,8 @@
+# Provider configuration
+proxmox_api_url = "https://pve-dev01.example.com:8006/api2/json"
+proxmox_api_token_id = "terraform@pam!terraform"
+proxmox_api_token_secret = "your-token-secret-here"
+
+# SSH configuration
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG... your-public-key"
+
