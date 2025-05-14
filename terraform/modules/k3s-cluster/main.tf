@@ -8,10 +8,14 @@ locals {
   master_count = var.master_count
   worker_count = var.worker_count
   
+  # Create a base VMID starting point to avoid conflicts
+  vmid_base = 3000
+  
   masters = {
     for i in range(local.master_count) :
     i => {
       name     = "${var.cluster_name}-master-${format("%02d", i + 1)}"
+      vmid     = local.vmid_base + i + 1
       ip       = var.use_dhcp ? null : "${var.network_prefix}.${var.master_ip_start + i}"
       disk_size = var.master_disk_size
       memory   = var.master_memory
@@ -23,6 +27,7 @@ locals {
     for i in range(local.worker_count) :
     i => {
       name     = "${var.cluster_name}-worker-${format("%02d", i + 1)}"
+      vmid     = local.vmid_base + local.master_count + i + 1
       ip       = var.use_dhcp ? null : "${var.network_prefix}.${var.worker_ip_start + i}"
       disk_size = var.worker_disk_size
       memory   = var.worker_memory
@@ -39,12 +44,12 @@ resource "proxmox_vm_qemu" "master_nodes" {
   name        = each.value.name
   desc        = "K3s master node for ${var.cluster_name} cluster"
   target_node = var.proxmox_node
-  vmid        = null  # Let Proxmox assign automatically
+  vmid        = each.value.vmid  # Set explicit VMID to avoid conflicts
   agent       = 1     # Enable QEMU Guest Agent
   
   # Clone settings
   clone      = var.template_name
-  full_clone = false
+  full_clone = true   # Changed to true for consistency with worker nodes
   
   # Boot settings
   onboot          = true
@@ -65,14 +70,27 @@ resource "proxmox_vm_qemu" "master_nodes" {
     model  = "virtio"
   }
   
-  # Storage settings
+  # Storage settings - updated to new format
   scsihw = "virtio-scsi-single"
   
-  disk {
-    storage = var.storage_pool
-    size    = each.value.disk_size
-    type    = "disk"
-    slot    = "virtio0"
+  disks {
+    ide {
+      ide0 {
+        cloudinit {
+          storage = var.storage_pool
+        }
+      }
+    }
+    virtio {
+      virtio0 {
+        disk {
+          storage = var.storage_pool
+          size    = each.value.disk_size
+          iothread = true
+          replicate = false
+        }
+      }
+    }
   }
   
   # Cloud-init settings
@@ -98,7 +116,7 @@ resource "proxmox_vm_qemu" "worker_nodes" {
   name        = each.value.name
   desc        = "K3s worker node for ${var.cluster_name} cluster"
   target_node = var.proxmox_node
-  vmid        = null  # Let Proxmox assign automatically
+  vmid        = each.value.vmid  # Set explicit VMID to avoid conflicts
   agent       = 1     # Enable QEMU Guest Agent
   
   # Clone settings
@@ -124,14 +142,27 @@ resource "proxmox_vm_qemu" "worker_nodes" {
     model  = "virtio"
   }
   
-  # Storage settings
+  # Storage settings - updated to new format
   scsihw = "virtio-scsi-single"
   
-  disk {
-    storage = var.storage_pool
-    size    = each.value.disk_size
-    type    = "disk"
-    slot    = "scsi0"
+  disks {
+    ide {
+      ide0 {
+        cloudinit {
+          storage = var.storage_pool
+        }
+      }
+    }
+    virtio {
+      virtio0 {
+        disk {
+          storage = var.storage_pool
+          size    = each.value.disk_size
+          iothread = true
+          replicate = false
+        }
+      }
+    }
   }
   
   # Cloud-init settings
