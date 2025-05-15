@@ -40,7 +40,7 @@ homelab/
 ```
 
 ## Network Structure
-![Network](docs/images/network.drawio.svg)
+![Network](docs/assets/diagrams/network.drawio.svg)
 
 ## Components
 
@@ -148,4 +148,4 @@ docker exec -it ansible-runner ansible-playbook /runner/site.yml
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GPLv3 License - see the LICENSE file for details.
