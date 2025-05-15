@@ -40,7 +40,7 @@ homelab/
 ```
 
 ## Network Structure
-![Network](docs/assets/diagrams/network.drawio.svg)
+![Network](docs/assets/network.drawio.svg)
 
 ## Components
 
