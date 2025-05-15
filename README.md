@@ -1,9 +1,9 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/homelab-top.png">
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/homelab-top.png">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner.png">
     <img alt="Homelab Infrastructure as Code: Complete automation for your home Kubernetes cluster"
-         src="docs/assets/homelab-top.png"
+         src="docs/assets/banner.png"
          width="50%">
   </picture>
 
