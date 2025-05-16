@@ -18,6 +18,15 @@
 
 A complete infrastructure-as-code solution for managing a home Kubernetes cluster running on Proxmox VMs. This repository contains automation for the entire lifecycle - from VM template creation to Kubernetes application deployment.
 
+## Multi-Environment Support
+
+This repository supports multiple environments with location-based naming:
+
+- **WIL**: Development/testing environment
+- **NYC**: Production environment
+
+Each environment can have its own configuration while sharing common base components.
+
 ## Repository Structure
 ```
 homelab/
@@ -52,15 +61,6 @@ homelab/
 
 ## Network Structure
 ![Network](docs/assets/network.drawio.svg)
-
-## Multi-Environment Support
-
-This repository supports multiple environments with location-based naming:
-
-- **WIL**: Development/testing environment
-- **NYC**: Production environment
-
-Each environment can have its own configuration while sharing common base components.
 
 ## Deployment - Zero to Hero
 
