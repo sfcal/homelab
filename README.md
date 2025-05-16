@@ -42,65 +42,6 @@ homelab/
 ## Network Structure
 ![Network](docs/assets/network.drawio.svg)
 
-## Components
-
-### [Packer](./packer/README.md)
-
-Automates the creation of VM templates in Proxmox with:
-- Ubuntu Server 24.04 (Noble)
-- Docker pre-installed
-- Cloud-init integration for dynamic provisioning
-- Optimized for Proxmox virtualization
-
-### [Terraform](./terraform/README.md)
-
-Deploys infrastructure on Proxmox using the templates created by Packer:
-- Control plane VM
-- K3s master nodes cluster
-- K3s worker nodes
-- Modular approach for different environments (WIL, NYC)
-
-### [Ansible](./ansible/README.md)
-
-Automates the deployment of K3s Kubernetes clusters:
-- High-availability control plane
-- Worker nodes
-- Load balancer configuration (MetalLB)
-- Network setup with kube-vip
-- Secure token-based authentication
-
-### [Kubernetes](./kubernetes/README.md)
-
-GitOps-based Kubernetes configuration using FluxCD:
-- Core infrastructure services (cert-manager, Traefik, Longhorn)
-- Monitoring stack with Prometheus and Grafana
-- Application deployments with kustomize
-- Multi-environment support (WIL, NYC)
-
-### Docker Compose Stacks
-
-Standalone service stacks for specific use cases:
-
-**Media Stack** ([docker-compose/media-stack](./docker-compose/media-stack/))
-- Plex Media Server
-- Sonarr, Radarr for media management
-- SABnzbd, NZBHydra2 for downloading
-- Tdarr for transcoding
-- Ombi for media requests
-
-**Monitoring Stack** ([docker-compose/monitoring-stack](./docker-compose/monitoring-stack/))
-- Prometheus for metrics collection
-- Grafana for visualization
-- InfluxDB and Telegraf for time-series data
-- Various exporters for specialized metrics
-
-## Deployment Flow
-
-1. **Template Creation**: Packer builds Ubuntu VM templates in Proxmox
-2. **Infrastructure Deployment**: Terraform provisions VMs from templates
-3. **Kubernetes Setup**: Ansible configures K3s cluster on VMs
-4. **Application Deployment**: FluxCD deploys applications to Kubernetes
-
 ## Multi-Environment Support
 
 This repository supports multiple environments with location-based naming:
@@ -110,30 +51,15 @@ This repository supports multiple environments with location-based naming:
 
 Each environment can have its own configuration while sharing common base components.
 
-## Running with Ansible Runner
+## Deployment - Zero to Hero
 
-For consistent execution of Ansible playbooks, you can use the included Ansible Runner container:
+There are 4 steps to fully deploy this homelab from scratch.
 
-```bash
-# Build the container
-cd ansible-runner
-docker-compose build
-
-# Run the container
-docker-compose up -d
-
-# Execute Ansible inside the container
-docker exec -it ansible-runner ansible-playbook /runner/site.yml
-```
-
-## Prerequisites
-
-- Proxmox VE server (tested with 8.0+)
-- SSH access to Proxmox
-- Proxmox API token for automation
-- Network with DHCP (or static IP configuration)
-- Git for version control
-- Internet access for downloading packages
+### Step 0: Prerequisites
+### Step 1: Machine Preparation
+### Step 2: Packer Template Generation
+### Step 3: Terraform VM Deployment
+### Step 4: Ansible Kubernetes Installation
 
 ## Maintenance and Updates
 
