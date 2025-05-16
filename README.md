@@ -27,7 +27,7 @@ apt update && apt install -y curl && bash -c "$(curl -fsSL https://raw.githubuse
 ```
 
 ## Repository Structure
-
+```
 homelab/
 ├── 🔄 ansible/             # K3s deployment automation
 │   ├── environments/       # Dev (10.1.20.x) and Prod (10.1.10.x) configs
@@ -56,6 +56,7 @@ homelab/
 │
 ├── 📜 scripts/             # Automation scripts
 └── 📋 Makefile             # Task automation
+```
 
 ## Network Structure
 ![Network](docs/assets/network.drawio.svg)
