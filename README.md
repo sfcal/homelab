@@ -72,17 +72,6 @@ There are 4 steps to fully deploy this homelab from scratch.
 ### Step 3: Terraform VM Deployment
 ### Step 4: Ansible Kubernetes Installation
 
-## Maintenance and Updates
-
-- **Templates**: Rebuild Packer templates when OS updates are needed
-- **Infrastructure**: Use Terraform to scale or modify VM resources
-- **Kubernetes**: Update through GitOps with FluxCD
-- **Applications**: Manage through Kubernetes manifests or Docker Compose for standalone services
-
-## Other Resources
-
-- [Dotfiles](https://github.com/sfcal/.home) - My personal configuration files
-
 ## Related Projects
 
 These projects have been an inspiration to my homelab
@@ -92,6 +81,10 @@ These projects have been an inspiration to my homelab
 - [khuedoan/homelab](https://github.com/khuedoan/homelab) - _Fully automated homelab from empty disk to running services with a single command._
 - [ricsanfre/pi-cluster](https://github.com/ricsanfre/pi-cluster) - _Pi Kubernetes Cluster. Homelab kubernetes cluster automated with Ansible and FluxCD_
 - [techno-tim/k3s-ansible](https://github.com/techno-tim/k3s-ansible) - _The easiest way to bootstrap a self-hosted High Availability Kubernetes cluster. A fully automated HA k3s etcd install with kube-vip, MetalLB, and more. Build. Destroy. Repeat._
+
+## Other Resources
+
+- [Dotfiles](https://github.com/sfcal/.home) - My personal configuration files
 
 ## License
 
