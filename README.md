@@ -28,16 +28,34 @@ apt update && apt install -y curl && bash -c "$(curl -fsSL https://raw.githubuse
 
 ## Repository Structure
 
-```
 homelab/
-├── ansible/           # Ansible playbooks for K3s deployment
-├── ansible-runner/    # Docker container for running Ansible
-├── deploy/            # Deployment scripts
-├── docker-compose/    # Docker Compose stacks for standalone services
-├── kubernetes/        # Kubernetes configurations (GitOps with FluxCD)
-├── packer/            # Packer templates for Proxmox VMs
-└── terraform/         # Terraform modules for infrastructure provisioning
-```
+├── 🔄 ansible/             # K3s deployment automation
+│   ├── environments/       # Dev (10.1.20.x) and Prod (10.1.10.x) configs
+│   ├── playbooks/          # Cluster operations (deploy, reset)
+│   └── roles/              # Component configurations
+│
+├── 🐳 docker-compose/      # Standalone services
+│   ├── bind9/              # 🔍 DNS servers
+│   ├── media-stack/        # 🎬 Plex, Sonarr, Radarr
+│   └── monitoring-stack/   # 📊 Prometheus/Grafana
+│
+├── 📚 docs/                # Documentation
+│
+├── ☸️ kubernetes/          # GitOps configurations
+│   ├── apps/               # 📱 Application deployments
+│   ├── cluster/            # 🧩 Cluster configurations
+│   └── infrastructure/     # 🏗️ Core components (Traefik, Cert-Manager, etc.)
+│
+├── 📦 packer/              # VM template creation
+│   ├── environments/       # Environment variables
+│   └── templates/          # Template definitions
+│
+├── 🏢 terraform/           # Infrastructure provisioning
+│   ├── environments/       # Dev and Prod environments
+│   └── modules/            # Reusable components
+│
+├── 📜 scripts/             # Automation scripts
+└── 📋 Makefile             # Task automation
 
 ## Network Structure
 ![Network](docs/assets/network.drawio.svg)
