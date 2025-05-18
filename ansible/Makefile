@@ -2,10 +2,10 @@
 ENV ?= dev
 
 # Ansible directories and files
-ANSIBLE_DIR := ansible
+ANSIBLE_DIR := .
 PLAYBOOKS_DIR := $(ANSIBLE_DIR)/playbooks/k3s
 ENV_DIR := $(ANSIBLE_DIR)/environments/$(ENV)
-ANSIBLE_CMD := ansible-playbook
+ANSIBLE_CMD := ANSIBLE_ROLES_PATH=$(ANSIBLE_DIR)/roles/k3s ansible-playbook
 
 # Playbooks
 DEPLOY_PLAYBOOK := $(PLAYBOOKS_DIR)/deploy.yml

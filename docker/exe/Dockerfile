@@ -1,3 +1,4 @@
+# Start from your existing homelab image
 FROM ubuntu:22.04
 
 # Set environment variables
@@ -23,6 +24,12 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    # Dotfiles required dependencies
+    zsh \
+    stow \
+    fzf \
+    ripgrep \
+    highlight \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,7 +42,7 @@ RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/shar
     && rm -rf /var/lib/apt/lists/*
 
 # Install Ansible and required collections
-RUN pip3 install --no-cache-dir ansible ansible-core \
+RUN pip3 install --no-cache-dir ansible ansible-core netaddr \
     && ansible-galaxy collection install community.general ansible.posix
 
 # Install kubectl
@@ -63,44 +70,37 @@ RUN mkdir -p /etc/ansible \
     && echo "[defaults]\ninterpreter_python = /usr/bin/python3\nhost_key_checking = False\nroles_path = /workspace/ansible/roles" > /etc/ansible/ansible.cfg \
     && chown -R devops:devops /etc/ansible
 
-# Set up workspace directory
-RUN mkdir -p /workspace \
-    && chown -R devops:devops /workspace
-
-# Create helpful aliases and environment setup
-RUN echo 'export PS1="🏠 homelab:\w \$ "' >> /home/devops/.bashrc \
-    && echo 'alias tf="terraform"' >> /home/devops/.bashrc \
-    && echo 'alias k="kubectl"' >> /home/devops/.bashrc \
-    && echo 'alias a="ansible"' >> /home/devops/.bashrc \
-    && echo 'alias ap="ansible-playbook"' >> /home/devops/.bashrc \
-    && echo 'export KUBECONFIG=/home/devops/.kube/config' >> /home/devops/.bashrc \
-    && chown devops:devops /home/devops/.bashrc
+# Set up workspace and dotfiles directories
+RUN mkdir -p /workspace /home/devops/.home \
+    && chown -R devops:devops /workspace /home/devops/.home
 
 # Set working directory
 WORKDIR /workspace
 
-# Add volumes for ssh keys, kube config, and workspace
-VOLUME ["/home/devops/.ssh", "/home/devops/.kube", "/workspace"]
+# Add volumes for ssh keys, kube config, workspace, and dotfiles
+VOLUME ["/home/devops/.ssh", "/home/devops/.kube", "/workspace", "/home/devops/.home", "/home/devops/.gitconfig"]
 
-# Switch to non-root user
-USER devops
-
-# Create an informative entrypoint script
-USER root
+# Create a simple entrypoint script
 RUN echo '#!/bin/bash\n\
 echo "🏠 Homelab Infrastructure Container"\n\
 echo "------------------------"\n\
-echo "Terraform: $(terraform version | head -n1)"\n\
-echo "Packer: $(packer version)"\n\
-echo "Ansible: $(ansible --version | head -n1)"\n\
-echo "Kubectl: $(kubectl version --client | grep -o "Client Version: [^,]*")"\n\
-echo "Flux: $(flux --version)"\n\
-echo "------------------------"\n\
-echo "Environment: ${ENV}"\n\
-echo "------------------------"\n\
-exec "$@"' > /entrypoint.sh \
+\n\
+# Apply dotfiles using stow on startup\n\
+if [ -d "/home/devops/.home" ] && [ "$(ls -A /home/devops/.home)" ]; then\n\
+  echo "Setting up dotfiles..."\n\
+  cd /home/devops/.home\n\
+  su - devops -c "cd ~/.home && make"\n\
+  # Use zsh if available\n\
+  if [ -f "/usr/bin/zsh" ]; then\n\
+    echo "Setting shell to zsh"\n\
+    chsh -s /usr/bin/zsh devops\n\
+  fi\n\
+fi\n\
+\n\
+# Execute command as devops user\n\
+exec su - devops -c "$*"\n\
+' > /entrypoint.sh \
 && chmod +x /entrypoint.sh
-USER devops
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/bash"]
+CMD ["/bin/zsh"]
