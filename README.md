@@ -67,7 +67,15 @@ homelab/
 There are 4 steps to fully deploy this homelab from scratch.
 
 ### Step 0: Prerequisites
-### Step 1: Machine Preparation
+### Step 1: Execution Environment
+```
+install docker git
+pull sfcal/homelab
+pull sfcal/.home
+create ssh keys
+build docker image
+```
+
 ### Step 2: Packer Template Generation
 ### Step 3: Terraform VM Deployment
 ### Step 4: Ansible Kubernetes Installation
