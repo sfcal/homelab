@@ -1,29 +1,108 @@
-# ansible/roles/dns/primary/tasks/main.yml
 ---
-- name: Create DNS config directory
-  ansible.builtin.file:
-    path: /opt/dns/config
-    state: directory
-    mode: '0755'
+- name: Deploy Bind9 DNS Server
+  hosts: dns_servers
+  become: true
+  vars:
+    docker_compose_dir: /opt/docker/bind9
+    git_repo: "https://github.com/sfcal/homelab.git"  # Replace with your actual repository URL
+    git_branch: "main"  # Change if using a different branch
+    git_dest: "/tmp/dns-config-repo"  # Temporary location to clone the repository
+  
+  tasks:
+    # Docker installation tasks
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_check
+      changed_when: false
+      failed_when: false
+      
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+          - git  # Ensure git is installed
+        state: present
+        update_cache: yes
+      when: docker_check.rc != 0
+      
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      when: docker_check.rc != 0
+      
+    - name: Get Ubuntu release version
+      command: lsb_release -cs
+      register: ubuntu_release
+      changed_when: false
+      when: docker_check.rc != 0
+      
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_release.stdout }} stable"
+        state: present
+      when: docker_check.rc != 0
+      
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      when: docker_check.rc != 0
+      
+    # Clone/update Git repository
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+        
+    - name: Clone or update git repository
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ git_dest }}"
+        version: "{{ git_branch }}"
+        update: yes
+        force: yes
+      register: git_clone
+        
+    # Create parent directory for Docker Compose directory if it doesn't exist
+    - name: Create parent directory
+      file:
+        path: "/opt/docker"
+        state: directory
+        mode: '0755'
+      
+    # Copy the entire bind9 directory structure using synchronize
+    - name: Copy entire bind9 directory from git repository
+      synchronize:
+        src: "{{ git_dest }}/docker/bind9/"
+        dest: "{{ docker_compose_dir }}/"
+        delete: yes  # Remove files in destination that are not in source
+      delegate_to: "{{ inventory_hostname }}"
+      register: config_sync
+      
+    # Deploy or update Docker Compose service
+    - name: Deploy Bind9 with Docker Compose
+      shell: |
+        cd {{ docker_compose_dir }} && docker compose up -d
+      register: docker_compose_result
+      changed_when: "'Creating' in docker_compose_result.stdout or 'Recreating' in docker_compose_result.stdout"
+      when: config_sync.changed or git_clone.changed
 
-- name: Copy docker-compose.yml
-  ansible.builtin.copy:
-    src: "{{ playbook_dir }}/../../../docker/bind9/docker-compose.yaml"
-    dest: /opt/dns/docker-compose.yaml
-    mode: '0644'
+    - name: Ensure Bind9 container is started (idempotent)
+      shell: |
+        cd {{ docker_compose_dir }} && docker compose up -d
+      when: not (config_sync.changed or git_clone.changed)
 
-- name: Copy DNS configuration files
-  ansible.builtin.copy:
-    src: "{{ playbook_dir }}/../../../docker/bind9/config/{{ item }}"
-    dest: "/opt/dns/config/{{ item }}"
-    mode: '0644'
-  loop:
-    - named.conf
-    - home-samuel-computer.zone
-    - 0.1.10.in-addr.arpa.zone
-
-- name: Deploy and restart primary DNS container
-  community.docker.docker_compose:
-    project_src: /opt/dns
-    pull: yes
-    recreate: always
+    - name: Print deployment status
+      debug:
+        msg: "Bind9 DNS server has been deployed successfully with the latest configuration from Git"
