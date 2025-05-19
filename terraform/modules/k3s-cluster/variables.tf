@@ -24,8 +24,13 @@ variable "worker_count" {
 }
 
 # -- Node Settings
-variable "proxmox_node" {
-  description = "Target Proxmox node for all VMs"
+variable "proxmox_master_nodes" {
+  description = "List of Proxmox nodes for deploying master nodes (should match or exceed master_count)"
+  type        = list(string)
+}
+
+variable "proxmox_worker_node" {
+  description = "Target Proxmox node for worker VMs"
   type        = string
 }
 

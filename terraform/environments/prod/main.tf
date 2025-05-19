@@ -1,7 +1,7 @@
 /**
- * # Development Environment
+ * # Production Environment
  *
- * This is the main configuration for the development environment.
+ * This is the main configuration for the production environment.
  */
 
 locals {
@@ -15,7 +15,11 @@ module "k3s_cluster" {
   cluster_name  = "k3s"
   master_count  = 3
   worker_count  = 2
-  proxmox_node  = "wil-pve-01"
+  
+  # Distributed master nodes across different Proxmox nodes
+  proxmox_master_nodes = ["wil-pve-01", "wil-pve-02", "wil-pve-03"]
+  proxmox_worker_node  = "wil-pve-01"
+  
   template_name = "ubuntu-server-prod-base"
 
   # Storage settings
