@@ -1,0 +1,39 @@
+---
+- name: Deploy DNS servers
+  hosts: dns
+  gather_facts: true
+  tasks:
+    - name: Set up DNS servers
+      ansible.builtin.debug:
+        msg: "Beginning DNS server deployment"
+
+- name: Deploy Primary DNS server
+  hosts: dns_primary
+  roles:
+    - role: dns/primary
+      become: true
+
+- name: Deploy Secondary DNS server
+  hosts: dns_secondary
+  roles:
+    - role: dns/secondary
+      become: true
+
+- name: Verify DNS services
+  hosts: dns
+  gather_facts: false
+  tasks:
+    - name: Check if Bind9 container is running
+      ansible.builtin.shell: docker ps | grep bind9
+      register: docker_check
+      changed_when: false
+      failed_when: false
+      
+    - name: Report DNS service status
+      ansible.builtin.debug:
+        msg: "DNS service is {{ 'running' if docker_check.rc == 0 else 'not running' }} on {{ inventory_hostname }}"
+      
+    - name: Fail if DNS service is not running
+      ansible.builtin.fail:
+        msg: "DNS service failed to start on {{ inventory_hostname }}"
+      when: docker_check.rc != 0

@@ -17,8 +17,7 @@ module "k3s_cluster" {
   worker_count  = 2
   
   # Distributed master nodes across different Proxmox nodes
-  proxmox_master_nodes = ["nyc-pve-01", "nyc-pve-02", "nyc-pve-03"]
-  proxmox_worker_node  = "nyc-pve-01"
+  proxmox_node = "nyc-pve-01"
   
   template_name = "ubuntu-server-dev-base"
 

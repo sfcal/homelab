@@ -1,0 +1,154 @@
+---
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ system_timezone | default('UTC') }}"
+
+- name: Add MaaS repository key
+  ansible.builtin.apt_key:
+    url: https://launchpad.net/~maas/+archive/ubuntu/3.4/+signing-key.asc
+    state: present
+
+- name: Add MaaS repository
+  ansible.builtin.apt_repository:
+    repo: "ppa:maas/3.4"
+    state: present
+    filename: maas
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install MaaS packages
+  ansible.builtin.apt:
+    name:
+      - maas
+      - jq
+    state: present
+    update_cache: yes
+
+- name: Wait for MaaS to be ready
+  ansible.builtin.wait_for:
+    path: /var/lib/maas
+    state: present
+    timeout: 60
+
+- name: Check if MaaS is already initialized
+  ansible.builtin.stat:
+    path: /var/lib/maas/.maas_initialized
+  register: maas_initialized
+
+- name: Initialize MaaS with proxy mode (no DHCP)
+  ansible.builtin.command:
+    cmd: maas init region+rack --maas-url http://localhost:5240/MAAS
+  when: not maas_initialized.stat.exists
+  register: maas_init_result
+  changed_when: maas_init_result.rc == 0
+
+- name: Create admin user
+  ansible.builtin.command:
+    cmd: >
+      maas createadmin
+      --username {{ maas_admin_username | default('admin') }}
+      --password {{ maas_admin_password | default('maasadmin') }}
+      --email {{ maas_admin_email | default('admin@example.com') }}
+      --ssh-import {{ maas_admin_ssh_import | default('lp:admin') }}
+  args:
+    creates: /var/lib/maas/.admin_created
+  register: maas_create_admin
+  changed_when: maas_create_admin.rc == 0
+  when: not maas_initialized.stat.exists
+
+- name: Mark MaaS as initialized
+  ansible.builtin.file:
+    path: /var/lib/maas/.maas_initialized
+    state: touch
+    mode: '0644'
+  when: maas_init_result.changed or maas_create_admin.changed
+
+- name: Obtain MaaS API key
+  ansible.builtin.command:
+    cmd: >
+      maas apikey --username {{ maas_admin_username | default('admin') }}
+  register: maas_api_key
+  changed_when: false
+  no_log: true
+  when: maas_api_key_file is defined
+
+- name: Store MaaS API key
+  ansible.builtin.copy:
+    content: "{{ maas_api_key.stdout }}"
+    dest: "{{ maas_api_key_file | default(ansible_user_dir + '/.maas_api_key') }}"
+    mode: '0600'
+  when: maas_api_key.stdout is defined
+
+- name: Set MaaS configuration
+  ansible.builtin.command:
+    cmd: >
+      maas login {{ maas_admin_username | default('admin') }} 
+      http://localhost:5240/MAAS/ {{ maas_api_key.stdout }}
+  when: maas_api_key.stdout is defined
+  register: maas_login
+  changed_when: false
+
+- name: Configure MaaS to use existing DNS
+  ansible.builtin.command:
+    cmd: >
+      maas {{ maas_admin_username | default('admin') }} maas set-config
+      name=upstream_dns value="{{ maas_upstream_dns | default('10.1.0.53 10.1.0.54') }}"
+  when: maas_login.rc == 0
+  register: maas_dns_config
+  changed_when: maas_dns_config.rc == 0
+
+- name: Configure MaaS name
+  ansible.builtin.command:
+    cmd: >
+      maas {{ maas_admin_username | default('admin') }} maas set-config
+      name=maas_name value="{{ maas_system_name | default('homelab-maas') }}"
+  when: maas_login.rc == 0
+  register: maas_name_config
+  changed_when: maas_name_config.rc == 0
+
+- name: Configure proxy mode (don't manage DHCP/DNS)
+  ansible.builtin.command:
+    cmd: >
+      maas {{ maas_admin_username | default('admin') }} maas set-config
+      name=network_discovery value=disabled
+  when: maas_login.rc == 0
+  register: maas_discovery_config
+  changed_when: maas_discovery_config.rc == 0
+
+- name: Disable HTTP and HTTPS proxies for MaaS
+  ansible.builtin.command:
+    cmd: >
+      maas {{ maas_admin_username | default('admin') }} maas set-config
+      name={{ item.name }} value={{ item.value }}
+  with_items:
+    - { name: 'enable_http_proxy', value: 'false' }
+    - { name: 'use_peer_proxy', value: 'false' }
+  when: maas_login.rc == 0
+  register: maas_proxy_config
+  changed_when: maas_proxy_config.rc == 0
+
+- name: Configure default OS and kernel
+  ansible.builtin.command:
+    cmd: >
+      maas {{ maas_admin_username | default('admin') }} maas set-config
+      name={{ item.name }} value={{ item.value }}
+  with_items:
+    - { name: 'default_osystem', value: 'ubuntu' }
+    - { name: 'default_distro_series', value: '{{ maas_default_ubuntu_version | default("jammy") }}' }
+    - { name: 'default_min_hwe_kernel', value: '{{ maas_default_kernel | default("ga-22.04") }}' }
+  when: maas_login.rc == 0
+  register: maas_os_config
+  changed_when: maas_os_config.rc == 0
+
+- name: Check MaaS service status
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - maas-rackd
+    - maas-regiond
+  register: maas_services
+  changed_when: false
