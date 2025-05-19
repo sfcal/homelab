@@ -1,0 +1,21 @@
+
+---
+ansible_user: sfcal
+system_timezone: America/New_York
+
+# MaaS admin configuration
+maas_system_name: homelab-maas
+maas_admin_username: admin
+maas_admin_password: "changeme"  # Change this to a secure password
+maas_admin_email: admin@example.com
+maas_admin_ssh_import: "gh:yourgithubusername"  # Import SSH keys from GitHub, change to your username
+
+# Use existing DNS servers
+maas_upstream_dns: "10.1.0.53 10.1.0.54"  # Using your existing DNS servers
+
+# Ubuntu version for deployment
+maas_default_ubuntu_version: "jammy"  # Ubuntu 22.04 LTS
+maas_default_kernel: "ga-22.04"  # General availability kernel
+
+# API key storage
+maas_api_key_file: "/home/sfcal/.maas_api_key"

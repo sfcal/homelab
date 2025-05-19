@@ -18,6 +18,8 @@ PROXMOX_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/proxmox/deploy.yml
 
 NTP_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/ntp/deploy.yml
 
+MAAS_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/maas/deploy.yml
+
 .PHONY: deploy reset clean kubeconfig
 
 # Deploy k3s infrastructure
@@ -61,3 +63,7 @@ deploy-proxmox:
 deploy-proxmox:
 	@echo "Deploying Proxmox to $(ENV) environment..."
 	$(ANSIBLE_CMD) -i $(ENV_DIR)/hosts.ini $(PTP_PLAYBOOK)
+
+deploy-maas:
+	@echo "Deploying MaaS to $(ENV) environment..."
+	$(ANSIBLE_CMD) -i $(ENV_DIR)/hosts.ini $(MAAS_PLAYBOOK)
