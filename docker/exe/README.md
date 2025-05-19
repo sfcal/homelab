@@ -1,5 +1,5 @@
 # Build the container
-docker build -t homelab-infra -f Dockerfile .
+docker build -t homelab-exe -f Dockerfile .
 
 # Run the container with your repo mounted
 docker run -it --rm \
@@ -10,4 +10,4 @@ docker run -it --rm \
   -v "$HOME/homelab:/home/devops/homelab" \
   -v "$HOME/.gitconfig:/home/devops/.gitconfig" \
   -e ENV=dev \
-  homelab-infra "$@"
+  homelab-exe "$@"
