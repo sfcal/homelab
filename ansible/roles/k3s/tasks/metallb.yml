@@ -1,6 +1,4 @@
 ---
-# metallb.yml for k3s role
-
 - name: Create manifests directory on first master
   ansible.builtin.file:
     path: /var/lib/rancher/k3s/server/manifests

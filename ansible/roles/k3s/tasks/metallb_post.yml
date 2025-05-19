@@ -1,6 +1,4 @@
 ---
-# metallb_pool.yml for k3s_server_post role
-
 - name: Create manifests directory for temp configuration
   ansible.builtin.file:
     path: /tmp/k3s
