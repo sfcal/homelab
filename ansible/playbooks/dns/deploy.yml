@@ -1,0 +1,28 @@
+---
+- name: Deploy DNS servers
+  hosts: dns
+  gather_facts: true
+  tasks:
+    - name: Ensure Docker is installed
+      ansible.builtin.package:
+        name: docker.io
+        state: present
+      become: true
+
+    - name: Ensure Docker Compose is installed
+      ansible.builtin.package:
+        name: docker-compose
+        state: present
+      become: true
+
+- name: Deploy Primary DNS server
+  hosts: dns_primary
+  roles:
+    - role: dns/primary
+      become: true
+
+- name: Deploy Secondary DNS server
+  hosts: dns_secondary
+  roles:
+    - role: dns/secondary
+      become: true

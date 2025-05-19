@@ -1,0 +1,25 @@
+# ansible/roles/dns/secondary/tasks/main.yml
+---
+- name: Create DNS config directory
+  ansible.builtin.file:
+    path: /opt/dns/config
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../../docker/bind9-secondary/docker-compose.yaml"
+    dest: /opt/dns/docker-compose.yaml
+    mode: '0644'
+
+- name: Copy DNS configuration files
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../../docker/bind9-secondary/config/named.conf"
+    dest: "/opt/dns/config/named.conf"
+    mode: '0644'
+
+- name: Deploy and restart secondary DNS container
+  community.docker.docker_compose:
+    project_src: /opt/dns
+    pull: yes
+    recreate: always

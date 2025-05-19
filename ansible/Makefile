@@ -11,6 +11,8 @@ ANSIBLE_CMD := ANSIBLE_ROLES_PATH=$(ANSIBLE_DIR)/roles/k3s ansible-playbook
 DEPLOY_PLAYBOOK := $(PLAYBOOKS_DIR)/deploy.yml
 RESET_PLAYBOOK := $(PLAYBOOKS_DIR)/reset.yml
 
+DNS_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/dns/deploy.yml
+
 .PHONY: deploy reset clean kubeconfig
 
 # Deploy k3s infrastructure
@@ -38,3 +40,9 @@ kubeconfig:
 	else \
 		echo "Kubeconfig not found. Deploy a cluster first."; \
 	fi
+
+
+# Deploy DNS infrastructure
+deploy-dns:
+	@echo "Deploying DNS servers to $(ENV) environment..."
+	$(ANSIBLE_CMD) -i $(ENV_DIR)/hosts.ini $(DNS_PLAYBOOK)
