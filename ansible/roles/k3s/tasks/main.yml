@@ -1,0 +1,38 @@
+---
+# Main tasks file for k3s role
+
+- name: Include prerequisite tasks
+  ansible.builtin.import_tasks: prereq.yml
+  when: "'prereq' in ansible_run_tags or 'all' in ansible_run_tags or ansible_run_tags == []"
+  tags: [prereq, k3s]
+
+- name: Include download tasks
+  ansible.builtin.import_tasks: download.yml
+  when: "'download' in ansible_run_tags or 'all' in ansible_run_tags or ansible_run_tags == []"
+  tags: [download, k3s]
+
+- name: Include server tasks for master nodes
+  ansible.builtin.import_tasks: k3s_server.yml
+  when: "inventory_hostname in groups['master'] and 
+        ('server' in ansible_run_tags or 'k3s_server' in ansible_run_tags or 
+         'all' in ansible_run_tags or ansible_run_tags == [])"
+  tags: [server, k3s_server, k3s]
+
+- name: Include agent tasks for worker nodes
+  ansible.builtin.import_tasks: k3s_agent.yml
+  when: "inventory_hostname in groups['node'] and 
+        ('agent' in ansible_run_tags or 'k3s_agent' in ansible_run_tags or 
+         'all' in ansible_run_tags or ansible_run_tags == [])"
+  tags: [agent, k3s_agent, k3s]
+
+- name: Include post-installation tasks for master nodes
+  ansible.builtin.import_tasks: k3s_server_post.yml
+  when: "inventory_hostname in groups['master'] and 
+        ('post' in ansible_run_tags or 'k3s_server_post' in ansible_run_tags or 
+         'all' in ansible_run_tags or ansible_run_tags == [])"
+  tags: [post, k3s_server_post, k3s]
+
+- name: Include reset tasks when reset tag is present
+  ansible.builtin.import_tasks: reset.yml
+  when: "'reset' in ansible_run_tags"
+  tags: [reset, k3s]

@@ -1,0 +1,11 @@
+---
+# k3s_server_post.yml with correct file paths
+
+- name: Deploy metallb pool
+  ansible.builtin.include_tasks: metallb_pool.yml
+  tags: metallb
+
+- name: Remove tmp directory used for manifests
+  ansible.builtin.file:
+    path: /tmp/k3s
+    state: absent

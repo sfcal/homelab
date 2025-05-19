@@ -1,0 +1,20 @@
+---
+# Main tasks file for proxmox role
+
+- name: Include installation tasks
+  ansible.builtin.import_tasks: install.yml
+  tags: [install, proxmox]
+
+- name: Include cluster tasks
+  ansible.builtin.import_tasks: cluster.yml
+  tags: [cluster, proxmox]
+
+- name: Include ceph tasks
+  ansible.builtin.import_tasks: ceph.yml
+  when: ceph_enabled | default(false)
+  tags: [ceph, proxmox]
+
+- name: Include ffr tasks
+  ansible.builtin.import_tasks: ffr.yml
+  when: ffr_enabled | default(false)
+  tags: [ffr, proxmox]
