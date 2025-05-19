@@ -16,6 +16,8 @@ DNS_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/dns/deploy.yml
 PROXMOX_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/proxmox/deploy.yml
 #PROXMOX_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/proxmox/reset.yml
 
+NTP_PLAYBOOK := $(ANSIBLE_DIR)/playbooks/ntp/deploy.yml
+
 .PHONY: deploy reset clean kubeconfig
 
 # Deploy k3s infrastructure
@@ -54,3 +56,8 @@ deploy-dns:
 deploy-proxmox:
 	@echo "Deploying Proxmox to $(ENV) environment..."
 	$(ANSIBLE_CMD) -i $(ENV_DIR)/hosts.ini $(PROXMOX_PLAYBOOK)
+
+# Deploy NTP infrastructure
+deploy-proxmox:
+	@echo "Deploying Proxmox to $(ENV) environment..."
+	$(ANSIBLE_CMD) -i $(ENV_DIR)/hosts.ini $(PTP_PLAYBOOK)
