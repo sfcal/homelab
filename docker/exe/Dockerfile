@@ -81,27 +81,37 @@ WORKDIR /workspace
 # Add volumes for ssh keys, kube config, workspace, and dotfiles
 VOLUME ["/home/devops/.ssh", "/home/devops/.kube", "/workspace", "/home/devops/.home", "/home/devops/.gitconfig"]
 
-# Create a simple entrypoint script
+# Create a non-interactive entrypoint script
 RUN echo '#!/bin/bash\n\
-echo "🏠 Homelab Infrastructure Container"\n\
-echo "------------------------"\n\
+set -e\n\
 \n\
-# Apply dotfiles using stow on startup\n\
-if [ -d "/home/devops/.home" ] && [ "$(ls -A /home/devops/.home)" ]; then\n\
-  echo "Setting up dotfiles..."\n\
+# Setup dotfiles silently if available\n\
+if [ -d "/home/devops/.home" ] && [ "$(ls -A /home/devops/.home 2>/dev/null)" ]; then\n\
   cd /home/devops/.home\n\
-  su - devops -c "cd ~/.home && make"\n\
-  # Use zsh if available\n\
-  if [ -f "/usr/bin/zsh" ]; then\n\
-    echo "Setting shell to zsh"\n\
-    chsh -s /usr/bin/zsh devops\n\
-  fi\n\
+  su - devops -c "cd ~/.home && make >/dev/null 2>&1" || true\n\
+  chsh -s /usr/bin/zsh devops >/dev/null 2>&1 || true\n\
+fi\n\
+\n\
+# If no command provided, show help\n\
+if [ "$#" -eq 0 ]; then\n\
+  echo "🏠 Homelab Infrastructure Container"\n\
+  echo "Usage: docker run --rm homelab-exe <command>"\n\
+  echo ""\n\
+  echo "Available tools:"\n\
+  echo "  - terraform"\n\
+  echo "  - ansible"\n\
+  echo "  - kubectl"\n\
+  echo "  - helm"\n\
+  echo "  - flux"\n\
+  echo "  - packer"\n\
+  echo ""\n\
+  echo "Example: docker run --rm homelab-exe terraform version"\n\
+  exit 1\n\
 fi\n\
 \n\
 # Execute command as devops user\n\
-exec su - devops -c "$*"\n\
+exec su - devops -c "cd /workspace && $*"\n\
 ' > /entrypoint.sh \
 && chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/zsh"]
