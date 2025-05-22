@@ -11,6 +11,11 @@ locals {
   # Create a base VMID starting point to avoid conflicts
   vmid_base = 3000
   
+  # Ensure we have enough Proxmox nodes for masters, or cycle through available ones
+  effective_master_nodes = length(var.proxmox_master_nodes) >= local.master_count ? 
+                          var.proxmox_master_nodes : 
+                          [for i in range(local.master_count) : var.proxmox_master_nodes[i % length(var.proxmox_master_nodes)]]
+  
   masters = {
     for i in range(local.master_count) :
     i => {
@@ -20,6 +25,7 @@ locals {
       disk_size = var.master_disk_size
       memory   = var.master_memory
       cores    = var.master_cores
+      target_node = local.effective_master_nodes[i]
     }
   }
   
@@ -43,7 +49,7 @@ resource "proxmox_vm_qemu" "master_nodes" {
   # General settings
   name        = each.value.name
   desc        = "K3s master node for ${var.cluster_name} cluster"
-  target_node = var.proxmox_node
+  target_node = each.value.target_node  # Use the distributed target node from locals
   vmid        = each.value.vmid  # Set explicit VMID to avoid conflicts
   agent       = 1     # Enable QEMU Guest Agent
   
@@ -115,7 +121,7 @@ resource "proxmox_vm_qemu" "worker_nodes" {
   # General settings
   name        = each.value.name
   desc        = "K3s worker node for ${var.cluster_name} cluster"
-  target_node = var.proxmox_node
+  target_node = var.proxmox_worker_node  # Use the worker node parameter
   vmid        = each.value.vmid  # Set explicit VMID to avoid conflicts
   agent       = 1     # Enable QEMU Guest Agent
   
