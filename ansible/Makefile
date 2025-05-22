@@ -1,0 +1,89 @@
+# Makefile for Ansible Infrastructure Management
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
+# Variables
+ENV ?= dev
+ANSIBLE_PLAYBOOK := ansible-playbook -i environments/$(ENV)/hosts.ini
+ANSIBLE_VAULT := ansible-vault
+
+# Colors
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+RED := \033[0;31m
+NC := \033[0m # No Color
+
+.PHONY: help
+help: ## Show this help message
+	@echo -e "$(GREEN)Ansible Infrastructure Management$(NC)"
+	@echo -e "$(YELLOW)Usage:$(NC)"
+	@echo -e "  make [target] ENV=[dev|prod]"
+	@echo ""
+	@echo -e "$(YELLOW)Available targets:$(NC)"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $1, $2}'
+	@echo ""
+	@echo -e "$(YELLOW)Examples:$(NC)"
+	@echo -e "  make deploy-k3s ENV=dev     # Deploy K3s to dev environment"
+	@echo -e "  make reset-k3s ENV=prod     # Reset K3s in prod environment"
+
+# K3s targets
+.PHONY: deploy-k3s
+deploy-k3s: ## Deploy K3s cluster
+	@echo -e "$(GREEN)Deploying K3s cluster in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/k3s/deploy.yml
+
+.PHONY: reset-k3s
+reset-k3s: ## Reset K3s cluster
+	@echo -e "$(RED)Resetting K3s cluster in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/k3s/reset.yml
+
+.PHONY: upgrade-k3s
+upgrade-k3s: ## Upgrade K3s cluster
+	@echo -e "$(YELLOW)Upgrading K3s cluster in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/k3s/upgrade.yml
+
+# DNS targets (future)
+.PHONY: deploy-dns
+deploy-dns: ## Deploy DNS servers
+	@echo -e "$(GREEN)Deploying DNS servers in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/dns/deploy.yml
+
+# MaaS targets (future)
+.PHONY: deploy-maas
+deploy-maas: ## Deploy MaaS
+	@echo -e "$(GREEN)Deploying MaaS in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/maas/deploy.yml
+
+# Proxmox targets (future)
+.PHONY: deploy-proxmox
+deploy-proxmox: ## Deploy Proxmox configuration
+	@echo -e "$(GREEN)Configuring Proxmox in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/proxmox/configure.yml
+
+# Utility targets
+.PHONY: ping
+ping: ## Ping all hosts in inventory
+	@echo -e "$(YELLOW)Pinging all hosts in $(ENV) environment...$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini all -m ping
+
+.PHONY: facts
+facts: ## Gather facts from all hosts
+	@echo -e "$(YELLOW)Gathering facts from $(ENV) environment...$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini all -m setup
+
+.PHONY: lint
+lint: ## Run ansible-lint on all playbooks
+	@echo -e "$(YELLOW)Running ansible-lint...$(NC)"
+	ansible-lint playbooks/
+
+.PHONY: validate
+validate: ## Validate inventory file
+	@echo -e "$(YELLOW)Validating inventory for $(ENV) environment...$(NC)"
+	ansible-inventory -i environments/$(ENV)/hosts.ini --list
+
+# Clean targets
+.PHONY: clean
+clean: ## Clean temporary files
+	@echo -e "$(YELLOW)Cleaning temporary files...$(NC)"
+	find . -name "*.retry" -delete
+	find . -name "__pycache__" -type d -exec rm -rf {} +
