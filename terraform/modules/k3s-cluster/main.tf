@@ -11,10 +11,19 @@ locals {
   # Create a base VMID starting point to avoid conflicts
   vmid_base = 3000
   
+  # Determine which Proxmox nodes to use for masters
+  # Priority: proxmox_master_nodes > proxmox_node (fallback)
+  master_nodes_list = var.proxmox_master_nodes != null ? var.proxmox_master_nodes : [var.proxmox_node]
+  
   # Ensure we have enough Proxmox nodes for masters, or cycle through available ones
-  effective_master_nodes = length(var.proxmox_master_nodes) >= local.master_count ? 
-                          var.proxmox_master_nodes : 
-                          [for i in range(local.master_count) : var.proxmox_master_nodes[i % length(var.proxmox_master_nodes)]]
+  effective_master_nodes = length(local.master_nodes_list) >= local.master_count ? (
+    slice(local.master_nodes_list, 0, local.master_count)
+  ) : (
+    [for i in range(local.master_count) : local.master_nodes_list[i % length(local.master_nodes_list)]]
+  )
+  
+  # Determine worker node - priority: proxmox_worker_node > proxmox_node > first master node
+  worker_node = coalesce(var.proxmox_worker_node, var.proxmox_node, local.master_nodes_list[0])
   
   masters = {
     for i in range(local.master_count) :
@@ -49,81 +58,9 @@ resource "proxmox_vm_qemu" "master_nodes" {
   # General settings
   name        = each.value.name
   desc        = "K3s master node for ${var.cluster_name} cluster"
-  target_node = each.value.target_node  # Use the distributed target node from locals
-  vmid        = each.value.vmid  # Set explicit VMID to avoid conflicts
-  agent       = 1     # Enable QEMU Guest Agent
-  
-  # Clone settings
-  clone      = var.template_name
-  full_clone = true   # Changed to true for consistency with worker nodes
-  
-  # Boot settings
-  onboot          = true
-  automatic_reboot = true
-  
-  # Hardware settings
-  qemu_os  = "other"
-  bios     = "seabios"
-  cores    = each.value.cores
-  sockets  = 1
-  cpu_type = "host"
-  memory   = each.value.memory
-  
-  # Network settings
-  network {
-    id     = 0
-    bridge = var.network_bridge
-    model  = "virtio"
-  }
-  
-  # Storage settings - updated to new format
-  scsihw = "virtio-scsi-single"
-  
-  disks {
-    ide {
-      ide0 {
-        cloudinit {
-          storage = var.storage_pool
-        }
-      }
-    }
-    virtio {
-      virtio0 {
-        disk {
-          storage = var.storage_pool
-          size    = each.value.disk_size
-          iothread = true
-          replicate = false
-        }
-      }
-    }
-  }
-  
-  # Cloud-init settings
-  os_type    = "cloud-init"
-  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.ip}/24,gw=${var.gateway}"
-  nameserver = var.nameserver
-  ciuser     = var.ssh_user
-  sshkeys    = var.ssh_public_key
-  
-  # Ensure VMs get unique IDs
-  lifecycle {
-    ignore_changes = [
-      network,
-    ]
-  }
-}
-
-# Create worker nodes directly with Proxmox
-resource "proxmox_vm_qemu" "worker_nodes" {
-  for_each = local.workers
-  
-  # General settings
-  name        = each.value.name
-  desc        = "K3s worker node for ${var.cluster_name} cluster"
-  target_node = var.proxmox_worker_node  # Use the worker node parameter
-  vmid        = each.value.vmid  # Set explicit VMID to avoid conflicts
-  agent       = 1     # Enable QEMU Guest Agent
+  target_node = each.value.target_node
+  vmid        = each.value.vmid
+  agent       = 1
   
   # Clone settings
   clone      = var.template_name
@@ -148,7 +85,7 @@ resource "proxmox_vm_qemu" "worker_nodes" {
     model  = "virtio"
   }
   
-  # Storage settings - updated to new format
+  # Storage settings
   scsihw = "virtio-scsi-single"
   
   disks {
@@ -178,7 +115,77 @@ resource "proxmox_vm_qemu" "worker_nodes" {
   ciuser     = var.ssh_user
   sshkeys    = var.ssh_public_key
   
-  # Ensure VMs get unique IDs
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
+}
+
+# Create worker nodes directly with Proxmox
+resource "proxmox_vm_qemu" "worker_nodes" {
+  for_each = local.workers
+  
+  # General settings
+  name        = each.value.name
+  desc        = "K3s worker node for ${var.cluster_name} cluster"
+  target_node = local.worker_node
+  vmid        = each.value.vmid
+  agent       = 1
+  
+  # Clone settings
+  clone      = var.template_name
+  full_clone = true
+  
+  # Boot settings
+  onboot          = true
+  automatic_reboot = true
+  
+  # Hardware settings
+  qemu_os  = "other"
+  bios     = "seabios"
+  cores    = each.value.cores
+  sockets  = 1
+  cpu_type = "host"
+  memory   = each.value.memory
+  
+  # Network settings
+  network {
+    id     = 0
+    bridge = var.network_bridge
+    model  = "virtio"
+  }
+  
+  # Storage settings
+  scsihw = "virtio-scsi-single"
+  
+  disks {
+    ide {
+      ide0 {
+        cloudinit {
+          storage = var.storage_pool
+        }
+      }
+    }
+    virtio {
+      virtio0 {
+        disk {
+          storage = var.storage_pool
+          size    = each.value.disk_size
+          iothread = true
+          replicate = false
+        }
+      }
+    }
+  }
+  
+  # Cloud-init settings
+  os_type    = "cloud-init"
+  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.ip}/24,gw=${var.gateway}"
+  nameserver = var.nameserver
+  ciuser     = var.ssh_user
+  sshkeys    = var.ssh_public_key
+  
   lifecycle {
     ignore_changes = [
       network,

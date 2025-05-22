@@ -25,8 +25,21 @@ variable "worker_count" {
 
 # -- Node Settings
 variable "proxmox_node" {
-  description = "Target Proxmox node for all VMs"
+  description = "Target Proxmox node for all VMs (fallback for single-node deployments)"
   type        = string
+  default     = null
+}
+
+variable "proxmox_master_nodes" {
+  description = "List of Proxmox nodes for distributing master nodes"
+  type        = list(string)
+  default     = null
+}
+
+variable "proxmox_worker_node" {
+  description = "Target Proxmox node for worker nodes"
+  type        = string
+  default     = null
 }
 
 variable "template_name" {
