@@ -1,1 +1,61 @@
+# docs
 site/
+
+# ansible
+ansible/kubeconfig
+
+# packer
+packer/credentials.*.pkrvars.hcl
+packer/downloaded_iso_path
+packer/packer.log
+
+# kubernetes
+kubernetes/infrastructure/cert-manager/issuers/cloudflare-token-secret.yaml
+kubernetes/infrastructure/traefik/dashboard/secret-dashboard.yaml
+kubernetes/apps/homelab/kube-prometheus-stack/grafana-admin-secret.yaml
+
+# terraform
+terraform/**/.terraform/*
+
+terraform/*.tfstate
+terraform/*.tfstate.*
+
+terraform/crash.log
+terraform/crash.*.log
+
+terraform/**/*.tfvars
+terraform/**/*.tfvars.json
+
+terraform/**/credentials.auto.tfvars
+
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+
+terraform/.terraformrc
+terraform/terraform.rc
+
+terraform/.terraform.tfstate.lock.info
+
+terraform/.terraform.lock.hcl
+
+terraform/.DS_Store
+terraform/Thumbs.db
+
+# Environment-specific 
+terraform/environments/*/terraform.tfvars
+
+terraform/environments/*/backend.config
+
+terraform/environments/*/terraform.tfstate
+terraform/environments/*/terraform.tfstate.backup
+
+terraform/environments/*/*.tfplan
+
+terraform/environments/*/.terraform.tfstate.lock.info
+
+.vscode/
+*.swp
+*.swo
+*~
