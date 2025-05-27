@@ -66,27 +66,34 @@ homelab/
 
 There are 6 steps to fully deploy this homelab from scratch.
 
-📋 Step 0: Prerequisites
+### 📋 Step 0: Prerequisites
+
 Before starting, ensure you have the following:
-Software Requirements
 
-Docker and Docker Compose
-Git
-SSH key pair for VM access
+#### Software Requirements
+- **Docker** and **Docker Compose**
+- **Git**
+- **SSH key pair** for VM access
 
-Initial Setup
-bash# Clone the repository
+#### Initial Setup
+```bash
+# Clone the repository
 git clone https://github.com/sfcal/homelab.git
 cd homelab
 
-# Clone dotfiles
+# Clone dotfiles (optional but recommended)
 git clone https://github.com/sfcal/.home.git ~/.home
 
 # Generate SSH keys if you don't have them
 ssh-keygen -t ed25519 -C "your-email@example.com"
-🐳 Step 1: Build Execution Environment
+```
+
+### 🐳 Step 1: Build Execution Environment
+
 Create a containerized environment with all necessary tools:
-bash# Build the homelab execution container
+
+```bash
+# Build the homelab execution container
 cd docker/exe
 docker build -t homelab-exe .
 
@@ -104,62 +111,88 @@ alias homelab='docker run -it --rm \
 homelab terraform version
 homelab ansible --version
 homelab kubectl version --client
-📦 Step 2: Create VM Templates with Packer
+```
+
+### 📦 Step 2: Create VM Templates with Packer
+
 Generate Ubuntu VM templates for your infrastructure:
-Configure Packer Variables
 
-Create credentials file:
+#### Configure Packer Variables
 
-bashcd packer/environments/dev
+1. **Create credentials file:**
+```bash
+cd packer/environments/dev
 cp credentials.prod.pkrvars.hcl.example credentials.dev.pkrvars.hcl
 
 # Edit with your Proxmox details
 vim credentials.dev.pkrvars.hcl
+```
+
 Example credentials configuration:
+```hcl
 proxmox_api_url = "https://nyc-pve-01.home.samuel.computer:8006/api2/json"
 proxmox_api_token_id = "root@pam!packer"
 proxmox_api_token_secret = "your-secret-token-here"
 ssh_password = "your-vm-ssh-password"
+```
 
-Review environment variables:
-
-bash# Check dev environment settings
+2. **Review environment variables:**
+```bash
+# Check dev environment settings
 cat environments/dev/variables.pkrvars.hcl
 
 # Adjust network, storage, and node settings as needed
 vim environments/dev/variables.pkrvars.hcl
-Build Templates
-bashcd packer
+```
+
+#### Build Templates
+
+```bash
+cd packer
 
 # Build base Ubuntu template
 make build TEMPLATE=base ENV=dev
 
 # Verify template creation in Proxmox
 # The template will be named: ubuntu-server-dev-base
-Alternative: Build all templates
-bash# Build base, docker, and k8s templates
+```
+
+**Alternative: Build all templates**
+```bash
+# Build base, docker, and k8s templates
 make all ENV=dev
-🏗️ Step 3: Provision VMs with Terraform
+```
+
+### 🏗️ Step 3: Provision VMs with Terraform
+
 Deploy your K3s cluster infrastructure:
-Configure Terraform Variables
 
-Create terraform variables:
+#### Configure Terraform Variables
 
-bashcd terraform/environments/dev
+1. **Create terraform variables:**
+```bash
+cd terraform/environments/dev
 cp terraform.tfvars.example terraform.tfvars
 
 # Edit with your configuration
 vim terraform.tfvars
+```
+
 Example terraform configuration:
-hcl# Provider configuration
+```hcl
+# Provider configuration
 proxmox_api_url = "https://nyc-pve-01.home.samuel.computer:8006/api2/json"
 proxmox_api_token_id = "root@pam!terraform"
 proxmox_api_token_secret = "your-terraform-token"
 
 # SSH configuration
 ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG... your-public-key"
-Deploy Infrastructure
-bash# Deploy the infrastructure
+```
+
+#### Deploy Infrastructure
+
+```bash
+# Deploy the infrastructure
 make deploy ENV=dev
 
 # Or run manually:
@@ -167,43 +200,58 @@ cd terraform/environments/dev
 terraform init
 terraform plan
 terraform apply
+```
+
 This will create:
+- **3 Master nodes**: 10.1.20.51, 10.1.20.52, 10.1.20.53
+- **2 Worker nodes**: 10.1.20.41, 10.1.20.42, 10.1.20.43
 
-3 Master nodes: 10.1.20.51, 10.1.20.52, 10.1.20.53
-3 Worker nodes: 10.1.20.41, 10.1.20.42, 10.1.20.43
-
-Verify Deployment
-bash# Check created VMs
+#### Verify Deployment
+```bash
+# Check created VMs
 terraform output
 
 # Test SSH connectivity
 ssh sfcal@10.1.20.51
-⚙️ Step 4: Deploy K3s with Ansible
+```
+
+### ⚙️ Step 4: Deploy K3s with Ansible
+
 Install and configure your Kubernetes cluster:
-Configure Ansible Variables
 
-Review inventory:
+#### Configure Ansible Variables
 
-bashcd ansible
+1. **Review inventory:**
+```bash
+cd ansible
 cat environments/dev/hosts.ini
+```
 
-Configure cluster settings:
-
-bash# Review cluster configuration
+2. **Configure cluster settings:**
+```bash
+# Review cluster configuration
 cat environments/dev/group_vars/all.yml
 
 # Key settings to verify:
 # - apiserver_endpoint: 10.1.20.222
 # - k3s_token: (change the default)
 # - metal_lb_ip_range: 10.1.20.140-10.1.20.150
-Deploy K3s Cluster
-bash# Deploy the K3s cluster
+```
+
+#### Deploy K3s Cluster
+
+```bash
+# Deploy the K3s cluster
 make deploy-k3s ENV=dev
 
 # Or run manually:
 ansible-playbook -i environments/dev/hosts.ini playbooks/k3s/deploy.yml
-Verify K3s Installation
-bash# Copy kubeconfig (automatically generated)
+```
+
+#### Verify K3s Installation
+
+```bash
+# Copy kubeconfig (automatically generated)
 cp kubeconfig ~/.kube/config
 
 # Test cluster connectivity
@@ -212,7 +260,10 @@ kubectl get pods -A
 
 # Check cluster status
 kubectl cluster-info
+```
+
 Expected output:
+```
 NAME           STATUS   ROLES                       AGE   VERSION
 k3s-master-01  Ready    control-plane,etcd,master   5m    v1.30.2+k3s2
 k3s-master-02  Ready    control-plane,etcd,master   4m    v1.30.2+k3s2
@@ -220,11 +271,16 @@ k3s-master-03  Ready    control-plane,etcd,master   3m    v1.30.2+k3s2
 k3s-worker-01  Ready    <none>                      2m    v1.30.2+k3s2
 k3s-worker-02  Ready    <none>                      1m    v1.30.2+k3s2
 k3s-worker-03  Ready    <none>                      1m    v1.30.2+k3s2
+```
 
-☸️ Step 5: Bootstrap Kubernetes Infrastructure
+### ☸️ Step 5: Bootstrap Kubernetes Infrastructure
+
 Deploy core cluster components using GitOps:
-Install Flux
-bash# Install Flux CLI
+
+#### Install Flux
+
+```bash
+# Install Flux CLI
 curl -s https://fluxcd.io/install.sh | sudo bash
 
 # Bootstrap Flux (replace with your repository)
@@ -234,9 +290,14 @@ flux bootstrap github \
   --branch=main \
   --path=./kubernetes/cluster/dev \
   --personal
-Verify Infrastructure Deployment
+```
+
+#### Verify Infrastructure Deployment
+
 Wait for core components to deploy:
-bash# Watch namespace creation
+
+```bash
+# Watch namespace creation
 watch kubectl get namespaces
 
 # Monitor infrastructure deployment
@@ -247,28 +308,38 @@ kubectl get pods -n traefik
 kubectl get pods -n cert-manager
 kubectl get pods -n longhorn-system
 kubectl get pods -n monitoring
-Access Web Interfaces
+```
+
+#### Access Web Interfaces
+
 Once deployed, access your services:
 
-Traefik Dashboard: https://traefik.local.samuelcalvert.com
-Grafana: https://grafana.local.samuelcalvert.com
-Longhorn: https://longhorn.local.samuelcalvert.com
+- **Traefik Dashboard**: https://traefik.local.samuelcalvert.com
+- **Grafana**: https://grafana.local.samuelcalvert.com
+- **Longhorn**: https://longhorn.local.samuelcalvert.com
 
-🚀 Step 6: Deploy Applications
+### 🚀 Step 6: Deploy Applications
+
 Your cluster is now ready for applications:
-Example: Deploy nginx
-bash# Applications are managed via GitOps
+
+#### Example: Deploy nginx
+
+```bash
+# Applications are managed via GitOps
 # Check the nginx example
 kubectl get pods -n default
 kubectl get ingress
 
 # Access nginx
 curl http://nginx.local.samuelcalvert.com
-Add Your Own Applications
+```
 
-Create application manifests in kubernetes/apps/dev/
-Add to kustomization.yaml
-Commit and push - Flux will automatically deploy
+#### Add Your Own Applications
+
+1. Create application manifests in `kubernetes/apps/dev/`
+2. Add to kustomization.yaml
+3. Commit and push - Flux will automatically deploy
+
 ## Related Projects
 
 These projects have been an inspiration to my homelab
