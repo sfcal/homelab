@@ -12,18 +12,15 @@ locals {
 module "k3s_cluster" {
   source = "../../modules/k3s-cluster"
 
-  cluster_name  = "k3s"
-  master_count  = 3
-  worker_count  = 2
+  cluster_name = "k3s"
   
-  # Distributed master nodes across different Proxmox nodes
-  proxmox_master_nodes = ["wil-pve-01", "wil-pve-02", "wil-pve-03"]
-  proxmox_worker_node  = "wil-pve-01"
+  # Deploy one master and one worker on each Proxmox node
+  proxmox_nodes = ["wil-pve-01", "wil-pve-02", "wil-pve-03"]
   
   template_name = "ubuntu-server-prod-base"
 
-  # Storage settings
-  storage_pool   = "local-lvm"
+  # Storage settings (using Ceph)
+  storage_pool   = "vm-disks"  # Ceph storage pool
   network_bridge = "vmbr0"
 
   # Network configuration
@@ -35,6 +32,6 @@ module "k3s_cluster" {
   nameserver      = "10.2.20.1"
 
   # SSH configuration
-  ssh_user      = "sfcal"
+  ssh_user       = "sfcal"
   ssh_public_key = var.ssh_public_key
 }

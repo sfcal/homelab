@@ -11,35 +11,13 @@ variable "cluster_name" {
   default     = "k3s"
 }
 
-variable "master_count" {
-  description = "Number of master nodes"
-  type        = number
-  default     = 1
-}
-
-variable "worker_count" {
-  description = "Number of worker nodes"
-  type        = number
-  default     = 1
-}
-
-# -- Node Settings
-variable "proxmox_node" {
-  description = "Target Proxmox node for all VMs (fallback for single-node deployments)"
-  type        = string
-  default     = null
-}
-
-variable "proxmox_master_nodes" {
-  description = "List of Proxmox nodes for distributing master nodes"
+variable "proxmox_nodes" {
+  description = "List of Proxmox nodes to deploy K3s on (one master and one worker per node)"
   type        = list(string)
-  default     = null
-}
-
-variable "proxmox_worker_node" {
-  description = "Target Proxmox node for worker nodes"
-  type        = string
-  default     = null
+  validation {
+    condition     = length(var.proxmox_nodes) > 0
+    error_message = "At least one Proxmox node must be specified."
+  }
 }
 
 variable "template_name" {

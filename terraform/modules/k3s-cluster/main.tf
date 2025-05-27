@@ -1,65 +1,47 @@
 /**
  * # K3s Cluster Module
  *
- * Creates a K3s cluster with master and worker nodes directly on Proxmox
+ * Creates a K3s cluster with one master and one worker node per Proxmox node
  */
 
 locals {
-  master_count = var.master_count
-  worker_count = var.worker_count
-  
   # Create a base VMID starting point to avoid conflicts
   vmid_base = 3000
   
-  # Determine which Proxmox nodes to use for masters
-  # Priority: proxmox_master_nodes > proxmox_node (fallback)
-  master_nodes_list = var.proxmox_master_nodes != null ? var.proxmox_master_nodes : [var.proxmox_node]
-  
-  # Ensure we have enough Proxmox nodes for masters, or cycle through available ones
-  effective_master_nodes = length(local.master_nodes_list) >= local.master_count ? (
-    slice(local.master_nodes_list, 0, local.master_count)
-  ) : (
-    [for i in range(local.master_count) : local.master_nodes_list[i % length(local.master_nodes_list)]]
-  )
-  
-  # Determine worker node - priority: proxmox_worker_node > proxmox_node > first master node
-  worker_node = coalesce(var.proxmox_worker_node, var.proxmox_node, local.master_nodes_list[0])
-  
-  masters = {
-    for i in range(local.master_count) :
-    i => {
-      name     = "${var.cluster_name}-master-${format("%02d", i + 1)}"
-      vmid     = local.vmid_base + i + 1
-      ip       = var.use_dhcp ? null : "${var.network_prefix}.${var.master_ip_start + i}"
-      disk_size = var.master_disk_size
-      memory   = var.master_memory
-      cores    = var.master_cores
-      target_node = local.effective_master_nodes[i]
-    }
-  }
-  
-  workers = {
-    for i in range(local.worker_count) :
-    i => {
-      name     = "${var.cluster_name}-worker-${format("%02d", i + 1)}"
-      vmid     = local.vmid_base + local.master_count + i + 1
-      ip       = var.use_dhcp ? null : "${var.network_prefix}.${var.worker_ip_start + i}"
-      disk_size = var.worker_disk_size
-      memory   = var.worker_memory
-      cores    = var.worker_cores
+  # Create pairs of master and worker nodes for each Proxmox node
+  node_pairs = {
+    for idx, node in var.proxmox_nodes :
+    idx => {
+      proxmox_node = node
+      master = {
+        name      = "${var.cluster_name}-master-${format("%02d", idx + 1)}"
+        vmid      = local.vmid_base + (idx * 2) + 1
+        ip        = var.use_dhcp ? null : "${var.network_prefix}.${var.master_ip_start + idx}"
+        disk_size = var.master_disk_size
+        memory    = var.master_memory
+        cores     = var.master_cores
+      }
+      worker = {
+        name      = "${var.cluster_name}-worker-${format("%02d", idx + 1)}"
+        vmid      = local.vmid_base + (idx * 2) + 2
+        ip        = var.use_dhcp ? null : "${var.network_prefix}.${var.worker_ip_start + idx}"
+        disk_size = var.worker_disk_size
+        memory    = var.worker_memory
+        cores     = var.worker_cores
+      }
     }
   }
 }
 
-# Create master nodes directly with Proxmox
+# Create master nodes - one per Proxmox node
 resource "proxmox_vm_qemu" "master_nodes" {
-  for_each = local.masters
+  for_each = local.node_pairs
   
   # General settings
-  name        = each.value.name
-  desc        = "K3s master node for ${var.cluster_name} cluster"
-  target_node = each.value.target_node
-  vmid        = each.value.vmid
+  name        = each.value.master.name
+  desc        = "K3s master node for ${var.cluster_name} cluster on ${each.value.proxmox_node}"
+  target_node = each.value.proxmox_node
+  vmid        = each.value.master.vmid
   agent       = 1
   
   # Clone settings
@@ -67,16 +49,16 @@ resource "proxmox_vm_qemu" "master_nodes" {
   full_clone = true
   
   # Boot settings
-  onboot          = true
+  onboot           = true
   automatic_reboot = true
   
   # Hardware settings
   qemu_os  = "other"
   bios     = "seabios"
-  cores    = each.value.cores
+  cores    = each.value.master.cores
   sockets  = 1
   cpu_type = "host"
-  memory   = each.value.memory
+  memory   = each.value.master.memory
   
   # Network settings
   network {
@@ -99,9 +81,9 @@ resource "proxmox_vm_qemu" "master_nodes" {
     virtio {
       virtio0 {
         disk {
-          storage = var.storage_pool
-          size    = each.value.disk_size
-          iothread = true
+          storage   = var.storage_pool
+          size      = each.value.master.disk_size
+          iothread  = true
           replicate = false
         }
       }
@@ -110,7 +92,7 @@ resource "proxmox_vm_qemu" "master_nodes" {
   
   # Cloud-init settings
   os_type    = "cloud-init"
-  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.ip}/24,gw=${var.gateway}"
+  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.master.ip}/24,gw=${var.gateway}"
   nameserver = var.nameserver
   ciuser     = var.ssh_user
   sshkeys    = var.ssh_public_key
@@ -122,15 +104,15 @@ resource "proxmox_vm_qemu" "master_nodes" {
   }
 }
 
-# Create worker nodes directly with Proxmox
+# Create worker nodes - one per Proxmox node
 resource "proxmox_vm_qemu" "worker_nodes" {
-  for_each = local.workers
+  for_each = local.node_pairs
   
   # General settings
-  name        = each.value.name
-  desc        = "K3s worker node for ${var.cluster_name} cluster"
-  target_node = local.worker_node
-  vmid        = each.value.vmid
+  name        = each.value.worker.name
+  desc        = "K3s worker node for ${var.cluster_name} cluster on ${each.value.proxmox_node}"
+  target_node = each.value.proxmox_node
+  vmid        = each.value.worker.vmid
   agent       = 1
   
   # Clone settings
@@ -138,16 +120,16 @@ resource "proxmox_vm_qemu" "worker_nodes" {
   full_clone = true
   
   # Boot settings
-  onboot          = true
+  onboot           = true
   automatic_reboot = true
   
   # Hardware settings
   qemu_os  = "other"
   bios     = "seabios"
-  cores    = each.value.cores
+  cores    = each.value.worker.cores
   sockets  = 1
   cpu_type = "host"
-  memory   = each.value.memory
+  memory   = each.value.worker.memory
   
   # Network settings
   network {
@@ -170,9 +152,9 @@ resource "proxmox_vm_qemu" "worker_nodes" {
     virtio {
       virtio0 {
         disk {
-          storage = var.storage_pool
-          size    = each.value.disk_size
-          iothread = true
+          storage   = var.storage_pool
+          size      = each.value.worker.disk_size
+          iothread  = true
           replicate = false
         }
       }
@@ -181,7 +163,7 @@ resource "proxmox_vm_qemu" "worker_nodes" {
   
   # Cloud-init settings
   os_type    = "cloud-init"
-  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.ip}/24,gw=${var.gateway}"
+  ipconfig0  = var.use_dhcp ? "ip=dhcp" : "ip=${each.value.worker.ip}/24,gw=${var.gateway}"
   nameserver = var.nameserver
   ciuser     = var.ssh_user
   sshkeys    = var.ssh_public_key
