@@ -66,7 +66,8 @@ homelab/
 
 There are 6 steps to fully deploy this homelab from scratch.
 
-### 📋 Step 0: Prerequisites
+<details>
+<summary>📋 Step 0: Prerequisites</summary>
 
 Before starting, ensure you have the following:
 
@@ -88,7 +89,10 @@ git clone https://github.com/sfcal/.home.git ~/.home
 ssh-keygen -t ed25519 -C "your-email@example.com"
 ```
 
-### 🐳 Step 1: Build Execution Environment
+</details>
+
+<details>
+<summary>🐳 Step 1: Build Execution Environment</summary>
 
 Create a containerized environment with all necessary tools:
 
@@ -113,7 +117,10 @@ homelab ansible --version
 homelab kubectl version --client
 ```
 
-### 📦 Step 2: Create VM Templates with Packer
+</details>
+
+<details>
+<summary>📦 Step 2: Create VM Templates with Packer</summary>
 
 Generate Ubuntu VM templates for your infrastructure:
 
@@ -163,7 +170,10 @@ make build TEMPLATE=base ENV=dev
 make all ENV=dev
 ```
 
-### 🏗️ Step 3: Provision VMs with Terraform
+</details>
+
+<details>
+<summary>🏗️ Step 3: Provision VMs with Terraform</summary>
 
 Deploy your K3s cluster infrastructure:
 
@@ -215,7 +225,10 @@ terraform output
 ssh sfcal@10.1.20.51
 ```
 
-### ⚙️ Step 4: Deploy K3s with Ansible
+</details>
+
+<details>
+<summary>⚙️ Step 4: Deploy K3s with Ansible</summary>
 
 Install and configure your Kubernetes cluster:
 
@@ -273,7 +286,10 @@ k3s-worker-02  Ready    <none>                      1m    v1.30.2+k3s2
 k3s-worker-03  Ready    <none>                      1m    v1.30.2+k3s2
 ```
 
-### ☸️ Step 5: Bootstrap Kubernetes Infrastructure
+</details>
+
+<details>
+<summary>☸️ Step 5: Bootstrap Kubernetes Infrastructure</summary>
 
 Deploy core cluster components using GitOps:
 
@@ -318,7 +334,10 @@ Once deployed, access your services:
 - **Grafana**: https://grafana.local.samuelcalvert.com
 - **Longhorn**: https://longhorn.local.samuelcalvert.com
 
-### 🚀 Step 6: Deploy Applications
+</details>
+
+<details>
+<summary>🚀 Step 6: Deploy Applications</summary>
 
 Your cluster is now ready for applications:
 
@@ -339,6 +358,8 @@ curl http://nginx.local.samuelcalvert.com
 1. Create application manifests in `kubernetes/apps/dev/`
 2. Add to kustomization.yaml
 3. Commit and push - Flux will automatically deploy
+
+</details>
 
 ## Related Projects
 
