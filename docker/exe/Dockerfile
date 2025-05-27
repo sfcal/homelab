@@ -60,6 +60,9 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/s
 # Install FluxCD CLI
 RUN curl -s https://fluxcd.io/install.sh | bash
 
+# Install MkDocs and theme
+RUN pip3 install --no-cache-dir mkdocs mkdocs-material pymdown-extensions
+
 # Create a non-root user for running commands
 RUN useradd -m -s /bin/bash devops \
     && mkdir -p /home/devops/.ssh /home/devops/.kube \
