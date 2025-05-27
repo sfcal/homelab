@@ -27,41 +27,6 @@ This repository supports multiple environments with location-based naming:
 
 Each environment can have its own configuration while sharing common base components.
 
-## Repository Structure
-```
-homelab/
-├── 🔄 ansible/             # K3s deployment automation
-│   ├── environments/       # Dev (10.1.20.x) and Prod (10.1.10.x) configs
-│   ├── playbooks/          # Cluster operations (deploy, reset)
-│   └── roles/              # Component configurations
-│
-├── 🐳 docker-compose/      # Standalone services
-│   ├── bind9/              # 🔍 DNS servers
-│   ├── media-stack/        # 🎬 Plex, Sonarr, Radarr
-│   └── monitoring-stack/   # 📊 Prometheus/Grafana
-│
-├── 📚 docs/                # Documentation
-│
-├── ☸️ kubernetes/          # GitOps configurations
-│   ├── apps/               # 📱 Application deployments
-│   ├── cluster/            # 🧩 Cluster configurations
-│   └── infrastructure/     # 🏗️ Core components (Traefik, Cert-Manager, etc.)
-│
-├── 📦 packer/              # VM template creation
-│   ├── environments/       # Environment variables
-│   └── templates/          # Template definitions
-│
-├── 🏢 terraform/           # Infrastructure provisioning
-│   ├── environments/       # Dev and Prod environments
-│   └── modules/            # Reusable components
-│
-├── 📜 scripts/             # Automation scripts
-└── 📋 Makefile             # Task automation
-```
-
-## Network Structure
-![Network](docs/assets/network.drawio.svg)
-
 ## Deployment - Zero to Hero
 
 There are 6 steps to fully deploy this homelab from scratch.
@@ -360,6 +325,41 @@ curl http://nginx.local.samuelcalvert.com
 3. Commit and push - Flux will automatically deploy
 
 </details>
+
+## Repository Structure
+```
+homelab/
+├── 🔄 ansible/             # K3s deployment automation
+│   ├── environments/       # Dev (10.1.20.x) and Prod (10.1.10.x) configs
+│   ├── playbooks/          # Cluster operations (deploy, reset)
+│   └── roles/              # Component configurations
+│
+├── 🐳 docker-compose/      # Standalone services
+│   ├── bind9/              # 🔍 DNS servers
+│   ├── media-stack/        # 🎬 Plex, Sonarr, Radarr
+│   └── monitoring-stack/   # 📊 Prometheus/Grafana
+│
+├── 📚 docs/                # Documentation
+│
+├── ☸️ kubernetes/          # GitOps configurations
+│   ├── apps/               # 📱 Application deployments
+│   ├── cluster/            # 🧩 Cluster configurations
+│   └── infrastructure/     # 🏗️ Core components (Traefik, Cert-Manager, etc.)
+│
+├── 📦 packer/              # VM template creation
+│   ├── environments/       # Environment variables
+│   └── templates/          # Template definitions
+│
+├── 🏢 terraform/           # Infrastructure provisioning
+│   ├── environments/       # Dev and Prod environments
+│   └── modules/            # Reusable components
+│
+├── 📜 scripts/             # Automation scripts
+└── 📋 Makefile             # Task automation
+```
+
+## Network Structure
+![Network](docs/assets/network.drawio.svg)
 
 ## Related Projects
 
