@@ -5,7 +5,7 @@ site/
 ansible/kubeconfig
 
 # packer
-packer/credentials.*.pkrvars.hcl
+packer/environments/*/credentials.*.pkrvars.hcl
 packer/downloaded_iso_path
 packer/packer.log
 
