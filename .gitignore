@@ -36,9 +36,9 @@ terraform/*_override.tf.json
 terraform/.terraformrc
 terraform/terraform.rc
 
-terraform/.terraform.tfstate.lock.info
+terraform/environments/*/.terraform.tfstate.lock.info
 
-terraform/.terraform.lock.hcl
+terraform/environments/*/.terraform.lock.hcl
 
 terraform/.DS_Store
 terraform/Thumbs.db
