@@ -1,0 +1,198 @@
+---
+- name: Test connectivity to DNS servers
+  hosts: dns_servers
+  gather_facts: false
+  tasks:
+    - name: Ping test
+      ansible.builtin.ping:
+    
+    - name: Display host info
+      ansible.builtin.debug:
+        msg: "Connected to {{ inventory_hostname }}"
+    
+    - name: Show all targeted hosts
+      ansible.builtin.debug:
+        msg: "Will deploy to: {{ ansible_play_hosts | join(', ') }}"
+      run_once: true
+
+- name: Deploy DNS servers
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - git
+          - docker.io
+          - python3-pip
+          - python3-docker
+          - curl
+          - dnsutils
+        state: present
+        update_cache: true
+    
+    - name: Detect system architecture
+      ansible.builtin.command:
+        cmd: uname -m
+      register: system_arch
+      changed_when: false
+    
+    - name: Display system architecture
+      ansible.builtin.debug:
+        msg: "System architecture: {{ system_arch.stdout }}"
+    
+    - name: Install Docker Compose v2 plugin
+      ansible.builtin.shell: |
+        mkdir -p /usr/local/lib/docker/cli-plugins
+        ARCH="{{ system_arch.stdout }}"
+        if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+          COMPOSE_ARCH="aarch64"
+        else
+          COMPOSE_ARCH="x86_64"
+        fi
+        echo "Downloading docker-compose-linux-${COMPOSE_ARCH}"
+        curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${COMPOSE_ARCH}" -o /usr/local/lib/docker/cli-plugins/docker-compose
+        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      register: compose_installed
+    
+    - name: Verify Docker Compose v2 is installed
+      ansible.builtin.command:
+        cmd: docker compose version
+      register: compose_version
+      changed_when: false
+      failed_when: false
+    
+    - name: Display Docker Compose version
+      ansible.builtin.debug:
+        msg: "Docker Compose version: {{ compose_version.stdout }}"
+      when: compose_version.rc == 0
+    
+    - name: Install docker-compose v1 as fallback
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-{{ 'aarch64' if system_arch.stdout in ['aarch64', 'arm64'] else 'x86_64' }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      when: compose_version.rc != 0
+      register: compose_v1_installed
+    
+    - name: Set docker compose command
+      ansible.builtin.set_fact:
+        docker_compose_cmd: "{{ 'docker compose' if compose_version.rc == 0 else 'docker-compose' }}"
+      
+    - name: Ensure Docker service is running
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+    
+    - name: Add ansible user to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+      register: docker_group_added
+    
+    - name: Reset connection to apply group changes
+      ansible.builtin.meta: reset_connection
+      when: docker_group_added is defined and docker_group_added.changed
+    
+    - name: Clone or update homelab repository
+      ansible.builtin.git:
+        repo: "{{ homelab_repo_url }}"
+        dest: "{{ homelab_repo_path }}"
+        version: "{{ homelab_repo_branch }}"
+        force: true
+      become_user: "{{ ansible_user }}"
+      register: repo_updated
+    
+    - name: Set correct permissions on repository
+      ansible.builtin.file:
+        path: "{{ homelab_repo_path }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        recurse: true
+    
+    - name: Get DNS server configuration for current host
+      ansible.builtin.set_fact:
+        current_dns_server: "{{ item }}"
+      when: item.ip == ansible_default_ipv4.address
+      loop: "{{ dns_servers }}"
+    
+    - name: Display current DNS server configuration
+      ansible.builtin.debug:
+        msg: "Configuring {{ current_dns_server.container_name }} ({{ current_dns_server.role }}) on {{ ansible_default_ipv4.address }}"
+      when: current_dns_server is defined
+    
+    - name: Stop existing DNS container if running
+      ansible.builtin.shell:
+        cmd: "{{ docker_compose_cmd }} down --remove-orphans"
+        chdir: "{{ current_dns_server.compose_path }}"
+      when: current_dns_server is defined
+      ignore_errors: true
+      register: compose_down
+    
+    - name: Pull latest Docker images
+      ansible.builtin.shell:
+        cmd: "{{ docker_compose_cmd }} pull"
+        chdir: "{{ current_dns_server.compose_path }}"
+      when: 
+        - current_dns_server is defined
+        - docker_compose_pull | bool
+      register: compose_pull
+    
+    - name: Deploy DNS container
+      ansible.builtin.shell:
+        cmd: "{{ docker_compose_cmd }} up -d"
+        chdir: "{{ current_dns_server.compose_path }}"
+      when: current_dns_server is defined
+      register: dns_deployed
+    
+    - name: Wait for DNS service to be ready
+      ansible.builtin.wait_for:
+        port: 53
+        host: "{{ ansible_default_ipv4.address }}"
+        delay: 5
+        timeout: 60
+      when: 
+        - dns_deployed is defined 
+        - dns_deployed.changed | default(false)
+    
+    - name: Verify DNS container is running
+      ansible.builtin.command:
+        cmd: docker ps --filter "name={{ current_dns_server.container_name }}" --format "table {% raw %}{{.Names}}\t{{.Status}}{% endraw %}"
+      register: container_status
+      changed_when: false
+      when: current_dns_server is defined
+    
+    - name: Display container status
+      ansible.builtin.debug:
+        msg: "{{ container_status.stdout_lines }}"
+      when: container_status is defined
+    
+    - name: Test DNS resolution - local domain
+      ansible.builtin.command:
+        cmd: dig @localhost home.samuel.computer +short
+      register: dns_test_local
+      changed_when: false
+      failed_when: false
+    
+    - name: Test DNS resolution - external domain
+      ansible.builtin.command:
+        cmd: dig @localhost google.com +short
+      register: dns_test_external
+      changed_when: false
+      failed_when: false
+    
+    - name: Display DNS test results
+      ansible.builtin.debug:
+        msg:
+          - "Local domain test (home.samuel.computer): {{ dns_test_local.stdout | default('No response') }}"
+          - "External domain test (google.com): {{ dns_test_external.stdout | default('No response') }}"
+
+  post_tasks:
+    - name: Deployment summary
+      ansible.builtin.debug:
+        msg: "DNS server {{ current_dns_server.container_name }} ({{ current_dns_server.role }}) deployment complete on {{ inventory_hostname }}"
+      when: current_dns_server is defined

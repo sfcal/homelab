@@ -1,0 +1,97 @@
+---
+- name: Update DNS servers from repository
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  
+  tasks:
+    - name: Check current git commit
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: git rev-parse HEAD
+        chdir: "{{ homelab_repo_path }}"
+      register: before_pull
+      changed_when: false
+      failed_when: false
+    
+    - name: Pull latest changes from repository
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.git:
+        repo: "{{ homelab_repo_url }}"
+        dest: "{{ homelab_repo_path }}"
+        version: "{{ homelab_repo_branch }}"
+        force: true
+      register: repo_updated
+    
+    - name: Check git commit after pull
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: git rev-parse HEAD
+        chdir: "{{ homelab_repo_path }}"
+      register: after_pull
+      changed_when: false
+    
+    - name: Display update status
+      ansible.builtin.debug:
+        msg: "Repository updated from {{ before_pull.stdout | default('unknown') }} to {{ after_pull.stdout }}"
+      when: before_pull.stdout | default('') != after_pull.stdout
+    
+    - name: Get DNS server configuration for current host
+      ansible.builtin.set_fact:
+        current_dns_server: "{{ item }}"
+      when: item.ip == ansible_default_ipv4.address
+      loop: "{{ dns_servers }}"
+    
+    - name: Check for DNS configuration changes
+      ansible.builtin.command:
+        cmd: git diff {{ before_pull.stdout | default('HEAD~1') }} {{ after_pull.stdout }} -- docker/bind9* 
+        chdir: "{{ homelab_repo_path }}"
+      register: dns_config_changes
+      changed_when: dns_config_changes.stdout | length > 0
+      failed_when: false
+      when: 
+        - current_dns_server is defined
+        - before_pull.stdout is defined
+    
+    - name: Restart DNS container if configuration changed
+      become_user: "{{ ansible_user }}"
+      community.docker.docker_compose_v2:
+        project_src: "{{ current_dns_server.compose_path }}"
+        state: present
+        recreate: always
+      when: 
+        - current_dns_server is defined
+        - dns_config_changes.changed | default(false) or repo_updated.changed | default(false)
+      register: dns_restarted
+    
+    - name: Wait for DNS service to be ready after restart
+      ansible.builtin.wait_for:
+        port: 53
+        host: "{{ ansible_default_ipv4.address }}"
+        delay: 5
+        timeout: 60
+      when: dns_restarted.changed | default(false)
+    
+    - name: Verify DNS container is running
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: docker ps --filter "name={{ current_dns_server.container_name }}" --format "table {% raw %}{{.Names}}\t{{.Status}}{% endraw %}"
+      register: container_status
+      changed_when: false
+      when: current_dns_server is defined
+    
+    - name: Display container status
+      ansible.builtin.debug:
+        msg: "{{ container_status.stdout_lines }}"
+      when: container_status is defined
+    
+    - name: Test DNS resolution
+      ansible.builtin.command:
+        cmd: dig @{{ ansible_default_ipv4.address }} home.samuel.computer +short
+      register: dns_test
+      changed_when: false
+      failed_when: false
+    
+    - name: Display DNS test result
+      ansible.builtin.debug:
+        msg: "DNS resolution test: {{ dns_test.stdout | default('No response') }}"

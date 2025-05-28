@@ -1,0 +1,74 @@
+---
+- name: Update DNS zone files
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  
+  tasks:
+    - name: Pull latest changes from repository
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.git:
+        repo: "{{ homelab_repo_url }}"
+        dest: "{{ homelab_repo_path }}"
+        version: "{{ homelab_repo_branch }}"
+        force: true
+      register: repo_updated
+    
+    - name: Get DNS server configuration for current host
+      ansible.builtin.set_fact:
+        current_dns_server: "{{ item }}"
+      when: item.ip == ansible_default_ipv4.address
+      loop: "{{ dns_servers }}"
+    
+    - name: Increment zone serial numbers
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.replace:
+        path: "{{ item }}"
+        regexp: '(\d{10})\s*;\s*serial'
+        replace: '{{ lookup("pipe", "date +%Y%m%d01") }} ; serial'
+      with_fileglob:
+        - "{{ current_dns_server.compose_path }}/config/*.zone"
+      when: 
+        - current_dns_server is defined
+        - current_dns_server.role == 'primary'
+      register: zone_updated
+    
+    - name: Reload DNS configuration
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: docker exec {{ current_dns_server.container_name }} rndc reload
+      when: 
+        - current_dns_server is defined
+        - zone_updated.changed | default(false)
+      register: reload_result
+      failed_when: reload_result.rc != 0 and "server reload successful" not in reload_result.stdout
+    
+    - name: Force zone transfer to secondary
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: docker exec {{ current_dns_server.container_name }} rndc notify home.samuel.computer
+      when: 
+        - current_dns_server is defined
+        - current_dns_server.role == 'primary'
+        - zone_updated.changed | default(false)
+      failed_when: false
+    
+    - name: Verify zone files are valid
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: docker exec {{ current_dns_server.container_name }} named-checkzone {{ item | basename | regex_replace('.zone$', '') }} {{ item }}
+      with_fileglob:
+        - "{{ current_dns_server.compose_path }}/config/*.zone"
+      when: 
+        - current_dns_server is defined
+        - current_dns_server.role == 'primary'
+      register: zone_check
+      changed_when: false
+    
+    - name: Display zone validation results
+      ansible.builtin.debug:
+        msg: "{{ item.stdout }}"
+      loop: "{{ zone_check.results | default([]) }}"
+      when: item.stdout is defined
+      loop_control:
+        label: "{{ item.item | default('unknown') | basename }}"

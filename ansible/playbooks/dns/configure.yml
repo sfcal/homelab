@@ -1,0 +1,80 @@
+---
+- name: Configure DNS servers
+  hosts: dns_servers
+  gather_facts: true
+  become: true
+  
+  tasks:
+    - name: Configure system DNS settings
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        regexp: '^#?DNS='
+        line: 'DNS=127.0.0.1'
+        state: present
+      notify: restart systemd-resolved
+    
+    - name: Configure fallback DNS
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        regexp: '^#?FallbackDNS='
+        line: 'FallbackDNS=1.1.1.1 1.0.0.1'
+        state: present
+      notify: restart systemd-resolved
+    
+    - name: Disable DNSSEC in systemd-resolved (for local DNS)
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        regexp: '^#?DNSSEC='
+        line: 'DNSSEC=no'
+        state: present
+      notify: restart systemd-resolved
+    
+    - name: Create symbolic link for resolv.conf
+      ansible.builtin.file:
+        src: /run/systemd/resolve/resolv.conf
+        dest: /etc/resolv.conf
+        state: link
+        force: true
+    
+    - name: Configure firewall for DNS
+      community.general.ufw:
+        rule: allow
+        port: '53'
+        proto: "{{ item }}"
+      loop:
+        - tcp
+        - udp
+      when: ansible_facts['os_family'] == "Debian"
+    
+    - name: Set up DNS server SSH key for git access (if using private repo)
+      ansible.builtin.copy:
+        content: "{{ dns_git_ssh_key }}"
+        dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
+      when: dns_git_ssh_key is defined
+    
+    - name: Configure git for the ansible user
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.command:
+        cmd: "git config --global {{ item.key }} '{{ item.value }}'"
+      loop:
+        - { key: "user.name", value: "DNS Server" }
+        - { key: "user.email", value: "dns@home.samuel.computer" }
+      changed_when: false
+    
+    - name: Create cron job for automatic updates
+      ansible.builtin.cron:
+        name: "Update DNS from repository"
+        minute: "*/30"
+        job: "cd {{ homelab_repo_path }} && git pull --quiet && docker compose -f docker/bind9*/docker-compose.yaml up -d --quiet"
+        user: "{{ ansible_user }}"
+        state: present
+      when: dns_auto_update | default(false) | bool
+  
+  handlers:
+    - name: restart systemd-resolved
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: restarted

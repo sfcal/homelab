@@ -42,11 +42,44 @@ upgrade-k3s: ## Upgrade K3s cluster
 	@echo -e "$(YELLOW)Upgrading K3s cluster in $(ENV) environment...$(NC)"
 	$(ANSIBLE_PLAYBOOK) playbooks/k3s/upgrade.yml
 
-# DNS targets (future)
+# DNS targets
 .PHONY: deploy-dns
 deploy-dns: ## Deploy DNS servers
 	@echo -e "$(GREEN)Deploying DNS servers in $(ENV) environment...$(NC)"
 	$(ANSIBLE_PLAYBOOK) playbooks/dns/deploy.yml
+
+.PHONY: configure-dns
+configure-dns: ## Configure DNS servers
+	@echo -e "$(GREEN)Configuring DNS servers in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/dns/configure.yml
+
+.PHONY: update-dns
+update-dns: ## Update DNS servers from repository
+	@echo -e "$(YELLOW)Updating DNS servers in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/dns/update.yml
+
+.PHONY: update-dns-zones
+update-dns-zones: ## Update DNS zone files
+	@echo -e "$(YELLOW)Updating DNS zone files in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/dns/update-zones.yml
+
+.PHONY: restart-dns
+restart-dns: ## Restart DNS containers
+	@echo -e "$(YELLOW)Restarting DNS servers in $(ENV) environment...$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini dns_servers -b -m shell -a "cd ~/homelab/docker/bind9* && docker compose restart"
+
+.PHONY: status-dns
+status-dns: ## Check DNS server status
+	@echo -e "$(YELLOW)Checking DNS server status in $(ENV) environment...$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini dns_servers -b -m shell -a "docker ps --filter 'name=nyc-dns' --format 'table {{.Names}}\t{{.Status}}'"
+
+.PHONY: test-dns
+test-dns: ## Test DNS resolution
+	@echo -e "$(YELLOW)Testing DNS resolution in $(ENV) environment...$(NC)"
+	@echo -e "$(GREEN)Testing local domain resolution:$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini dns_servers -m shell -a "dig @localhost home.samuel.computer +short"
+	@echo -e "$(GREEN)Testing external domain resolution:$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini dns_servers -m shell -a "dig @localhost google.com +short"
 
 # MaaS targets (future)
 .PHONY: deploy-maas
