@@ -1,0 +1,30 @@
+---
+# DNS server configuration for prod environment
+ansible_user: sfcal
+
+# Repository configuration
+homelab_repo_url: https://github.com/sfcal/homelab.git  # Update with your repo URL
+homelab_repo_branch: main
+homelab_repo_path: /home/{{ ansible_user }}/homelab
+
+# Docker compose paths
+dns_primary_compose_path: "{{ homelab_repo_path }}/docker/bind9-prod"
+dns_secondary_compose_path: "{{ homelab_repo_path }}/docker/bind9-secondary-prod"
+
+# DNS server roles
+dns_servers:
+  - ip: 10.2.0.53
+    role: primary
+    compose_path: "{{ dns_primary_compose_path }}"
+    container_name: prod-dns-01
+  - ip: 10.2.0.54
+    role: secondary
+    compose_path: "{{ dns_secondary_compose_path }}"
+    container_name: prod-dns-02
+
+# Docker configuration
+docker_compose_timeout: 300
+docker_compose_pull: true
+
+# Auto-update configuration (optional)
+dns_auto_update: false  # Set to true if you want automatic git updates

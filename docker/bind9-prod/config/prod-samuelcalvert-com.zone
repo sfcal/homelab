@@ -1,0 +1,38 @@
+$ORIGIN prod.samuelcalvert.com.
+$TTL 86400	; 1 day
+@	IN SOA	ns.prod.samuelcalvert.com. admin.prod.samuelcalvert.com. (
+				2024111901 ; serial
+				3600       ; refresh (1 hour)
+				3600       ; retry (1 hour)
+				2419200    ; expire (4 weeks)
+				3600       ; minimum (1 hour)
+				)
+			NS	ns.prod.samuelcalvert.com.
+			NS	ns2.prod.samuelcalvert.com.
+
+; Name servers
+ns		IN A	10.2.0.53
+ns2		IN A	10.2.0.54
+
+; Infrastructure servers
+prod-dns-01	IN A	10.2.0.53
+prod-dns-02	IN A	10.2.0.54
+
+; Kubernetes cluster nodes
+k3s-master-01	IN A	10.2.20.51
+k3s-master-02	IN A	10.2.20.52
+k3s-master-03	IN A	10.2.20.53
+k3s-node-01	IN A	10.2.20.41
+k3s-node-02	IN A	10.2.20.42
+k3s-node-03	IN A	10.2.20.43
+
+; Kubernetes API endpoint
+k3s-api		IN A	10.2.20.222
+
+; Kubernetes Services (all point to MetalLB LoadBalancer range)
+traefik		IN A	10.2.20.140
+grafana		IN A	10.2.20.140
+longhorn	IN A	10.2.20.140
+
+; Wildcard for services
+*		IN A	10.2.20.140
