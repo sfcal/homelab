@@ -87,11 +87,26 @@ deploy-maas: ## Deploy MaaS
 	@echo -e "$(GREEN)Deploying MaaS in $(ENV) environment...$(NC)"
 	$(ANSIBLE_PLAYBOOK) playbooks/maas/deploy.yml
 
-# Proxmox targets (future)
+# Proxmox targets
 .PHONY: deploy-proxmox
-deploy-proxmox: ## Deploy Proxmox configuration
+deploy-proxmox: ## Install Proxmox VE
+	@echo -e "$(GREEN)Installing Proxmox VE in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/proxmox/install.yml
+
+.PHONY: configure-proxmox
+configure-proxmox: ## Configure Proxmox settings
 	@echo -e "$(GREEN)Configuring Proxmox in $(ENV) environment...$(NC)"
 	$(ANSIBLE_PLAYBOOK) playbooks/proxmox/configure.yml
+
+.PHONY: join-proxmox-cluster
+join-proxmox-cluster: ## Join nodes to Proxmox cluster
+	@echo -e "$(GREEN)Joining nodes to Proxmox cluster in $(ENV) environment...$(NC)"
+	$(ANSIBLE_PLAYBOOK) playbooks/proxmox/cluster.yml
+
+.PHONY: status-proxmox
+status-proxmox: ## Check Proxmox cluster status
+	@echo -e "$(YELLOW)Checking Proxmox cluster status in $(ENV) environment...$(NC)"
+	ansible -i environments/$(ENV)/hosts.ini proxmox_nodes -b -m shell -a "pvecm status"
 
 # Utility targets
 .PHONY: ping

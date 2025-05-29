@@ -1,0 +1,72 @@
+---
+- name: Configure network interfaces
+  ansible.builtin.template:
+    src: interfaces.j2
+    dest: /etc/network/interfaces
+    backup: true
+  notify: restart networking
+  when: proxmox_configure_network | default(true)
+
+- name: Configure Proxmox firewall
+  community.general.proxmox_option:
+    name: firewall
+    value: 1
+  when: proxmox_enable_firewall | default(true)
+
+- name: Disable subscription nag
+  ansible.builtin.replace:
+    path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+    regexp: "res\\s*===\\s*'active'"
+    replace: "false"
+    backup: true
+  when: proxmox_disable_subscription_nag | default(true)
+
+- name: Configure storage
+  ansible.builtin.include_tasks: storage.yml
+  when: proxmox_storage_config is defined
+
+- name: Configure cluster
+  ansible.builtin.include_tasks: cluster.yml
+  when: 
+    - groups['proxmox_nodes'] | length > 1
+    - proxmox_create_cluster | default(false)
+
+- name: Install useful tools
+  ansible.builtin.apt:
+    name:
+      - vim
+      - tmux
+      - ncdu
+      - iperf3
+      - nmap
+      - tcpdump
+      - lshw
+      - nvme-cli
+      - smartmontools
+    state: present
+
+- name: Enable IP forwarding
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    reload: true
+  loop:
+    - net.ipv4.ip_forward
+    - net.ipv6.conf.all.forwarding
+
+- name: Configure Proxmox updates
+  ansible.builtin.cron:
+    name: "Check for Proxmox updates"
+    minute: "0"
+    hour: "3"
+    job: "/usr/bin/pveupdate >/dev/null 2>&1"
+    user: root
+    state: present
+  when: proxmox_enable_auto_updates | default(false)
+
+handlers:
+  - name: restart networking
+    ansible.builtin.systemd:
+      name: networking
+      state: restarted

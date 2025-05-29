@@ -1,0 +1,33 @@
+---
+- name: Pre-installation checks
+  hosts: proxmox_nodes
+  gather_facts: true
+  tasks:
+    - name: Verify Ansible version
+      ansible.builtin.assert:
+        that: ansible_version.full is version_compare('2.11', '>=')
+        msg: "Ansible version 2.11 or higher is required"
+
+    - name: Check if running on Debian
+      ansible.builtin.assert:
+        that: ansible_facts['os_family'] == "Debian"
+        msg: "This playbook only supports Debian-based systems"
+
+    - name: Check Debian version
+      ansible.builtin.assert:
+        that: ansible_facts['distribution_major_version'] | int >= 11
+        msg: "Debian 11 (Bullseye) or higher is required"
+
+- name: Install Proxmox VE
+  hosts: proxmox_nodes
+  gather_facts: true
+  become: true
+  roles:
+    - role: proxmox/prereq
+    - role: proxmox/install
+    - role: proxmox/configure
+  
+  post_tasks:
+    - name: Display installation summary
+      ansible.builtin.debug:
+        msg: "Proxmox VE installed successfully on {{ inventory_hostname }}"

@@ -1,0 +1,64 @@
+---
+- name: Add Proxmox VE repository key
+  ansible.builtin.get_url:
+    url: "https://enterprise.proxmox.com/debian/proxmox-release-{{ ansible_distribution_release }}.gpg"
+    dest: /etc/apt/trusted.gpg.d/proxmox-release.gpg
+    mode: '0644'
+
+- name: Add Proxmox VE repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription"
+    state: present
+    filename: pve-no-subscription
+
+- name: Remove enterprise repository if exists
+  ansible.builtin.apt_repository:
+    repo: "deb https://enterprise.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-enterprise"
+    state: absent
+    filename: pve-enterprise
+
+- name: Update apt cache after adding repository
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Full system upgrade
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: true
+  register: apt_upgrade
+
+- name: Install Proxmox VE packages
+  ansible.builtin.apt:
+    name:
+      - proxmox-ve
+      - postfix
+      - open-iscsi
+      - bridge-utils
+      - ifupdown2
+    state: present
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Remove old kernel if exists
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: absent
+    purge: true
+  loop:
+    - linux-image-amd64
+    - linux-image-5.10*
+  when: proxmox_remove_old_kernels | default(true)
+  ignore_errors: true
+
+- name: Configure postfix for local delivery
+  ansible.builtin.debconf:
+    name: postfix
+    question: postfix/main_mailer_type
+    value: 'Local only'
+    vtype: string
+
+- name: Remove os-prober
+  ansible.builtin.apt:
+    name: os-prober
+    state: absent
+    purge: true

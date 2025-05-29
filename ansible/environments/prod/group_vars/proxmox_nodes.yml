@@ -1,5 +1,5 @@
 ---
-# Proxmox configuration for dev environment
+# Proxmox configuration for prod environment
 ansible_user: root
 
 # Basic configuration
@@ -8,15 +8,17 @@ proxmox_enable_firewall: true
 proxmox_remove_old_kernels: true
 proxmox_enable_auto_updates: false
 
-# DNS servers
-proxmox_dns_server: "{{ hostvars[groups['dns_servers'][0]]['ansible_default_ipv4']['address'] | default('10.1.0.53') }}"
-proxmox_dns_server_secondary: "{{ hostvars[groups['dns_servers'][1]]['ansible_default_ipv4']['address'] | default('10.1.0.54') }}"
+# DNS servers (update when DNS servers are deployed in prod)
+proxmox_dns_server: "1.1.1.1"
+proxmox_dns_server_secondary: "1.0.0.1"
 
 # Network configuration
 proxmox_configure_network: true
 proxmox_network_config:
   interfaces:
     - name: eno1
+      method: manual
+    - name: eno2
       method: manual
   bridges:
     - name: vmbr0
@@ -26,6 +28,7 @@ proxmox_network_config:
       gateway: "{{ ansible_default_ipv4.gateway }}"
       ports:
         - eno1
+        - eno2
       vlan_aware: true
     - name: vmbr1
       method: manual
@@ -47,4 +50,4 @@ proxmox_storage_config:
 
 # Cluster configuration
 proxmox_create_cluster: true
-proxmox_cluster_name: pve-dev-cluster
+proxmox_cluster_name: pve-prod-cluster
