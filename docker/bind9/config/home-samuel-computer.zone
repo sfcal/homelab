@@ -19,8 +19,8 @@ nyc-dns-02	IN A	10.1.0.54
 
 ; VM Hosts
 nyc-pve-01	IN A	10.1.20.11
-nyc-pve-01	IN A	10.1.20.12
-nyc-pve-01	IN A	10.1.20.13
+nyc-pve-02	IN A	10.1.20.12
+nyc-pve-03	IN A	10.1.20.13
 
 ; Add your other hosts below
 ; Examples:
