@@ -1,0 +1,38 @@
+$ORIGIN local.samuelcalvert.com.
+$TTL 86400	; 1 day
+@	IN SOA	ns.local.samuelcalvert.com. admin.local.samuelcalvert.com. (
+				2024051401 ; serial (updated)
+				3600       ; refresh (1 hour)
+				3600       ; retry (1 hour)
+				2419200    ; expire (4 weeks)
+				3600       ; minimum (1 hour)
+				)
+			NS	ns.local.samuelcalvert.com.
+
+; Name servers
+ns		IN A	10.1.0.53
+
+; Infrastructure servers
+unifi		IN A	10.1.0.1
+nyc-dns-01	IN A	10.1.0.53
+nyc-dns-02	IN A	10.1.0.54
+
+; VM Hosts / Kubernetes Nodes
+nyc-pve-01	IN A	10.1.20.11
+nyc-pve-02	IN A	10.1.20.12
+nyc-pve-03	IN A	10.1.20.13
+
+; Kubernetes cluster nodes (update with your actual IPs)
+k8s-master-01	IN A	10.1.10.51
+k8s-master-02	IN A	10.1.10.52
+k8s-master-03	IN A	10.1.10.53
+
+; Kubernetes Services (all point to Traefik LoadBalancer IP)
+nginx		IN A	10.1.10.140
+www.nginx	IN CNAME nginx.local.samuelcalvert.com.
+grafana		IN A	10.1.10.140
+longhorn	IN A	10.1.10.140
+traefik		IN A	10.1.10.140
+
+; Wildcard for any other services
+*		IN A	10.1.10.140

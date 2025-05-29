@@ -1,19 +1,22 @@
 $TTL 86400	; 1 day
-@	IN SOA	ns.home.samuel.computer. admin.home.samuel.computer. (
-				2023051401 ; serial
+@	IN SOA	ns.local.samuelcalvert.com. admin.local.samuelcalvert.com. (
+				2024051401 ; serial (updated)
 				3600       ; refresh (1 hour)
 				3600       ; retry (1 hour)
 				2419200    ; expire (4 weeks)
 				3600       ; minimum (1 hour)
 				)
-	NS	ns.home.samuel.computer.
+	NS	ns.local.samuelcalvert.com.
 
 ; Infrastructure servers
-1.0	IN PTR	unifi.home.samuel.computer.
-53.0	IN PTR	nyc-dns-01.home.samuel.computer.
-54.0	IN PTR	nyc-dns-02.home.samuel.computer.
+1.0	IN PTR	unifi.local.samuelcalvert.com.
+53.0	IN PTR	nyc-dns-01.local.samuelcalvert.com.
+54.0	IN PTR	nyc-dns-02.local.samuelcalvert.com.
 
-; Add your other reverse mappings below
-; Examples:
-; 10.0	IN PTR	nas.home.samuel.computer.
-; 20.0	IN PTR	media.home.samuel.computer.
+; Kubernetes nodes
+51.0	IN PTR	k8s-master-01.local.samuelcalvert.com.
+52.0	IN PTR	k8s-master-02.local.samuelcalvert.com.
+53.0	IN PTR	k8s-master-03.local.samuelcalvert.com.
+
+; Kubernetes services (Traefik LoadBalancer)
+140.0	IN PTR	traefik.local.samuelcalvert.com.
