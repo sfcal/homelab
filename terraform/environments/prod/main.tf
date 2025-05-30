@@ -19,8 +19,8 @@ module "k3s_cluster" {
   
   template_name = "ubuntu-server-prod-base"
 
-  # Storage settings (using Ceph)
-  storage_pool   = "vm-disks"  # Ceph storage pool
+  # Storage settings
+  storage_pool   = "vm-disks"
   network_bridge = "vmbr0"
 
   # Network configuration

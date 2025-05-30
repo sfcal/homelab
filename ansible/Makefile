@@ -81,12 +81,6 @@ test-dns: ## Test DNS resolution
 	@echo -e "$(GREEN)Testing external domain resolution:$(NC)"
 	ansible -i environments/$(ENV)/hosts.ini dns_servers -m shell -a "dig @localhost google.com +short"
 
-# MaaS targets (future)
-.PHONY: deploy-maas
-deploy-maas: ## Deploy MaaS
-	@echo -e "$(GREEN)Deploying MaaS in $(ENV) environment...$(NC)"
-	$(ANSIBLE_PLAYBOOK) playbooks/maas/deploy.yml
-
 # Proxmox targets
 .PHONY: deploy-proxmox
 deploy-proxmox: ## Install Proxmox VE

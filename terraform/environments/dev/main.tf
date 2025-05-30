@@ -15,12 +15,12 @@ module "k3s_cluster" {
   cluster_name = "k3s"
   
   # Deploy one master and one worker on each Proxmox node
-  proxmox_nodes = ["nyc-pve-01"]
+  proxmox_nodes = ["nyc-pve-01", "nyc-pve-02", "nyc-pve-03"]
   
   template_name = "ubuntu-server-dev-base"
 
   # Storage settings
-  storage_pool   = "local-lvm"
+  storage_pool   = "vm-disks"
   network_bridge = "vmbr0"
 
   # Network configuration
