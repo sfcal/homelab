@@ -102,7 +102,7 @@ vim credentials.dev.pkrvars.hcl
 
 Example credentials configuration:
 ```hcl
-proxmox_api_url = "https://nyc-pve-01.home.samuel.computer:8006/api2/json"
+proxmox_api_url = "https://10.1.20.11:8006/api2/json"
 proxmox_api_token_id = "root@pam!packer"
 proxmox_api_token_secret = "your-secret-token-here"
 ssh_password = "your-vm-ssh-password"
@@ -117,7 +117,20 @@ cat environments/dev/variables.pkrvars.hcl
 vim environments/dev/variables.pkrvars.hcl
 ```
 
+Important variables:
+```hcl
+iso_file             = "local:iso/ubuntu-24.04.2-live-server-amd64.iso"
+iso_storage_pool     = "ISOs-Templates"
+
+storage_pool         = "vm-disks"
+storage_pool_type    = "rbm"
+cloud_init_storage_pool = "vm-disks"
+```
+These need to reflect if you are using local storage, ceph, or nfs
+
 #### Build Templates
+
+Choose your template and environment
 
 ```bash
 cd packer
@@ -125,16 +138,7 @@ cd packer
 # Build base Ubuntu template
 make build TEMPLATE=base ENV=dev
 
-# Verify template creation in Proxmox
-# The template will be named: ubuntu-server-dev-base
 ```
-
-**Alternative: Build all templates**
-```bash
-# Build base, docker, and k8s templates
-make all ENV=dev
-```
-
 </details>
 
 <details>
