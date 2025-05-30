@@ -95,9 +95,6 @@ Generate Ubuntu VM templates for your infrastructure:
 ```bash
 cd packer/environments/dev
 cp credentials.prod.pkrvars.hcl.example credentials.dev.pkrvars.hcl
-
-# Edit with your Proxmox details
-vim credentials.dev.pkrvars.hcl
 ```
 
 Example credentials configuration:
@@ -112,9 +109,6 @@ ssh_password = "your-vm-ssh-password"
 ```bash
 # Check dev environment settings
 cat environments/dev/variables.pkrvars.hcl
-
-# Adjust network, storage, and node settings as needed
-vim environments/dev/variables.pkrvars.hcl
 ```
 
 Important variables:
@@ -136,7 +130,7 @@ Choose your template and environment
 cd packer
 
 # Build base Ubuntu template
-make build TEMPLATE=base ENV=dev
+hl make build TEMPLATE=base ENV=dev
 
 ```
 </details>
@@ -152,9 +146,6 @@ Deploy your K3s cluster infrastructure:
 ```bash
 cd terraform/environments/dev
 cp terraform.tfvars.example terraform.tfvars
-
-# Edit with your configuration
-vim terraform.tfvars
 ```
 
 Example terraform configuration:
@@ -213,7 +204,7 @@ Becomes:
 cd terraform
 
 # Deploy the infrastructure
-make deploy ENV=dev
+hl make deploy ENV=dev
 ```
 
 This will create:
@@ -241,16 +232,16 @@ cat environments/dev/hosts.ini
 cat environments/dev/group_vars/all.yml
 
 # Key settings to verify:
-# - apiserver_endpoint: 10.1.20.222
-# - k3s_token: (change the default)
-# - metal_lb_ip_range: 10.1.20.140-10.1.20.150
+- apiserver_endpoint: 10.1.20.222
+- k3s_token: #(change the default)
+- metal_lb_ip_range: 10.1.20.140-10.1.20.150
 ```
 
 #### Deploy K3s Cluster
 
 ```bash
 # Deploy the K3s cluster
-make deploy-k3s ENV=dev
+hl make deploy-k3s ENV=dev
 
 ```
 
@@ -261,7 +252,7 @@ make deploy-k3s ENV=dev
 cp kubeconfig ~/.kube/config
 
 # Test cluster connectivity
-kubectl get nodes
+hl kubectl get nodes
 ```
 
 Expected output:
@@ -289,7 +280,7 @@ Deploy core cluster components using GitOps:
 curl -s https://fluxcd.io/install.sh | sudo bash
 
 # Bootstrap Flux (replace with your repository)
-flux bootstrap github \
+hl flux bootstrap github \
   --owner=sfcal \
   --repository=homelab \
   --branch=main \
