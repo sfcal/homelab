@@ -160,7 +160,7 @@ vim terraform.tfvars
 Example terraform configuration:
 ```hcl
 # Provider configuration
-proxmox_api_url = "https://nyc-pve-01.home.samuel.computer:8006/api2/json"
+proxmox_api_url = "https://10.1.20.11:8006/api2/json"
 proxmox_api_token_id = "root@pam!terraform"
 proxmox_api_token_secret = "your-terraform-token"
 
@@ -168,31 +168,57 @@ proxmox_api_token_secret = "your-terraform-token"
 ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG... your-public-key"
 ```
 
+2. **Edit main.tf**
+```hcl
+  # Network configuration
+  use_dhcp        = false
+  network_prefix  = "10.1.20"
+  master_ip_start = 51
+  worker_ip_start = 41
+  gateway         = "10.1.20.1"
+  nameserver      = "10.1.20.1"
+
+  # Storage settings
+  storage_pool   = "vm-disks"
+  network_bridge = "vmbr0"
+
+  # Nodes for each master worker deployment pair
+  proxmox_nodes = ["nyc-pve-01", "nyc-pve-02", "nyc-pve-03"]
+```
+
+3. **Single Node**
+```
+proxmox_nodes = ["nyc-pve-01"]
+```
+If you are only using a single node with local storage, you will need to modify `modules/k3s-cluster/main.tf`
+
+```hlc
+for idx, node in var.proxmox_nodes :
+    idx => {
+      proxmox_node = node
+```
+
+Becomes:
+
+```hlc
+  for idx in range(3) :
+  idx => {
+    proxmox_node = var.proxmox_nodes[0]
+```
+
+
 #### Deploy Infrastructure
 
 ```bash
+cd terraform
+
 # Deploy the infrastructure
 make deploy ENV=dev
-
-# Or run manually:
-cd terraform/environments/dev
-terraform init
-terraform plan
-terraform apply
 ```
 
 This will create:
 - **3 Master nodes**: 10.1.20.51, 10.1.20.52, 10.1.20.53
-- **2 Worker nodes**: 10.1.20.41, 10.1.20.42, 10.1.20.43
-
-#### Verify Deployment
-```bash
-# Check created VMs
-terraform output
-
-# Test SSH connectivity
-ssh sfcal@10.1.20.51
-```
+- **3 Worker nodes**: 10.1.20.41, 10.1.20.42, 10.1.20.43
 
 </details>
 
@@ -226,8 +252,6 @@ cat environments/dev/group_vars/all.yml
 # Deploy the K3s cluster
 make deploy-k3s ENV=dev
 
-# Or run manually:
-ansible-playbook -i environments/dev/hosts.ini playbooks/k3s/deploy.yml
 ```
 
 #### Verify K3s Installation
@@ -238,10 +262,6 @@ cp kubeconfig ~/.kube/config
 
 # Test cluster connectivity
 kubectl get nodes
-kubectl get pods -A
-
-# Check cluster status
-kubectl cluster-info
 ```
 
 Expected output:
