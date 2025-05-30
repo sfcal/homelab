@@ -46,12 +46,6 @@ Before starting, ensure you have the following:
 # Clone the repository
 git clone https://github.com/sfcal/homelab.git
 cd homelab
-
-# Clone dotfiles (optional but recommended)
-git clone https://github.com/sfcal/.home.git ~/.home
-
-# Generate SSH keys if you don't have them
-ssh-keygen -t ed25519 -C "your-email@example.com"
 ```
 
 </details>
@@ -67,7 +61,8 @@ cd docker/exe
 docker build -t homelab-exe .
 
 # Create a convenient alias for running commands
-alias homelab='docker run -it --rm \
+# Add to .bashrc
+alias hl='docker run -it --rm \
   -v "$HOME/.ssh:/home/devops/.ssh" \
   -v "$HOME/.kube:/home/devops/.kube" \
   -v "$PWD:/workspace" \
@@ -75,11 +70,6 @@ alias homelab='docker run -it --rm \
   -v "$HOME/.gitconfig:/home/devops/.gitconfig" \
   -e ENV=dev \
   homelab-exe'
-
-# Test the environment
-homelab terraform version
-homelab ansible --version
-homelab kubectl version --client
 ```
 
 </details>
