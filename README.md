@@ -27,6 +27,9 @@ This repository supports multiple environments with location-based naming:
 
 Each environment can have its own configuration while sharing common base components.
 
+### Network Structure
+![Network](docs/assets/network.drawio.svg)
+
 ## Deployment - Zero to Hero
 
 There are 6 steps to fully deploy this homelab from scratch.
@@ -313,9 +316,6 @@ curl http://nginx.local.samuelcalvert.com
 3. Commit and push - Flux will automatically deploy
 
 </details>
-
-## Network Structure
-![Network](docs/assets/network.drawio.svg)
 
 ## Related Projects
 
