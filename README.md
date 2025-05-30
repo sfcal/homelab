@@ -16,6 +16,8 @@
 
 # Homelab Infrastructure as Code
 
+
+
 A complete infrastructure-as-code solution for managing a home Kubernetes cluster running on Proxmox VMs. This repository contains automation for the entire lifecycle - from VM template creation to Kubernetes application deployment.
 
 ## Multi-Environment Support

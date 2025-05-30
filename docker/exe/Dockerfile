@@ -4,7 +4,9 @@ FROM ubuntu:22.04
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     KUBECONFIG="/home/devops/.kube/config" \
-    ENV="dev"
+    ENV="dev" \
+    TERM=xterm-256color \
+    NO_COLOR=0
 
 # Install common utilities and prerequisites
 RUN apt-get update && apt-get install -y \
@@ -50,6 +52,12 @@ RUN pip3 install --no-cache-dir ansible ansible-core netaddr \
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
     && chmod +x kubectl \
     && mv kubectl /usr/local/bin/
+
+# Install kubectx and kubens
+RUN git clone https://github.com/ahmetb/kubectx /opt/kubectx \
+    && ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx \
+    && ln -s /opt/kubectx/kubens /usr/local/bin/kubens \
+    && chmod +x /opt/kubectx/kubectx /opt/kubectx/kubens
 
 # Install Helm
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
