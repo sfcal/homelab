@@ -87,21 +87,15 @@ cd packer/environments/dev
 cp credentials.prod.pkrvars.hcl.example credentials.dev.pkrvars.hcl
 ```
 
-Example credentials configuration:
-```hcl
-proxmox_api_url = "https://10.1.20.11:8006/api2/json"
-proxmox_api_token_id = "root@pam!packer"
-proxmox_api_token_secret = "your-secret-token-here"
-ssh_password = "your-vm-ssh-password"
-```
-
 2. **Review environment variables:**
 ```bash
 # Check dev environment settings
 cat environments/dev/variables.pkrvars.hcl
 ```
 
-Important variables:
+Important variables:  
+These need to reflect if you are using local storage, ceph, or nfs
+
 ```hcl
 iso_file             = "local:iso/ubuntu-24.04.2-live-server-amd64.iso"
 iso_storage_pool     = "ISOs-Templates"
@@ -110,7 +104,6 @@ storage_pool         = "vm-disks"
 storage_pool_type    = "rbm"
 cloud_init_storage_pool = "vm-disks"
 ```
-These need to reflect if you are using local storage, ceph, or nfs
 
 #### Build Templates
 
@@ -138,18 +131,8 @@ cd terraform/environments/dev
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Example terraform configuration:
-```hcl
-# Provider configuration
-proxmox_api_url = "https://10.1.20.11:8006/api2/json"
-proxmox_api_token_id = "root@pam!terraform"
-proxmox_api_token_secret = "your-terraform-token"
-
-# SSH configuration
-ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG... your-public-key"
-```
-
 2. **Edit main.tf**
+These are the network and storage settings for your cluster
 ```hcl
   # Network configuration
   use_dhcp        = false
