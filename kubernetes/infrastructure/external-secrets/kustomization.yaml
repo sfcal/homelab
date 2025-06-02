@@ -6,5 +6,4 @@ resources:
 - secret-store.yaml
 - rbac.yaml
 - ca-config.yaml
-- ../1password-connect/connect-token-secret.yaml
 - secret-store-1password.yaml

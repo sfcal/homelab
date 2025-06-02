@@ -16,7 +16,5 @@ spec:
   values:
     connect:
       serviceType: ClusterIP  # Don't expose externally
-      credentialsName: "onepassword-connect-secret"
-      credentialsKey: "1password-credentials.json"
     operator:
       create: false  # We're using External Secrets Operator instead
