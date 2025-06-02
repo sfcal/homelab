@@ -53,6 +53,10 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     && chmod +x kubectl \
     && mv kubectl /usr/local/bin/
 
+# Install kustomize (separate from kubectl)
+RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash \
+    && mv kustomize /usr/local/bin/
+
 # Install kubectx and kubens
 RUN git clone https://github.com/ahmetb/kubectx /opt/kubectx \
     && ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx \
