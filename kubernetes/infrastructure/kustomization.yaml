@@ -7,3 +7,4 @@ resources:
 - external-secrets
 - longhorn
 - kube-prometheus-stack
+- 1password-connect

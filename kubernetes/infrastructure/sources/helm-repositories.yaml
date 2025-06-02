@@ -42,3 +42,12 @@ metadata:
 spec:
   interval: 1h
   url: https://charts.external-secrets.io
+  ---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: 1password
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://1password.github.io/connect-helm-charts
