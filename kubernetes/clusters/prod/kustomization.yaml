@@ -1,0 +1,6 @@
+# kubernetes/clusters/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base
+  - cluster-settings.yaml

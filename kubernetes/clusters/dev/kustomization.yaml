@@ -1,7 +1,16 @@
+# kubernetes/clusters/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- cluster-settings.yaml
-- infrastructure.yaml
-- apps.yaml
-#- flux-system-automation.yaml
+  - ../base
+  - cluster-settings.yaml
+
+patches:
+  # Speed up reconciliation in dev for faster testing
+  - patch: |
+      - op: replace
+        path: /spec/interval
+        value: 1m
+    target:
+      kind: Kustomization
+      name: apps
