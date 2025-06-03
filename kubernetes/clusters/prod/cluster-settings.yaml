@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  CLUSTER_NAME: prod
+  CLUSTER_DOMAIN: home.local
+  CLUSTER_REGION: homelab
+  # Storage
+  STORAGE_CLASS: ceph-block
+  VOLSYNC_ENABLED: "true"
+  VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
+  # Networking
+  INGRESS_TYPE: loadbalancer
+  LOAD_BALANCER_IP_RANGE: 192.168.1.100-192.168.1.200
+  # Resources - normal for prod
+  DEFAULT_CPU_REQUEST: 100m
+  DEFAULT_MEMORY_REQUEST: 256Mi

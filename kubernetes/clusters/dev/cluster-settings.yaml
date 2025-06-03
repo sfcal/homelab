@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  CLUSTER_NAME: dev
+  CLUSTER_DOMAIN: dev.home.local
+  CLUSTER_REGION: homelab
+  # Storage
+  STORAGE_CLASS: local-path
+  VOLSYNC_ENABLED: "false"
+  # Networking
+  INGRESS_TYPE: nodeport
+  LOAD_BALANCER_IP_RANGE: 192.168.1.220-192.168.1.230
+  # Resources - smaller for dev
+  DEFAULT_CPU_REQUEST: 10m
+  DEFAULT_MEMORY_REQUEST: 64Mi
