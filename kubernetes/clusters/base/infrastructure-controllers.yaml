@@ -1,11 +1,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure
+  name: infrastructure-controllers
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./kubernetes/infrastructure/common
+  path: ./kubernetes/infrastructure/common/external-secrets
   prune: true
   sourceRef:
     kind: GitRepository
@@ -21,3 +21,8 @@ spec:
       - kind: Secret
         name: cluster-secrets
         optional: true
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta2
+      kind: HelmRelease
+      name: external-secrets
+      namespace: external-secrets

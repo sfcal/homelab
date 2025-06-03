@@ -3,7 +3,8 @@ kind: Kustomization
 namespace: external-secrets
 resources:
   - namespace.yaml
+  - helmrepository.yaml
   - onepassword-secret.sops.yaml
   - helmrelease.yaml
-  - helmrepository.yaml
-  - clustersecretstore.yaml
+  # ClusterSecretStore needs to be created after external-secrets is deployed
+  # Moving to a separate kustomization or using Flux dependencies
