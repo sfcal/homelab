@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./kubernetes/infrastructure/common/external-secrets
+  path: ./kubernetes/infrastructure/controllers
   prune: true
   sourceRef:
     kind: GitRepository
