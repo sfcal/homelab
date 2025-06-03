@@ -1,4 +1,3 @@
-# kubernetes/clusters/prod/cluster-settings.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
