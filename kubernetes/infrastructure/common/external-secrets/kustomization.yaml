@@ -6,3 +6,4 @@ resources:
   - onepassword-secret.sops.yaml
   - helmrelease.yaml
   - helmrepository.yaml
+  - clustersecretstore.yaml
