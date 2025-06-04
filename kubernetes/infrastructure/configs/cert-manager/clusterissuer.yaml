@@ -10,9 +10,12 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
-      - http01:
-          ingress:
-            class: nginx
+      - dns01:
+          cloudflare:
+            email: cloudflare@samuelcalvert.com
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -25,6 +28,9 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-production
     solvers:
-      - http01:
-          ingress:
-            class: nginx
+      - dns01:
+          cloudflare:
+            email: cloudflare@samuelcalvert.com
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
