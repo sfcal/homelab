@@ -6,4 +6,3 @@ resources:
   - nginx-ingress
   - cert-manager
   - external-secrets
-  - monitoring
