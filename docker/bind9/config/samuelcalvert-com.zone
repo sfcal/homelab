@@ -14,9 +14,9 @@ ns		IN A	10.1.0.53
 
 ; Split horizon entries - point to internal IPs
 ; These override external DNS when resolved internally
-nginx		IN A	10.2.10.140  ; Points to your Traefik LoadBalancer
-grafana		IN A	10.2.10.140
-longhorn	IN A	10.2.10.140
+nginx		IN A	10.1.20.140  ; Points to your nginx-ingress LoadBalancer
+grafana		IN A	10.1.10.140
+longhorn	IN A	10.1.10.140
 
 ; Wildcard for any k8s services
-*.k8s		IN A	10.2.10.140
+*.k8s		IN A	10.1.10.140
