@@ -1,0 +1,58 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: ingress-nginx
+      version: "4.11.3"
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+        namespace: flux-system
+  values:
+    controller:
+      kind: Deployment
+      replicaCount: 3
+      service:
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+      config:
+        ssl-protocols: "TLSv1.2 TLSv1.3"
+        hsts: "true"
+        hsts-max-age: "31536000"
+        hsts-include-subdomains: "true"
+        hsts-preload: "true"
+      metrics:
+        enabled: false
+        serviceMonitor:
+          enabled: false
+      podAnnotations:
+        app.kubernetes.io/part-of: ingress-nginx
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: ingress-nginx
+                app.kubernetes.io/instance: ingress-nginx
+                app.kubernetes.io/component: controller
+            topologyKey: kubernetes.io/hostname
+      nodeSelector:
+        node-role.kubernetes.io/master: "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+    defaultBackend:
+      enabled: false
