@@ -8,9 +8,15 @@ data:
   CLUSTER_DOMAIN: home.local
   CLUSTER_REGION: homelab
   # Storage
-  STORAGE_CLASS: ceph-block
+  STORAGE_CLASS: ceph-rbd
   VOLSYNC_ENABLED: "true"
   VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
+  # Ceph Configuration
+  CEPH_CLUSTER_ID: ""  # TODO: Add your Ceph cluster ID (run 'ceph fsid' on Ceph node)
+  CEPH_MON1_IP: ""     # TODO: Add your first Ceph monitor IP
+  CEPH_MON2_IP: ""     # TODO: Add your second Ceph monitor IP
+  CEPH_MON3_IP: ""     # TODO: Add your third Ceph monitor IP
+  CEPH_POOL_NAME: "kubernetes"
   # Networking
   INGRESS_TYPE: loadbalancer
   LOAD_BALANCER_IP_RANGE: 192.168.1.100-192.168.1.200

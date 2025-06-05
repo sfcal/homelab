@@ -6,3 +6,4 @@ resources:
   - nginx-ingress
   - cert-manager
   - external-secrets
+  - ceph-csi

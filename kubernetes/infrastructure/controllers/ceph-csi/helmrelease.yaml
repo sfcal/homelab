@@ -1,0 +1,46 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ceph-csi-rbd
+  namespace: ceph-csi-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: ceph-csi-rbd
+      version: "3.12.0"
+      sourceRef:
+        kind: HelmRepository
+        name: ceph-csi
+        namespace: flux-system
+  values:
+    csiConfig:
+      - clusterID: "${CEPH_CLUSTER_ID}"
+        monitors:
+          - "${CEPH_MON1_IP}:6789"
+          - "${CEPH_MON2_IP}:6789"
+          - "${CEPH_MON3_IP}:6789"
+    storageClass:
+      create: false  # We'll create this separately with proper secret refs
+    secret:
+      create: false  # We'll manage secrets via external-secrets
+    provisioner:
+      replicaCount: 2
+      httpMetrics:
+        enabled: true
+        containerPort: 8080
+        service:
+          enabled: true
+          servicePort: 8080
+    nodeplugin:
+      httpMetrics:
+        enabled: true
+        containerPort: 8081
+    rbac:
+      create: true
+    serviceAccounts:
+      nodeplugin:
+        create: true
+      provisioner:
+        create: true
