@@ -23,7 +23,6 @@ terraform/*.tfstate.*
 terraform/crash.log
 terraform/crash.*.log
 
-terraform/**/*.tfvars
 terraform/**/*.tfvars.json
 
 terraform/**/credentials.auto.tfvars
