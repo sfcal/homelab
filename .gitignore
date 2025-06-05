@@ -1,6 +1,11 @@
 # docs
 site/
 
+# sops
+**/.decrypted-*
+terraform/environments/*/.decrypted-*
+packer/environments/*/.decrypted-*
+
 # ansible
 ansible/kubeconfig
 
