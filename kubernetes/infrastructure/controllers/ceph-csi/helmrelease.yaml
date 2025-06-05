@@ -37,6 +37,8 @@ spec:
       httpMetrics:
         enabled: true
         containerPort: 8081
+      topology:
+        enabled: false
     rbac:
       create: true
     serviceAccounts:
