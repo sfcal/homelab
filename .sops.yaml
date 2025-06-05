@@ -7,3 +7,5 @@ creation_rules:
     age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
   - path_regex: terraform/.*\.tfvars
     age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
+  - path_regex: packer/.*\.pkrvars\.hcl
+    age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
