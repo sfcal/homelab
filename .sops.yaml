@@ -1,11 +1,11 @@
 creation_rules:
   - path_regex: kubernetes/.*\.sops\.ya?ml
     encrypted_regex: "^(data|stringData)$"
-    age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
+    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
   - path_regex: kubernetes/.*secrets?\.ya?ml
     encrypted_regex: "^(data|stringData)$"
-    age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
+    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
   - path_regex: terraform/.*\.tfvars
-    age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
+    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
   - path_regex: packer/.*\.pkrvars\.hcl
-    age: age15q2dpennrm6faufhgw279v63ymu9km7j0vqpn9ftrvyv935u3q2st5w9mu
+    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
