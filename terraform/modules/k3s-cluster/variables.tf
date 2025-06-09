@@ -3,6 +3,54 @@
  *
  * All variables for the K3s cluster module
  */
+variable "ssh_private_key_path" {
+  description = "Path to SSH private key for configuring VMs"
+  type        = string
+  default     = "~/.ssh/id_ed25519"
+}
+
+# -- Ceph Network Configuration
+variable "enable_ceph_network" {
+  description = "Enable Ceph network access for nodes"
+  type        = bool
+  default     = false
+}
+
+variable "ceph_network_bridge" {
+  description = "Network bridge for Ceph access"
+  type        = string
+  default     = "vmbr100"
+}
+
+variable "ceph_network_prefix" {
+  description = "Network prefix for Ceph access IPs (will be suffixed with node number)"
+  type        = string
+  default     = "10.0.8"  # Will create 10.0.81.x, 10.0.82.x, 10.0.83.x
+}
+
+variable "ceph_master_ip_start" {
+  description = "Starting IP offset for master nodes on Ceph network"
+  type        = number
+  default     = 11
+}
+
+variable "ceph_worker_ip_start" {
+  description = "Starting IP offset for worker nodes on Ceph network"
+  type        = number
+  default     = 21
+}
+
+variable "ceph_target_network" {
+  description = "Ceph cluster network to route to"
+  type        = string
+  default     = "10.0.0.0/24"
+}
+
+variable "ceph_mtu" {
+  description = "MTU for Ceph network interface"
+  type        = number
+  default     = 9000
+}
 
 # -- Cluster Configuration
 variable "cluster_name" {

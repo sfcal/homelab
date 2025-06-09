@@ -1,13 +1,3 @@
-/**
- * # Development Environment
- *
- * This is the main configuration for the development environment.
- */
-
-locals {
-  env_name = "dev"
-}
-
 # K3s Cluster
 module "k3s_cluster" {
   source = "../../modules/k3s-cluster"
@@ -31,7 +21,17 @@ module "k3s_cluster" {
   gateway         = "10.1.20.1"
   nameserver      = "10.1.20.1"
 
+  # Ceph network configuration
+  enable_ceph_network  = true
+  ceph_network_bridge  = "vmbr100"
+  ceph_network_prefix  = "10.0.8"  # Will create 10.0.81.x, 10.0.82.x, 10.0.83.x
+  ceph_master_ip_start = 11
+  ceph_worker_ip_start = 21
+  ceph_target_network  = "10.0.0.0/24"
+  ceph_mtu            = 9000
+
   # SSH configuration
-  ssh_user       = "sfcal"
-  ssh_public_key = var.ssh_public_key
+  ssh_user             = "sfcal"
+  ssh_public_key       = var.ssh_public_key
+  ssh_private_key_path = "~/.ssh/id_ed25519"  # Adjust if needed
 }
