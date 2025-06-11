@@ -62,4 +62,6 @@ terraform/environments/*/.terraform.tfstate.lock.info
 .vscode/
 *.swp
 *.swo
-*~
+*~# Flux auto-generated files
+**/flux-system/gotk-sync.yaml
+**/flux-system/gotk-components.yaml
