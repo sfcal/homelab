@@ -265,16 +265,25 @@ Deploy core cluster components using GitOps:
 #### Install Flux
 
 ```bash
-# Install Flux CLI
-curl -s https://fluxcd.io/install.sh | sudo bash
-
-# Bootstrap Flux (replace with your repository)
-hl flux bootstrap github \
+# Bootstrap
+flux bootstrap github \
   --owner=sfcal \
   --repository=homelab \
   --branch=main \
-  --path=./kubernetes/cluster/dev \
+  --path=./kubernetes/clusters/${CLUSTER} \
   --personal
+
+# Wait for Flux
+kubectl wait --for=condition=ready --timeout=5m -n flux-system pods --all
+
+# Add SOPS secret
+kubectl create secret generic sops-age \
+  --namespace=flux-system \
+  --from-file=age.agekey=$HOME/.config/sops/age/keys.txt \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# Trigger reconciliation
+flux reconcile source git flux-system
 ```
 
 #### Verify Infrastructure Deployment
