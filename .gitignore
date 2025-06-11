@@ -68,3 +68,6 @@ terraform/environments/*/.terraform.tfstate.lock.info
 # Flux auto-generated files
 **/flux-system/gotk-sync.yaml
 **/flux-system/gotk-components.yaml
+# Flux auto-generated files
+**/flux-system/gotk-sync.yaml
+**/flux-system/gotk-components.yaml
