@@ -1,0 +1,60 @@
+---
+- name: Bootstrap Flux on K3s cluster
+  hosts: localhost
+  gather_facts: false
+  
+  vars:
+    github_user: sfcal
+    github_repo: homelab
+    flux_namespace: flux-system
+    cluster_env: "{{ ENV | default('dev') }}"
+    
+  tasks:
+    - name: Check if Flux is already installed
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: "{{ flux_namespace }}"
+      register: flux_check
+
+    - name: Bootstrap Flux
+      when: not flux_check.resources
+      block:
+        - name: Create flux-system namespace
+          kubernetes.core.k8s:
+            name: "{{ flux_namespace }}"
+            api_version: v1
+            kind: Namespace
+            state: present
+
+        - name: Add SOPS age secret
+          kubernetes.core.k8s:
+            definition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: sops-age
+                namespace: "{{ flux_namespace }}"
+              stringData:
+                age.agekey: "{{ sops_age_key }}"
+          when: sops_age_key is defined
+
+        - name: Install Flux
+          ansible.builtin.shell: |
+            flux bootstrap github \
+              --owner={{ github_user }} \
+              --repository={{ github_repo }} \
+              --branch=main \
+              --path=./kubernetes/clusters/{{ cluster_env }} \
+              --personal
+          environment:
+            GITHUB_TOKEN: "{{ github_token }}"
+    
+    - name: Check Flux status
+      ansible.builtin.command: flux check
+      register: flux_status
+      changed_when: false
+      
+    - name: Show status
+      ansible.builtin.debug:
+        msg: "{{ flux_status.stdout_lines }}"
