@@ -35,10 +35,12 @@
     - role: k3s/k3s_server_post
       become: true
 
-    - name: Copy kubeconfig from {{ hostvars[groups[group_name_master | default('k3s_master')][0]]['ansible_hostname'] }} to local ~/.kube/config
+- name: Storing kubeconfig in the playbook directory
+  hosts: k3s_master
+  tasks:
+    - name: Copying kubeconfig from {{ hostvars[groups[group_name_master | default('k3s_master')][0]]['ansible_hostname'] }}
       ansible.builtin.fetch:
         src: "{{ ansible_user_dir }}/.kube/config"
         dest: "{{ lookup('env', 'HOME') }}/.kube/config"
         flat: true
-        mode: '0600'
       when: ansible_hostname == hostvars[groups[group_name_master | default('k3s_master')][0]]['ansible_hostname']

@@ -5,8 +5,8 @@ metadata:
   name: ceph-cluster-settings
   namespace: flux-system
 data:
-  CEPH_CLUSTER_ID: "de931674-fd79-4563-b46c-6581a5a7a418"  # To be filled with your Ceph cluster ID
-  CEPH_MON1_IP: "10.0.0.1"     # To be filled with your first monitor IP
-  CEPH_MON2_IP: "10.0.0.2"     # To be filled with your second monitor IP
-  CEPH_MON3_IP: "10.0.0.3"     # To be filled with your third monitor IP
+  CEPH_CLUSTER_ID: "45d33c5e-afd8-46a9-a989-e02be4af9c7e"  # To be filled with your Ceph cluster ID
+  CEPH_MON1_IP: "10.0.0.81"     # To be filled with your first monitor IP
+  CEPH_MON2_IP: "10.0.0.82"     # To be filled with your second monitor IP
+  CEPH_MON3_IP: "10.0.0.83"     # To be filled with your third monitor IP
   CEPH_POOL_NAME: "kubernetes"  # Default pool name for Kubernetes volumes
