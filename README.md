@@ -270,7 +270,7 @@ flux bootstrap github \
   --owner=sfcal \
   --repository=homelab \
   --branch=main \
-  --path=./kubernetes/clusters/${CLUSTER} \
+  --path=./kubernetes/clusters/dev \
   --personal
 
 # Wait for Flux
@@ -283,6 +283,7 @@ kubectl create secret generic sops-age \
 
 # Trigger reconciliation
 flux reconcile source git flux-system
+flux reconcile kustomization infrastructure-controllers
 ```
 
 #### Verify Infrastructure Deployment

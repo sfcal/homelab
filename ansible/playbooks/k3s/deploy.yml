@@ -6,7 +6,7 @@
       ansible.builtin.assert:
         that: ansible_version.full is version_compare('2.11', '>=')
         msg: >
-          "Ansible is out of date. See here for more info: https://docs.technotim.live/posts/ansible-automation/"
+          "Ansible is out of date.
 
 - name: Prepare k3s nodes
   hosts: k3s_cluster
@@ -35,12 +35,10 @@
     - role: k3s/k3s_server_post
       become: true
 
-- name: Storing kubeconfig in the playbook directory
-  hosts: k3s_master
-  tasks:
-    - name: Copying kubeconfig from {{ hostvars[groups[group_name_master | default('k3s_master')][0]]['ansible_hostname'] }}
+    - name: Copy kubeconfig from {{ hostvars[groups[group_name_master | default('k3s_master')][0]]['ansible_hostname'] }} to local ~/.kube/config
       ansible.builtin.fetch:
         src: "{{ ansible_user_dir }}/.kube/config"
-        dest: ../../kubeconfig
+        dest: "{{ lookup('env', 'HOME') }}/.kube/config"
         flat: true
+        mode: '0600'
       when: ansible_hostname == hostvars[groups[group_name_master | default('k3s_master')][0]]['ansible_hostname']
