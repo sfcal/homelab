@@ -102,26 +102,6 @@ status-proxmox: ## Check Proxmox cluster status
 	@echo -e "$(YELLOW)Checking Proxmox cluster status in $(ENV) environment...$(NC)"
 	ansible -i environments/$(ENV)/hosts.ini proxmox_nodes -b -m shell -a "pvecm status"
 
-# Flux targets
-.PHONY: flux-bootstrap
-flux-bootstrap: ## Bootstrap Flux GitOps
-	@echo -e "$(GREEN)Bootstrapping Flux for $(ENV) environment...$(NC)"
-	$(ANSIBLE_PLAYBOOK) playbooks/k3s/bootstrap-flux.yml \
-		-e "github_token=${GITHUB_TOKEN}" \
-		-e "sops_age_key=${SOPS_AGE_KEY}" \
-		-e "ENV=$(ENV)"
-
-.PHONY: flux-reconcile
-flux-reconcile: ## Force Flux reconciliation
-	@echo -e "$(YELLOW)Forcing Flux reconciliation...$(NC)"
-	flux reconcile source git flux-system -n flux-system
-	flux reconcile kustomization flux-system -n flux-system
-
-.PHONY: flux-status
-flux-status: ## Check Flux status
-	@echo -e "$(YELLOW)Checking Flux status...$(NC)"
-	flux check
-
 # Utility targets
 .PHONY: ping
 ping: ## Ping all hosts in inventory

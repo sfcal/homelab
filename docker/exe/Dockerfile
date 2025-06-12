@@ -52,8 +52,8 @@ RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/shar
     && rm -rf /var/lib/apt/lists/*
 
 # Install Ansible and required collections
-RUN pip3 install --no-cache-dir ansible ansible-core netaddr \
-    && ansible-galaxy collection install community.general ansible.posix
+RUN pip3 install --no-cache-dir ansible ansible-core netaddr kubernetes openshift pyyaml \
+    && ansible-galaxy collection install community.general ansible.posix kubernetes.core
 
 # Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
@@ -76,8 +76,9 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/s
     && ./get_helm.sh \
     && rm get_helm.sh
 
-# Install FluxCD CLI
-RUN curl -s https://fluxcd.io/install.sh | bash
+# Install FluxCD CLI (compatible with K8s 1.30)
+RUN FLUX_VERSION="2.2.3" \
+    && curl -s https://raw.githubusercontent.com/fluxcd/flux2/v${FLUX_VERSION}/install/flux.sh | bash
 
 # Install MkDocs and theme
 RUN pip3 install --no-cache-dir mkdocs mkdocs-material pymdown-extensions

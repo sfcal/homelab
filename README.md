@@ -266,10 +266,24 @@ Deploy core cluster components using GitOps:
 
 ```bash
 # Bootstrap
-export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
-export SOPS_AGE_KEY="AGE-SECRET-KEY-1XXXXX"
+flux bootstrap github \
+  --owner=sfcal \
+  --repository=homelab \
+  --branch=main \
+  --path=./kubernetes/clusters/${CLUSTER} \
+  --personal
 
-make flux-bootstrap ENV=dev
+# Wait for Flux
+kubectl wait --for=condition=ready --timeout=5m -n flux-system pods --all
+
+# Add SOPS secret
+kubectl create secret generic sops-age \
+  --namespace=flux-system \
+  --from-file=age.agekey=$HOME/.config/sops/age/keys.txt \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# Trigger reconciliation
+flux reconcile source git flux-system
 ```
 
 #### Verify Infrastructure Deployment
