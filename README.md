@@ -279,8 +279,7 @@ kubectl wait --for=condition=ready --timeout=5m -n flux-system pods --all
 # Add SOPS secret
 kubectl create secret generic sops-age \
   --namespace=flux-system \
-  --from-file=age.agekey=$HOME/.config/sops/age/keys.txt \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --from-file=age.agekey=$HOME/.config/sops/age/keys.txt
 
 # Trigger reconciliation
 flux reconcile source git flux-system
