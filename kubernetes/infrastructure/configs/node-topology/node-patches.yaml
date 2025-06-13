@@ -1,0 +1,54 @@
+---
+# Node patches for topology labels
+# Mapping nodes to Proxmox hosts based on their number suffix
+
+# Master and Worker 01 on Proxmox host wil-pve-01
+apiVersion: v1
+kind: Node
+metadata:
+  name: k3s-master-01
+  labels:
+    topology.kubernetes.io/zone: wil-pve-01
+    topology.kubernetes.io/region: homelab
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k3s-worker-01
+  labels:
+    topology.kubernetes.io/zone: wil-pve-01
+    topology.kubernetes.io/region: homelab
+---
+# Master and Worker 02 on Proxmox host wil-pve-02
+apiVersion: v1
+kind: Node
+metadata:
+  name: k3s-master-02
+  labels:
+    topology.kubernetes.io/zone: wil-pve-02
+    topology.kubernetes.io/region: homelab
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k3s-worker-02
+  labels:
+    topology.kubernetes.io/zone: wil-pve-02
+    topology.kubernetes.io/region: homelab
+---
+# Master and Worker 03 on Proxmox host wil-pve-03
+apiVersion: v1
+kind: Node
+metadata:
+  name: k3s-master-03
+  labels:
+    topology.kubernetes.io/zone: wil-pve-03
+    topology.kubernetes.io/region: homelab
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k3s-worker-03
+  labels:
+    topology.kubernetes.io/zone: wil-pve-03
+    topology.kubernetes.io/region: homelab
