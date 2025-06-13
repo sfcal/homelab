@@ -4,4 +4,3 @@ resources:
   - infrastructure-controllers.yaml
   - infrastructure-config.yaml
   - apps.yaml
-  - node-topology.yaml

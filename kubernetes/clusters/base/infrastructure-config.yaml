@@ -23,6 +23,5 @@ spec:
         optional: true
   dependsOn:
     - name: infrastructure-controllers
-    - name: node-topology
   wait: true
   timeout: 5m
