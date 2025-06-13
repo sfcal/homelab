@@ -5,9 +5,3 @@ resources:
   - externalsecret.yaml
   - cluster-settings.yaml
   - storageclass.yaml
-configMapGenerator:
-  - name: ceph-cluster-settings
-    namespace: flux-system
-    behavior: merge
-    envs:
-      - cluster-settings.yaml
