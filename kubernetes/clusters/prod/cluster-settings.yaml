@@ -12,10 +12,10 @@ data:
   VOLSYNC_ENABLED: "true"
   VOLSYNC_SNAPSHOTCLASS: csi-ceph-blockpool
   # Ceph Configuration
-  CEPH_CLUSTER_ID: ""  # TODO: Add your Ceph cluster ID (run 'ceph fsid' on Ceph node)
-  CEPH_MON1_IP: ""     # TODO: Add your first Ceph monitor IP
-  CEPH_MON2_IP: ""     # TODO: Add your second Ceph monitor IP
-  CEPH_MON3_IP: ""     # TODO: Add your third Ceph monitor IP
+  CEPH_CLUSTER_ID: "45d33c5e-afd8-46a9-a989-e02be4af9c7e"
+  CEPH_MON1_IP: "10.0.0.81"
+  CEPH_MON2_IP: "10.0.0.82"
+  CEPH_MON3_IP: "10.0.0.83"
   CEPH_POOL_NAME: "kubernetes"
   # Networking
   INGRESS_TYPE: loadbalancer
