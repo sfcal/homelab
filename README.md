@@ -255,6 +255,18 @@ k3s-worker-02  Ready    <none>                      1m    v1.30.2+k3s2
 k3s-worker-03  Ready    <none>                      1m    v1.30.2+k3s2
 ```
 
+# needed for ceph-csi, will add to ansible eventually
+```
+kubectl label node k3s-master-01 topology.kubernetes.io/zone=wil-pve-01
+kubectl label node k3s-worker-01 topology.kubernetes.io/zone=wil-pve-01
+
+kubectl label node k3s-master-02 topology.kubernetes.io/zone=wil-pve-02
+kubectl label node k3s-worker-02 topology.kubernetes.io/zone=wil-pve-02
+
+kubectl label node k3s-master-03 topology.kubernetes.io/zone=wil-pve-03
+kubectl label node k3s-worker-03 topology.kubernetes.io/zone=wil-pve-03
+```
+
 </details>
 
 <details>
