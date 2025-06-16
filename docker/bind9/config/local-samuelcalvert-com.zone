@@ -28,9 +28,9 @@ k8s-master-02	IN A	10.1.10.52
 k8s-master-03	IN A	10.1.10.53
 
 ; Kubernetes Services (all point to Traefik LoadBalancer IP)
-nginx		IN A	10.1.10.140
+nginx		IN A	10.2.10.140
 www.nginx	IN CNAME nginx.local.samuelcalvert.com.
-grafana		IN A	10.1.10.140
+grafana		IN A	10.2.10.140
 longhorn	IN A	10.1.10.140
 traefik		IN A	10.1.10.140
 
