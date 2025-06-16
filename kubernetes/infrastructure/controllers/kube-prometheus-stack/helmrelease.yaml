@@ -1,0 +1,60 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "65.1.1"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  values:
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-rbd
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
+    
+    prometheus:
+      prometheusSpec:
+        retention: 30d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-rbd
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 50Gi
+    
+    grafana:
+      enabled: true
+      persistence:
+        enabled: true
+        storageClassName: ceph-rbd
+        size: 10Gi
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: username
+        passwordKey: password
+      
+    # Disable etcd monitoring as it's not used in k3s
+    kubeEtcd:
+      enabled: false
+    
+    # Disable kubeScheduler and kubeControllerManager monitoring
+    # as they are not exposed in k3s by default
+    kubeScheduler:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
