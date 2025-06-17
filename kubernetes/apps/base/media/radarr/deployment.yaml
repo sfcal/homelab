@@ -44,8 +44,8 @@ spec:
           claimName: radarr-config
       - name: media
         nfs:
-          server: 10.2.0.4
-          path: /volume1/nas/media/movies
+          server: 10.2.10.100
+          path: /mnt/NAS-WIL/Media/media/movies
           readOnly: false
 ---
 apiVersion: v1
