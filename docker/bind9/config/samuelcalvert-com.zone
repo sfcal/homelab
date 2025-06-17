@@ -18,6 +18,10 @@ nginx		IN A	10.2.20.140  ; Points to your nginx-ingress LoadBalancer
 grafana		IN A	10.2.20.140
 longhorn	IN A	10.2.20.140
 sonarr 	    IN A	10.2.20.140
+radarr 	    IN A	10.2.20.140
+prowlarr    IN A	10.2.20.140
+plex 	    IN A	10.2.20.140
+sabnzb 	    IN A	10.2.20.140
 
 
 ; Wildcard for any k8s services
