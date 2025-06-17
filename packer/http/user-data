@@ -35,3 +35,4 @@ autoinstall:
     - vim
     - zip
     - unzip
+    - nfs-common
