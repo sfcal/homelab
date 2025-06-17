@@ -8,7 +8,7 @@ spec:
     app: plex
   ports:
   - name: http
-    port: 80
+    port: 32400
     targetPort: 32400
     protocol: TCP
   type: ClusterIP

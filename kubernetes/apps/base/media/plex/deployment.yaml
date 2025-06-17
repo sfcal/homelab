@@ -28,6 +28,12 @@ spec:
           value: "America/New_York"
         - name: VERSION
           value: "docker"
+        - name: PLEX_CLAIM
+          valueFrom:
+            secretKeyRef:
+              name: plex-claim-token
+              key: claim-token
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /config

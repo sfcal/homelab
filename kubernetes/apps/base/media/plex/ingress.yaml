@@ -5,6 +5,17 @@ metadata:
   namespace: media
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-production"
+    # Important: Plex needs these for proper operation
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/server-snippets: |
+      location = / {
+        if ($http_x_plex_device_name = '') {
+          rewrite ^/$ /web/index.html;
+        }
+      }
 spec:
   ingressClassName: nginx
   tls:
@@ -21,4 +32,4 @@ spec:
           service:
             name: plex
             port:
-              number: 443
+              number: 32400
