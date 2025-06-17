@@ -5,8 +5,6 @@ metadata:
   namespace: media
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: plex
@@ -56,13 +54,13 @@ spec:
           claimName: plex-config
       - name: tv
         nfs:
-          server: 10.2.0.4
-          path: /volume1/nas/media/tv
+          server: 10.2.10.100
+          path: /mnt/NAS-WIL/Media/media/tv
           readOnly: true
       - name: movies
         nfs:
-          server: 10.2.0.4
-          path: /volume1/nas/media/movies
+          server: 10.2.10.100
+          path: /mnt/NAS-WIL/Media/media/movies
           readOnly: true
 ---
 apiVersion: v1
