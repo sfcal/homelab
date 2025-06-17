@@ -21,4 +21,4 @@ spec:
           service:
             name: plex
             port:
-              number: 80
+              number: 443
