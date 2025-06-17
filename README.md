@@ -350,7 +350,14 @@ curl http://nginx.local.samuelcalvert.com
 3. Commit and push - Flux will automatically deploy
 
 </details>
+## Troubleshooting  
 
+When external-secrets will not automatically update plex-claim token when updated in 1password. 
+Force this change:
+```
+kubectl delete externalsecret plex-claim-token -n media
+kubectl apply -f /home/sfcal/homelab/kubernetes/apps/base/media/plex/externalsecret.yaml
+```
 ## Related Projects
 
 These projects have been an inspiration to my homelab
