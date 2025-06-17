@@ -29,10 +29,8 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
-        - name: downloads
-          mountPath: /downloads
-        - name: incomplete-downloads
-          mountPath: /incomplete-downloads
+        - name: usenet
+          mountPath: /usenet
         resources:
           requests:
             memory: "512Mi"
@@ -44,15 +42,10 @@ spec:
       - name: config
         persistentVolumeClaim:
           claimName: sabnzbd-config
-      - name: downloads
+      - name: usenet
         nfs:
           server: 10.2.0.4
-          path: /volume1/nas/media/downloads
-          readOnly: false
-      - name: incomplete-downloads
-        nfs:
-          server: 10.2.0.4
-          path: /volume1/nas/media/incomplete-downloads
+          path: /volume1/nas/usenet
           readOnly: false
 ---
 apiVersion: v1
