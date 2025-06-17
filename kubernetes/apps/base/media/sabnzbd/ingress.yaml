@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - sabnzbd.samuelcalvert.com
+    - sabnzb.samuelcalvert.com
     secretName: sabnzbd-tls
   rules:
-  - host: sabnzbd.samuelcalvert.com
+  - host: sabnzb.samuelcalvert.com
     http:
       paths:
       - path: /
