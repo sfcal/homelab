@@ -350,7 +350,8 @@ curl http://nginx.local.samuelcalvert.com
 3. Commit and push - Flux will automatically deploy
 
 </details>
-## Troubleshooting
+## Troubleshooting  
+
 When external-secrets will not automatically update plex-claim token when updated in 1password. 
 Force this change:
 ```
