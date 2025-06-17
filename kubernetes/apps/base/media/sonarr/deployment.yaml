@@ -29,10 +29,8 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
-#        - name: media
-#          mountPath: /tv
-#        - name: downloads
-#          mountPath: /downloads
+        - name: media
+          mountPath: /tv
         resources:
           requests:
             memory: "512Mi"
@@ -44,6 +42,11 @@ spec:
       - name: config
         persistentVolumeClaim:
           claimName: sonarr-config
+      - name: media
+        nfs:
+          server: 10.2.0.4
+          path: /volume1/nas/media/tv
+          readOnly: false
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
