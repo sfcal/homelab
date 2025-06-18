@@ -36,6 +36,8 @@ spec:
               name: plex-claim-token
               key: claim-token
               optional: true
+        - name: TRANSCODE_DIR
+          value: "/transcode"
         volumeMounts:
         - name: config
           mountPath: /config
@@ -45,13 +47,16 @@ spec:
           mountPath: /movies
         - name: dri
           mountPath: /dev/dri
+        - name: transcode
+          mountPath: /transcode
         resources:
           requests:
             memory: "1Gi"
             cpu: "1000m"
             gpu.intel.com/i915: "1"
           limits:
-            memory: "4Gi"
+            # Increase memory limit to account for RAM transcode directory
+            memory: "8Gi"
             cpu: "2000m"
             gpu.intel.com/i915: "1"
         securityContext:
@@ -74,6 +79,10 @@ spec:
         hostPath:
           path: /dev/dri
           type: Directory
+      - name: transcode
+        emptyDir:
+          medium: Memory
+          sizeLimit: 4Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
