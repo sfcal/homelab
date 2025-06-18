@@ -77,13 +77,13 @@ variable "template_name" {
 variable "master_memory" {
   description = "Memory in MB for master nodes"
   type        = number
-  default     = 4096
+  default     = 8192
 }
 
 variable "master_cores" {
   description = "CPU cores for master nodes"
   type        = number
-  default     = 2
+  default     = 4
 }
 
 variable "master_disk_size" {
@@ -96,13 +96,13 @@ variable "master_disk_size" {
 variable "worker_memory" {
   description = "Memory in MB for worker nodes"
   type        = number
-  default     = 4096
+  default     = 16384
 }
 
 variable "worker_cores" {
   description = "CPU cores for worker nodes"
   type        = number
-  default     = 2
+  default     = 4
 }
 
 variable "worker_disk_size" {
