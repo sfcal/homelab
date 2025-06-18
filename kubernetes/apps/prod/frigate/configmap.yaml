@@ -13,9 +13,7 @@ data:
       
     go2rtc:
       streams:
-        # Add your camera streams here
-        # example_cam:
-        #   - rtsp://user:pass@192.168.1.100:554/stream1
+        dummy: ffmpeg:rtsp://127.0.0.1:554/null#video=copy
 
     detectors:
       coral:
@@ -23,39 +21,19 @@ data:
         num_threads: 3
 
     cameras:
-      # Example camera - uncomment and modify
-      # front_door:
-      #   ffmpeg:
-      #     inputs:
-      #       - path: rtsp://user:pass@192.168.1.100:554/stream1
-      #         roles:
-      #           - detect
-      #       - path: rtsp://user:pass@192.168.1.100:554/stream2
-      #         roles:
-      #           - record
-      #   detect:
-      #     width: 1920
-      #     height: 1080
-      #     fps: 5
-      #   record:
-      #     enabled: true
-      #     retain:
-      #       days: 7
-      #       mode: motion
-      #     events:
-      #       retain:
-      #         default: 14
-      #         mode: active_objects
+      dummy_cam:
+        enabled: false
+        ffmpeg:
+          inputs:
+            - path: rtsp://127.0.0.1:554/null
+              roles:
+                - detect
 
     record:
       enabled: true
       retain:
         days: 7
         mode: all
-      events:
-        retain:
-          default: 14
-          mode: motion
 
     snapshots:
       enabled: true
@@ -79,9 +57,7 @@ data:
           threshold: 0.7
 
     ui:
-      live_mode: mse
       timezone: America/New_York
-      use_experimental: false
       time_format: 12hour
       date_style: short
       time_style: medium
