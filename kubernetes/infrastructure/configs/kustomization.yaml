@@ -6,3 +6,4 @@ resources:
   - external-secrets
   - ceph-csi
   - intel-gpu-plugin
+  - node-feature-discovery

@@ -1,0 +1,45 @@
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: zone-labeling
+  namespace: node-feature-discovery
+spec:
+  rules:
+    # Zone 1 nodes
+    - name: "zone1-nodes"
+      labels:
+        "failure-domain/region": "homelab"
+        "failure-domain/zone": "zone1"
+      matchFeatures:
+        - feature: system.name
+          matchExpressions:
+            nodename:
+              op: InRegexp
+              value:
+                - ".*-01$"
+    
+    # Zone 2 nodes
+    - name: "zone2-nodes"
+      labels:
+        "failure-domain/region": "homelab"
+        "failure-domain/zone": "zone2"
+      matchFeatures:
+        - feature: system.name
+          matchExpressions:
+            nodename:
+              op: InRegexp
+              value:
+                - ".*-02$"
+    
+    # Zone 3 nodes
+    - name: "zone3-nodes"
+      labels:
+        "failure-domain/region": "homelab"
+        "failure-domain/zone": "zone3"
+      matchFeatures:
+        - feature: system.name
+          matchExpressions:
+            nodename:
+              op: InRegexp
+              value:
+                - ".*-03$"
