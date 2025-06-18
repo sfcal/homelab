@@ -9,8 +9,8 @@ proxmox_node = "wil-pve-01"
 // Common VM Settings
 template_prefix      = "ubuntu-server"
 vm_id                = null // Let Proxmox auto-assign
-cores                = "2"
-memory               = "2048"
+cores                = "4"
+memory               = "8192"
 disk_size            = "20G"
 storage_pool         = "vm-disks"
 storage_pool_type    = "rbd"
