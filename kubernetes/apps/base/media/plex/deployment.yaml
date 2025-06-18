@@ -53,12 +53,10 @@ spec:
           requests:
             memory: "8Gi"
             cpu: "3000m"
-            gpu.intel.com/i915: "1"
           limits:
             # Increase memory limit to account for RAM transcode directory
             memory: "16Gi"
             cpu: "4000m"
-            gpu.intel.com/i915: "1"
         securityContext:
           privileged: true
       volumes:
