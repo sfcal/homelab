@@ -22,7 +22,7 @@ radarr 	    IN A	10.2.20.140
 prowlarr    IN A	10.2.20.140
 plex 	    IN A	10.2.20.140
 sabnzb 	    IN A	10.2.20.140
-
+frigate	    IN A	10.2.20.140
 
 ; Wildcard for any k8s services
 *.k8s		IN A	10.2.20.140
