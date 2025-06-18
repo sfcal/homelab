@@ -51,13 +51,13 @@ spec:
           mountPath: /transcode
         resources:
           requests:
-            memory: "1Gi"
-            cpu: "1000m"
+            memory: "8Gi"
+            cpu: "3000m"
             gpu.intel.com/i915: "1"
           limits:
             # Increase memory limit to account for RAM transcode directory
-            memory: "8Gi"
-            cpu: "2000m"
+            memory: "16Gi"
+            cpu: "4000m"
             gpu.intel.com/i915: "1"
         securityContext:
           privileged: true
