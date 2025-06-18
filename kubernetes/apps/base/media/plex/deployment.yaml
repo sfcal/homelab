@@ -13,6 +13,8 @@ spec:
       labels:
         app: plex
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: k3s-worker-01
       containers:
       - name: plex
         image: lscr.io/linuxserver/plex:latest
@@ -41,13 +43,19 @@ spec:
           mountPath: /tv
         - name: movies
           mountPath: /movies
+        - name: dri
+          mountPath: /dev/dri
         resources:
           requests:
             memory: "1Gi"
             cpu: "1000m"
+            gpu.intel.com/i915: "1"
           limits:
             memory: "4Gi"
             cpu: "2000m"
+            gpu.intel.com/i915: "1"
+        securityContext:
+          privileged: true
       volumes:
       - name: config
         persistentVolumeClaim:
@@ -62,6 +70,10 @@ spec:
           server: 10.2.10.100
           path: /mnt/NAS-WIL/Media/media/movies
           readOnly: true
+      - name: dri
+        hostPath:
+          path: /dev/dri
+          type: Directory
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
