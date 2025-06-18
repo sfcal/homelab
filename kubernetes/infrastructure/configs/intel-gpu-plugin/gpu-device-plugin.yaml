@@ -1,10 +1,10 @@
 apiVersion: deviceplugin.intel.com/v1
 kind: GpuDevicePlugin
 metadata:
-  name: gpudeviceplugin-sample
+  name: gpu-device-plugin
   namespace: intel-device-plugins-system
 spec:
   nodeSelector:
     kubernetes.io/hostname: k3s-worker-01
-  sharedDevNum: 1
+  image: intel/intel-gpu-plugin:0.30.0
   logLevel: 4
