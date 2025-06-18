@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frigate
+  namespace: frigate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frigate
+  template:
+    metadata:
+      labels:
+        app: frigate
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k3s-worker-01
+      containers:
+      - name: frigate
+        image: ghcr.io/blakeblackshear/frigate:stable
+        ports:
+        - containerPort: 5000
+          name: http
+        - containerPort: 8554
+          name: rtsp
+        - containerPort: 8555
+          name: webrtc-tcp
+          protocol: TCP
+        - containerPort: 8555
+          name: webrtc-udp
+          protocol: UDP
+        env:
+        - name: FRIGATE_RTSP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: frigate-secrets
+              key: rtsp-password
+        - name: TZ
+          value: "America/New_York"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: media
+          mountPath: /media/frigate
+        - name: frigate-config
+          mountPath: /config/config.yml
+          subPath: config.yml
+          readOnly: true
+        - name: dri
+          mountPath: /dev/dri
+        - name: shm
+          mountPath: /dev/shm
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+            gpu.intel.com/i915: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+            gpu.intel.com/i915: "1"
+        securityContext:
+          privileged: true
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: frigate-config
+      - name: media
+        nfs:
+          server: 10.2.10.100
+          path: /mnt/NAS-WIL/Media/frigate
+          readOnly: false
+      - name: frigate-config
+        configMap:
+          name: frigate-config
+      - name: dri
+        hostPath:
+          path: /dev/dri
+          type: Directory
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate-config
+  namespace: frigate
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-rbd
+  resources:
+    requests:
+      storage: 10Gi
