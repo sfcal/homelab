@@ -17,4 +17,4 @@ spec:
     nodeSelector:
       kubernetes.io/hostname: k3s-worker-01
     sharedDevNum: 1
-    nodeFeatureRule: true
+    nodeFeatureRule: false
