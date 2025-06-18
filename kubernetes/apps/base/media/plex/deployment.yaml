@@ -52,7 +52,7 @@ spec:
         resources:
           requests:
             memory: "8Gi"
-            cpu: "3000m"
+            cpu: "1500m"
           limits:
             # Increase memory limit to account for RAM transcode directory
             memory: "16Gi"
