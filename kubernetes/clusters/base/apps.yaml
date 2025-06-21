@@ -7,7 +7,7 @@ spec:
   interval: 5m
   dependsOn:
     - name: infrastructure-config
-  path: ./kubernetes/apps/dev
+  path: ./kubernetes/apps/${CLUSTER_NAME}
   prune: true
   sourceRef:
     kind: GitRepository
