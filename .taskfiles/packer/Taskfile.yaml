@@ -27,6 +27,23 @@ tasks:
           "{{.TEMPLATE_FILE}}"
       - echo "Finished building {{.TEMPLATE}} template for {{.ENV}} environment."
 
+tasks:
+  build-ubuntu:
+    desc: Build Ubuntu template
+    dir: '{{.ROOT_DIR}}/packer'
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_FILE: 'templates/ubuntu-server-{{.TEMPLATE}}.pkr.hcl'
+
+  build-debian:
+    desc: Build Rocky Linux template
+    dir: '{{.ROOT_DIR}}/packer'
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_FILE: 'templates/debian-bookworm-{{.TEMPLATE}}.pkr.hcl'
+
   clean:
     desc: Clean up Packer artifacts
     dir: '{{.ROOT_DIR}}/packer'
