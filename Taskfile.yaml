@@ -1,37 +1,7 @@
----
-# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
-set: [pipefail]
-shopt: [globstar]
-
 vars:
-  # Directory structure
-  ANSIBLE_DIR: '{{.ROOT_DIR}}/ansible'
-  DOCKER_DIR: '{{.ROOT_DIR}}/docker'
-  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
-  PACKER_DIR: '{{.ROOT_DIR}}/packer'
-  TERRAFORM_DIR: '{{.ROOT_DIR}}/terraform'
-  SCRIPTS_DIR: '{{.ROOT_DIR}}/scripts'
-  
-  # Environment configuration
   ENV: '{{.ENV | default "dev"}}'
-  
-  # Colors for output
-  GREEN: '\033[0;32m'
-  YELLOW: '\033[1;33m'
-  RED: '\033[0;31m'
-  NC: '\033[0m' # No Color
-
-# Load environment-specific configuration
-dotenv:
-  - '{{.ROOT_DIR}}/.env.{{.ENV}}'
-
-env:
-  # Common environment variables
-  KUBECONFIG: '{{.ROOT_DIR}}/kubeconfig'
-  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
-  ENV: '{{.ENV}}'
 
 includes:
   ansible: .taskfiles/ansible
