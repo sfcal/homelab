@@ -2,14 +2,15 @@ version: '3'
 
 vars:
   ENV: '{{.ENV | default "dev"}}'
+  ROOT_DIR: '{{.PWD}}'
 
 includes:
-  ansible: .taskfiles/ansible
+  #ansible: .taskfiles/ansible
   docker: .taskfiles/docker
-  kubernetes: .taskfiles/kubernetes
+  #kubernetes: .taskfiles/kubernetes
   packer: .taskfiles/packer
-  terraform: .taskfiles/terraform
-
+  #terraform: .taskfiles/terraform 
+  
 tasks:
   default:
     desc: Show available tasks

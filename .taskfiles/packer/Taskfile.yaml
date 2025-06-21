@@ -1,7 +1,6 @@
 version: '3'
 
 vars:
-  ENV: '{{.ENV | default "dev"}}'
   TEMPLATE: '{{.TEMPLATE | default "base"}}'
   ENV_VAR_FILE: 'environments/{{.ENV}}/variables.pkrvars.hcl'
   CRED_VAR_FILE: 'environments/{{.ENV}}/credentials.{{.ENV}}.pkrvars.hcl'
