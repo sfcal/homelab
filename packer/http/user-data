@@ -36,3 +36,5 @@ autoinstall:
     - zip
     - unzip
     - nfs-common
+    - intel-media-va-driver-non-free
+    - intel-gpu-tools
