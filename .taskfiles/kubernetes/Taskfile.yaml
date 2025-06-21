@@ -1,0 +1,31 @@
+version: '3'
+
+tasks:
+  bootstrap:
+    desc: Bootstrap Flux for {{.ENV}} environment
+    preconditions:
+      - sh: test -n "$GITHUB_TOKEN"
+        msg: "GITHUB_TOKEN environment variable must be set"
+    cmds:
+      - echo "===================================="
+      - echo "Bootstrapping Flux for {{.ENV}} environment"
+      - echo "===================================="
+      - |
+        flux bootstrap github \
+          --owner=sfcal \
+          --repository=homelab \
+          --branch=main \
+          --path=./kubernetes/clusters/{{.ENV}} \
+          --personal \
+          --token-auth
+      - echo "Waiting for Flux system pods..."
+      - kubectl wait --for=condition=ready --timeout=5m -n flux-system pods --all
+      - echo "Adding SOPS age secret..."
+      - |
+        kubectl create secret generic sops-age \
+          --namespace=flux-system \
+          --from-file=age.agekey=$HOME/.config/sops/age/keys.txt
+      - echo "Triggering reconciliation..."
+      - flux reconcile source git flux-system
+      - flux reconcile kustomization infrastructure-controllers
+      - echo "Flux bootstrap completed for {{.ENV}} environment"

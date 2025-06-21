@@ -1,0 +1,55 @@
+version: '3'
+
+vars:
+  ENV_DIR: 'environments/{{.ENV}}'
+  HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
+
+tasks:
+  # K3s tasks
+  deploy-k3s:
+    desc: Deploy K3s cluster
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - echo "===================================="
+      - echo "Deploying K3s cluster in {{.ENV}} environment"
+      - echo "===================================="
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/k3s/deploy.yml
+
+  reset-k3s:
+    desc: Reset K3s cluster
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - echo "===================================="
+      - echo "Resetting K3s cluster in {{.ENV}} environment"
+      - echo "===================================="
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/k3s/reset.yml
+
+  # DNS tasks
+  deploy-dns:
+    desc: Deploy DNS servers
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - echo "===================================="
+      - echo "Deploying DNS servers in {{.ENV}} environment"
+      - echo "===================================="
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
+
+  update-dns:
+    desc: Update DNS servers from repository
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - echo "===================================="
+      - echo "Updating DNS servers in {{.ENV}} environment"
+      - echo "===================================="
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/update.yml
+
+  # Utility tasks
+  ping:
+    desc: Ping all hosts in inventory
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - echo "Pinging all hosts in {{.ENV}} environment..."
+      - ansible -i {{.HOSTS_FILE}} all -m ping
+
+
+

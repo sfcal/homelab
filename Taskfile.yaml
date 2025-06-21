@@ -5,9 +5,9 @@ vars:
   ROOT_DIR: '{{.PWD}}'
 
 includes:
-  #ansible: .taskfiles/ansible
+  ansible: .taskfiles/ansible
   docker: .taskfiles/docker
-  #kubernetes: .taskfiles/kubernetes
+  kubernetes: .taskfiles/kubernetes
   packer: .taskfiles/packer
   terraform: .taskfiles/terraform 
   
