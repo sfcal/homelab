@@ -2,52 +2,53 @@ version: '3'
 
 vars:
   TEMPLATE: '{{.TEMPLATE | default "base"}}'
-  ENV_VAR_FILE: 'environments/{{.ENV}}/variables.pkrvars.hcl'
+  ENV_VAR_FILE: 'environments/{{.ENV}}/ubuntu-variables.pkrvars.hcl'
   CRED_VAR_FILE: 'environments/{{.ENV}}/credentials.{{.ENV}}.pkrvars.hcl'
 
 tasks:
+  # Generic build task
   build:
-    desc: Build a specific template
+    desc: Build a template
     dir: '{{.ROOT_DIR}}/packer'
     vars:
-      TEMPLATE_FILE: 'templates/ubuntu-server-{{.TEMPLATE}}.pkr.hcl'
+      # Set defaults based on DISTRO
+      TEMPLATE_PREFIX: '{{.TEMPLATE_PREFIX | default "ubuntu-server"}}'
+      VAR_FILE: '{{.VAR_FILE | default .ENV_VAR_FILE}}'
+      TEMPLATE_FILE: 'templates/{{.TEMPLATE_PREFIX}}-{{.TEMPLATE}}.pkr.hcl'
     cmds:
       - echo "===================================="
-      - echo "Building {{.TEMPLATE}} template for {{.ENV}} environment"
-      - echo "Using environment vars {{.ENV_VAR_FILE}}"
+      - echo "Building {{.TEMPLATE_PREFIX}}-{{.TEMPLATE}} template for {{.ENV}} environment"
+      - echo "Using environment vars {{.VAR_FILE}}"
       - echo "Using credential vars {{.CRED_VAR_FILE}}"
       - echo "===================================="
-      - echo "Initializing Packer plugins for {{.TEMPLATE_FILE}}..."
       - packer init {{.TEMPLATE_FILE}}
-      - echo "Building template {{.TEMPLATE_FILE}}..."
       - |
         PACKER_LOG=1 packer build \
           -var-file="{{.CRED_VAR_FILE}}" \
-          -var-file="{{.ENV_VAR_FILE}}" \
+          -var-file="{{.VAR_FILE}}" \
           "{{.TEMPLATE_FILE}}"
-      - echo "Finished building {{.TEMPLATE}} template for {{.ENV}} environment."
 
-tasks:
+  # Distribution-specific tasks
   build-ubuntu:
     desc: Build Ubuntu template
-    dir: '{{.ROOT_DIR}}/packer'
     cmds:
       - task: build
         vars:
-          TEMPLATE_FILE: 'templates/ubuntu-server-{{.TEMPLATE}}.pkr.hcl'
+          TEMPLATE_PREFIX: ubuntu-server
+          VAR_FILE: 'environments/{{.ENV}}/ubuntu-variables.pkrvars.hcl'
+
 
   build-debian:
-    desc: Build Rocky Linux template
-    dir: '{{.ROOT_DIR}}/packer'
+    desc: Build Debian template
     cmds:
       - task: build
         vars:
-          TEMPLATE_FILE: 'templates/debian-bookworm-{{.TEMPLATE}}.pkr.hcl'
+          TEMPLATE_PREFIX: debian-bookworm
+          VAR_FILE: 'environments/{{.ENV}}/debian-variables.pkrvars.hcl'
 
   clean:
     desc: Clean up Packer artifacts
     dir: '{{.ROOT_DIR}}/packer'
     cmds:
-      - echo "Cleaning up Packer artifacts..."
       - rm -f packer.log
       - rm -rf downloaded_iso_path
