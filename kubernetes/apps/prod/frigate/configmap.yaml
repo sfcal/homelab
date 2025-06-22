@@ -13,7 +13,11 @@ data:
       
     go2rtc:
       streams:
+        # Keep dummy stream if needed for testing
         dummy: ffmpeg:rtsp://127.0.0.1:554/null#video=copy
+        # Amcrest camera streams
+        amcrest_main: rtsp://admin:SuperSecure00@10.2.0.181:554/cam/realmonitor?channel=1&subtype=0
+        amcrest_sub: rtsp://admin:SuperSecure00@10.2.0.181:554/cam/realmonitor?channel=1&subtype=1
 
     detectors:
       coral:
@@ -21,6 +25,7 @@ data:
         num_threads: 3
 
     cameras:
+      # Keep dummy cam disabled for reference
       dummy_cam:
         enabled: false
         ffmpeg:
@@ -28,6 +33,32 @@ data:
             - path: rtsp://127.0.0.1:554/null
               roles:
                 - detect
+      
+      # Amcrest camera configuration
+      amcrest_camera:
+        enabled: true
+        ffmpeg:
+          inputs:
+            # Use substream for detection (lower resolution, less CPU)
+            - path: rtsp://admin:SuperSecure00@10.2.0.181:554/cam/realmonitor?channel=1&subtype=1
+              roles:
+                - detect
+            # Use mainstream for recording (high quality)
+            - path: rtsp://admin:SuperSecure00@10.2.0.181:554/cam/realmonitor?channel=1&subtype=0
+              roles:
+                - record
+        detect:
+          width: 640
+          height: 480
+          fps: 5
+        motion:
+          mask:
+            # Add motion masks here if needed to ignore certain areas
+            # - 0,0,0,480,640,480,640,0
+        zones:
+          # Define zones if you want alerts only in specific areas
+          # front_door:
+          #   coordinates: 100,100,200,100,200,200,100,200
 
     record:
       enabled: true
@@ -55,6 +86,10 @@ data:
           min_area: 5000
           max_area: 100000
           threshold: 0.7
+        car:
+          # Add car-specific filters if needed
+          min_area: 10000
+          max_area: 150000
 
     ui:
       timezone: America/New_York
