@@ -3,6 +3,6 @@ version: '3'
 tasks:
   exe:
     desc: Build the homelab-exe Docker container
-    dir: ../../docker/exe
+    dir: '{{.ROOT_DIR}}/docker/exe'
     cmds:
       - docker build -t homelab-exe .

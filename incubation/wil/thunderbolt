@@ -1,0 +1,15 @@
+auto lo:0
+iface lo:0 inet static
+        address 10.0.0.81/32
+        
+auto lo:6
+iface lo:6 inet static
+        address fc00::81/128
+        
+allow-hotplug en05
+iface en05 inet manual
+        mtu 65520
+
+allow-hotplug en06
+iface en06 inet manual
+        mtu 65520
