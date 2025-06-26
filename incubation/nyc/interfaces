@@ -1,0 +1,32 @@
+auto lo
+iface lo inet static
+        address 10.0.0.81/32
+
+iface eno1 inet manual
+        post-up ethtool -K eno1 tso off gso off
+
+auto enp1s0f0
+iface enp1s0f0 inet manual
+        mtu 9000
+
+auto enp1s0f1
+iface enp1s0f1 inet manual
+        mtu 9000
+
+auto vmbr0
+iface vmbr0 inet static
+        address 10.1.20.11/24
+        gateway 10.1.20.1
+        bridge-ports eno1
+        bridge-stp off
+        bridge-fd 0
+
+auto vmbr100
+iface vmbr100 inet static
+        address 10.0.81.1/24
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+        mtu 9000
+
+source /etc/network/interfaces.d/*
