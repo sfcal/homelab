@@ -56,12 +56,19 @@ Before starting, ensure you have the following:
 - **Docker** and **Docker Compose**
 - **Git**
 - **SSH key pair** for VM access
+- **Task** (Taskfile runner) - [Installation instructions](https://taskfile.dev/installation/)
 
 #### Initial Setup
 ```bash
 # Clone the repository
 git clone https://github.com/sfcal/homelab.git
 cd homelab
+
+# Verify Taskfile is installed
+task --version
+
+# View available tasks
+task --list
 ```
 
 </details>
@@ -73,8 +80,7 @@ Create a containerized environment with all necessary tools:
 
 ```bash
 # Build the homelab execution container
-cd docker/exe
-docker build -t homelab-exe .
+task docker:exe
 
 # Create a convenient alias for running commands
 # Add to .bashrc
@@ -126,11 +132,12 @@ cloud_init_storage_pool = "vm-disks"
 Choose your template and environment
 
 ```bash
-cd packer
-
 # Build base Ubuntu template
-hl make build TEMPLATE=base ENV=dev
+hl task packer:build TEMPLATE=base ENV=dev
 
+# Build other templates as needed
+# hl task packer:build-ubuntu ENV=dev
+# hl task packer:build-debian ENV=dev
 ```
 </details>
 
@@ -190,10 +197,12 @@ Becomes:
 #### Deploy Infrastructure
 
 ```bash
-cd terraform
+# Deploy the entire infrastructure
+hl task terraform:deploy ENV=dev
 
-# Deploy the infrastructure
-hl make deploy ENV=dev
+# Or deploy specific components
+# hl task terraform:deploy-k3s ENV=dev
+# hl task terraform:deploy-dns ENV=dev
 ```
 
 This will create:
@@ -230,8 +239,12 @@ cat environments/dev/group_vars/all.yml
 
 ```bash
 # Deploy the K3s cluster
-hl make deploy-k3s ENV=dev
+hl task ansible:deploy-k3s ENV=dev
 
+# Other useful Ansible tasks:
+# hl task ansible:ping ENV=dev          # Test connectivity
+# hl task ansible:reset-k3s ENV=dev     # Reset cluster
+# hl task ansible:deploy-dns ENV=dev    # Deploy DNS servers
 ```
 
 #### Verify K3s Installation
@@ -277,7 +290,10 @@ Deploy core cluster components using GitOps:
 #### Install Flux
 
 ```bash
-# Bootstrap
+# Bootstrap using Taskfile (recommended)
+hl task kubernetes:bootstrap ENV=dev
+
+# Or manually:
 flux bootstrap github \
   --owner=sfcal \
   --repository=homelab \

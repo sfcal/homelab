@@ -19,10 +19,10 @@ qemu_agent           = true
 scsi_controller      = "virtio-scsi-pci"
 
 // ISO Settings (Using Ubuntu 24.04 as an example)
-iso_file             = "local:iso/ubuntu-24.04.2-live-server-amd64.iso" 
+iso_file             = "ISOs-Templates:iso/ubuntu-24.04.2-live-server-amd64.iso" // Preferred: Use local ISO if available
 # iso_url              = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso" # Uncomment if downloading
 # iso_checksum         = "sha256:d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d" # Uncomment if downloading
-iso_storage_pool     = "ISOs-Templates"
+iso_storage_pool     = "ISOs-Templates" 
 
 // SSH Settings (Username defined here, password should be in credentials.pkrvars.hcl)
 ssh_username         = "sfcal"
