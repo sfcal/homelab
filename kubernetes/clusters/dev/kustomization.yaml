@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../base
   - cluster-settings.yaml
+  - infrastructure-controllers.yaml
 
 patches:
   # Speed up reconciliation in dev for faster testing
