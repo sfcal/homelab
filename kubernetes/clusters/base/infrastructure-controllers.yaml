@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./kubernetes/infrastructure/${CLUSTER_NAME}
+  path: ./kubernetes/infrastructure/prod
   prune: true
   sourceRef:
     kind: GitRepository
