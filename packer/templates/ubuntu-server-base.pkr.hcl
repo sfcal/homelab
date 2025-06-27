@@ -231,13 +231,39 @@ build {
 
   // Provisioning Steps (Run after OS install, before template creation)
 
-  // Wait for cloud-init to complete and perform cleanup
+  // Wait for cloud-init to complete
   provisioner "shell" {
-    expect_disconnect = true // Cloud-init clean might restart network or SSH
     inline = [
       "echo 'Waiting for cloud-init to finish first boot setup...'",
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting...'; sleep 2; done",
-      "echo 'Cloud-init finished. Running cleanup script.'",
+      "echo 'Cloud-init finished.'"
+    ]
+  }
+
+  // Install Docker
+  provisioner "shell" {
+    inline = [
+      "echo 'Installing Docker...'",
+      "sudo apt-get update",
+      "sudo apt-get install -y ca-certificates curl gnupg lsb-release",
+      "sudo mkdir -p /etc/apt/keyrings",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+      "sudo systemctl enable docker",
+      "sudo systemctl start docker",
+      "sudo usermod -aG docker ${var.ssh_username}",
+      "sudo docker version",
+      "echo 'Docker installation complete!'"
+    ]
+  }
+
+  // Cleanup
+  provisioner "shell" {
+    expect_disconnect = true // Cloud-init clean might restart network or SSH
+    inline = [
+      "echo 'Running cleanup script.'",
       "sudo rm -f /etc/ssh/ssh_host_*",                                             // Remove host keys
       "sudo truncate -s 0 /etc/machine-id",                                         // Clear machine ID
       "sudo rm -f /var/lib/dbus/machine-id",                                        // Remove dbus machine ID if present

@@ -34,8 +34,8 @@ tasks:
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform apply -target=module.dns_server -auto-approve
   
-    deploy-docker:
-    desc: Deploy only DNS server for {{.ENV}} environment
+  deploy-docker:
+    desc: Deploy docker server for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'
     cmds:
       - echo "===================================="
@@ -43,6 +43,16 @@ tasks:
       - echo "===================================="
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform apply -target=module.docker_vm -auto-approve
+
+  destroy:
+    desc: Destroy all VMs and infrastructure for {{.ENV}} environment
+    dir: '{{.ROOT_DIR}}/terraform'
+    cmds:
+      - echo "===================================="
+      - echo "DESTROYING all infrastructure for {{.ENV}} environment"
+      - echo "===================================="
+      - cd {{.ENV_DIR}} && terraform init
+      - cd {{.ENV_DIR}} && terraform destroy -auto-approve
 
   clean:
     desc: Clean up all Terraform files for {{.ENV}} environment
