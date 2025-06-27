@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - ../base
   - cluster-settings.yaml
+  - infrastructure-controllers.yaml
