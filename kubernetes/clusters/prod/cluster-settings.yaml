@@ -23,3 +23,6 @@ data:
   # Resources - normal for prod
   DEFAULT_CPU_REQUEST: 100m
   DEFAULT_MEMORY_REQUEST: 256Mi
+
+  ONEPASSWORD_CONNECT_HOST: "http://10.2.20.5:7070"
+  ONEPASSWORD_VAULT: "k3s-prod"
