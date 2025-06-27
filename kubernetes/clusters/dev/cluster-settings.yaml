@@ -22,3 +22,6 @@ data:
   # Resources - smaller for dev
   DEFAULT_CPU_REQUEST: 10m
   DEFAULT_MEMORY_REQUEST: 64Mi
+
+  ONEPASSWORD_CONNECT_HOST: "http://10.1.20.5:7070"
+  ONEPASSWORD_VAULT: "k3s-dev"
