@@ -1,11 +1,10 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: volsync
   namespace: volsync-system
 spec:
-  interval: 30m
+  interval: 1h
   chart:
     spec:
       chart: volsync
@@ -16,15 +15,7 @@ spec:
         namespace: flux-system
   dependsOn:
     - name: snapshot-controller
-      namespace: system
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
+      namespace: snapshot-controller
   values:
     manageCRDs: true
     metrics:
