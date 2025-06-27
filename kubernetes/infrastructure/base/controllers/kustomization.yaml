@@ -9,4 +9,5 @@ resources:
   - ceph-csi
   - node-feature-discovery
   - intel-gpu-plugin
+  - snapshot-controller
   - volsync

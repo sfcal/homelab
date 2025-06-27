@@ -1,0 +1,171 @@
+version: '3'
+
+vars:
+  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
+
+tasks:
+  list:
+    desc: List all ReplicationSources and ReplicationDestinations
+    cmds:
+      - kubectl get replicationsources,replicationdestinations -A
+
+  status:
+    desc: Show detailed status of all replications
+    cmds:
+      - |
+        echo "=== ReplicationSources ==="
+        kubectl get replicationsources -A -o custom-columns=\
+        NAMESPACE:.metadata.namespace,\
+        NAME:.metadata.name,\
+        PVC:.spec.sourcePVC,\
+        METHOD:.spec.restic.copyMethod,\
+        LAST-SYNC:.status.lastSyncTime,\
+        NEXT-SYNC:.status.nextSyncTime
+
+  trigger:
+    desc: Manually trigger a backup
+    summary: |
+      Args:
+        NAMESPACE: Namespace of the ReplicationSource
+        NAME: Name of the ReplicationSource
+    cmds:
+      - |
+        kubectl patch replicationsource -n {{.NAMESPACE}} {{.NAME}} --type merge -p \
+        '{"spec": {"trigger": {"manual": "{{.CLI_ARGS}}"}}}'
+    requires:
+      vars: ["NAMESPACE", "NAME"]
+
+  restore-list:
+    desc: List available snapshots for an app
+    summary: |
+      Args:
+        NAMESPACE: Namespace of the app
+        NAME: Name of the ReplicationSource
+    cmds:
+      - |
+        kubectl create job -n {{.NAMESPACE}} --from=cronjob/{{.NAME}} list-snaps-{{.NAME}}-manual -- \
+        /bin/bash -c "restic snapshots"
+        kubectl wait -n {{.NAMESPACE}} --for=condition=complete job/list-snaps-{{.NAME}}-manual
+        kubectl logs -n {{.NAMESPACE}} job/list-snaps-{{.NAME}}-manual
+        kubectl delete job -n {{.NAMESPACE}} list-snaps-{{.NAME}}-manual
+    requires:
+      vars: ["NAMESPACE", "NAME"]
+
+  restore:
+    desc: Restore a PVC from backup
+    summary: |
+      Args:
+        NAMESPACE: Namespace to restore into
+        NAME: Name of the ReplicationSource
+        CLAIM: Name of the PVC to restore to
+    cmds:
+      - task: restore:prompt
+      - task: restore:destination
+      - task: restore:wait
+    requires:
+      vars: ["NAMESPACE", "NAME", "CLAIM"]
+
+  restore:prompt:
+    internal: true
+    prompt: This will restore {{.NAME}} to {{.CLAIM}} in namespace {{.NAMESPACE}}. Continue?
+
+  restore:destination:
+    internal: true
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: volsync.backube/v1alpha1
+        kind: ReplicationDestination
+        metadata:
+          name: {{.NAME}}-restore
+          namespace: {{.NAMESPACE}}
+        spec:
+          trigger:
+            manual: restore-once
+          restic:
+            repository: {{.NAME}}-restic-secret
+            destinationPVC: {{.CLAIM}}
+            copyMethod: Direct
+        EOF
+
+  restore:wait:
+    internal: true
+    cmds:
+      - kubectl wait -n {{.NAMESPACE}} replicationdestination/{{.NAME}}-restore --for=condition=Completed --timeout=60m
+      - kubectl delete -n {{.NAMESPACE}} replicationdestination/{{.NAME}}-restore
+
+  app-pause:
+    desc: Scale down an app before restore
+    summary: |
+      Args:
+        NAMESPACE: Namespace of the app
+        NAME: Name of the deployment
+    cmds:
+      - kubectl scale -n {{.NAMESPACE}} deployment/{{.NAME}} --replicas=0
+      - kubectl wait -n {{.NAMESPACE}} deployment/{{.NAME}} --for=jsonpath='{.status.replicas}'=0
+    requires:
+      vars: ["NAMESPACE", "NAME"]
+
+  app-resume:
+    desc: Scale up an app after restore
+    summary: |
+      Args:
+        NAMESPACE: Namespace of the app
+        NAME: Name of the deployment
+    cmds:
+      - kubectl scale -n {{.NAMESPACE}} deployment/{{.NAME}} --replicas=1
+    requires:
+      vars: ["NAMESPACE", "NAME"]
+
+  debug:
+    desc: Debug a failing ReplicationSource
+    summary: |
+      Args:
+        NAMESPACE: Namespace of the ReplicationSource
+        NAME: Name of the ReplicationSource
+    cmds:
+      - kubectl describe replicationsource -n {{.NAMESPACE}} {{.NAME}}
+      - echo ""
+      - echo "=== Recent Events ==="
+      - kubectl get events -n {{.NAMESPACE}} --field-selector involvedObject.name={{.NAME}} --sort-by='.lastTimestamp'
+      - echo ""
+      - echo "=== Pod Logs ==="
+      - kubectl logs -n {{.NAMESPACE}} -l volsync.backube/replication-source={{.NAME}} --tail=50
+    requires:
+      vars: ["NAMESPACE", "NAME"]
+
+  full-restore:
+    desc: Full restore process for an app
+    summary: |
+      Complete restore process:
+      1. Scale down the app
+      2. Delete the original PVC
+      3. Restore from backup
+      4. Scale up the app
+      
+      Args:
+        NAMESPACE: Namespace of the app
+        APP: Name of the deployment
+        CLAIM: Name of the PVC
+    cmds:
+      - echo "Scaling down {{.APP}}..."
+      - task: app-pause
+        vars:
+          NAMESPACE: "{{.NAMESPACE}}"
+          NAME: "{{.APP}}"
+      - echo "Deleting original PVC {{.CLAIM}}..."
+      - kubectl delete pvc -n {{.NAMESPACE}} {{.CLAIM}}
+      - echo "Restoring from backup..."
+      - task: restore
+        vars:
+          NAMESPACE: "{{.NAMESPACE}}"
+          NAME: "{{.APP}}"
+          CLAIM: "{{.CLAIM}}"
+      - echo "Scaling up {{.APP}}..."
+      - task: app-resume
+        vars:
+          NAMESPACE: "{{.NAMESPACE}}"
+          NAME: "{{.APP}}"
+      - echo "Restore complete!"
+    requires:
+      vars: ["NAMESPACE", "APP", "CLAIM"]

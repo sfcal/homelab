@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - storageclass.yaml
+  - volumesnapshotclass.yaml

@@ -1,38 +1,39 @@
-# External secret for restic password
+# Template for app volsync backups
+# Replace: APP_NAME, APP_NAMESPACE, PVC_NAME
+---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: sonarr-restic-secret
-  namespace: media
+  name: APP_NAME-restic-secret
+  namespace: APP_NAMESPACE
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword
   refreshInterval: 1h
   target:
-    name: sonarr-restic-secret
+    name: APP_NAME-restic-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
       data:
-        RESTIC_REPOSITORY: "/backups/sonarr"
+        RESTIC_REPOSITORY: "/backups/APP_NAME"
         RESTIC_PASSWORD: "{{ .resticPassword }}"
   dataFrom:
     - extract:
         key: volsync-restic
 ---
-# Volsync backup configuration
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: sonarr
-  namespace: media
+  name: APP_NAME
+  namespace: APP_NAMESPACE
 spec:
-  sourcePVC: sonarr-config
+  sourcePVC: PVC_NAME
   trigger:
-    schedule: "0 3 * * *"  # Daily at 3 AM
+    schedule: "0 3 * * *"
   restic:
-    repository: sonarr-restic-secret
+    repository: APP_NAME-restic-secret
     retain:
       daily: 7
       weekly: 4

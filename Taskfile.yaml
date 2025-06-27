@@ -10,6 +10,7 @@ includes:
   kubernetes: .taskfiles/kubernetes
   packer: .taskfiles/packer
   terraform: .taskfiles/terraform 
+  volsync: .taskfiles/volsync
   
 tasks:
   default:

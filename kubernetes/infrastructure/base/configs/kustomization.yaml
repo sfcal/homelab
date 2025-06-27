@@ -7,3 +7,4 @@ resources:
   - ceph-csi
   - intel-gpu-plugin
   - node-feature-discovery
+  - volsync

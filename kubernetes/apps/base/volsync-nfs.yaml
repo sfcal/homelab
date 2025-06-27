@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: volsync-nfs-backup
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.2.10.100
+    path: /mnt/NAS-WIL/Media/k3s-backups
+  mountOptions:
+    - nfsvers=4.2
+    - nconnect=8
+    - hard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: volsync-nfs-backup
+  namespace: volsync-system
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Ti
+  volumeName: volsync-nfs-backup
