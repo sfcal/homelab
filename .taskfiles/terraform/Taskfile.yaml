@@ -33,6 +33,16 @@ tasks:
       - echo "===================================="
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform apply -target=module.dns_server -auto-approve
+  
+    deploy-docker:
+    desc: Deploy only DNS server for {{.ENV}} environment
+    dir: '{{.ROOT_DIR}}/terraform'
+    cmds:
+      - echo "===================================="
+      - echo "Deploying DNS server for {{.ENV}} environment"
+      - echo "===================================="
+      - cd {{.ENV_DIR}} && terraform init
+      - cd {{.ENV_DIR}} && terraform apply -target=module.docker_vm -auto-approve
 
   clean:
     desc: Clean up all Terraform files for {{.ENV}} environment
