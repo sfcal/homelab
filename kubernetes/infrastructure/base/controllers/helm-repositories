@@ -77,4 +77,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://piraeus.github.io/helm-charts/
+  url: https://charts.piraeus.io
