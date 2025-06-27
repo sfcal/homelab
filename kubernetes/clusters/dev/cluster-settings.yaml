@@ -11,10 +11,10 @@ data:
   STORAGE_CLASS: ceph-rbd
   VOLSYNC_ENABLED: "false"
   # Ceph Configuration
-  CEPH_CLUSTER_ID: "de931674-fd79-4563-b46c-6581a5a7a418"
-  CEPH_MON1_IP: "10.0.0.1"
-  CEPH_MON2_IP: "10.0.0.2"
-  CEPH_MON3_IP: "10.0.0.3"
+  CEPH_CLUSTER_ID: "0f72fe9d-dd7f-49c1-b7a8-86aabb02459f"
+  CEPH_MON1_IP: "10.0.0.81"
+  CEPH_MON2_IP: "10.0.0.82"
+  CEPH_MON3_IP: "10.0.0.83"
   CEPH_POOL_NAME: "kubernetes"
   # Networking
   INGRESS_TYPE: nodeport
