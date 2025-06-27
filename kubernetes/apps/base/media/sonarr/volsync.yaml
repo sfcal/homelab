@@ -1,0 +1,64 @@
+# NFS PV for backups
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sonarr-backup-nfs-pv
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.2.10.100
+    path: /mnt/NAS-WIL/Media/k3s-backups
+---
+# PVC for the backup destination
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarr-backup-nfs
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: sonarr-backup-nfs-pv
+---
+# Secret with restic password
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sonarr-restic-secret
+  namespace: media
+type: Opaque
+stringData:
+  RESTIC_REPOSITORY: "/backups/sonarr"
+  RESTIC_PASSWORD: "change-this-to-a-secure-password"
+---
+# Volsync backup configuration
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: sonarr-backup
+  namespace: media
+spec:
+  sourcePVC: sonarr-config
+  trigger:
+    schedule: "0 3 * * *"  # Daily at 3 AM
+  restic:
+    repository: sonarr-restic-secret
+    retain:
+      daily: 7
+      weekly: 4
+    copyMethod: Direct
+    accessModes:
+      - ReadWriteMany
+    capacity: 50Gi
+    volumeSnapshotClassName: csi-ceph-blockpool
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
