@@ -52,9 +52,9 @@ data:
           height: 480
           fps: 5
         motion:
-          mask:
-            # Add motion masks here if needed to ignore certain areas
-            # - 0,0,0,480,640,480,640,0
+          # Uncomment and configure mask if needed to ignore certain areas
+          # mask:
+          #   - "0,0,0,480,640,480,640,0"
         zones: {}
 
     record:
