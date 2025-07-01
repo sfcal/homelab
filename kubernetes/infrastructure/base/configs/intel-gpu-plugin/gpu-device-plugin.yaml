@@ -5,6 +5,6 @@ metadata:
   namespace: intel-device-plugins-system
 spec:
   nodeSelector:
-    kubernetes.io/hostname: k3s-worker-01
+    feature.node.kubernetes.io/pci-0300_8086.present: "true"
   image: intel/intel-gpu-plugin:0.30.0
   logLevel: 4

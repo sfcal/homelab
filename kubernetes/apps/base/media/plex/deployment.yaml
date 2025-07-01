@@ -14,7 +14,7 @@ spec:
         app: plex
     spec:
       nodeSelector:
-        kubernetes.io/hostname: k3s-worker-01
+        feature.node.kubernetes.io/pci-0300_8086.present: "true"
       containers:
       - name: plex
         image: lscr.io/linuxserver/plex:latest
@@ -53,10 +53,12 @@ spec:
           requests:
             memory: "8Gi"
             cpu: "1500m"
+            gpu.intel.com/i915: "1"
           limits:
             # Increase memory limit to account for RAM transcode directory
             memory: "16Gi"
             cpu: "4000m"
+            gpu.intel.com/i915: "1"
         securityContext:
           privileged: true
       volumes:

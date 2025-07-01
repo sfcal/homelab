@@ -14,7 +14,7 @@ spec:
         app: frigate
     spec:
       nodeSelector:
-        kubernetes.io/hostname: k3s-worker-01
+        feature.node.kubernetes.io/pci-0300_8086.present: "true"
       containers:
       - name: frigate
         image: ghcr.io/blakeblackshear/frigate:stable
@@ -54,9 +54,11 @@ spec:
           requests:
             memory: "2Gi"
             cpu: "1000m"
+            gpu.intel.com/i915: "1"
           limits:
             memory: "4Gi"
             cpu: "2000m"
+            gpu.intel.com/i915: "1"
         securityContext:
           privileged: true
       volumes:

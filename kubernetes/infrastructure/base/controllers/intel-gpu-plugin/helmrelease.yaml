@@ -16,4 +16,4 @@ spec:
   values:
     manager:
       nodeSelector:
-        kubernetes.io/hostname: k3s-worker-01
+        feature.node.kubernetes.io/pci-0300_8086.present: "true"
