@@ -55,8 +55,9 @@ spec:
       weekly: 4
     copyMethod: Direct
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
     capacity: 50Gi
+    storageClassName: ceph-rbd
     volumeSnapshotClassName: csi-ceph-blockpool
     moverSecurityContext:
       runAsUser: 1000
