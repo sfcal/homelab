@@ -55,10 +55,7 @@ data:
           mask:
             # Add motion masks here if needed to ignore certain areas
             # - 0,0,0,480,640,480,640,0
-        zones:
-          # Define zones if you want alerts only in specific areas
-          # front_door:
-          #   coordinates: 100,100,200,100,200,200,100,200
+        zones: {}
 
     record:
       enabled: true
