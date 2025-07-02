@@ -1,3 +1,6 @@
+# File: kubernetes/apps/base/media/sonarr/volsync.yaml
+# Complete working configuration for rsync-based VolSync backups
+
 # NFS PV for backups
 apiVersion: v1
 kind: PersistentVolume
@@ -11,7 +14,11 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 10.2.10.100
-    path: /mnt/NAS-WIL/Media/k3s-backups
+    path: /mnt/NAS-WIL/Media/k3s-backups/sonarr  # Create subdirectory for sonarr
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+    - noatime
 ---
 # PVC for the backup destination
 apiVersion: v1
@@ -27,18 +34,7 @@ spec:
       storage: 50Gi
   volumeName: sonarr-backup-nfs-pv
 ---
-# Secret with restic password
-apiVersion: v1
-kind: Secret
-metadata:
-  name: sonarr-restic-secret
-  namespace: media
-type: Opaque
-stringData:
-  RESTIC_REPOSITORY: "/backups/sonarr"
-  RESTIC_PASSWORD: "change-this-to-a-secure-password"
----
-# Volsync backup configuration
+# VolSync rsync backup configuration
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -48,18 +44,11 @@ spec:
   sourcePVC: sonarr-config
   trigger:
     schedule: "0 3 * * *"  # Daily at 3 AM
-  restic:
-    repository: sonarr-restic-secret
-    retain:
-      daily: 7
-      weekly: 4
-    copyMethod: Direct
+  rsync:
+    destinationPVC: sonarr-backup-nfs
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-blockpool
+    storageClassName: ceph-rbd
     accessModes:
       - ReadWriteOnce
-    capacity: 50Gi
-    storageClassName: ceph-rbd
-    volumeSnapshotClassName: csi-ceph-blockpool
-    moverSecurityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
+    capacity: 10Gi  # Must match sonarr-config PVC size

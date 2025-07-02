@@ -5,6 +5,6 @@ metadata:
 driver: rbd.csi.ceph.com
 parameters:
   clusterID: "${CEPH_CLUSTER_ID}"
-  csi.storage.k8s.io/snapshotter-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/snapshotter-secret-name: ceph-admin-secret
   csi.storage.k8s.io/snapshotter-secret-namespace: ceph-csi-system
 deletionPolicy: Delete

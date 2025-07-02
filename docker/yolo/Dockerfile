@@ -32,6 +32,7 @@ RUN mkdir -p /root/.cache/torch/hub/checkpoints && \
     https://sg-hub-nv.s3.amazonaws.com/models/yolo_nas_s_coco.pth
 
 # Create the COCO-80 labelmap file
+# Chopped as hell
 RUN cat > coco-80.txt << 'EOF'
 person
 bicycle
