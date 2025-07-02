@@ -24,8 +24,8 @@ data:
       ov:
         type: openvino
         device: GPU
-        path: /models/yolo_nas_s.onnx
         model:
+          path: /models/yolo_nas_s.onnx
           model_type: yolonas
           width: 320
           height: 320
