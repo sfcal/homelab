@@ -21,9 +21,11 @@ data:
         hikvision_sub: rtsp://admin:SuperSecure00@10.2.0.101:554/Streaming/Channels/102
 
     detectors:
-      coral:
-        type: cpu
-        num_threads: 3
+      ov:
+        type: openvino
+        device: GPU
+        model:
+          path: /openvino-model/ssdlite_mobilenet_v2.xml
 
     cameras:
       # Amcrest camera configuration
