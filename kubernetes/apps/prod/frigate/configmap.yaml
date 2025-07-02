@@ -24,8 +24,6 @@ data:
       ov:
         type: openvino
         device: GPU
-        model:
-          path: /openvino-model/ssdlite_mobilenet_v2.xml
 
     cameras:
       # Amcrest camera configuration
