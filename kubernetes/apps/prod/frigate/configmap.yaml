@@ -24,14 +24,14 @@ data:
       ov:
         type: openvino
         device: GPU
-        model:
-          path: /models/yolo_nas_s.onnx
-          model_type: yolonas
-          width: 320
-          height: 320
-          input_tensor: nchw
-          input_pixel_format: bgr
-          labelmap_path: /models/coco-80.txt
+    model:
+      path: /models/yolo_nas_s.onnx
+      model_type: yolonas
+      width: 320
+      height: 320
+      input_tensor: nchw
+      input_pixel_format: bgr
+      labelmap_path: /models/coco-80.txt
 
     cameras:
       # Amcrest camera configuration
