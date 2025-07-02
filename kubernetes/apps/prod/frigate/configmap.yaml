@@ -7,9 +7,9 @@ data:
   config.yml: |
     mqtt:
       enabled: false
-      
+
     ffmpeg:
-      hwaccel_args: preset-intel-qsv-h26[4|5]
+      hwaccel_args: preset-intel-qsv-h264
       
     go2rtc:
       streams:
