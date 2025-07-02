@@ -15,6 +15,22 @@ spec:
     spec:
       nodeSelector:
         feature.node.kubernetes.io/pci-0300_8086.present: "true"
+      initContainers:
+      # Add an init container to copy the config file
+      - name: config-init
+        image: busybox:1.36
+        command: ['sh', '-c']
+        args:
+          - |
+            # Copy the config from ConfigMap to the persistent volume
+            cp /tmp/config/config.yml /config/config.yml
+            # Ensure proper permissions
+            chmod 644 /config/config.yml
+        volumeMounts:
+        - name: frigate-config
+          mountPath: /tmp/config
+        - name: config
+          mountPath: /config
       containers:
       - name: frigate
         image: ghcr.io/blakeblackshear/frigate:stable
@@ -45,10 +61,11 @@ spec:
         - name: models
           mountPath: /models
           readOnly: true
-        - name: frigate-config
-          mountPath: /config/config.yml
-          subPath: config.yml
-          readOnly: true
+        # Remove the conflicting ConfigMap mount
+        # - name: frigate-config
+        #   mountPath: /config/config.yml
+        #   subPath: config.yml
+        #   readOnly: true
         - name: dri
           mountPath: /dev/dri
         - name: shm
