@@ -24,6 +24,10 @@ data:
       ov:
         type: openvino
         device: GPU
+        model:
+          input_tensor: nhwc
+          input_pixel_format: bgr
+          model_type: ssd
 
     cameras:
       # Amcrest camera configuration
