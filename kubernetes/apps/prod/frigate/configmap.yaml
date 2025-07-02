@@ -24,13 +24,13 @@ data:
       ov:
         type: openvino
         device: GPU
+        path: /models/yolo_nas_s.onnx
         model:
           model_type: yolonas
           width: 320
           height: 320
           input_tensor: nchw
           input_pixel_format: bgr
-          path: /models/yolo_nas_s.onnx
           labelmap_path: /models/coco-80.txt
 
     cameras:
