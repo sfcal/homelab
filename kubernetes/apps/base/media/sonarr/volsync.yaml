@@ -1,7 +1,3 @@
-# File: kubernetes/apps/base/media/sonarr/volsync.yaml
-# Complete working configuration for rsync-based VolSync backups
-
-# NFS PV for backups
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -14,13 +10,8 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 10.2.10.100
-    path: /mnt/NAS-WIL/Media/k3s-backups/sonarr  # Create subdirectory for sonarr
-  mountOptions:
-    - hard
-    - nfsvers=4.1
-    - noatime
+    path: /mnt/NAS-WIL/Media/k3s-backups/sonarr
 ---
-# PVC for the backup destination
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -34,7 +25,7 @@ spec:
       storage: 50Gi
   volumeName: sonarr-backup-nfs-pv
 ---
-# VolSync rsync backup configuration
+# Use rclone
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -43,12 +34,19 @@ metadata:
 spec:
   sourcePVC: sonarr-config
   trigger:
-    schedule: "0 3 * * *"  # Daily at 3 AM
-  rsync:
+    schedule: "0 3 * * *"
+  rclone:  # Changed from rsync to rclone
     destinationPVC: sonarr-backup-nfs
+    rcloneConfig: |
+      # No config needed for local filesystem
     copyMethod: Snapshot
     volumeSnapshotClassName: csi-ceph-blockpool
     storageClassName: ceph-rbd
     accessModes:
       - ReadWriteOnce
-    capacity: 10Gi  # Must match sonarr-config PVC size
+    capacity: 10Gi
+    # Optional: Add these for better control
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
