@@ -25,9 +25,13 @@ data:
         type: openvino
         device: GPU
         model:
-          input_tensor: nhwc
+          model_type: yolonas
+          width: 320
+          height: 320
+          input_tensor: nchw
           input_pixel_format: bgr
-          model_type: ssd
+          path: /models/yolo_nas_s.onnx
+          labelmap_path: /models/coco-80.txt
 
     cameras:
       # Amcrest camera configuration

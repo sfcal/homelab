@@ -42,6 +42,9 @@ spec:
           mountPath: /config
         - name: media
           mountPath: /media/frigate
+        - name: models
+          mountPath: /models
+          readOnly: true
         - name: frigate-config
           mountPath: /config/config.yml
           subPath: config.yml
@@ -70,6 +73,11 @@ spec:
           server: 10.2.10.100
           path: /mnt/NAS-WIL/Media/frigate
           readOnly: false
+      - name: models
+        nfs:
+          server: 10.2.10.100
+          path: /mnt/NAS-WIL/Media/frigate/models
+          readOnly: true
       - name: frigate-config
         configMap:
           name: frigate-config

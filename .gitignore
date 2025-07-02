@@ -63,3 +63,4 @@ terraform/environments/*/.terraform.tfstate.lock.info
 *.swp
 *.swo
 
+docker/yolo/models
