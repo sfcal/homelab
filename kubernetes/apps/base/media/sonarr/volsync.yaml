@@ -25,7 +25,31 @@ spec:
       storage: 50Gi
   volumeName: sonarr-backup-nfs-pv
 ---
-# Using rsync which is simpler for PVC to PVC copies
+# Create secret for restic repository password
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: sonarr-restic-secret
+  namespace: media
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  refreshInterval: 1h
+  target:
+    name: sonarr-restic-secret
+    creationPolicy: Owner
+    template:
+      type: Opaque
+      data:
+        RESTIC_PASSWORD: "{{ .resticPassword | b64enc }}"
+  data:
+    - secretKey: resticPassword
+      remoteRef:
+        key: sonarr-backup
+        property: restic-password
+---
+# Restic-based backup - works great for PVC-to-PVC without SSH
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -35,21 +59,18 @@ spec:
   sourcePVC: sonarr-config
   trigger:
     schedule: "0 3 * * *"  # Daily at 3 AM
-  rsync:
+  restic:
+    # Restic will create a repository on the destination PVC
+    repository: sonarr-backup-nfs
     copyMethod: Snapshot
     storageClassName: ceph-rbd
     volumeSnapshotClassName: csi-ceph-blockpool
-    destinationPVC: sonarr-backup-nfs
-    # SSH not needed for PVC to PVC copy
-    sshKeys: ~
-    # Preserve permissions and ownership
-    rsyncOpts:
-      - "--archive"
-      - "--delete"
-      - "--hard-links"
-      - "--acls"
-      - "--xattrs"
-    # Set proper permissions for the mover pod
+    # Reference the secret containing RESTIC_PASSWORD
+    repositorySecretRef:
+      name: sonarr-restic-secret
+    # Retain 7 daily backups
+    retain:
+      daily: 7
     moverSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
