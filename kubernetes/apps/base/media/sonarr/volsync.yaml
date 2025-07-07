@@ -25,7 +25,7 @@ spec:
       storage: 50Gi
   volumeName: sonarr-backup-nfs-pv
 ---
-# Use rclone
+# Using rsync which is simpler for PVC to PVC copies
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
@@ -34,18 +34,22 @@ metadata:
 spec:
   sourcePVC: sonarr-config
   trigger:
-    schedule: "0 3 * * *"
-  rclone:  # Changed from rsync to rclone
-    destinationPVC: sonarr-backup-nfs
-    rcloneConfig: |
-      # No config needed for local filesystem
+    schedule: "0 3 * * *"  # Daily at 3 AM
+  rsync:
     copyMethod: Snapshot
-    volumeSnapshotClassName: csi-ceph-blockpool
     storageClassName: ceph-rbd
-    accessModes:
-      - ReadWriteOnce
-    capacity: 10Gi
-    # Optional: Add these for better control
+    volumeSnapshotClassName: csi-ceph-blockpool
+    destinationPVC: sonarr-backup-nfs
+    # SSH not needed for PVC to PVC copy
+    sshKeys: ~
+    # Preserve permissions and ownership
+    rsyncOpts:
+      - "--archive"
+      - "--delete"
+      - "--hard-links"
+      - "--acls"
+      - "--xattrs"
+    # Set proper permissions for the mover pod
     moverSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
