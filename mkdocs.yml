@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 site_name: Homelab Infrastructure as Code
+site_url: https://homelab.samuel.computer
 copyright: Copyright &copy; 2025 sfcal
 
 repo_url: https://github.com/sfcal/homelab
@@ -35,6 +36,9 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+
+extra_files:
+  - CNAME
 
 nav:
   - Home: index.md
