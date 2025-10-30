@@ -1,5 +1,5 @@
 # Fixed Dockerfile with working YOLO-NAS model download
-FROM python:3.9
+FROM python:3.14
 
 WORKDIR /models
 
