@@ -1,77 +1,213 @@
+networks:
+  traefik-public:
+    external: true
+
+secrets:
+  cf-token:
+    file: ./cf-token
+
 services:
-  nzbget:
-    container_name: sabnzbd
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.sfc.al`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=https"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls=true"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-dashboard.tls.domains[0].main=sfc.al"
+      - "traefik.http.routers.traefik-dashboard.tls.domains[0].sans=*.sfc.al"
+    networks:
+      - traefik-public
+    secrets:
+      - cf-token
+    ports:
+      - 80:80
+      - 443:443
     environment:
-      - PGID=1024
-      - PUID=1024
-      - UMASK=022
+      - CF_API_EMAIL=samuel.f.calvert@gmail.com
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/sfcal/traefik/config/traefik.yaml:/traefik.yaml:ro
+      - /home/sfcal/traefik/config/acme.json:/acme.json
+      - /home/sfcal/traefik/config/config.yaml:/config.yaml:ro
+      - /home/sfcal/traefik/logs:/var/log/traefik
+
+  sabnzbd:
     image: linuxserver/sabnzbd
+    container_name: sabnzbd
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.sfc.al`)"
+      - "traefik.http.routers.sabnzbd.entrypoints=https"
+      - "traefik.http.routers.sabnzbd.tls=true"
+      - "traefik.http.routers.sabnzbd.tls.certresolver=cloudflare"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
+    networks:
+      - traefik-public
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
     ports:
       - "8080:8080"
-    restart: unless-stopped
     volumes:
       - /home/sfcal/sabnzbd:/config
       - /mnt/data/usenet:/data/usenet
-  nzbhydra2:
-    container_name: nzbhydra2
-    environment:
-      - PGID=1024
-      - PUID=1024
-      - UMASK=022
-    image: linuxserver/nzbhydra2
-    ports:
-      - "5076:5076"
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
     restart: unless-stopped
-    volumes:
-      - /home/sfcal/hydra2:/config
-  sonarr:
-    container_name: sonarr
-    depends_on:
-      - nzbget
-      - nzbhydra2
+    mem_limit: 2g
+    mem_reservation: 1g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.sfc.al`)"
+      - "traefik.http.routers.prowlarr.entrypoints=https"
+      - "traefik.http.routers.prowlarr.tls=true"
+      - "traefik.http.routers.prowlarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+    networks:
+      - traefik-public
     environment:
-      - PGID=1024
-      - PUID=1024
+      - PGID=1000
+      - PUID=1000
       - UMASK=022
+    ports:
+      - "9696:9696"
+    volumes:
+      - /home/sfcal/prowlarr:/config
+
+  sonarr:
     image: linuxserver/sonarr
-    links:
-      - nzbget
+    container_name: sonarr
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.sfc.al`)"
+      - "traefik.http.routers.sonarr.entrypoints=https"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+    networks:
+      - traefik-public
+    depends_on:
+      - sabnzbd
+      - prowlarr
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
     ports:
       - "8989:8989"
-    restart: unless-stopped
     volumes:
       - /home/sfcal/sonarr:/config
       - /mnt/data:/data
+
   radarr:
-    container_name: radarr
-    depends_on:
-      - nzbget
-      - nzbhydra2
-    environment:
-      - PGID=1024
-      - PUID=1024
-      - UMASK=022
     image: linuxserver/radarr
-    links:
-      - nzbget
+    container_name: radarr
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.sfc.al`)"
+      - "traefik.http.routers.radarr.entrypoints=https"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.routers.radarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+    networks:
+      - traefik-public
+    depends_on:
+      - sabnzbd
+      - prowlarr
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
     ports:
       - "7878:7878"
-    restart: unless-stopped
     volumes:
       - /home/sfcal/radarr:/config
       - /mnt/data:/data
-  plex:
-    container_name: plex
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.sfc.al`)"
+      - "traefik.http.routers.bazarr.entrypoints=https"
+      - "traefik.http.routers.bazarr.tls=true"
+      - "traefik.http.routers.bazarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+    networks:
+      - traefik-public
+    depends_on:
+      - sonarr
+      - radarr
     environment:
-      - PGID=1024
-      - PUID=1024
+      - PGID=1000
+      - PUID=1000
       - UMASK=022
-        #- PLEX_CLAIM=
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-    image: linuxserver/plex
+      - TZ=Etc/UTC
     ports:
-      - 32401:32400
+      - "6767:6767"
+    volumes:
+      - /home/sfcal/bazarr:/config
+      - /mnt/data/media/movies:/movies
+      - /mnt/data/media/tv:/tv
+
+  plex:
+    image: plexinc/pms-docker:plexpass
+    container_name: plex
+    restart: unless-stopped
+    mem_limit: 20g
+    mem_reservation: 10g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.plex.rule=Host(`plex.sfc.al`)"  # Fixed: added opening (
+      - "traefik.http.routers.plex.entrypoints=https"
+      - "traefik.http.routers.plex.tls=true"
+      - "traefik.http.routers.plex.tls.certresolver=cloudflare"
+      - "traefik.http.routers.plex.middlewares=plex-headers@file"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
+      - "traefik.http.services.plex.loadbalancer.server.scheme=http"  # Added: explicit scheme
+    networks:
+      - traefik-public
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
+      - PLEX_CLAIM=claim-yKBqzu2nPh2aTN6H-E8A
+      - ADVERTISE_IP=https://plex.sfc.al:443,http://10.2.0.5:32400
+    ports:
+      - 32400:32400
       - 1900:1900/udp
       - 5353:5353/udp
       - 8324:8324
@@ -80,61 +216,156 @@ services:
       - 32413:32413/udp
       - 32414:32414/udp
       - 32469:32469
-    restart: unless-stopped
     volumes:
-
       - /home/sfcal/plex:/config
       - /mnt/data/media:/data/media
-      - /mnt/data/transcode:/transcode
-      - /usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1
-      - /usr/lib/x86_64-linux-gnu/libnvidia-decode.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-decode.so.1
-      # Additional required NVIDIA libraries
-      - /usr/lib/x86_64-linux-gnu/libnvidia-egl-wayland.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-egl-wayland.so.1
-      - /usr/lib/x86_64-linux-gnu/libnvidia-gl.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-gl.so.1
+      - /dev/shm/plex:/transcode
     devices:
-      - /dev/nvidia0:/dev/nvidia0
-      - /dev/nvidiactl:/dev/nvidiactl
-      - /dev/nvidia-modeset:/dev/nvidia-modeset
-      - /dev/nvidia-uvm:/dev/nvidia-uvm
-    runtime: nvidia
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-  watchtower:
-    container_name: watchtower
-    environment:
-      - BASE_URL=/
-      - PGID=1024
-      - PUID=1024
-      - TZ=Etc/UTC
-      - UMASK=022
-    image: containrrr/watchtower
+      - /dev/dri:/dev/dri
+  tunarr:
+    image: chrisbenincasa/tunarr:latest
+    container_name: tunarr
     restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-  ombi:
-    container_name: ombi
+    mem_limit: 6g
+    mem_reservation: 3g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.tunarr.rule=Host(`tunarr.sfc.al`)"
+      - "traefik.http.routers.tunarr.entrypoints=https"
+      - "traefik.http.routers.tunarr.tls=true"
+      - "traefik.http.routers.tunarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.tunarr.loadbalancer.server.port=8000"
+    networks:
+      - traefik-public
     environment:
-      - BASE_URL=/
-      - PGID=1024
-      - PUID=1024
-      - TZ=Etc/UTC
+      - PGID=1000
+      - PUID=1000
       - UMASK=022
-    image: lscr.io/linuxserver/ombi:latest
+      - TZ=Etc/UTC
     ports:
-      - "3579:3579"
-    restart: unless-stopped
+      - "8000:8000"
     volumes:
-      - /home/sfcal/ombi:/config
-  tdarr:
-    container_name: tdarr
+      - /home/sfcal/tunarr:/config
+      - /mnt/data/media:/media:ro
+      - /dev/shm/tunarr:/cache
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - '993'
+
+  pulsarr:
+    image: lakker/pulsarr:latest
+    container_name: pulsarr
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.pulsarr.rule=Host(`pulsarr.sfc.al`)"
+      - "traefik.http.routers.pulsarr.entrypoints=https"
+      - "traefik.http.routers.pulsarr.tls=true"
+      - "traefik.http.routers.pulsarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.pulsarr.loadbalancer.server.port=3003"
+    networks:
+      - traefik-public
+    depends_on:
+      - sonarr
+      - radarr
+      - plex
     environment:
-      - PGID=1024
-      - PUID=1024
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
+      - TZ=Etc/UTC
+      - baseUrl=http://10.2.0.5
+      - port=3003
+      - logLevel=info
+      - NODE_ARGS=--log-both
+    ports:
+      - "3003:3003"
+    volumes:
+      - /home/sfcal/pulsarr/data:/app/data
+      - /home/sfcal/pulsarr/.env:/app/.env
+  
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.cleanuparr.rule=Host(`cleanuparr.sfc.al`)"
+      - "traefik.http.routers.cleanuparr.entrypoints=https"
+      - "traefik.http.routers.cleanuparr.tls=true"
+      - "traefik.http.routers.cleanuparr.tls.certresolver=cloudflare"
+      - "traefik.http.services.cleanuparr.loadbalancer.server.port=11011"
+    networks:
+      - traefik-public
+    depends_on:
+      - sonarr
+      - radarr
+      - sabnzbd
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
+      - TZ=Etc/UTC
+      - PORT=11011
+    ports:
+      - "11011:11011"
+    volumes:
+      - /home/sfcal/cleanuparr:/config
+
+  huntarr:
+    image: ghcr.io/plexguide/huntarr:latest
+    container_name: huntarr
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.huntarr.rule=Host(`huntarr.sfc.al`)"
+      - "traefik.http.routers.huntarr.entrypoints=https"
+      - "traefik.http.routers.huntarr.tls=true"
+      - "traefik.http.routers.huntarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.huntarr.loadbalancer.server.port=9705"
+    networks:
+      - traefik-public
+    depends_on:
+      - sonarr
+      - radarr
+      - prowlarr
+    environment:
+      - TZ=Etc/UTC
+    ports:
+      - "9705:9705"
+    volumes:
+      - /home/sfcal/huntarr:/config
+
+  tdarr-server:
+    image: ghcr.io/haveagitgat/tdarr:latest
+    container_name: tdarr-server
+    restart: unless-stopped
+    mem_limit: 10g
+    mem_reservation: 5g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.tdarr.rule=Host(`tdarr.sfc.al`)"
+      - "traefik.http.routers.tdarr.entrypoints=https"
+      - "traefik.http.routers.tdarr.tls=true"
+      - "traefik.http.routers.tdarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
+    networks:
+      - traefik-public
+    environment:
+      - PUID=1000
+      - PGID=1000
       - UMASK=022
       - TZ=Etc/UTC
       - serverIP=0.0.0.0
@@ -143,24 +374,84 @@ services:
       - internalNode=true
       - inContainer=true
       - ffmpegVersion=6
-      - nodeName=InternalNode
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=all
-    image: ghcr.io/haveagitgat/tdarr:latest
+      - nodeName=TdarrServer
     ports:
       - "8265:8265"
       - "8266:8266"
-    restart: unless-stopped
     volumes:
       - /home/sfcal/tdarr/server:/app/server
       - /home/sfcal/tdarr/configs:/app/configs
       - /home/sfcal/tdarr/logs:/app/logs
-      - /mnt/data/:/data
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      - /home/sfcal/tdarr/data:/app/data
+      - /mnt/data/media:/media
+      - /dev/shm/tdarr:/temp
+    devices:
+      - /dev/dri:/dev/dri
 
+#  tdarr-node:
+#    image: ghcr.io/haveagitgat/tdarr_node:latest
+#    container_name: tdarr-node
+#    restart: unless-stopped
+#    mem_limit: 16g
+#    mem_reservation: 8g
+#    networks:
+#      - traefik-public
+#    environment:
+#      - PUID=1000
+#      - PGID=1000
+#      - UMASK=022
+#      - TZ=Etc/UTC
+#      - nodeID=1
+#      - nodeIP=0.0.0.0
+#      - nodePort=8267
+#      - serverIP=tdarr-server
+#      - serverPort=8266
+#      - inContainer=true
+#      - internalnode=true
+#      - ffmpegVersion=6
+#      - nodeName=TdarrNode1
+#    volumes:
+#      - /home/sfcal/tdarr/configs:/app/configs
+#      - /home/sfcal/tdarr/logs:/app/logs
+#      - /mnt/data/media:/media
+#      - /dev/shm/tdarr:/temp
+#    devices:
+#      - /dev/dri:/dev/dri
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    container_name: frigate
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.frigate.rule=Host(`frigate.sfc.al`)"
+      - "traefik.http.routers.frigate.entrypoints=https"
+      - "traefik.http.routers.frigate.tls=true"
+      - "traefik.http.routers.frigate.tls.certresolver=cloudflare"
+      - "traefik.http.services.frigate.loadbalancer.server.port=5000"
+    networks:
+      - traefik-public
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - UMASK=022
+      - TZ=America/New_York
+      - FRIGATE_RTSP_PASSWORD=SuperSecure00  # Change this to a secure password
+    ports:
+      - "5000:5000"    # Web UI
+      - "8554:8554"    # RTSP
+      - "8555:8555/tcp" # WebRTC over TCP
+      - "8555:8555/udp" # WebRTC over UDP
+    volumes:
+      - /home/sfcal/frigate:/config
+      - /mnt/data/frigate:/media/frigate
+      - /home/sfcal/frigate/models:/models:ro
+      - /dev/shm/frigate:/dev/shm
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/dri:/dev/dri  # Intel GPU for hardware acceleration
+    privileged: true
+    shm_size: 1g
