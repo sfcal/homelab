@@ -1,35 +1,54 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "docker": {
-    "enabled": true,
-    "pinDigests": false
-  },
+  "extends": [
+    "config:recommended"
+  ],
   "packageRules": [
     {
+      "matchCategories": [
+        "docker"
+      ],
+      "enabled": true,
+      "pinDigests": false
+    },
+    {
       "description": "Auto-merge patch after 1 day",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["patch"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true,
       "minimumReleaseAge": "1 day",
       "automergeType": "pr"
     },
     {
       "description": "Auto-merge minor after 3 days",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
       "automerge": true,
       "minimumReleaseAge": "3 days",
       "automergeType": "pr"
     },
     {
       "description": "Manual review for major",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["major"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
       "minimumReleaseAge": "7 days"
     }
   ],
-  "schedule": ["before 6am every weekday"],
-  "stabilityDays": 1
+  "schedule": [
+    "before 6am every weekday"
+  ],
+  "minimumReleaseAge": "1 day"
 }
