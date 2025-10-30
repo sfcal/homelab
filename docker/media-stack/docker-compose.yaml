@@ -348,7 +348,7 @@ services:
       - /home/sfcal/huntarr:/config
 
   tdarr-server:
-    image: ghcr.io/haveagitgat/tdarr:2.27.04
+    image: ghcr.io/haveagitgat/tdarr:2.51.03
     container_name: tdarr-server
     restart: unless-stopped
     mem_limit: 10g
