@@ -14,7 +14,7 @@
 #         homelab-exe "$@"
 # }
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Set environment variables
 ENV KUBECONFIG="/home/devops/.kube/config" \
