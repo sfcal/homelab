@@ -321,7 +321,7 @@ services:
       - /home/sfcal/cleanuparr:/config
 
   huntarr:
-    image: ghcr.io/plexguide/huntarr:v1.0.8
+    image: ghcr.io/plexguide/huntarr:8.2.10
     container_name: huntarr
     restart: unless-stopped
     mem_limit: 1g
