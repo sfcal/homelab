@@ -290,7 +290,7 @@ services:
       - /home/sfcal/pulsarr/.env:/app/.env
   
   cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:0.9.2
+    image: ghcr.io/cleanuparr/cleanuparr:2.4.0
     container_name: cleanuparr
     restart: unless-stopped
     mem_limit: 1g
