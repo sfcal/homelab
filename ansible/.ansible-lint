@@ -1,4 +1,8 @@
 ---
+exclude_paths:
+  - collections/
+  - .cache/
+
 skip_list:
   - 'no-handler'
   - 'no-changed-when'
