@@ -5,21 +5,21 @@ module "k3s_cluster" {
   cluster_name = "k3s"
   
   # Deploy one master and one worker on each Proxmox node
-  proxmox_nodes = ["nyc-pve-01", "nyc-pve-02", "nyc-pve-03"]
+  proxmox_nodes = ["proxmox", "nyc-pve-02", "nyc-pve-03"]
   
-  template_name = "ubuntu-server-dev-base"
+  template_name = "ubuntu-server-nyc-base"
 
   # Storage settings
-  storage_pool   = "vm-disks"
+  storage_pool   = "local-lvm"
   network_bridge = "vmbr0"
 
   # Network configuration
   use_dhcp        = false
-  network_prefix  = "10.1.20"
+  network_prefix  = "10.1.30"
   master_ip_start = 51
   worker_ip_start = 41
-  gateway         = "10.1.20.1"
-  nameserver      = "10.1.20.1"
+  gateway         = "10.1.30.1"
+  nameserver      = "10.1.30.1"
 
   # Ceph network configuration
   enable_ceph_network  = true
@@ -41,14 +41,14 @@ module "dns_server" {
   source = "../../modules/dns-server"
 
   name         = "dev-dns-01"
-  proxmox_node = "nyc-pve-02"
+  proxmox_node = "proxmox"
   vmid         = 1000
   
   template_name = "ubuntu-server-dev-base"
   
   # Network
-  ip_address = "10.1.20.53"
-  gateway    = "10.1.20.1"
+  ip_address = "10.1.30.53"
+  gateway    = "10.1.30.1"
   nameserver = "1.1.1.1"  # Use Cloudflare until DNS is configured
   
   # Resources
@@ -57,7 +57,7 @@ module "dns_server" {
   disk_size = "20G"
   
   # Storage
-  storage_pool = "vm-disks"
+  storage_pool = "local-lvm"
   network_bridge = "vmbr0"
   
   # SSH
@@ -69,16 +69,16 @@ module "dns_server" {
 module "docker_vm" {
   source = "../../modules/docker-vm"
 
-  name         = "dev-docker-01"
-  proxmox_node = "nyc-pve-03"
+  name         = "nyc-docker-01"
+  proxmox_node = "proxmox"
   vmid         = 1001
   
-  template_name = "ubuntu-server-dev-base"
+  template_name = "ubuntu-server-nyc-base"
   
   # Network
-  ip_address = "10.1.20.54"
-  gateway    = "10.1.20.1"
-  nameserver = "10.1.20.53"  # Use our DNS server
+  ip_address = "10.1.30.54"
+  gateway    = "10.1.30.1"
+  nameserver = "1.1.1.1"
   
   # Resources
   memory    = 8192
@@ -86,7 +86,7 @@ module "docker_vm" {
   disk_size = "100G"
   
   # Storage
-  storage_pool = "vm-disks"
+  storage_pool = "local-lvm"
   network_bridge = "vmbr0"
   
   # SSH
