@@ -1,0 +1,13 @@
+[Unit]
+Description=Precision Time Protocol (PTP) service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/ptp4l -f /etc/ptp4l.conf -i {{ ptp4l_ptp_iface }}
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

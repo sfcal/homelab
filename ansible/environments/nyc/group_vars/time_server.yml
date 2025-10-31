@@ -1,0 +1,45 @@
+---
+# Time Server Configuration Variables
+# Copy this file to 'vars.yml' and customize for your environment
+
+# GPS/GNSS Configuration
+# Find your device with: ls /dev/ttyS* /dev/ttyUSB* or dmesg | grep tty
+gpsd_device: "/dev/ttyS5"
+gpsd_baud: "115200"
+
+# Time Card PHC device
+# Check available devices with: ls /dev/ptp*
+# Time Card is usually /dev/ptp3
+timecard_phc: "/dev/ptp3"
+
+# Network Interface for PTP
+# Must support hardware timestamping - check with: ethtool -T <interface>
+ptp_interface: "eno1"
+
+# NTP Client Access
+# CIDR notation for networks allowed to query NTP
+# Examples:
+#   - "10.0.0.0/8"      # All 10.x.x.x addresses
+#   - "192.168.1.0/24"  # Single /24 subnet
+#   - "0.0.0.0/0"       # Allow all (not recommended for production)
+ntp_allow_network: "10.1.0.0/16"
+
+# Backup NTP Servers (Stratum 1)
+# Customize based on your geographic location
+backup_ntp_servers:
+  - "clock.nyc.he.net"       # New York
+  - "tick.usno.navy.mil"     # US Naval Observatory
+  - "tock.usno.navy.mil"     # US Naval Observatory
+  - "time-a-g.nist.gov"      # NIST
+
+# PTP Configuration
+ptp_domain: 0                # PTP domain number (0-127)
+ptp_priority1: 128           # First priority (lower is better)
+ptp_priority2: 128           # Second priority (lower is better)
+ptp_announce_interval: -3    # Announce messages (log2 seconds, -3 = 125ms)
+ptp_sync_interval: -3        # Sync messages (log2 seconds, -3 = 125ms)
+
+# phc2sys Configuration
+phc2sys_offset: 0            # Initial offset correction
+phc2sys_update_rate: 16      # Update rate (updates per second)
+phc2sys_servo_step: 8        # Servo step threshold
