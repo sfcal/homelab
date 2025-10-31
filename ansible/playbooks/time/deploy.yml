@@ -3,10 +3,7 @@
   hosts: time
   become: true
   
-  vars_files:
-    - vars.yml
-  
-    handlers:
+  handlers:
     - name: Include various service handlers.
       ansible.builtin.import_tasks: handlers/main.yml
 
