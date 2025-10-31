@@ -1,0 +1,58 @@
+---
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main  # Changed from 'master' to match your setup
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  lint:
+    name: Lint Ansible & YAML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install yamllint ansible-core ansible-lint
+          pip install community.general community.docker community.sops
+
+      - name: Run yamllint
+        run: yamllint .
+
+      - name: Run ansible-lint
+        run: |
+          cd ansible
+          ansible-lint
+
+  syntax-check:
+    name: Ansible Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: |
+          pip install ansible-core
+          pip install community.general community.docker community.sops
+
+      - name: Check playbook syntax
+        run: |
+          cd ansible
+          ansible-playbook --syntax-check playbooks/dns/deploy.yml
+          ansible-playbook --syntax-check playbooks/time/deploy.yml
+          ansible-playbook --syntax-check playbooks/media/deploy.yml
