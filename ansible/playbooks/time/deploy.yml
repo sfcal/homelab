@@ -3,181 +3,25 @@
   hosts: time
   become: true
   
-  # Load custom variables if vars.yml exists, otherwise use defaults below
   vars_files:
     - vars.yml
   
-  vars:
-    # GPS/GNSS Configuration
-    gpsd_device: "/dev/ttyS5"
-    gpsd_baud: "115200"
-    
-    # Time Card PHC device
-    timecard_phc: "/dev/ptp3"
-    
-    # NIC for PTP (adjust to your NIC interface name)
-    ptp_interface: "eno1"
-    
-    # Network to allow NTP clients
-    ntp_allow_network: "10.1.0.0/16"
-    
-    # Backup NTP servers
-    backup_ntp_servers:
-      - "clock.nyc.he.net"
-      - "tick.usno.navy.mil"
-      - "tock.usno.navy.mil"
-      - "time-a-g.nist.gov"
-    
-    # PTP Configuration
-    ptp_domain: 0
-    ptp_priority1: 128
-    ptp_priority2: 128
-    ptp_announce_interval: -3
-    ptp_sync_interval: -3
-    
-    # phc2sys Configuration
-    phc2sys_offset: 0
-    phc2sys_update_rate: 16
-    phc2sys_servo_step: 8
-    
-  tasks:
-    - name: Install prerequisites
+    handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Update apt cache.
       ansible.builtin.apt:
-        name:
-          - libncurses-dev
-          - flex
-          - bison
-          - openssl
-          - vim
-          - libssl-dev
-          - dkms
-          - libelf-dev
-          - libudev-dev
-          - libpci-dev
-          - libiberty-dev
-          - autoconf
-          - zstd
-          - gpsd
-          - gpsd-clients
-          - chrony
-          - linuxptp
-        state: present
         update_cache: true
+        cache_valid_time: 1800
 
-    - name: Configure GPSd
-      ansible.builtin.lineinfile:
-        dest: /etc/default/gpsd
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
-        state: present
-      loop:
-        - regexp: '^START_DAEMON='
-          line: 'START_DAEMON="true"'
-        - regexp: '^USBAUTO='
-          line: 'USBAUTO="false"'
-        - regexp: '^DEVICES='
-          line: 'DEVICES="{{ gpsd_device }} -s {{ gpsd_baud }}"'
-        - regexp: '^GPSD_OPTIONS='
-          line: 'GPSD_OPTIONS="-n"'
-      notify: Restart gpsd
+  tasks:
+    - name: Configure GPS.
+      ansible.builtin.include_tasks: tasks/gps.yml
 
-    - name: Add gpsd user to dialout group
-      ansible.builtin.user:
-        name: gpsd
-        groups: dialout
-        append: true
+    - name: Configure chrony.
+      ansible.builtin.include_tasks: tasks/chrony.yml
 
-    - name: Enable and start GPSd
-      ansible.builtin.service:
-        name: gpsd
-        state: started
-        enabled: true
-
-    - name: Configure Chrony refclock
-      ansible.builtin.blockinfile:
-        path: /etc/chrony/chrony.conf
-        block: |
-          # Allow NTP clients on local network
-          allow {{ ntp_allow_network }}
-          
-          # Use OCP Time Card PHC as primary reference
-          refclock PHC {{ timecard_phc }} poll 0 refid AC precision 1e-9 tai prefer
-          
-          # Backup Stratum 1 servers
-          {% for server in backup_ntp_servers %}
-          server {{ server }} iburst
-          {% endfor %}
-        marker: "# {mark} ANSIBLE MANAGED TIME SERVER CONFIG"
-      notify: Restart chrony
-
-    - name: Enable and start Chrony
-      ansible.builtin.service:
-        name: chrony
-        state: started
-        enabled: true
-
-    - name: Create ptp4l configuration
-      ansible.builtin.template:
-        src: ptp4l.conf.j2
-        dest: /etc/ptp4l.conf
-        mode: '0644'
-      notify: Reload and restart ptp4l
-
-    - name: Create phc2sys systemd service
-      ansible.builtin.template:
-        src: phc2sys.service.j2
-        dest: /etc/systemd/system/phc2sys.service
-        mode: '0644'
-      notify: Reload and restart phc2sys
-
-    - name: Create ptp4l systemd service
-      ansible.builtin.template:
-        src: ptp4l.service.j2
-        dest: /etc/systemd/system/ptp4l.service
-        mode: '0644'
-      notify: Reload and restart ptp4l
-
-    - name: Enable and start phc2sys
-      ansible.builtin.service:
-        name: phc2sys
-        state: started
-        enabled: true
-
-    - name: Enable and start ptp4l
-      ansible.builtin.service:
-        name: ptp4l
-        state: started
-        enabled: true
-
-    - name: Deploy health check script
-      ansible.builtin.copy:
-        src: scripts/check-timeserver.sh
-        dest: /usr/local/bin/check-timeserver
-        mode: '0755'
-        owner: root
-        group: root
-
-  handlers:
-    - name: Restart gpsd
-      ansible.builtin.service:
-        name: gpsd
-        state: restarted
-
-    - name: Restart chrony
-      ansible.builtin.service:
-        name: chrony
-        state: restarted
-
-    - name: Reload and restart phc2sys
-      ansible.builtin.systemd:
-        name: phc2sys
-        state: restarted
-        enabled: true
-        daemon_reload: true
-
-    - name: Reload and restart ptp4l
-      ansible.builtin.systemd:
-        name: ptp4l
-        state: restarted
-        enabled: true
-        daemon_reload: true
+    - name: Configure PTP.
+      ansible.builtin.include_tasks: tasks/ptp.yml
