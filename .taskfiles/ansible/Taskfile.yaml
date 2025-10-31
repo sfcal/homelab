@@ -42,6 +42,16 @@ tasks:
       - echo "Updating DNS servers in {{.ENV}} environment"
       - echo "===================================="
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/update.yml
+  
+    # Media tasks
+  deploy-media:
+    desc: Deploy media stack
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - echo "===================================="
+      - echo "Deploying media stack in {{.ENV}} environment"
+      - echo "===================================="
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/deploy.yml --ask-become-pass
 
   # Utility tasks
   ping:

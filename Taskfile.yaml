@@ -7,7 +7,6 @@ vars:
 includes:
   ansible: .taskfiles/ansible
   docker: .taskfiles/docker
-  kubernetes: .taskfiles/kubernetes
   packer: .taskfiles/packer
   terraform: .taskfiles/terraform 
   
