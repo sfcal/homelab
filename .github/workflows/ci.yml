@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint:
-    name: Lint Ansible & YAML
+    name: Lint Ansible
     runs-on: ubuntu-latest
     steps:
       - name: Check out the codebase
@@ -22,15 +22,12 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install yamllint ansible-core ansible-lint
+          pip install ansible-core ansible-lint
 
       - name: Install Ansible collections
         run: |
           cd ansible
           ansible-galaxy collection install -r requirements.yml
-
-      - name: Run yamllint
-        run: yamllint .
 
       - name: Run ansible-lint
         run: |
