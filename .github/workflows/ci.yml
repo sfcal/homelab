@@ -4,8 +4,8 @@ on:
   pull_request:
   push:
     branches:
-      - main  # Changed from 'master' to match your setup
-  workflow_dispatch:  # Allows manual triggering
+      - main
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -20,10 +20,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install yamllint ansible-core ansible-lint
-          pip install community.general community.docker community.sops
+
+      - name: Install Ansible collections
+        run: |
+          ansible-galaxy collection install community.general
+          ansible-galaxy collection install community.docker
+          ansible-galaxy collection install community.sops
+          ansible-galaxy collection install ansible.posix
 
       - name: Run yamllint
         run: yamllint .
@@ -45,10 +51,15 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Ansible
+      - name: Install Python dependencies
+        run: pip install ansible-core
+
+      - name: Install Ansible collections
         run: |
-          pip install ansible-core
-          pip install community.general community.docker community.sops
+          ansible-galaxy collection install community.general
+          ansible-galaxy collection install community.docker
+          ansible-galaxy collection install community.sops
+          ansible-galaxy collection install ansible.posix
 
       - name: Check playbook syntax
         run: |
