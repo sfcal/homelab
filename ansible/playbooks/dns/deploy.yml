@@ -1,6 +1,6 @@
 ---
 - name: Deploy DNS Server (BIND9)
-  hosts: dns
+  hosts: dns_servers
   become: true
   
   handlers:

@@ -26,10 +26,8 @@ jobs:
 
       - name: Install Ansible collections
         run: |
-          ansible-galaxy collection install community.general
-          ansible-galaxy collection install community.docker
-          ansible-galaxy collection install community.sops
-          ansible-galaxy collection install ansible.posix
+          cd ansible
+          ansible-galaxy collection install -r requirements.yml
 
       - name: Run yamllint
         run: yamllint .
@@ -56,14 +54,15 @@ jobs:
 
       - name: Install Ansible collections
         run: |
-          ansible-galaxy collection install community.general
-          ansible-galaxy collection install community.docker
-          ansible-galaxy collection install community.sops
-          ansible-galaxy collection install ansible.posix
+          cd ansible
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Verify collections
+        run: ansible-galaxy collection list
 
       - name: Check playbook syntax
         run: |
           cd ansible
-          ansible-playbook --syntax-check playbooks/dns/deploy.yml
-          ansible-playbook --syntax-check playbooks/time/deploy.yml
-          ansible-playbook --syntax-check playbooks/media/deploy.yml
+          ansible-playbook --syntax-check playbooks/dns/deploy.yml -i environments/wil/hosts.ini
+          ansible-playbook --syntax-check playbooks/time/deploy.yml -i environments/wil/hosts.ini
+          ansible-playbook --syntax-check playbooks/media/deploy.yml -i environments/wil/hosts.ini
