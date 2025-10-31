@@ -1,0 +1,23 @@
+---
+- name: Deploy Media Stack
+  hosts: media
+  become: true
+  
+  tasks:
+    - name: Create deploy directory
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        mode: '0755'
+    
+    - name: Copy docker-compose file
+      copy:
+        src: ../../../docker/media-stack/docker-compose.yaml
+        dest: "{{ deploy_path }}/docker-compose.yml"
+      register: compose_file
+    
+    - name: Restart stack if compose file changed
+      community.docker.docker_compose_v2:
+        project_src: "{{ deploy_path }}"
+        state: present
+        recreate: "{{ 'always' if compose_file.changed else 'smart' }}"
