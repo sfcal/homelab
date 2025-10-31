@@ -1,11 +1,13 @@
 creation_rules:
   - path_regex: kubernetes/.*\.sops\.ya?ml
     encrypted_regex: "^(data|stringData)$"
-    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: kubernetes/.*secrets?\.ya?ml
     encrypted_regex: "^(data|stringData)$"
-    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: terraform/.*\.tfvars
-    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: packer/.*\.pkrvars\.hcl
-    age: age1yzc0gc34lxth2dyr4fr42nwuv45ac66r8c26cjredf8gysmrjstqrfw764
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
+  - path_regex: (docker|ansible)/.*/(cf-token|.*secrets.*\.ya?ml)
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
