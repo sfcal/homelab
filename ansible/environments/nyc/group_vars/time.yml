@@ -1,45 +1,51 @@
 ---
-# Time Server Configuration Variables
-# Copy this file to 'vars.yml' and customize for your environment
-
-# GPS/GNSS Configuration
-# Find your device with: ls /dev/ttyS* /dev/ttyUSB* or dmesg | grep tty
-gpsd_device: "/dev/ttyS5"
+# GPSd configuration.
+gpsd_state: stopped
+gpsd_enabled: false
+gpsd_devices: "/dev/ttyAMA0"
 gpsd_baud: "115200"
+gpsd_options: "-s {{ gpsd_baud }} -n"
 
-# Time Card PHC device
-# Check available devices with: ls /dev/ptp*
-# Time Card is usually /dev/ptp3
-timecard_phc: "/dev/ptp3"
+# Refclock to be used as a time source.
+# See: https://chrony-project.org/doc/3.4/chrony.conf.html#refclock
+chrony_refclock: |
+  # Uncomment to use NIC's PHC as time source.
+  # refclock PHC /dev/ptp0 poll 0 dpoll -5 tai  # Use NIC's PHC
 
-# Network Interface for PTP
-# Must support hardware timestamping - check with: ethtool -T <interface>
-ptp_interface: "eno1"
+  # Uncomment to use GPS module directly as time source.
+  refclock SHM 0 refid NMEA precision 1e-3 poll 0 filter 3
 
-# NTP Client Access
-# CIDR notation for networks allowed to query NTP
-# Examples:
-#   - "10.0.0.0/8"      # All 10.x.x.x addresses
-#   - "192.168.1.0/24"  # Single /24 subnet
-#   - "0.0.0.0/0"       # Allow all (not recommended for production)
-ntp_allow_network: "10.1.0.0/16"
+  # Uncomment to use PPS source (e.g. GPS PPS to GPIO pin 18)
+  #refclock PPS /dev/pps0 refid PPS lock NMEA poll 3 trust
 
-# Backup NTP Servers (Stratum 1)
-# Customize based on your geographic location
-backup_ntp_servers:
-  - "clock.nyc.he.net"       # New York
-  - "tick.usno.navy.mil"     # US Naval Observatory
-  - "tock.usno.navy.mil"     # US Naval Observatory
-  - "time-a-g.nist.gov"      # NIST
+  # Uncomment to log timing statistics.
+  #log tracking measurements statistics
 
-# PTP Configuration
-ptp_domain: 0                # PTP domain number (0-127)
-ptp_priority1: 128           # First priority (lower is better)
-ptp_priority2: 128           # Second priority (lower is better)
-ptp_announce_interval: -3    # Announce messages (log2 seconds, -3 = 125ms)
-ptp_sync_interval: -3        # Sync messages (log2 seconds, -3 = 125ms)
+# Hosts allowed to query chrony for NTP time.
+# See: https://chrony-project.org/doc/3.4/chrony.conf.html#allow
+chrony_allow: "10.0.2.0/24"
 
-# phc2sys Configuration
-phc2sys_offset: 0            # Initial offset correction
-phc2sys_update_rate: 16      # Update rate (updates per second)
-phc2sys_servo_step: 8        # Servo step threshold
+# Force i226 eth1 interface to 1 Gbps speed.
+# See: https://github.com/geerlingguy/time-pi/issues/2
+i226_force_1gbps: true
+
+# PTP 4 Linux options.
+ptp4l_version_latest: true  # Install jclark's linuxptp v4 .deb if true
+ptp4l_ptp_iface: eth1
+ptp4l_service_state: started
+ptp4l_service_enabled: true
+
+ts2phc_service_state: started
+ts2phc_service_enabled: true
+ts2phc_logging_level: 7
+ts2phc_clock: '/dev/ptp0'
+ts2phc_source: 'generic'
+ts2phc_extra_opts: '-m'
+# If not using custom IGC driver, i226 needs these options defined because of
+# quirks. See: https://github.com/geerlingguy/time-pi/issues/13
+
+phc2sys_service_state: started
+phc2sys_service_enabled: true
+phc2sys_clock: 'CLOCK_REALTIME'
+phc2sys_source: '/dev/ptp0'
+phc2sys_extra_opts: '-O 37 -m'

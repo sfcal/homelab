@@ -1,0 +1,26 @@
+---
+- name: Install GPS prerequisites.
+  ansible.builtin.apt:
+    name:
+      - gpsd
+      - gpsd-clients
+    state: present
+
+- name: Configure gpsd.
+  ansible.builtin.lineinfile:
+    dest: /etc/default/gpsd
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  notify: Restart gpsd
+  with_items:
+    - regexp: '^DEVICES='
+      line: 'DEVICES="{{ gpsd_devices }}"'
+    - regexp: '^GPSD_OPTIONS='
+      line: 'GPSD_OPTIONS="{{ gpsd_options }}"'
+
+- name: Configure gpsd service.
+  ansible.builtin.service:
+    name: gpsd
+    state: "{{ gpsd_state }}"
+    enabled: "{{ gpsd_enabled }}"

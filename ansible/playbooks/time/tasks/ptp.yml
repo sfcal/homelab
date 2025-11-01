@@ -1,0 +1,57 @@
+---
+- name: Install linuxptp.
+  ansible.builtin.apt:
+    name: linuxptp
+    state: present
+
+- name: Copy ts2phc systemd unit file into place.
+  ansible.builtin.template:
+    src: ts2phc.unit.j2
+    dest: /etc/systemd/system/ts2phc.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: Restart ts2phc
+
+- name: Ensure ts2phc service is in the correct state.
+  ansible.builtin.service:
+    name: ts2phc
+    state: "{{ ts2phc_service_state }}"
+    enabled: "{{ ts2phc_service_enabled }}"
+
+- name: Copy phc2sys systemd unit file into place.
+  ansible.builtin.template:
+    src: phc2sys.unit.j2
+    dest: /etc/systemd/system/phc2sys.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: Restart phc2sys
+
+- name: Ensure phc2sys service is in the correct state.
+  ansible.builtin.service:
+    name: phc2sys
+    state: "{{ phc2sys_service_state }}"
+    enabled: "{{ phc2sys_service_enabled }}"
+
+- name: Add ptp4l configuration.
+  ansible.builtin.template:
+    src: "templates/ptp4l.conf.j2"
+    dest: "/etc/ptp4l.conf"
+    mode: 0644
+  notify: Restart ptp4l
+
+- name: Copy ptp4l systemd unit file into place.
+  ansible.builtin.template:
+    src: ptp4l.unit.j2
+    dest: /etc/systemd/system/ptp4l.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: Restart ptp4l
+
+- name: Ensure ptp4l service is in the correct state.
+  ansible.builtin.service:
+    name: ptp4l
+    state: "{{ ptp4l_service_state }}"
+    enabled: "{{ ptp4l_service_enabled }}"

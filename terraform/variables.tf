@@ -1,5 +1,7 @@
 /**
- * # NYC Environment Variables
+ * # Shared Variables
+ *
+ * Variable definitions for all environments
  */
 
 # -- Provider Configuration
@@ -47,4 +49,5 @@ variable "vms" {
     onboot         = optional(bool, true)
     ssh_user       = string
   }))
+  default = {}
 }

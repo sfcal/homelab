@@ -1,7 +1,7 @@
 /**
  * # Provider Configuration
  *
- * Configuration for the Proxmox provider
+ * Provider configuration for NYC environment
  */
 
 provider "proxmox" {

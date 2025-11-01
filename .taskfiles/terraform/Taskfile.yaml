@@ -8,57 +8,34 @@ tasks:
     desc: Deploy all infrastructure for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'
     cmds:
-      - echo "===================================="
-      - echo "Deploying all infrastructure for {{.ENV}} environment"
-      - echo "===================================="
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform apply -auto-approve
 
-  deploy-k3s:
-    desc: Deploy only K3s cluster for {{.ENV}} environment
+  deploy-vm:
+    desc: Deploy specific VM for {{.ENV}} environment (requires VM=vm-key)
     dir: '{{.ROOT_DIR}}/terraform'
     cmds:
-      - echo "===================================="
-      - echo "Deploying K3s cluster for {{.ENV}} environment"
-      - echo "===================================="
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform apply -target=module.k3s_cluster -auto-approve
-
-  deploy-dns:
-    desc: Deploy only DNS server for {{.ENV}} environment
-    dir: '{{.ROOT_DIR}}/terraform'
-    cmds:
-      - echo "===================================="
-      - echo "Deploying DNS server for {{.ENV}} environment"
-      - echo "===================================="
-      - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform apply -target=module.dns_server -auto-approve
-  
-  deploy-docker:
-    desc: Deploy docker server for {{.ENV}} environment
-    dir: '{{.ROOT_DIR}}/terraform'
-    cmds:
-      - echo "===================================="
-      - echo "Deploying DNS server for {{.ENV}} environment"
-      - echo "===================================="
-      - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform apply -target=module.docker_vm -auto-approve
+      - cd {{.ENV_DIR}} && terraform apply -target='module.infrastructure.module.vms["{{.VM}}"]' -auto-approve
 
   destroy:
     desc: Destroy all VMs and infrastructure for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'
     cmds:
-      - echo "===================================="
-      - echo "DESTROYING all infrastructure for {{.ENV}} environment"
-      - echo "===================================="
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform destroy -auto-approve
+
+  destroy-vm:
+    desc: Destroy specific VM for {{.ENV}} environment (requires VM=vm-key)
+    dir: '{{.ROOT_DIR}}/terraform'
+    cmds:
+      - cd {{.ENV_DIR}} && terraform init
+      - cd {{.ENV_DIR}} && terraform destroy -target='module.infrastructure.module.vms["{{.VM}}"]' -auto-approve
 
   clean:
     desc: Clean up all Terraform files for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'
     cmds:
-      - echo "Cleaning Terraform files for {{.ENV}}..."
       - rm -rf {{.ENV_DIR}}/.terraform
       - rm -f {{.ENV_DIR}}/.terraform.lock.hcl
       - rm -f {{.ENV_DIR}}/terraform.tfstate*

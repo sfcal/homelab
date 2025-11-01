@@ -1,7 +1,5 @@
 /**
  * # Terraform and Provider Versions
- *
- * Terraform and provider version constraints
  */
 
 terraform {
