@@ -11,7 +11,18 @@
   community.general.timezone:
     name: America/New_York
 
-- name: Deploy BIND9 configuration files.
+- name: Deploy BIND9 named.conf configuration.
+  ansible.builtin.template:
+    src: "templates/named.conf.j2"
+    dest: "/etc/bind/named.conf"
+    owner: bind
+    group: bind
+    mode: 0644
+  notify:
+    - Check bind9 config
+    - Restart bind9
+
+- name: Deploy BIND9 zone files (primary only).
   ansible.builtin.template:
     src: "templates/{{ item }}.j2"
     dest: "/etc/bind/{{ item }}"
@@ -20,12 +31,12 @@
     mode: 0644
   notify:
     - Check bind9 config
-    - Restart bind9
+    - Reload bind9
   with_items:
-    - named.conf
     - local-sfc-al.zone
     - sfc-al.zone
     - 0.1.10.in-addr.arpa.zone
+  when: (dns_servers | selectattr('ip', 'equalto', ansible_default_ipv4.address) | first).role == 'primary'
 
 - name: Ensure BIND9 is running and enabled.
   ansible.builtin.service:

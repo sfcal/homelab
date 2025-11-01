@@ -1,1 +1,39 @@
-TODO
+$ORIGIN local.sfc.al.
+$TTL 86400	; 1 day
+@	IN SOA	ns.local.sfc.al. admin.local.sfc.al. (
+				{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01 ; serial (generated)
+				3600       ; refresh (1 hour)
+				3600       ; retry (1 hour)
+				2419200    ; expire (4 weeks)
+				3600       ; minimum (1 hour)
+				)
+			NS	ns.local.sfc.al.
+
+; Name servers
+ns		IN A	{{ dns_servers | selectattr('role', 'equalto', 'primary') | map(attribute='ip') | first }}
+
+; Infrastructure servers
+unifi		IN A	10.1.0.1
+{% for server in dns_servers %}
+{{ server.container_name }}	IN A	{{ server.ip }}
+{% endfor %}
+
+; VM Hosts / Kubernetes Nodes
+nyc-pve-01	IN A	10.1.20.11
+nyc-pve-02	IN A	10.1.20.12
+nyc-pve-03	IN A	10.1.20.13
+
+; Kubernetes cluster nodes (update with your actual IPs)
+k8s-master-01	IN A	10.1.10.51
+k8s-master-02	IN A	10.1.10.52
+k8s-master-03	IN A	10.2.10.53
+
+; Kubernetes Services (all point to Traefik LoadBalancer IP)
+nginx		IN A	10.2.20.140
+www.nginx	IN CNAME nginx.local.sfc.al.
+grafana		IN A	10.2.20.140
+longhorn	IN A	10.2.20.140
+traefik		IN A	10.2.20.140
+
+; Wildcard for any other services
+*		IN A	10.2.20.140
