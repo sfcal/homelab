@@ -9,21 +9,18 @@ tasks:
     desc: Deploy DNS servers
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - echo "Deploying DNS servers in {{.ENV}} environment"
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
 
   deploy-media:
     desc: Deploy media stack
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - echo "Deploying media stack in {{.ENV}} environment"
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/deploy.yml --ask-become-pass
 
   deploy-time:
     desc: Deploy NTP/PTP server
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - echo "Deploying media stack in {{.ENV}} environment"
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/time/deploy.yml
 
   # Utility tasks
@@ -31,7 +28,6 @@ tasks:
     desc: Ping all hosts in inventory
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - echo "Pinging all hosts in {{.ENV}} environment..."
       - ansible -i {{.HOSTS_FILE}} all -m ping
 
 
