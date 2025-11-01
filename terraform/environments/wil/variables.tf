@@ -1,7 +1,5 @@
 /**
- * # Development Environment Variables
- *
- * Variable definitions for the development environment
+ * # WIL Environment Variables
  */
 
 # -- Provider Configuration
@@ -27,4 +25,26 @@ variable "ssh_public_key" {
   description = "SSH public key for VM access"
   type        = string
   sensitive   = true
+}
+
+# -- VM Configuration
+variable "vms" {
+  description = "Map of VMs to create"
+  type = map(object({
+    name           = string
+    description    = optional(string, "Virtual Machine")
+    proxmox_node   = string
+    vmid           = number
+    template_name  = string
+    ip_address     = string
+    gateway        = string
+    nameserver     = string
+    cores          = optional(number, 2)
+    memory         = optional(number, 2048)
+    disk_size      = optional(string, "20G")
+    storage_pool   = string
+    network_bridge = optional(string, "vmbr0")
+    onboot         = optional(bool, true)
+    ssh_user       = string
+  }))
 }

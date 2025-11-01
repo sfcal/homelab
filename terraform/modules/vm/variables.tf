@@ -1,5 +1,5 @@
 /**
- * # Docker VM Module Variables
+ * # Generic VM Module Variables
  */
 
 variable "name" {
@@ -10,7 +10,7 @@ variable "name" {
 variable "description" {
   description = "Description of the VM"
   type        = string
-  default     = "Docker Host"
+  default     = "Virtual Machine"
 }
 
 variable "proxmox_node" {
@@ -37,19 +37,19 @@ variable "onboot" {
 variable "cores" {
   description = "Number of CPU cores"
   type        = number
-  default     = 4
+  default     = 2
 }
 
 variable "memory" {
   description = "Memory in MB"
   type        = number
-  default     = 8192
+  default     = 2048
 }
 
 variable "disk_size" {
   description = "Disk size"
   type        = string
-  default     = "100G"
+  default     = "20G"
 }
 
 variable "storage_pool" {
