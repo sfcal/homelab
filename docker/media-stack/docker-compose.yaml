@@ -290,7 +290,7 @@ services:
       - /opt/pulsarr/.env:/app/.env
   
   cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:2.4.0
+    image: ghcr.io/cleanuparr/cleanuparr:2.4.3
     container_name: cleanuparr
     restart: unless-stopped
     mem_limit: 1g
