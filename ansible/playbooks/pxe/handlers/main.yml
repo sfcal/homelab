@@ -1,1 +1,16 @@
-TODO
+---
+- name: Restart netbootxyz
+  community.docker.docker_compose_v2:
+    project_src: /opt/netbootxyz
+    state: restarted
+    restarted: true
+
+- name: Stop netbootxyz
+  community.docker.docker_compose_v2:
+    project_src: /opt/netbootxyz
+    state: stopped
+
+- name: Start netbootxyz
+  community.docker.docker_compose_v2:
+    project_src: /opt/netbootxyz
+    state: present

@@ -1,6 +1,6 @@
 ---
 - name: Deploy PXE Server (netbootxyz)
-  hosts: pxe_server
+  hosts: netbootxyz
   become: true
   
   handlers:
