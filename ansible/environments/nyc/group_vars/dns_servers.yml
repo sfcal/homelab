@@ -1,0 +1,11 @@
+# DNS Forwarders
+dns_forwarders:
+  - "1.1.1.1"
+  - "1.0.0.1"
+
+# Trusted Networks
+dns_trusted_networks:
+  - localhost
+  - localnets
+  - 10.2.0.0/16
+  - 10.1.0.0/16

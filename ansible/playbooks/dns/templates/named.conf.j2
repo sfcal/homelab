@@ -1,8 +1,7 @@
 acl trusted {
-  localhost;
-  localnets;
-  10.2.0.0/16;
-  10.1.0.0/16;
+{% for network in dns_trusted_networks %}
+  {{ network }};
+{% endfor %}
 };
 
 options {
@@ -11,10 +10,11 @@ options {
   // Enable recursion
   recursion yes;
   
-  // Forward to Cloudflare DNS for external resolution
+  // Forward to external DNS
   forwarders {
-    1.1.1.1;
-    1.0.0.1;
+{% for forwarder in dns_forwarders %}
+    {{ forwarder }};
+{% endfor %}
   };
   
   // Enable query logging for debugging
@@ -41,7 +41,7 @@ options {
 zone "plex.sfc.al" IN {
   type forward;
   forward only;
-  forwarders { 1.1.1.1; 1.0.0.1; };
+  forwarders { {% for forwarder in dns_forwarders %}{{ forwarder }}; {% endfor %}};
 };
 
 // Split horizon zone for public domain
