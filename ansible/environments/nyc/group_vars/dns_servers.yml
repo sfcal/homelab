@@ -9,3 +9,68 @@ dns_trusted_networks:
   - localnets
   - 10.2.0.0/16
   - 10.1.0.0/16
+
+# Forward Zone A Records
+dns_a_records:
+  - name: "ns"
+    ip: "10.1.30.53"
+    
+  - name: "sonarr"
+    ip: "10.2.0.5"
+
+  - name: "radarr"
+    ip: "10.2.0.5"
+
+  - name: "prowlarr"
+    ip: "10.2.0.5"
+
+  - name: "sabnzbd"
+    ip: "10.2.0.5"
+
+  - name: "bazarr"
+    ip: "10.2.0.5"
+
+  - name: "ersatztv"
+    ip: "10.2.0.5"
+
+  - name: "pulsarr"
+    ip: "10.2.0.5"
+
+  - name: "cleanuparr"
+    ip: "10.2.0.5"
+
+  - name: "huntarr"
+    ip: "10.2.0.5"
+
+  - name: "tdarr"
+    ip: "10.2.0.5"
+
+  - name: "tunarr"
+    ip: "10.2.0.5"
+
+  - name: "frigate"
+    ip: "10.2.0.5"
+
+  - name: "grafana"
+    ip: "10.2.0.5"
+
+  - name: "prometheus"
+    ip: "10.2.0.5"
+
+  - name: "loki"
+    ip: "10.2.0.5"
+
+  - name: "cadvisor"
+    ip: "10.2.0.5"
+
+  - name: "time"
+    ip: "10.1.30.123"
+
+# Reverse Zone PTR Records
+dns_ptr_records:
+  - octet: "1"
+    hostname: "unifi.sfc.al."
+  - octet: "53"
+    hostname: "dns.sfc.al."
+  - octet: "123"
+    hostname: "time.sfc.al."
