@@ -1,4 +1,9 @@
 ---
+- name: Update apt cache.
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 1800
+
 - name: Set same timezone on every Server
   community.general.timezone:
     name: "{{ system_timezone }}"

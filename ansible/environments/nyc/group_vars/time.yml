@@ -1,4 +1,6 @@
 ---
+system_timezone: America/New_York
+
 # GPSd configuration.
 gpsd_state: stopped
 gpsd_enabled: false

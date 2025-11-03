@@ -1,3 +1,6 @@
+---
+system_timezone: America/New_York
+
 # DNS Forwarders
 dns_forwarders:
   - "1.1.1.1"
@@ -14,55 +17,38 @@ dns_trusted_networks:
 dns_a_records:
   - name: "ns"
     ip: "10.1.30.53"
-    
   - name: "sonarr"
     ip: "10.2.0.5"
-
   - name: "radarr"
     ip: "10.2.0.5"
-
   - name: "prowlarr"
     ip: "10.2.0.5"
-
   - name: "sabnzbd"
     ip: "10.2.0.5"
-
   - name: "bazarr"
     ip: "10.2.0.5"
-
   - name: "ersatztv"
     ip: "10.2.0.5"
-
   - name: "pulsarr"
     ip: "10.2.0.5"
-
   - name: "cleanuparr"
     ip: "10.2.0.5"
-
   - name: "huntarr"
     ip: "10.2.0.5"
-
   - name: "tdarr"
     ip: "10.2.0.5"
-
   - name: "tunarr"
     ip: "10.2.0.5"
-
   - name: "frigate"
     ip: "10.2.0.5"
-
   - name: "grafana"
     ip: "10.2.0.5"
-
   - name: "prometheus"
     ip: "10.2.0.5"
-
   - name: "loki"
     ip: "10.2.0.5"
-
   - name: "cadvisor"
     ip: "10.2.0.5"
-
   - name: "time"
     ip: "10.1.30.123"
 

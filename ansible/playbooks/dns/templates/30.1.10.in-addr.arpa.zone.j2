@@ -10,5 +10,5 @@ $TTL 86400	; 1 day
 
 ; PTR Records
 {% for record in dns_ptr_records %}
-{{ record.octet }}.0	IN PTR	{{ record.hostname }}
+{{ record.octet }}	IN PTR	{{ record.hostname }}
 {% endfor %}

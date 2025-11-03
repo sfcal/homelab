@@ -8,10 +8,8 @@
       ansible.builtin.import_tasks: handlers/main.yml
 
   pre_tasks:
-    - name: Update apt cache.
-      ansible.builtin.apt:
-        update_cache: true
-        cache_valid_time: 1800
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../common/prereq.yml
 
   tasks:
     - name: Configure GPS.
