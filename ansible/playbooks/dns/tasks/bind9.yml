@@ -23,9 +23,8 @@
     - Restart bind9
   with_items:
     - named.conf
-    - local-sfc-al.zone
     - sfc-al.zone
-    - 0.1.10.in-addr.arpa.zone
+    - 30.1.10.in-addr.arpa.zone
 
 - name: Ensure BIND9 is running and enabled.
   ansible.builtin.service:

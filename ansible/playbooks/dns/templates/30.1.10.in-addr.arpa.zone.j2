@@ -1,1 +1,14 @@
-TODO 
+$TTL 86400	; 1 day
+@	IN SOA	ns.sfc.al. admin.sfc.al. (
+				{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01 ; serial
+				3600       ; refresh (1 hour)
+				3600       ; retry (1 hour)
+				2419200    ; expire (4 weeks)
+				3600       ; minimum (1 hour)
+				)
+	NS	ns.sfc.al.
+
+; Infrastructure servers
+1.0	IN PTR	unifi.sfc.al.
+53.0	IN PTR	dns.sfc.al.
+123.0	IN PTR	time.sfc.al.
