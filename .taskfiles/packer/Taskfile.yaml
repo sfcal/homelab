@@ -46,6 +46,14 @@ tasks:
           TEMPLATE_PREFIX: debian-bookworm
           VAR_FILE: 'environments/{{.ENV}}/debian-variables.pkrvars.hcl'
 
+  build-netboot:
+    desc: Build Debian template
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_PREFIX: netboot-vm
+          VAR_FILE: 'environments/{{.ENV}}/netboot-variables.pkrvars.hcl'
+
   clean:
     desc: Clean up Packer artifacts
     dir: '{{.ROOT_DIR}}/packer'

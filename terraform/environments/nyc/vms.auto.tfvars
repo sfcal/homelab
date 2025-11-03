@@ -51,13 +51,13 @@ vms = {
     ssh_user       = "sfcal"
   }
 
-  test_server = {
-    name           = "test-01"
-    description    = "NTP Server"
+  netboot_server = {
+    name           = "netbootxyz"
+    description    = "Netboot Server"
     proxmox_node   = "proxmox"
     vmid           = 1101
     template_name  = "ubuntu-server-nyc-base"
-    ip_address     = "10.1.30.124"
+    ip_address     = "10.1.30.69"
     gateway        = "10.1.30.1"
     nameserver     = "10.1.30.1"
     cores          = 1

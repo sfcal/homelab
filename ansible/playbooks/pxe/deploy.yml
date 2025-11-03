@@ -1,6 +1,6 @@
 ---
-- name: Deploy DNS Server (BIND9)
-  hosts: dns_server
+- name: Deploy PXE Server (netbootxyz)
+  hosts: pxe_server
   become: true
   
   handlers:
@@ -12,5 +12,5 @@
       ansible.builtin.include_tasks: ../common/prereq.yml
 
   tasks:
-    - name: Configure BIND9.
-      ansible.builtin.include_tasks: tasks/bind9.yml
+    - name: Configure netbootxyz.
+      ansible.builtin.include_tasks: tasks/netbootxyz.yml
