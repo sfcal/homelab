@@ -19,6 +19,11 @@
     mode: '0644'
   notify: Restart media-stack
 
+- name: Create traefik-public network
+  community.docker.docker_network:
+    name: traefik-public
+    state: present
+
 - name: Start media-stack container
   community.docker.docker_compose_v2:
     project_src: "{{ deploy_path }}"
@@ -27,4 +32,4 @@
 
 - name: Display media-stack status
   ansible.builtin.debug:
-    var: media_stack_output
+    msg: "Media stack deployment succeeded"

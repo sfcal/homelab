@@ -12,5 +12,8 @@
       ansible.builtin.include_tasks: ../common/prereq.yml
 
   tasks:
+    - name: Configure nfs.
+      ansible.builtin.include_tasks: tasks/nfs.yml
+      
     - name: Configure media-stack.
       ansible.builtin.include_tasks: tasks/media-stack.yml
