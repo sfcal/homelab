@@ -1,1 +1,60 @@
-TODO
+---
+- name: Create step-ca directory structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ step_ca_deploy_path }}"
+    - "{{ step_ca_deploy_path }}/data"
+
+- name: Set ownership on step-ca data directory
+  ansible.builtin.file:
+    path: "{{ step_ca_deploy_path }}/data"
+    owner: "1000"
+    group: "1000"
+    recurse: yes
+
+- name: Deploy step-ca docker-compose file
+  ansible.builtin.template:
+    src: "../templates/docker-compose.yaml.j2"
+    dest: "{{ step_ca_deploy_path }}/docker-compose.yaml"
+    mode: '0644'
+  notify: Restart step-ca
+
+- name: Start step-ca container
+  community.docker.docker_compose_v2:
+    project_src: "{{ step_ca_deploy_path }}"
+    state: present
+  register: step_ca_output
+
+- name: Wait for step-ca to initialize
+  ansible.builtin.pause:
+    seconds: 5
+  when: step_ca_output.changed
+
+- name: Retrieve step-ca container logs
+  ansible.builtin.command: docker logs step-ca
+  register: step_ca_logs
+  changed_when: false
+  when: step_ca_output.changed
+
+- name: Extract step-ca password from logs
+  ansible.builtin.set_fact:
+    step_ca_password: "{{ (step_ca_logs.stderr | regex_search('Password: (.+)', '\\1')) | default([]) | first | default('') }}"
+  when:
+    - step_ca_output.changed
+    - step_ca_logs.stderr is defined
+
+- name: Display step-ca credentials
+  ansible.builtin.debug:
+    msg:
+      - "Step CA deployment succeeded!"
+      - "Access URL: https://{{ step_ca_hostname }}:{{ step_ca_port }}"
+      - "Admin Password: {{ step_ca_password | default('Check container logs manually with: docker logs step-ca') }}"
+  when: step_ca_output.changed
+
+- name: Display step-ca status (no changes)
+  ansible.builtin.debug:
+    msg: "Step CA is already running at https://{{ step_ca_hostname }}:{{ step_ca_port }}"
+  when: not step_ca_output.changed

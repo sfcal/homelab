@@ -1,14 +1,15 @@
-version: '3.8'
-
+---
 services:
   step-ca:
     image: smallstep/step-ca:latest
     container_name: step-ca
     restart: unless-stopped
     ports:
-      - "{{ step_ca_port }}:{{ step_ca_port }}"
+      - "{{ step_ca_port }}:9000"
     volumes:
-      - {{ step_ca_deploy_path }}/step-ca-data:/home/step
+      - ./data:/home/step
     environment:
       - DOCKER_STEPCA_INIT_NAME={{ step_ca_name }}
-      - DOCKER_STEPCA_INIT_DNS_NAMES={{ step_ca_dns_name }}
+      - DOCKER_STEPCA_INIT_DNS_NAMES={{ step_ca_hostname }}
+      - DOCKER_STEPCA_INIT_PROVISIONER_NAME={{ step_ca_provisioner_name | default('admin') }}
+      - DOCKER_STEPCA_INIT_SSH={{ step_ca_init_ssh | default('false') }}

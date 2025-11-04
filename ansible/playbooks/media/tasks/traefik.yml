@@ -1,0 +1,4 @@
+- name: Create traefik-public network
+  community.docker.docker_network:
+    name: traefik-public
+    state: present

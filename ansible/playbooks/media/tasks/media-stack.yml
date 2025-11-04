@@ -19,11 +19,6 @@
     mode: '0644'
   notify: Restart media-stack
 
-- name: Create traefik-public network
-  community.docker.docker_network:
-    name: traefik-public
-    state: present
-
 - name: Start media-stack container
   community.docker.docker_compose_v2:
     project_src: "{{ deploy_path }}"

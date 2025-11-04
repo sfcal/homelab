@@ -1,6 +1,6 @@
 ---
 - name: Deploy Step CA Server
-  hosts: step_ca
+  hosts: step-ca
   become: true
   
   handlers:
