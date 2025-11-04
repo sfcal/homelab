@@ -1,30 +1,16 @@
 ---
 - name: Deploy Media Stack
-  hosts: media
+  hosts: media-stack
   become: true
-  
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../common/prereq.yml
+
   tasks:
-    - name: Create deploy directory
-      file:
-        path: "{{ deploy_path }}"
-        state: directory
-        mode: '0755'
-    
-    - name: Decrypt and copy cf-token
-      ansible.builtin.copy:
-        content: "{{ lookup('community.sops.sops', '../../../docker/media-stack/cf-token.sops') }}"
-        dest: "{{ deploy_path }}/cf-token"
-        mode: '0600'
-      no_log: true
-    
-    - name: Copy docker-compose file
-      copy:
-        src: ../../../docker/media-stack/docker-compose.yaml
-        dest: "{{ deploy_path }}/docker-compose.yml"
-      register: compose_file
-    
-    - name: Restart stack if compose file changed
-      community.docker.docker_compose_v2:
-        project_src: "{{ deploy_path }}"
-        state: present
-        recreate: "{{ 'always' if compose_file.changed else 'smart' }}"
+    - name: Configure media-stack.
+      ansible.builtin.include_tasks: tasks/media-stack.yml

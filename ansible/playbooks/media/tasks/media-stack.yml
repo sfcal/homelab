@@ -1,0 +1,30 @@
+---
+- name: Create deploy directory
+  ansible.builtin.file:
+    path: "{{ deploy_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Decrypt and copy cf-token
+  ansible.builtin.copy:
+    content: "{{ lookup('community.sops.sops', '../../../docker/media-stack/cf-token.sops') }}"
+    dest: "{{ deploy_path }}/cf-token"
+    mode: '0600'
+  no_log: true
+
+- name: Deploy media-stack docker-compose file
+  ansible.builtin.copy:
+    src: ../../../docker/media-stack/docker-compose.yaml
+    dest: "{{ deploy_path }}/docker-compose.yml"
+    mode: '0644'
+  notify: Restart media-stack
+
+- name: Start media-stack container
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}"
+    state: present
+  register: media_stack_output
+
+- name: Display media-stack status
+  ansible.builtin.debug:
+    var: media_stack_output
