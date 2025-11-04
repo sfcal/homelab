@@ -4,6 +4,20 @@
     name: chrony
     state: present
 
+- name: Remove default pool servers from chrony.conf.
+  ansible.builtin.lineinfile:
+    dest: /etc/chrony/chrony.conf
+    regexp: '^pool.*debian\.pool\.ntp\.org'
+    state: absent
+  notify: Restart chrony
+
+- name: Remove any other default pool/server lines.
+  ansible.builtin.replace:
+    dest: /etc/chrony/chrony.conf
+    regexp: '^(pool|server)\s+.*\.pool\.ntp\.org.*$'
+    replace: '# \1 (removed by Ansible)'
+  notify: Restart chrony
+
 - name: Customize chrony configuration.
   ansible.builtin.template:
     src: "templates/{{ item }}.j2"
@@ -13,6 +27,7 @@
   with_items:
     - allow.conf
     - refclock.conf
+    - servers.conf
 
 - name: Ensure chrony is running.
   ansible.builtin.service:

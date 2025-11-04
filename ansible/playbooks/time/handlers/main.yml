@@ -19,6 +19,12 @@
     name: ptp4l
     state: restarted
     daemon-reload: true
+    
+- name: Restart ts2phc
+  ansible.builtin.systemd_service:
+    name: ts2phc
+    state: restarted
+    daemon-reload: true
 
 - name: Restart phc2sys
   ansible.builtin.systemd_service:

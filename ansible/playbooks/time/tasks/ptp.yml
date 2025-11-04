@@ -6,7 +6,7 @@
 
 - name: Copy ts2phc systemd unit file into place.
   ansible.builtin.template:
-    src: ts2phc.unit.j2
+    src: ts2phc.service.j2
     dest: /etc/systemd/system/ts2phc.service
     owner: root
     group: root
@@ -21,7 +21,7 @@
 
 - name: Copy phc2sys systemd unit file into place.
   ansible.builtin.template:
-    src: phc2sys.unit.j2
+    src: phc2sys.service.j2
     dest: /etc/systemd/system/phc2sys.service
     owner: root
     group: root
@@ -43,7 +43,7 @@
 
 - name: Copy ptp4l systemd unit file into place.
   ansible.builtin.template:
-    src: ptp4l.unit.j2
+    src: ptp4l.service.j2
     dest: /etc/systemd/system/ptp4l.service
     owner: root
     group: root
