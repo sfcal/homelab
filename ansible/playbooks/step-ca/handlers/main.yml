@@ -1,0 +1,16 @@
+---
+- name: Restart step-ca
+  community.docker.docker_compose_v2:
+    project_src: "{{ step_ca_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop step-ca
+  community.docker.docker_compose_v2:
+    project_src: "{{ step_ca_deploy_path }}"
+    state: stopped
+
+- name: Start step-ca
+  community.docker.docker_compose_v2:
+    project_src: "{{ step_ca_deploy_path }}"
+    state: present
