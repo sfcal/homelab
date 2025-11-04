@@ -1,7 +1,7 @@
 # VMs to create
 vms = {
   dns_server = {
-    name           = "dev-dns-01"
+    name           = "dns"
     description    = "DNS Server (BIND9)"
     proxmox_node   = "proxmox"
     vmid           = 1000
@@ -18,7 +18,7 @@ vms = {
   }
 
   ntp_server = {
-    name           = "ntp-01"
+    name           = "ntp-ptp"
     description    = "NTP Server"
     proxmox_node   = "proxmox"
     vmid           = 1100
@@ -79,6 +79,23 @@ vms = {
     nameserver     = "10.1.30.1"
     cores          = 1
     memory         = 1024
+    disk_size      = "50G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    ssh_user       = "sfcal"
+  }
+
+  monitoring_server = {
+    name           = "monitoring"
+    description    = "Monitoring Server"
+    proxmox_node   = "proxmox"
+    vmid           = 1107
+    template_name  = "ubuntu-server-nyc-base"
+    ip_address     = "10.1.30.30"
+    gateway        = "10.1.30.1"
+    nameserver     = "10.1.30.1"
+    cores          = 1
+    memory         = 2048
     disk_size      = "50G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"

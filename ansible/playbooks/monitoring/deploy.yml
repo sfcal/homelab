@@ -1,0 +1,19 @@
+---
+- name: Deploy Monitoring
+  hosts: monitoring
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../common/prereq.yml
+
+  tasks:
+    - name: Configure Prometheus exporter.
+      ansible.builtin.include_tasks: tasks/prometheus.yml
+      
+    - name: Configure Grafana.
+      ansible.builtin.include_tasks: tasks/grafana.yml

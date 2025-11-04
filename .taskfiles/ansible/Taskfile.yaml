@@ -6,10 +6,22 @@ vars:
 
 tasks:
   deploy-dns:
-    desc: Deploy DNS servers
+    desc: Deploy DNS server
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
+  
+  deploy-ntp:
+    desc: Deploy NTP/PTP server
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/time/deploy.yml
+
+  deploy-ca:
+    desc: Deploy Certificate Authority
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/step-ca/deploy.yml
 
   deploy-pxe:
     desc: Deploy PXE server
@@ -22,12 +34,12 @@ tasks:
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/deploy.yml
-
-  deploy-time:
-    desc: Deploy NTP/PTP server
+  
+  deploy-monitoring:
+    desc: Deploy monitoring stack
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/time/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/monitoring/deploy.yml
 
   # Utility tasks
   ping:
