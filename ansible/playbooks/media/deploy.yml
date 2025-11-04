@@ -14,6 +14,9 @@
   tasks:
     - name: Configure nfs.
       ansible.builtin.include_tasks: tasks/nfs.yml
-      
+
+    - name: Configure Traefik.
+      ansible.builtin.include_tasks: tasks/traefik.yml  
+
     - name: Configure media-stack.
       ansible.builtin.include_tasks: tasks/media-stack.yml

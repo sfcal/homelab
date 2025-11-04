@@ -1,0 +1,97 @@
+networks:
+  traefik-public:
+    external: true
+
+secrets:
+  cf-token:
+    file: ./cf-token
+
+services:
+  traefik:
+    image: traefik:v3.5.4
+    container_name: traefik
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.sfc.al`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=https"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls=true"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-dashboard.tls.domains[0].main=sfc.al"
+      - "traefik.http.routers.traefik-dashboard.tls.domains[0].sans=*.sfc.al"
+    networks:
+      - traefik-public
+    secrets:
+      - cf-token
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - CF_API_EMAIL=samuel.f.calvert@gmail.com
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/config/traefik.yaml:/traefik.yaml:ro
+      - ./traefik/config/acme.json:/acme.json
+      - ./traefik/config/config.yaml:/config.yaml:ro
+      - ./traefik/logs:/var/log/traefik
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:4.0.15
+    container_name: sonarr
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.sfc.al`)"
+      - "traefik.http.routers.sonarr.entrypoints=https"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+    networks:
+      - traefik-public
+    environment:
+      - PGID=987
+      - PUID=999
+      - UMASK=022
+    ports:
+      - "8989:8989"
+    volumes:
+      - ./sonarr:/config
+      - /mnt/data:/data
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:5.28.0
+    container_name: radarr
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.sfc.al`)"
+      - "traefik.http.routers.radarr.entrypoints=https"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.routers.radarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+    networks:
+      - traefik-public
+    environment:
+      - PGID=987
+      - PUID=999
+      - UMASK=022
+    ports:
+      - "7878:7878"
+    volumes:
+      - ./radarr:/config
+      - /mnt/data:/data
+
+ 

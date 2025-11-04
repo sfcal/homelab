@@ -7,10 +7,6 @@
       - bind9-doc
     state: present
 
-- name: Set timezone.
-  community.general.timezone:
-    name: America/New_York
-
 - name: Deploy BIND9 configuration files.
   ansible.builtin.template:
     src: "templates/{{ item }}.j2"

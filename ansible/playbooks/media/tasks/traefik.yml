@@ -2,3 +2,29 @@
   community.docker.docker_network:
     name: traefik-public
     state: present
+
+- name: Create traefik config directory
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/traefik"
+    state: directory
+    mode: '0755'
+
+- name: Create traefik log directory
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/traefik/logs"
+    state: directory
+    mode: '0755'
+
+- name: Deploy traefik.yaml configuration
+  ansible.builtin.template:
+    src: templates/traefik.yaml.j2
+    dest: "{{ deploy_path }}/traefik/traefik.yaml"
+    mode: '0644'
+  notify: Restart media-stack
+
+- name: Deploy config.yaml configuration
+  ansible.builtin.template:
+    src: templates/config.yaml.j2
+    dest: "{{ deploy_path }}/traefik/config.yaml"
+    mode: '0644'
+  notify: Restart media-stack
