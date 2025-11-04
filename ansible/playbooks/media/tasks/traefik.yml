@@ -9,6 +9,12 @@
     state: directory
     mode: '0755'
 
+- name: Create traefik config subdirectory
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/traefik/config"
+    state: directory
+    mode: '0755'
+
 - name: Create traefik log directory
   ansible.builtin.file:
     path: "{{ deploy_path }}/traefik/logs"
@@ -18,6 +24,12 @@
 - name: Create acme.json file
   ansible.builtin.file:
     path: "{{ deploy_path }}/traefik/config/acme.json"
+    state: touch
+    mode: '0600'
+
+- name: Create acme-step.json file for step-ca
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/traefik/config/acme-step.json"
     state: touch
     mode: '0600'
     

@@ -1,0 +1,43 @@
+---
+- name: Fetch step-ca root certificate from step-ca host
+  ansible.builtin.slurp:
+    src: "{{ hostvars[groups['step-ca'][0]]['step_ca_deploy_path'] }}/data/certs/root_ca.crt"
+  register: step_ca_root_cert
+  delegate_to: "{{ groups['step-ca'][0] }}"
+
+- name: Create traefik certs directory
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/traefik/certs"
+    state: directory
+    mode: '0755'
+
+- name: Copy step-ca root certificate to traefik host
+  ansible.builtin.copy:
+    content: "{{ step_ca_root_cert.content | b64decode }}"
+    dest: "{{ deploy_path }}/traefik/certs/step-ca-root.crt"
+    mode: '0644'
+  notify: Restart media-stack
+
+- name: Create acme-step.json file
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/traefik/config/acme-step.json"
+    state: touch
+    mode: '0600'
+
+- name: Test connectivity to step-ca from traefik host
+  ansible.builtin.uri:
+    url: "https://{{ hostvars[groups['step-ca'][0]]['step_ca_hostname'] }}:{{ hostvars[groups['step-ca'][0]]['step_ca_port'] }}/acme/acme/directory"
+    validate_certs: no
+    return_content: yes
+  register: step_ca_connectivity
+  failed_when: false
+
+- name: Display connectivity test results
+  ansible.builtin.debug:
+    msg:
+      - "Step-CA connectivity status: {{ step_ca_connectivity.status | default('Failed to connect') }}"
+      - "Step-CA URL: https://{{ hostvars[groups['step-ca'][0]]['step_ca_hostname'] }}:{{ hostvars[groups['step-ca'][0]]['step_ca_port'] }}/acme/acme/directory"
+      - "If status is not 200, check:"
+      - "  1. Network connectivity (ping {{ groups['step-ca'][0] }})"
+      - "  2. Firewall rules on step-ca host"
+      - "  3. ACME provisioner is enabled in step-ca"

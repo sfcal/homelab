@@ -43,8 +43,8 @@ certificatesResolvers:
       storage: acme-step.json
       caServer: https://ca.sfc.al:9000/acme/acme/directory
       certificatesDuration: 2160  # 90 days
-      httpChallenge:
-        entryPoint: http
+      tlsChallenge: {}
+
 
 log:
   level: "DEBUG"

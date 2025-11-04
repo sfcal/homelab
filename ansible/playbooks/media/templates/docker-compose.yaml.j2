@@ -34,13 +34,16 @@ services:
     environment:
       - CF_API_EMAIL=samuel.f.calvert@gmail.com
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
+      - SSL_CERT_FILE=/certs/step-ca-root.crt
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/config/traefik.yaml:/traefik.yaml:ro
       - ./traefik/config/acme.json:/acme.json
+      - ./traefik/config/acme-step.json:/acme-step.json
       - ./traefik/config/config.yaml:/config.yaml:ro
       - ./traefik/logs:/var/log/traefik
+      - ./traefik/certs:/certs:ro
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:4.0.15
