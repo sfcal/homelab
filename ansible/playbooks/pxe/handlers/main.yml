@@ -3,7 +3,7 @@
   community.docker.docker_compose_v2:
     project_src: /opt/netbootxyz
     state: restarted
-    restarted: true
+    recreate: always
 
 - name: Stop netbootxyz
   community.docker.docker_compose_v2:

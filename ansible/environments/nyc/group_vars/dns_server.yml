@@ -23,6 +23,8 @@ dns_a_records:
     ip: "10.1.30.100"
   - name: "time"
     ip: "10.1.30.123"
+  - name: "pxe"
+    ip: "10.1.30.69"
 
 # Reverse Zone PTR Records
 dns_ptr_records:

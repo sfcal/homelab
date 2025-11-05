@@ -37,24 +37,38 @@
   ansible.builtin.command: docker logs step-ca
   register: step_ca_logs
   changed_when: false
+  failed_when: false
   when: step_ca_output.changed
 
 - name: Extract step-ca password from logs
-  ansible.builtin.set_fact:
-    step_ca_password: "{{ (step_ca_logs.stderr | regex_search('Password: (.+)', '\\1')) | default([]) | first | default('') }}"
+  block:
+    - name: Parse password from stderr
+      ansible.builtin.set_fact:
+        password_matches: "{{ step_ca_logs.stderr | regex_findall('Password: (.+)') }}"
+      
+    - name: Set password variable
+      ansible.builtin.set_fact:
+        step_ca_password: "{{ password_matches[0] if password_matches | length > 0 else '' }}"
   when:
     - step_ca_output.changed
     - step_ca_logs.stderr is defined
 
-- name: Display step-ca credentials
+- name: Display step-ca credentials (new deployment)
   ansible.builtin.debug:
     msg:
+      - "========================================"
       - "Step CA deployment succeeded!"
+      - "========================================"
       - "Access URL: https://{{ step_ca_hostname }}:{{ step_ca_port }}"
-      - "Admin Password: {{ step_ca_password | default('Check container logs manually with: docker logs step-ca') }}"
+      - "{% if step_ca_password is defined and step_ca_password | length > 0 %}Admin Password: {{ step_ca_password }}{% else %}Admin Password: Check container logs with 'docker logs step-ca 2>&1 | grep Password'{% endif %}"
+      - ""
+      - "Save this password in a secure location!"
+      - "========================================"
   when: step_ca_output.changed
 
-- name: Display step-ca status (no changes)
+- name: Display step-ca status (existing deployment)
   ansible.builtin.debug:
-    msg: "Step CA is already running at https://{{ step_ca_hostname }}:{{ step_ca_port }}"
+    msg: 
+      - "Step CA is already running at https://{{ step_ca_hostname }}:{{ step_ca_port }}"
+      - "To retrieve admin password: docker logs step-ca 2>&1 | grep Password"
   when: not step_ca_output.changed

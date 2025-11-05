@@ -1,0 +1,40 @@
+---
+# Deploy entire infrastructure in correct order
+- name: Deploy Infrastructure Services
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Display deployment order
+      ansible.builtin.debug:
+        msg:
+          - "Deploying infrastructure in the following order:"
+          - "1. DNS Server (foundational)"
+          - "2. Step-CA (required for TLS)"
+          - "3. Time Server"
+          - "4. PXE Server"
+          - "5. Media Stack (depends on Step-CA)"
+          - "6. Monitoring (depends on Step-CA)"
+
+# 1. DNS - No dependencies
+- import_playbook: dns/deploy.yml
+  tags: ['dns', 'foundation']
+
+# 2. Step-CA - Must be second (needed by others)
+- import_playbook: step-ca/deploy.yml
+  tags: ['step-ca', 'foundation', 'security']
+
+# 3. Time - Can run after foundation
+- import_playbook: time/deploy.yml
+  tags: ['time', 'ntp']
+
+# 4. PXE - Independent
+- import_playbook: pxe/deploy.yml
+  tags: ['pxe', 'netboot']
+
+# 5. Media - Depends on Step-CA
+- import_playbook: media/deploy.yml
+  tags: ['media', 'applications']
+
+# 6. Monitoring - Depends on Step-CA
+#- import_playbook: monitoring/deploy.yml
+#  tags: ['monitoring', 'observability']

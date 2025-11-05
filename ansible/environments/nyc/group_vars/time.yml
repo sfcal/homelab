@@ -12,7 +12,7 @@ gpsd_options: "-s {{ gpsd_baud }} -n"
 # See: https://chrony-project.org/doc/3.4/chrony.conf.html#refclock
 chrony_refclock: |
   # Uncomment to use Timecard PHC as time source.
-  refclock PHC /dev/ptp3 poll 0 refid AC precision 1e-9 tai prefer
+  #refclock PHC /dev/ptp3 poll 0 refid AC precision 1e-9 tai prefer
 
   # Uncomment to use NIC's PHC as time source.
   # refclock PHC /dev/ptp0 poll 0 dpoll -5 tai  # Use NIC's PHC
