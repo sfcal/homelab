@@ -10,7 +10,7 @@ tasks:
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/site.yml
-      
+
   deploy-dns:
     desc: Deploy DNS server
     dir: '{{.ROOT_DIR}}/ansible'
@@ -21,13 +21,13 @@ tasks:
     desc: Deploy NTP/PTP server
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/time/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/ntp/deploy.yml
 
   deploy-ca:
     desc: Deploy Certificate Authority
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/step-ca/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/ca/deploy.yml
 
   deploy-pxe:
     desc: Deploy PXE server

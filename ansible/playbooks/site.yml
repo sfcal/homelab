@@ -20,11 +20,11 @@
   tags: ['dns', 'foundation']
 
 # 2. Step-CA - Must be second (needed by others)
-- import_playbook: step-ca/deploy.yml
+- import_playbook: ca/deploy.yml
   tags: ['step-ca', 'foundation', 'security']
 
 # 3. Time - Can run after foundation
-- import_playbook: time/deploy.yml
+- import_playbook: ntp/deploy.yml
   tags: ['time', 'ntp']
 
 # 4. PXE - Independent
