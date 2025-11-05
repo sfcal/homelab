@@ -1,4 +1,2 @@
 ---
-system_timezone: America/New_York
-
 deploy_path: /opt/media-stack

@@ -1,12 +1,12 @@
 $TTL 86400	; 1 day
-@	IN SOA	ns.sfc.al. admin.sfc.al. (
+@	IN SOA	ns.{{ domain_name }}. admin.{{ domain_name }}. (
 				{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01 ; serial
 				3600       ; refresh (1 hour)
 				3600       ; retry (1 hour)
 				2419200    ; expire (4 weeks)
 				3600       ; minimum (1 hour)
 				)
-	NS	ns.sfc.al.
+	NS	ns.{{ domain_name }}.
 
 ; PTR Records
 {% for record in dns_ptr_records %}

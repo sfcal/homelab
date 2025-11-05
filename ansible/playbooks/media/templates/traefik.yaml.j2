@@ -27,21 +27,21 @@ providers:
     watch: true
 
 certificatesResolvers:
-  cloudflare:
-    acme:
-      caServer: https://acme-v02.api.letsencrypt.org/directory
-      email: samuel.f.calvert@gmail.com
-      storage: acme.json
-      dnsChallenge:
-        provider: cloudflare
-        resolvers:
-          - "1.1.1.1:53"
-          - "1.0.0.1:53"
+#  cloudflare:
+#    acme:
+#      caServer: https://acme-v02.api.letsencrypt.org/directory
+#      email: samuel.f.calvert@gmail.com
+#      storage: acme.json
+#      dnsChallenge:
+#        provider: cloudflare
+#        resolvers:
+#          - "1.1.1.1:53"
+#          - "1.0.0.1:53"
   step-ca:  # Add new Step CA resolver
     acme:
       email: samuel.f.calvert@gmail.com
       storage: acme-step.json
-      caServer: https://ca.sfc.al:9000/acme/acme/directory
+      caServer: https://ca.{{ domain_name }}:9000/acme/acme/directory
       certificatesDuration: 2160  # 90 days
       tlsChallenge: {}
 

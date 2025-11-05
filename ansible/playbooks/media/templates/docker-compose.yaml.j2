@@ -17,13 +17,13 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.sfc.al`)"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.{{ domain_name }}`)"
       - "traefik.http.routers.traefik-dashboard.entrypoints=https"
       - "traefik.http.routers.traefik-dashboard.service=api@internal"
       - "traefik.http.routers.traefik-dashboard.tls=true"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
-      - "traefik.http.routers.traefik-dashboard.tls.domains[0].main=sfc.al"
-      - "traefik.http.routers.traefik-dashboard.tls.domains[0].sans=*.sfc.al"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=step-ca"
+      - "traefik.http.routers.traefik-dashboard.tls.domains[0].main={{ domain_name }}"
+      - "traefik.http.routers.traefik-dashboard.tls.domains[0].sans=*.{{ domain_name }}"
     networks:
       - traefik-public
     secrets:
@@ -54,10 +54,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.sonarr.rule=Host(`sonarr.sfc.al`)"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.{{ domain_name }}`)"
       - "traefik.http.routers.sonarr.entrypoints=https"
       - "traefik.http.routers.sonarr.tls=true"
-      - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
+      - "traefik.http.routers.sonarr.tls.certresolver=step-ca"
       - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
     networks:
       - traefik-public
@@ -80,10 +80,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.radarr.rule=Host(`radarr.sfc.al`)"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.{{ domain_name }}`)"
       - "traefik.http.routers.radarr.entrypoints=https"
       - "traefik.http.routers.radarr.tls=true"
-      - "traefik.http.routers.radarr.tls.certresolver=cloudflare"
+      - "traefik.http.routers.radarr.tls.certresolver=step-ca"
       - "traefik.http.services.radarr.loadbalancer.server.port=7878"
     networks:
       - traefik-public

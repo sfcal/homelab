@@ -30,7 +30,7 @@ http:
         customFrameOptionsValue: "SAMEORIGIN"
         customRequestHeaders:
           X-Forwarded-Proto: "https"
-          X-Forwarded-Host: "plex.sfc.al"
+          X-Forwarded-Host: "plex.{{ domain_name }}"
           X-Forwarded-Port: "443"
           X-Forwarded-For: ""  # Traefik will populate this
           X-Real-IP: ""  # Traefik will populate this
@@ -40,7 +40,7 @@ http:
     portainer:
       entryPoints:
         - "https"
-      rule: "Host(`portainer.sfc.al`)"
+      rule: "Host(`portainer.{{ domain_name }}`)"
       middlewares:
         - default-security-headers
         - https-redirectscheme
@@ -49,7 +49,7 @@ http:
     plex:
       entryPoints:
         - "https"
-      rule: "Host(`plex.sfc.al`)"
+      rule: "Host(`plex.{{ domain_name }}`)"
       middlewares:
         - plex-headers  # Changed to use Plex-specific headers
         - https-redirectscheme

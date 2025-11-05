@@ -38,16 +38,16 @@ options {
 };
 
 // Fix for plex forwarding
-zone "plex.sfc.al" IN {
+zone "plex.{{ domain_name }}" IN {
   type forward;
   forward only;
   forwarders { {% for forwarder in dns_forwarders %}{{ forwarder }}; {% endfor %}};
 };
 
 // Split horizon zone for public domain
-zone "sfc.al" IN {
+zone "{{ domain_name }}" IN {
   type master;
-  file "/etc/bind/sfc-al.zone";
+  file "/etc/bind/domain.zone";
 };
 
 // Reverse zone for 10.1.30.0/24

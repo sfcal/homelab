@@ -19,7 +19,7 @@
     - Restart bind9
   with_items:
     - named.conf
-    - sfc-al.zone
+    - domain.zone
     - 30.1.10.in-addr.arpa.zone
 
 - name: Ensure BIND9 is running and enabled.

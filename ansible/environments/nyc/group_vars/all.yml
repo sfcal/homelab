@@ -1,0 +1,8 @@
+---
+# Global variables for NYC environment
+
+# Primary domain name
+domain_name: "sfc.hello"
+
+# System timezone
+system_timezone: America/New_York

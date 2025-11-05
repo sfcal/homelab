@@ -14,7 +14,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.sfc.al`)"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ domain_name }}`)"
       - "traefik.http.routers.prometheus.entrypoints=https"
       - "traefik.http.routers.prometheus.tls=true"
       - "traefik.http.routers.prometheus.tls.certresolver=cloudflare"
@@ -45,7 +45,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.sfc.al`)"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.{{ domain_name }}`)"
       - "traefik.http.routers.grafana.entrypoints=https"
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
@@ -59,7 +59,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin  # Change this!
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
-      - GF_SERVER_ROOT_URL=https://grafana.sfc.al
+      - GF_SERVER_ROOT_URL=https://grafana.{{ domain_name }}
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
       - "3000:3000"
@@ -76,7 +76,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.sfc.al`)"
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.{{ domain_name }}`)"
       - "traefik.http.routers.cadvisor.entrypoints=https"
       - "traefik.http.routers.cadvisor.tls=true"
       - "traefik.http.routers.cadvisor.tls.certresolver=cloudflare"
@@ -125,7 +125,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.loki.rule=Host(`loki.sfc.al`)"
+      - "traefik.http.routers.loki.rule=Host(`loki.{{ domain_name }}`)"
       - "traefik.http.routers.loki.entrypoints=https"
       - "traefik.http.routers.loki.tls=true"
       - "traefik.http.routers.loki.tls.certresolver=cloudflare"
@@ -166,7 +166,7 @@ services:
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.docker.network=traefik-public"
-  #     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.sfc.al`)"
+  #     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.{{ domain_name }}`)"
   #     - "traefik.http.routers.alertmanager.entrypoints=https"
   #     - "traefik.http.routers.alertmanager.tls=true"
   #     - "traefik.http.routers.alertmanager.tls.certresolver=cloudflare"

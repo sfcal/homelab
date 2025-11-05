@@ -1,9 +1,7 @@
 ---
-system_timezone: America/New_York
-
 step_ca_deploy_path: "/opt/step-ca"
 step_ca_port: 9000
 step_ca_name: "NYC Homelab CA"
-step_ca_hostname: "ca.sfc.al"
+step_ca_hostname: "ca.{{ domain_name }}"
 step_ca_provisioner_name: "admin"
 step_ca_init_ssh: "false"
