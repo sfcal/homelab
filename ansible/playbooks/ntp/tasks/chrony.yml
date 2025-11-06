@@ -11,10 +11,10 @@
     state: absent
   notify: Restart chrony
 
-- name: Remove any other default pool/server lines.
+- name: Remove any default pool/server lines.
   ansible.builtin.replace:
     dest: /etc/chrony/chrony.conf
-    regexp: '^(pool|server)\s+.*\.pool\.ntp\.org.*$'
+    regexp: '^(pool|server)\s+.*\.(pool\.ntp\.org|ubuntu\.com).*$'
     replace: '# \1 (removed by Ansible)'
   notify: Restart chrony
 
@@ -27,7 +27,13 @@
   with_items:
     - allow.conf
     - refclock.conf
-    - servers.conf
+
+- name: Configure NTP sources.
+  ansible.builtin.template:
+    src: "templates/servers.sources.j2"
+    dest: "/etc/chrony/sources.d/servers.sources"
+    mode: 0644
+  notify: Restart chrony
 
 - name: Ensure chrony is running.
   ansible.builtin.service:

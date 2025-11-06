@@ -3,7 +3,7 @@
   ansible.builtin.apt:
     name:
       - gpsd
-      - gpsd-clients
+      - gpsd-tools
     state: present
 
 - name: Configure gpsd.

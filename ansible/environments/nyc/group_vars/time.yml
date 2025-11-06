@@ -2,9 +2,9 @@
 system_timezone: America/New_York
 
 # GPSd configuration.
-gpsd_state: stopped
-gpsd_enabled: false
-gpsd_devices: "/dev/ttyAMA0"
+gpsd_state: started
+gpsd_enabled: true
+gpsd_devices: "/dev/ttyS7"
 gpsd_baud: "115200"
 gpsd_options: "-s {{ gpsd_baud }} -n"
 
@@ -12,13 +12,13 @@ gpsd_options: "-s {{ gpsd_baud }} -n"
 # See: https://chrony-project.org/doc/3.4/chrony.conf.html#refclock
 chrony_refclock: |
   # Uncomment to use Timecard PHC as time source.
-  #refclock PHC /dev/ptp3 poll 0 refid AC precision 1e-9 tai prefer
+  refclock PHC /dev/ptp3 poll 0 refid AC precision 1e-9 tai prefer
 
   # Uncomment to use NIC's PHC as time source.
   # refclock PHC /dev/ptp0 poll 0 dpoll -5 tai  # Use NIC's PHC
 
   # Uncomment to use GPS module directly as time source.
-  refclock SHM 0 refid NMEA precision 1e-3 poll 0 filter 3
+  #refclock SHM 0 refid NMEA precision 1e-3 poll 0 filter 3
 
   # Uncomment to use PPS source (e.g. GPS PPS to GPIO pin 18)
   #refclock PPS /dev/pps0 refid PPS lock NMEA poll 3 trust
@@ -28,22 +28,31 @@ chrony_refclock: |
 
 # Hosts allowed to query chrony for NTP time.
 # See: https://chrony-project.org/doc/3.4/chrony.conf.html#allow
-chrony_allow: "10.0.2.0/24"
+chrony_allow: "10.1.0.0/16"
+
+# NTP upstream servers
+chrony_servers:
+  - clock.nyc.he.net
+  - tick.usno.navy.mil
+  - tock.usno.navy.mil
+  - time-a-g.nist.gov
+
+chrony_server_options: iburst
 
 # Force i226 eth1 interface to 1 Gbps speed.
 # See: https://github.com/geerlingguy/time-pi/issues/2
-i226_force_1gbps: true
+#i226_force_1gbps: true
 
 # PTP 4 Linux options.
-ptp4l_version_latest: true  # Install jclark's linuxptp v4 .deb if true
-ptp4l_ptp_iface: eth1
+#ptp4l_version_latest: true  # Install jclark's linuxptp v4 .deb if true
+ptp4l_ptp_iface: enp1s0
 ptp4l_service_state: started
 ptp4l_service_enabled: true
 
 ts2phc_service_state: started
 ts2phc_service_enabled: true
 ts2phc_logging_level: 7
-ts2phc_clock: '/dev/ptp0'
+ts2phc_clock: '/dev/ptp3'
 ts2phc_source: 'generic'
 ts2phc_extra_opts: '-m'
 # If not using custom IGC driver, i226 needs these options defined because of
@@ -52,5 +61,5 @@ ts2phc_extra_opts: '-m'
 phc2sys_service_state: started
 phc2sys_service_enabled: true
 phc2sys_clock: 'CLOCK_REALTIME'
-phc2sys_source: '/dev/ptp0'
+phc2sys_source: '/dev/ptp3'
 phc2sys_extra_opts: '-O 37 -m'
