@@ -1,0 +1,12 @@
+---
+- name: Deploy Kernel on Time Server (NTP/PTP)
+  hosts: kernel
+  become: true
+  
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../common/prereq.yml
+
+  tasks:
+    - name: Install Kernel.
+      ansible.builtin.include_tasks: tasks/kernel.yml

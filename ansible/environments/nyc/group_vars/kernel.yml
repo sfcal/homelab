@@ -1,0 +1,61 @@
+## Kernel build for Ubuntu
+# defaults file for kernel
+
+kernel_version: "6.17.7"
+kernel_build_location: /tmp
+kernel_parameters:
+  - name: CONFIG_SMP
+    value: y
+  - name: CONFIG_I2C_XILINX
+    value: m
+  - name: CONFIG_MTD
+    value: y
+  - name: CONFIG_MTD_SPI_NOR
+    value: m
+  - name: CONFIG_SPI
+    value: y
+  - name: CONFIG_SPI_ALTERA
+    value: m
+  - name: CONFIG_SPI_BITBANG
+    value: m
+  - name: CONFIG_SPI_MASTER
+    value: y
+  - name: CONFIG_SPI_MEM
+    value: y
+  - name: CONFIG_SPI_XILINX
+    value: m
+  - name: CONFIG_I2C
+    value: y
+  - name: CONFIG_I2C_OCORES
+    value: m
+  - name: CONFIG_IKCONFIG
+    value: y
+  - name: CONFIG_EEPROM_AT24
+    value: m
+  - name: CONFIG_DEBUG_INFO_BTF
+    value: n
+  - name: CONFIG_PTP_INTEL_PMC_TGPIO
+    value: y
+  - name: CONFIG_PCIE_PTM
+    value: y
+
+# vars file for kernel
+kernel_unarchive_src: "https://cdn.kernel.org/pub/linux/kernel/v{{ kernel_version[:1] }}.x/linux-{{ kernel_version }}.tar.xz"
+kernel_unarchive_creates: "{{ kernel_build_location }}/linux-{{ kernel_version }}"
+kernel_requirements:
+  - bc
+  - bison
+  - flex
+  - libelf-dev
+  - libssl-dev
+  - libncurses-dev
+  - openssl
+  - vim
+  - dkms
+  - libudev-dev
+  - libpci-dev
+  - libiberty-dev
+  - autoconf
+  - zstd
+kernel_modules_location: /lib/modules/{{ kernel_version }}*
+kernel_installation_location: /boot/vmlinuz-{{ kernel_version }}*

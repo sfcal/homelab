@@ -3,7 +3,7 @@
   ansible.builtin.apt:
     name:
       - gpsd
-      - gpsd-tools
+      - gpsd-clients
     state: present
 
 - name: Configure gpsd.
@@ -18,6 +18,8 @@
       line: 'DEVICES="{{ gpsd_devices }}"'
     - regexp: '^GPSD_OPTIONS='
       line: 'GPSD_OPTIONS="{{ gpsd_options }}"'
+    - regexp: '^USBAUTO='
+      line: 'USBAUTO="false"'
 
 - name: Configure gpsd service.
   ansible.builtin.service:

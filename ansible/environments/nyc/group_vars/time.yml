@@ -39,27 +39,20 @@ chrony_servers:
 
 chrony_server_options: iburst
 
-# Force i226 eth1 interface to 1 Gbps speed.
-# See: https://github.com/geerlingguy/time-pi/issues/2
-#i226_force_1gbps: true
-
 # PTP 4 Linux options.
-#ptp4l_version_latest: true  # Install jclark's linuxptp v4 .deb if true
 ptp4l_ptp_iface: enp1s0
-ptp4l_service_state: started
-ptp4l_service_enabled: true
+ptp4l_service_state: stopped
+ptp4l_service_enabled: false
 
-ts2phc_service_state: started
-ts2phc_service_enabled: true
+ts2phc_service_state: stopped
+ts2phc_service_enabled: false
 ts2phc_logging_level: 7
 ts2phc_clock: '/dev/ptp3'
 ts2phc_source: 'generic'
 ts2phc_extra_opts: '-m'
-# If not using custom IGC driver, i226 needs these options defined because of
-# quirks. See: https://github.com/geerlingguy/time-pi/issues/13
 
-phc2sys_service_state: started
-phc2sys_service_enabled: true
+phc2sys_service_state: stopped
+phc2sys_service_enabled: false
 phc2sys_clock: 'CLOCK_REALTIME'
 phc2sys_source: '/dev/ptp3'
-phc2sys_extra_opts: '-O 37 -m'
+phc2sys_extra_opts: '-m'

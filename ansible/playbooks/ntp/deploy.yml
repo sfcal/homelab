@@ -20,3 +20,6 @@
 
     - name: Configure PTP.
       ansible.builtin.include_tasks: tasks/ptp.yml
+
+    - name: Install Kernel.
+      ansible.builtin.include_tasks: tasks/kernel.yml
