@@ -1,7 +1,7 @@
 ## Kernel build for Ubuntu
 # defaults file for kernel
 
-kernel_version: "6.17.7"
+kernel_version: "6.12.56"
 kernel_build_location: /tmp
 kernel_parameters:
   - name: CONFIG_SMP

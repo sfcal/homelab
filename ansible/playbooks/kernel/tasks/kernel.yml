@@ -12,21 +12,30 @@
     creates: "{{ kernel_unarchive_creates }}"
     mode: "0755"
 
-- name: Make defconfig
+- name: Copy running kernel config
+  ansible.builtin.copy:
+    src: /boot/config-{{ ansible_kernel }}
+    dest: "{{ kernel_build_location }}/linux-{{ kernel_version }}/.config"
+    remote_src: yes
+    mode: "0640"
+
+- name: Update config to new kernel version
   ansible.builtin.command:
-    cmd: make defconfig
+    cmd: make olddefconfig
     chdir: "{{ kernel_build_location }}/linux-{{ kernel_version }}"
-    creates: "{{ kernel_build_location }}/linux-{{ kernel_version }}/.config"
 
 - name: Change selected parameters in config
-  ansible.builtin.lineinfile:
-    path: "{{ kernel_build_location }}/linux-{{ kernel_version }}/.config"
-    regexp: "^{{ item.name }}="
-    line: "{{ item.name }}={{ item.value }}"
-    mode: "0640"
+  ansible.builtin.command:
+    cmd: "./scripts/config --set-val {{ item.name }} {{ item.value }}"
+    chdir: "{{ kernel_build_location }}/linux-{{ kernel_version }}"
   loop: "{{ kernel_parameters }}"
   when:
     - kernel_parameters is defined
+
+- name: Resolve config dependencies after changes
+  ansible.builtin.command:
+    cmd: make olddefconfig
+    chdir: "{{ kernel_build_location }}/linux-{{ kernel_version }}"
 
 - name: Make
   ansible.builtin.command:
@@ -36,7 +45,6 @@
   async: 1800
   poll: 0
   register: kernel_make
-  changed_when: false
 
 - name: Wait for make
   ansible.builtin.async_status:
@@ -64,3 +72,19 @@
     cmd: make install
     chdir: "{{ kernel_build_location }}/linux-{{ kernel_version }}"
     creates: "{{ kernel_installation_location }}"
+
+- name: Generate or update initramfs
+  ansible.builtin.command:
+    cmd: "update-initramfs -u -k {{ kernel_version }}"
+  failed_when: false
+  register: initramfs_update
+
+- name: Create initramfs if update failed
+  ansible.builtin.command:
+    cmd: "update-initramfs -c -k {{ kernel_version }}"
+  when: initramfs_update.rc != 0
+
+- name: Update GRUB
+  ansible.builtin.command:
+    cmd: update-grub
+  changed_when: true
