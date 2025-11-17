@@ -348,7 +348,7 @@ services:
       - ./huntarr:/config
 
   tdarr-server:
-    image: ghcr.io/haveagitgat/tdarr:2.54.01
+    image: ghcr.io/haveagitgat/tdarr:2.56.01
     container_name: tdarr-server
     restart: unless-stopped
     mem_limit: 10g
