@@ -69,7 +69,7 @@ services:
       - /mnt/data/usenet:/data/usenet
 
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:2.1.5
+    image: lscr.io/linuxserver/prowlarr:2.3.0
     container_name: prowlarr
     restart: unless-stopped
     mem_limit: 2g
