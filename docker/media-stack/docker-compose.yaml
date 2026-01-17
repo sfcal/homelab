@@ -8,7 +8,7 @@ secrets:
 
 services:
   traefik:
-    image: traefik:v3.6.6
+    image: traefik:v3.6.7
     container_name: traefik
     restart: unless-stopped
     mem_limit: 1g
