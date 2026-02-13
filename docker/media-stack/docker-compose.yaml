@@ -223,7 +223,7 @@ services:
       - /dev/dri:/dev/dri
 
   tunarr:
-    image: chrisbenincasa/tunarr:0.22.9
+    image: chrisbenincasa/tunarr:1.1.12
     container_name: tunarr
     restart: unless-stopped
     mem_limit: 6g
