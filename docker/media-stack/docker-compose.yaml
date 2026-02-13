@@ -8,7 +8,7 @@ secrets:
 
 services:
   traefik:
-    image: traefik:v3.6.7
+    image: traefik:v3.5.4
     container_name: traefik
     restart: unless-stopped
     mem_limit: 1g
@@ -37,10 +37,10 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/config/traefik.yaml:/traefik.yaml:ro
-      - ./traefik/config/acme.json:/acme.json
-      - ./traefik/config/config.yaml:/config.yaml:ro
-      - ./traefik/logs:/var/log/traefik
+      - /opt/traefik/config/traefik.yaml:/traefik.yaml:ro
+      - /opt/traefik/config/acme.json:/acme.json
+      - /opt/traefik/config/config.yaml:/config.yaml:ro
+      - /opt/traefik/logs:/var/log/traefik
 
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:4.5.5
@@ -65,7 +65,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./sabnzbd:/config
+      - /opt/sabnzbd:/config
       - /mnt/data/usenet:/data/usenet
 
   prowlarr:
@@ -91,10 +91,10 @@ services:
     ports:
       - "9696:9696"
     volumes:
-      - ./prowlarr:/config
+      - /opt/prowlarr:/config
 
   sonarr:
-    image: lscr.io/linuxserver/sonarr:4.0.16
+    image: lscr.io/linuxserver/sonarr:4.0.15
     container_name: sonarr
     restart: unless-stopped
     mem_limit: 4g
@@ -119,7 +119,7 @@ services:
     ports:
       - "8989:8989"
     volumes:
-      - ./sonarr:/config
+      - /opt/sonarr:/config
       - /mnt/data:/data
 
   radarr:
@@ -148,7 +148,7 @@ services:
     ports:
       - "7878:7878"
     volumes:
-      - ./radarr:/config
+      - /opt/radarr:/config
       - /mnt/data:/data
 
   bazarr:
@@ -178,7 +178,7 @@ services:
     ports:
       - "6767:6767"
     volumes:
-      - ./bazarr:/config
+      - /opt/bazarr:/config
       - /mnt/data/media/movies:/movies
       - /mnt/data/media/tv:/tv
 
@@ -216,14 +216,14 @@ services:
       - 32414:32414/udp
       - 32469:32469
     volumes:
-      - ./plex:/config
+      - /opt/plex:/config
       - /mnt/data/media:/data/media
       - /dev/shm/plex:/transcode
     devices:
       - /dev/dri:/dev/dri
 
   tunarr:
-    image: chrisbenincasa/tunarr:0.22.18
+    image: chrisbenincasa/tunarr:0.22.9
     container_name: tunarr
     restart: unless-stopped
     mem_limit: 6g
@@ -246,7 +246,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./tunarr:/config
+      - /opt/tunarr:/config
       - /mnt/data/media:/media:ro
       - /dev/shm/tunarr:/cache
     devices:
@@ -255,7 +255,7 @@ services:
       - '993'
 
   pulsarr:
-    image: lakker/pulsarr:0.9.5
+    image: lakker/pulsarr:0.6.6
     container_name: pulsarr
     restart: unless-stopped
     mem_limit: 2g
@@ -286,11 +286,11 @@ services:
     ports:
       - "3003:3003"
     volumes:
-      - ./pulsarr/data:/app/data
-      - ./pulsarr/.env:/app/.env
+      - /opt/pulsarr/data:/app/data
+      - /opt/pulsarr/.env:/app/.env
   
   cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:2.4.5
+    image: ghcr.io/cleanuparr/cleanuparr:2.4.0
     container_name: cleanuparr
     restart: unless-stopped
     mem_limit: 1g
@@ -318,7 +318,7 @@ services:
     ports:
       - "11011:11011"
     volumes:
-      - ./cleanuparr:/config
+      - /opt/cleanuparr:/config
 
   huntarr:
     image: ghcr.io/plexguide/huntarr:8.2.10
@@ -345,14 +345,14 @@ services:
     ports:
       - "9705:9705"
     volumes:
-      - ./huntarr:/config
+      - /opt/huntarr:/config
 
   tdarr-server:
-    image: ghcr.io/haveagitgat/tdarr:2.54.01
+    image: ghcr.io/haveagitgat/tdarr:2.51.03
     container_name: tdarr-server
     restart: unless-stopped
-    mem_limit: 10g
-    mem_reservation: 5g
+    mem_limit: 16g
+    mem_reservation: 8g
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
@@ -379,10 +379,10 @@ services:
       - "8265:8265"
       - "8266:8266"
     volumes:
-      - ./tdarr/server:/app/server
-      - ./tdarr/configs:/app/configs
-      - ./tdarr/logs:/app/logs
-      - ./tdarr/data:/app/data
+      - /opt/tdarr/server:/app/server
+      - /opt/tdarr/configs:/app/configs
+      - /opt/tdarr/logs:/app/logs
+      - /opt/tdarr/data:/app/data
       - /mnt/data/media:/media
       - /dev/shm/tdarr:/temp
     devices:
@@ -446,9 +446,9 @@ services:
       - "8555:8555/tcp" # WebRTC over TCP
       - "8555:8555/udp" # WebRTC over UDP
     volumes:
-      - ./frigate:/config
+      - /opt/frigate:/config
       - /mnt/data/frigate:/media/frigate
-      - ./frigate/models:/models:ro
+      - /opt/frigate/models:/models:ro
       - /dev/shm/frigate:/dev/shm
       - /etc/localtime:/etc/localtime:ro
     devices:
