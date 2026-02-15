@@ -69,6 +69,8 @@ This is the easiest way to watch -- no app needed.
 
 ## Linking any device -- the universal method
 
+![Plex device link code screen](images/plex-link-code.png){ width="600" }
+
 Nearly every Plex app on a TV or streaming device uses the same linking process:
 
 1. Install and open the Plex app on your device. A **4-letter code** appears on screen.

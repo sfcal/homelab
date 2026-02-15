@@ -1,5 +1,7 @@
 # Welcome to My Plex Server
 
+![Plex home screen](images/plex-home.png){ width="600" }
+
 You've been invited to stream movies, TV shows, and more -- all for free.
 This short guide will help you get set up and watching in minutes.
 
