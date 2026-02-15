@@ -50,5 +50,6 @@ nav:
     - Getting Started: plex/getting-started.md
     - Browsing & Playing: plex/browsing-and-playing.md
     - Devices: plex/devices.md
+    - Requesting Content: plex/requesting-content.md
   - Reference:
     - FAQ: reference/faq.md

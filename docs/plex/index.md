@@ -17,6 +17,7 @@ Pick the guide that matches where you are right now:
 - **[Getting Started](getting-started.md)** -- Create your free Plex account, accept your invitation, and sign in for the first time. Takes about 5 minutes.
 - **[Browsing & Playing](browsing-and-playing.md)** -- Learn how to find movies and shows, use search, manage your watchlist, and control playback.
 - **[Setting Up Your Devices](devices.md)** -- Step-by-step instructions for watching on your TV, phone, tablet, or computer.
+- **[Requesting Content](requesting-content.md)** -- How to request new movies and TV shows by adding them to your Plex watchlist.
 
 ---
 
