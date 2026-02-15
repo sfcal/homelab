@@ -4,6 +4,8 @@ Create your free account, accept your invitation, and start watching. The whole 
 
 ## Step 1 -- Create your free Plex account
 
+![Plex sign-up page](images/plex-signup.png){ width="600" }
+
 1. Open a web browser on your computer, phone, or tablet and go to: **[plex.tv/sign-up](https://www.plex.tv/sign-up/)**
 2. You can sign up using your **email address**, or sign in with Google, Facebook, or Apple. Use whichever you're most comfortable with.
 3. Choose a **username** and **password** you'll remember. Write them down if it helps!
@@ -14,6 +16,8 @@ Create your free account, accept your invitation, and start watching. The whole 
     If you used an email address to sign up, check your inbox for a confirmation email from Plex and click the link inside. Check your spam folder if you don't see it.
 
 ## Step 2 -- Accept the server invitation
+
+![Plex invitation email](images/plex-invitation.png){ width="600" }
 
 The server owner will send you a **friend invitation** through Plex. Here's how to find and accept it:
 
@@ -26,6 +30,8 @@ The server owner will send you a **friend invitation** through Plex. Here's how 
     Ask the server owner to re-send the invitation. Make sure they have the same email address you used to create your Plex account. Also check your spam/junk folder.
 
 ## Step 3 -- Sign in and start watching
+
+![Plex sidebar with shared libraries](images/plex-sidebar-libraries.png){ width="600" }
 
 1. Go to **[app.plex.tv](https://app.plex.tv)** in any web browser.
 2. Sign in with your account.
