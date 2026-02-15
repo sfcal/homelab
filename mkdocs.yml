@@ -42,7 +42,7 @@ extra_files:
 
 nav:
   - Home: index.md
-  - Getting Started:
+  - Setup:
     - Quick Start: getting-started/quick-start.md
     - Prerequisites: getting-started/prerequisites.md
   - Plex:
