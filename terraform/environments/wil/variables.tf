@@ -1,5 +1,5 @@
 /**
- * # WIL Environment Variables
+ * # NYC Environment Variables
  */
 
 # -- Provider Configuration

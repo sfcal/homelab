@@ -1,7 +1,7 @@
-// Production environment variables for Debian
+// Development environment variables for Debian
 
 // Environment marker
-environment = "prod"
+environment = "dev"
 
 // Environment-specific settings
 proxmox_node = "wil-pve-01"

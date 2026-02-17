@@ -28,7 +28,7 @@ chrony_refclock: |
 
 # Hosts allowed to query chrony for NTP time.
 # See: https://chrony-project.org/doc/3.4/chrony.conf.html#allow
-chrony_allow: "10.1.0.0/16"
+chrony_allow: "10.2.0.0/16"
 
 # NTP upstream servers
 chrony_servers:

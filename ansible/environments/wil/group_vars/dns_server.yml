@@ -14,17 +14,17 @@ dns_trusted_networks:
 # Forward Zone A Records
 dns_a_records:
   - name: "ns"
-    ip: "10.1.30.53"
+    ip: "10.2.20.53"
   - name: "sonarr"
-    ip: "10.1.30.100"
+    ip: "10.2.20.100"
   - name: "ca"
-    ip: "10.1.30.3"
+    ip: "10.2.20.3"
   - name: "radarr"
-    ip: "10.1.30.100"
+    ip: "10.2.20.100"
   - name: "time"
-    ip: "10.1.30.123"
+    ip: "10.2.20.123"
   - name: "pxe"
-    ip: "10.1.30.69"
+    ip: "10.2.20.69"
 
 # Reverse Zone PTR Records
 dns_ptr_records:

@@ -2,7 +2,7 @@
 # Global variables for NYC environment
 
 # Primary domain name
-domain_name: "sfc.hello"
+domain_name: "5am.video"
 
 # System timezone
 system_timezone: America/New_York

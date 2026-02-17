@@ -38,6 +38,10 @@ kernel_parameters:
     value: y
   - name: CONFIG_PCIE_PTM
     value: y
+  - name: CONFIG_SYSTEM_TRUSTED_KEYS
+    value: '""'
+  - name: CONFIG_SYSTEM_REVOCATION_KEYS
+    value: '""'
 
 # vars file for kernel
 kernel_unarchive_src: "https://cdn.kernel.org/pub/linux/kernel/v{{ kernel_version[:1] }}.x/linux-{{ kernel_version }}.tar.xz"

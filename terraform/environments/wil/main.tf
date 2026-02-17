@@ -1,7 +1,7 @@
 /**
- * # WIL Environment
+ * # NYC Environment
  *
- * Wrapper that calls the root module with WIL-specific configuration
+ * Wrapper that calls the root module with NYC-specific configuration
  */
 
 module "infrastructure" {

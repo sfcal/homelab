@@ -42,7 +42,7 @@
     cmd: make -j {{ ansible_processor_vcpus * 2 }}
     chdir: "{{ kernel_build_location }}/linux-{{ kernel_version }}"
     creates: "{{ kernel_build_location }}/linux-{{ kernel_version }}/vmlinux"
-  async: 1800
+  async: 7200
   poll: 0
   register: kernel_make
 
@@ -52,7 +52,7 @@
   register: kernel_wait_for_make
   until:
     - kernel_wait_for_make.finished
-  retries: 120
+  retries: 240
   delay: 30
 
 - name: Make modules_install
