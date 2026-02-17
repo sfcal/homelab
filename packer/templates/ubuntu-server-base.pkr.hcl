@@ -258,6 +258,18 @@ build {
       "echo 'Docker installation complete!'"
     ]
   }
+  
+  // Install lazydocker
+  provisioner "shell" {
+    inline = [
+      "echo 'Installing lazydocker...'",
+      "LAZYDOCKER_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazydocker/releases/latest | grep '\"tag_name\"' | cut -d '\"' -f 4 | sed 's/v//')",
+      "curl -fsSL \"https://github.com/jesseduffield/lazydocker/releases/latest/download/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz\" | sudo tar -xz -C /usr/local/bin lazydocker",
+      "sudo chmod +x /usr/local/bin/lazydocker",
+      "lazydocker --version",
+      "echo 'lazydocker installation complete!'"
+    ]
+  }
 
   // Cleanup
   provisioner "shell" {

@@ -25,6 +25,10 @@ dns_a_records:
     ip: "10.2.20.123"
   - name: "pxe"
     ip: "10.2.20.69"
+  - name: "truenas"
+    ip: "10.2.0.100"
+  - name: "caddy"
+    ip: "10.2.20.80"
 
 # Reverse Zone PTR Records
 dns_ptr_records:
