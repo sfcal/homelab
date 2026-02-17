@@ -255,7 +255,7 @@ services:
       - '993'
 
   pulsarr:
-    image: lakker/pulsarr:0.11.4
+    image: lakker/pulsarr:0.11.5
     container_name: pulsarr
     restart: unless-stopped
     mem_limit: 2g
