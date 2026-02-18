@@ -2,18 +2,21 @@
         admin 0.0.0.0:2019
 }
 
-*.5am.video {
+*.{{ domain_name }} {
         tls {
                 dns cloudflare {env.CF_API_TOKEN}
                 propagation_delay 2m
                 resolvers 1.1.1.1
         }
 
-        @caddy host caddy.5am.video
-        handle @caddy {
-                root * /usr/share/caddy
-                php_fastcgi localhost:80
-                file_server
+        @radarr host radarr.5am.video
+        handle @radarr {
+                reverse_proxy 10.2.0.5:7878
+        }
+
+        @sonarr host sonarr.5am.video
+        handle @sonarr {
+                reverse_proxy 10.2.0.5:8989
         }
 
         @trueNAS host truenas.5am.video
@@ -30,4 +33,5 @@
                     }
                 }
         }
+}
 }

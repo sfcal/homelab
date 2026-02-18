@@ -11,6 +11,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/site.yml
 
+  deploy-rproxy:
+    desc: Deploy reverse proxy server
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
+
   deploy-dns:
     desc: Deploy DNS server
     dir: '{{.ROOT_DIR}}/ansible'

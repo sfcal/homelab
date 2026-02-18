@@ -1,5 +1,5 @@
 ---
-# Global variables for NYC environment
+# Global variables for WIL environment
 
 # Primary domain name
 domain_name: "5am.video"

@@ -1,0 +1,3 @@
+---
+system_timezone: America/New_York
+reverse_proxy_deploy_path: /opt/caddy

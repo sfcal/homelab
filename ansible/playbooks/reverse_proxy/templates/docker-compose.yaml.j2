@@ -19,7 +19,6 @@ services:
       - caddy-config:/config
       - caddy-data:/data
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./index.html:/usr/share/caddy/index.html
     networks:
       - caddy # add other containers onto this network to use dns name
 
