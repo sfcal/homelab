@@ -17,23 +17,6 @@ vms = {
     ssh_user       = "sfcal"
   }
 
-  netboot_server = {
-    name           = "netbootxyz"
-    description    = "Netboot Server"
-    proxmox_node   = "proxmox"
-    vmid           = 1101
-    template_name  = "ubuntu-server-wil-base"
-    ip_address     = "10.2.20.69"
-    gateway        = "10.2.20.1"
-    nameserver     = "10.2.20.53"
-    cores          = 1
-    memory         = 1024
-    disk_size      = "50G"
-    storage_pool   = "local-lvm"
-    network_bridge = "vmbr0"
-    ssh_user       = "sfcal"
-  }
-
   reverse_proxy = {
     name           = "caddy"
     description    = "Reverse Proxy"

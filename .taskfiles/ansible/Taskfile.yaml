@@ -22,24 +22,6 @@ tasks:
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
-  
-  deploy-ntp:
-    desc: Deploy NTP/PTP server
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/ntp/deploy.yml
-
-  deploy-ca:
-    desc: Deploy Certificate Authority
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/ca/deploy.yml
-
-  deploy-pxe:
-    desc: Deploy PXE server
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/pxe/deploy.yml
 
   deploy-media:
     desc: Deploy media stack
