@@ -1,7 +1,7 @@
-// NYC environment variables for Netboot VM
+// WIL environment variables for Netboot VM
 
 // Environment marker
-environment = "nyc"
+environment = "wil"
 
 // Environment-specific settings
 proxmox_node = "proxmox"

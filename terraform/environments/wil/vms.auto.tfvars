@@ -17,23 +17,6 @@ vms = {
     ssh_user       = "sfcal"
   }
 
-  ntp_server = {
-    name           = "ntp-ptp"
-    description    = "NTP Server"
-    proxmox_node   = "proxmox"
-    vmid           = 1100
-    template_name  = "ubuntu-server-wil-base"
-    ip_address     = "10.2.20.123"
-    gateway        = "10.2.20.1"
-    nameserver     = "10.2.20.53"
-    cores          = 1
-    memory         = 1024
-    disk_size      = "50G"
-    storage_pool   = "local-lvm"
-    network_bridge = "vmbr0"
-    ssh_user       = "sfcal"
-  }
-
   netboot_server = {
     name           = "netbootxyz"
     description    = "Netboot Server"
@@ -62,23 +45,6 @@ vms = {
     nameserver     = "10.2.20.53"
     cores          = 1
     memory         = 1024
-    disk_size      = "50G"
-    storage_pool   = "local-lvm"
-    network_bridge = "vmbr0"
-    ssh_user       = "sfcal"
-  }
-
-  certificate_authority = {
-    name           = "step-ca"
-    description    = "Certificate Authority"
-    proxmox_node   = "proxmox"
-    vmid           = 1103
-    template_name  = "ubuntu-server-wil-base"
-    ip_address     = "10.2.20.3"
-    gateway        = "10.2.20.1"
-    nameserver     = "10.2.20.53"
-    cores          = 1
-    memory         = 2048
     disk_size      = "50G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
