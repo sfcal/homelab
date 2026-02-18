@@ -255,19 +255,10 @@ build {
       "sudo systemctl start docker",
       "sudo usermod -aG docker ${var.ssh_username}",
       "sudo docker version",
-      "echo 'Docker installation complete!'"
-    ]
-  }
-  
-  // Install lazydocker
-  provisioner "shell" {
-    inline = [
-      "echo 'Installing lazydocker...'",
-      "LAZYDOCKER_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazydocker/releases/latest | grep '\"tag_name\"' | cut -d '\"' -f 4 | sed 's/v//')",
-      "curl -fsSL \"https://github.com/jesseduffield/lazydocker/releases/latest/download/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz\" | sudo tar -xz -C /usr/local/bin lazydocker",
-      "sudo chmod +x /usr/local/bin/lazydocker",
-      "lazydocker --version",
-      "echo 'lazydocker installation complete!'"
+      "echo 'Docker installation complete!'",
+      "echo 'Installing Lazydocker...'",
+      "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash",
+      "echo 'Lazydocker installation complete!'"
     ]
   }
 

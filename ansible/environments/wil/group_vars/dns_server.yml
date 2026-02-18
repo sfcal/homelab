@@ -9,18 +9,17 @@ dns_trusted_networks:
   - localhost
   - localnets
   - 10.2.0.0/16
-  - 10.1.0.0/16
 
 # Forward Zone A Records
 dns_a_records:
   - name: "ns"
     ip: "10.2.20.53"
   - name: "sonarr"
-    ip: "10.2.20.100"
+    ip: "10.2.20.80"
   - name: "ca"
     ip: "10.2.20.3"
   - name: "radarr"
-    ip: "10.2.20.100"
+    ip: "10.2.20.80"
   - name: "time"
     ip: "10.2.20.123"
   - name: "pxe"

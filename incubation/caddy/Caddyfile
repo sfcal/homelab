@@ -2,26 +2,26 @@
         admin 0.0.0.0:2019
 }
 
-*.jimsgarage.co.uk {
+*.5am.video {
         tls {
                 dns cloudflare {env.CF_API_TOKEN}
                 propagation_delay 2m
                 resolvers 1.1.1.1
         }
 
-        @caddy host caddy.jimsgarage.co.uk
+        @caddy host caddy.5am.video
         handle @caddy {
                 root * /usr/share/caddy
                 php_fastcgi localhost:80
                 file_server
         }
 
-        @trueNAS host truenas.jimsgarage.co.uk
+        @trueNAS host truenas.5am.video
         handle @trueNAS {
                 reverse_proxy 192.168.6.2:80
         }
 
-        @portainer host caddy-portainer.jimsgarage.co.uk
+        @portainer host caddy-portainer.5am.video
         handle @portainer {
                 reverse_proxy https://portainer:9443 {
                     transport http {

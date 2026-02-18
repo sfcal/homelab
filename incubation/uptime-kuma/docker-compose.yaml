@@ -6,16 +6,6 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.sfc.al`)"
-      - "traefik.http.routers.uptime-kuma.entrypoints=https"
-      - "traefik.http.routers.uptime-kuma.tls=true"
-      - "traefik.http.routers.uptime-kuma.tls.certresolver=cloudflare"
-      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
-    networks:
-      - traefik-public
     environment:
       - TZ=Etc/UTC
     ports:
