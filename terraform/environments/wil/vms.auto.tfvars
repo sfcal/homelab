@@ -67,4 +67,21 @@ vms = {
     network_bridge = "vmbr0"
     ssh_user       = "sfcal"
   }
+
+    media_server = {
+    name           = "media-stack"
+    description    = "Media Server"
+    proxmox_node   = "proxmox"
+    vmid           = 1102
+    template_name  = "ubuntu-server-wil-base"
+    ip_address     = "10.2.20.100"
+    gateway        = "10.2.20.1"
+    nameserver     = "10.2.20.53"
+    cores          = 2
+    memory         = 8192
+    disk_size      = "50G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    ssh_user       = "sfcal"
+  }
 }

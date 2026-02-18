@@ -1,63 +1,10 @@
-networks:
-  traefik-public:
-    external: true
-
-secrets:
-  cf-token:
-    file: ./cf-token
-
 services:
-  traefik:
-    image: traefik:v3.6.7
-    container_name: traefik
-    restart: unless-stopped
-    mem_limit: 1g
-    mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.sfc.al`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=https"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.routers.traefik-dashboard.tls=true"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
-      - "traefik.http.routers.traefik-dashboard.tls.domains[0].main=sfc.al"
-      - "traefik.http.routers.traefik-dashboard.tls.domains[0].sans=*.sfc.al"
-    networks:
-      - traefik-public
-    secrets:
-      - cf-token
-    ports:
-      - 80:80
-      - 443:443
-    environment:
-      - CF_API_EMAIL=samuel.f.calvert@gmail.com
-      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /opt/traefik/config/traefik.yaml:/traefik.yaml:ro
-      - /opt/traefik/config/acme.json:/acme.json
-      - /opt/traefik/config/config.yaml:/config.yaml:ro
-      - /opt/traefik/logs:/var/log/traefik
-
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:4.5.5
     container_name: sabnzbd
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.sfc.al`)"
-      - "traefik.http.routers.sabnzbd.entrypoints=https"
-      - "traefik.http.routers.sabnzbd.tls=true"
-      - "traefik.http.routers.sabnzbd.tls.certresolver=cloudflare"
-      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
-    networks:
-      - traefik-public
     environment:
       - PGID=987
       - PUID=999
@@ -65,7 +12,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /opt/sabnzbd:/config
+      - ./sabnzbd:/config
       - /mnt/data/usenet:/data/usenet
 
   prowlarr:
@@ -74,16 +21,6 @@ services:
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 1g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.sfc.al`)"
-      - "traefik.http.routers.prowlarr.entrypoints=https"
-      - "traefik.http.routers.prowlarr.tls=true"
-      - "traefik.http.routers.prowlarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
-    networks:
-      - traefik-public
     environment:
       - PGID=987
       - PUID=999
@@ -91,24 +28,14 @@ services:
     ports:
       - "9696:9696"
     volumes:
-      - /opt/prowlarr:/config
+      - ./prowlarr:/config
 
   sonarr:
-    image: lscr.io/linuxserver/sonarr:4.0.15
+    image: lscr.io/linuxserver/sonarr:4.0.16
     container_name: sonarr
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.sonarr.rule=Host(`sonarr.sfc.al`)"
-      - "traefik.http.routers.sonarr.entrypoints=https"
-      - "traefik.http.routers.sonarr.tls=true"
-      - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
-    networks:
-      - traefik-public
     depends_on:
       - sabnzbd
       - prowlarr
@@ -119,7 +46,7 @@ services:
     ports:
       - "8989:8989"
     volumes:
-      - /opt/sonarr:/config
+      - ./sonarr:/config
       - /mnt/data:/data
 
   radarr:
@@ -128,16 +55,6 @@ services:
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.radarr.rule=Host(`radarr.sfc.al`)"
-      - "traefik.http.routers.radarr.entrypoints=https"
-      - "traefik.http.routers.radarr.tls=true"
-      - "traefik.http.routers.radarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
-    networks:
-      - traefik-public
     depends_on:
       - sabnzbd
       - prowlarr
@@ -148,7 +65,7 @@ services:
     ports:
       - "7878:7878"
     volumes:
-      - /opt/radarr:/config
+      - ./radarr:/config
       - /mnt/data:/data
 
   bazarr:
@@ -157,16 +74,6 @@ services:
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 1g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.bazarr.rule=Host(`bazarr.sfc.al`)"
-      - "traefik.http.routers.bazarr.entrypoints=https"
-      - "traefik.http.routers.bazarr.tls=true"
-      - "traefik.http.routers.bazarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
-    networks:
-      - traefik-public
     depends_on:
       - sonarr
       - radarr
@@ -178,7 +85,7 @@ services:
     ports:
       - "6767:6767"
     volumes:
-      - /opt/bazarr:/config
+      - ./bazarr:/config
       - /mnt/data/media/movies:/movies
       - /mnt/data/media/tv:/tv
 
@@ -188,18 +95,6 @@ services:
     restart: unless-stopped
     mem_limit: 20g
     mem_reservation: 10g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.plex.rule=Host(`plex.sfc.al`)"
-      - "traefik.http.routers.plex.entrypoints=https"
-      - "traefik.http.routers.plex.tls=true"
-      - "traefik.http.routers.plex.tls.certresolver=cloudflare"
-      - "traefik.http.routers.plex.middlewares=plex-headers@file"
-      - "traefik.http.services.plex.loadbalancer.server.port=32400"
-      - "traefik.http.services.plex.loadbalancer.server.scheme=http"
-    networks:
-      - traefik-public
     environment:
       - PGID=987
       - PUID=999
@@ -216,28 +111,18 @@ services:
       - 32414:32414/udp
       - 32469:32469
     volumes:
-      - /opt/plex:/config
+      - ./plex:/config
       - /mnt/data/media:/data/media
       - /dev/shm/plex:/transcode
     devices:
       - /dev/dri:/dev/dri
 
   tunarr:
-    image: chrisbenincasa/tunarr:0.22.9
+    image: chrisbenincasa/tunarr:0.22.11
     container_name: tunarr
     restart: unless-stopped
     mem_limit: 6g
     mem_reservation: 3g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.tunarr.rule=Host(`tunarr.sfc.al`)"
-      - "traefik.http.routers.tunarr.entrypoints=https"
-      - "traefik.http.routers.tunarr.tls=true"
-      - "traefik.http.routers.tunarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.tunarr.loadbalancer.server.port=8000"
-    networks:
-      - traefik-public
     environment:
       - PGID=987
       - PUID=999
@@ -246,7 +131,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /opt/tunarr:/config
+      - ./tunarr:/config
       - /mnt/data/media:/media:ro
       - /dev/shm/tunarr:/cache
     devices:
@@ -255,21 +140,11 @@ services:
       - '993'
 
   pulsarr:
-    image: lakker/pulsarr:0.11.5
+    image: lakker/pulsarr:0.6.8
     container_name: pulsarr
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 1g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.pulsarr.rule=Host(`pulsarr.sfc.al`)"
-      - "traefik.http.routers.pulsarr.entrypoints=https"
-      - "traefik.http.routers.pulsarr.tls=true"
-      - "traefik.http.routers.pulsarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.pulsarr.loadbalancer.server.port=3003"
-    networks:
-      - traefik-public
     depends_on:
       - sonarr
       - radarr
@@ -286,25 +161,15 @@ services:
     ports:
       - "3003:3003"
     volumes:
-      - /opt/pulsarr/data:/app/data
-      - /opt/pulsarr/.env:/app/.env
-  
+      - ./pulsarr/data:/app/data
+      - ./pulsarr/.env:/app/.env
+
   cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:2.4.0
+    image: ghcr.io/cleanuparr/cleanuparr:2.4.3
     container_name: cleanuparr
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.cleanuparr.rule=Host(`cleanuparr.sfc.al`)"
-      - "traefik.http.routers.cleanuparr.entrypoints=https"
-      - "traefik.http.routers.cleanuparr.tls=true"
-      - "traefik.http.routers.cleanuparr.tls.certresolver=cloudflare"
-      - "traefik.http.services.cleanuparr.loadbalancer.server.port=11011"
-    networks:
-      - traefik-public
     depends_on:
       - sonarr
       - radarr
@@ -318,7 +183,7 @@ services:
     ports:
       - "11011:11011"
     volumes:
-      - /opt/cleanuparr:/config
+      - ./cleanuparr:/config
 
   huntarr:
     image: ghcr.io/plexguide/huntarr:8.2.10
@@ -326,16 +191,6 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.huntarr.rule=Host(`huntarr.sfc.al`)"
-      - "traefik.http.routers.huntarr.entrypoints=https"
-      - "traefik.http.routers.huntarr.tls=true"
-      - "traefik.http.routers.huntarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.huntarr.loadbalancer.server.port=9705"
-    networks:
-      - traefik-public
     depends_on:
       - sonarr
       - radarr
@@ -345,24 +200,14 @@ services:
     ports:
       - "9705:9705"
     volumes:
-      - /opt/huntarr:/config
+      - ./huntarr:/config
 
   tdarr-server:
     image: ghcr.io/haveagitgat/tdarr:2.51.03
     container_name: tdarr-server
     restart: unless-stopped
-    mem_limit: 16g
-    mem_reservation: 8g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.tdarr.rule=Host(`tdarr.sfc.al`)"
-      - "traefik.http.routers.tdarr.entrypoints=https"
-      - "traefik.http.routers.tdarr.tls=true"
-      - "traefik.http.routers.tdarr.tls.certresolver=cloudflare"
-      - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
-    networks:
-      - traefik-public
+    mem_limit: 10g
+    mem_reservation: 5g
     environment:
       - PUID=999
       - PGID=987
@@ -379,10 +224,10 @@ services:
       - "8265:8265"
       - "8266:8266"
     volumes:
-      - /opt/tdarr/server:/app/server
-      - /opt/tdarr/configs:/app/configs
-      - /opt/tdarr/logs:/app/logs
-      - /opt/tdarr/data:/app/data
+      - ./tdarr/server:/app/server
+      - ./tdarr/configs:/app/configs
+      - ./tdarr/logs:/app/logs
+      - ./tdarr/data:/app/data
       - /mnt/data/media:/media
       - /dev/shm/tdarr:/temp
     devices:
@@ -394,8 +239,6 @@ services:
 #    restart: unless-stopped
 #    mem_limit: 16g
 #    mem_reservation: 8g
-#    networks:
-#      - traefik-public
 #    environment:
 #      - PUID=999
 #      - PGID=987
@@ -424,16 +267,6 @@ services:
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.frigate.rule=Host(`frigate.sfc.al`)"
-      - "traefik.http.routers.frigate.entrypoints=https"
-      - "traefik.http.routers.frigate.tls=true"
-      - "traefik.http.routers.frigate.tls.certresolver=cloudflare"
-      - "traefik.http.services.frigate.loadbalancer.server.port=5000"
-    networks:
-      - traefik-public
     environment:
       - PGID=987
       - PUID=999
@@ -446,9 +279,9 @@ services:
       - "8555:8555/tcp" # WebRTC over TCP
       - "8555:8555/udp" # WebRTC over UDP
     volumes:
-      - /opt/frigate:/config
+      - ./frigate:/config
       - /mnt/data/frigate:/media/frigate
-      - /opt/frigate/models:/models:ro
+      - ./frigate/models:/models:ro
       - /dev/shm/frigate:/dev/shm
       - /etc/localtime:/etc/localtime:ro
     devices:

@@ -1,69 +1,48 @@
-networks:
-  traefik-public:
-    external: true
-
-secrets:
-  cf-token:
-    file: ./cf-token
-
+---
 services:
-  traefik:
-    image: traefik:v3.5.4
-    container_name: traefik
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:{{ sabnzbd_version }}
+    container_name: sabnzbd
     restart: unless-stopped
-    mem_limit: 1g
-    mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.{{ domain_name }}`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=https"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.routers.traefik-dashboard.tls=true"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=step-ca"
-      - "traefik.http.routers.traefik-dashboard.tls.domains[0].main={{ domain_name }}"
-      - "traefik.http.routers.traefik-dashboard.tls.domains[0].sans=*.{{ domain_name }}"
-    networks:
-      - traefik-public
-    secrets:
-      - cf-token
-    ports:
-      - 80:80
-      - 443:443
+    mem_limit: 4g
+    mem_reservation: 2g
     environment:
-      - CF_API_EMAIL=samuel.f.calvert@gmail.com
-      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
-      - SSL_CERT_FILE=/certs/step-ca-root.crt
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+    ports:
+      - "8080:8080"
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/config/traefik.yaml:/traefik.yaml:ro
-      - ./traefik/config/acme.json:/acme.json
-      - ./traefik/config/acme-step.json:/acme-step.json
-      - ./traefik/config/config.yaml:/config.yaml:ro
-      - ./traefik/logs:/var/log/traefik
-      - ./traefik/certs:/certs:ro
+      - ./sabnzbd:/config
+      - /mnt/data/usenet:/data/usenet
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:{{ prowlarr_version }}
+    container_name: prowlarr
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+    ports:
+      - "9696:9696"
+    volumes:
+      - ./prowlarr:/config
 
   sonarr:
-    image: lscr.io/linuxserver/sonarr:4.0.15
+    image: lscr.io/linuxserver/sonarr:{{ sonarr_version }}
     container_name: sonarr
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.sonarr.rule=Host(`sonarr.{{ domain_name }}`)"
-      - "traefik.http.routers.sonarr.entrypoints=https"
-      - "traefik.http.routers.sonarr.tls=true"
-      - "traefik.http.routers.sonarr.tls.certresolver=step-ca"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
-    networks:
-      - traefik-public
+    depends_on:
+      - sabnzbd
+      - prowlarr
     environment:
-      - PGID=987
-      - PUID=999
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
       - UMASK=022
     ports:
       - "8989:8989"
@@ -72,24 +51,17 @@ services:
       - /mnt/data:/data
 
   radarr:
-    image: lscr.io/linuxserver/radarr:5.28.0
+    image: lscr.io/linuxserver/radarr:{{ radarr_version }}
     container_name: radarr
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.radarr.rule=Host(`radarr.{{ domain_name }}`)"
-      - "traefik.http.routers.radarr.entrypoints=https"
-      - "traefik.http.routers.radarr.tls=true"
-      - "traefik.http.routers.radarr.tls.certresolver=step-ca"
-      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
-    networks:
-      - traefik-public
+    depends_on:
+      - sabnzbd
+      - prowlarr
     environment:
-      - PGID=987
-      - PUID=999
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
       - UMASK=022
     ports:
       - "7878:7878"
@@ -97,4 +69,195 @@ services:
       - ./radarr:/config
       - /mnt/data:/data
 
- 
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:{{ bazarr_version }}
+    container_name: bazarr
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    depends_on:
+      - sonarr
+      - radarr
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+    ports:
+      - "6767:6767"
+    volumes:
+      - ./bazarr:/config
+      - /mnt/data/media/movies:/movies
+      - /mnt/data/media/tv:/tv
+
+  plex:
+    image: lscr.io/linuxserver/plex:{{ plex_version }}
+    container_name: plex
+    restart: unless-stopped
+    mem_limit: 20g
+    mem_reservation: 10g
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+      - VERSION=docker
+    ports:
+      - 32400:32400
+      - 1900:1900/udp
+      - 5353:5353/udp
+      - 8324:8324
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 32469:32469
+    volumes:
+      - ./plex:/config
+      - /mnt/data/media:/data/media
+      - /dev/shm/plex:/transcode
+    devices:
+      - /dev/dri:/dev/dri
+
+  tunarr:
+    image: chrisbenincasa/tunarr:{{ tunarr_version }}
+    container_name: tunarr
+    restart: unless-stopped
+    mem_limit: 6g
+    mem_reservation: 3g
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./tunarr:/config
+      - /mnt/data/media:/media:ro
+      - /dev/shm/tunarr:/cache
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - '{{ media_stack_render_gid }}'
+
+  pulsarr:
+    image: lakker/pulsarr:{{ pulsarr_version }}
+    container_name: pulsarr
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    depends_on:
+      - sonarr
+      - radarr
+      - plex
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+      - baseUrl=http://{{ media_stack_host_ip }}
+      - port=3003
+      - logLevel=info
+      - NODE_ARGS=--log-both
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./pulsarr/data:/app/data
+      - ./pulsarr/.env:/app/.env
+
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:{{ cleanuparr_version }}
+    container_name: cleanuparr
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    depends_on:
+      - sonarr
+      - radarr
+      - sabnzbd
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+      - PORT=11011
+    ports:
+      - "11011:11011"
+    volumes:
+      - ./cleanuparr:/config
+
+  huntarr:
+    image: ghcr.io/plexguide/huntarr:{{ huntarr_version }}
+    container_name: huntarr
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    depends_on:
+      - sonarr
+      - radarr
+      - prowlarr
+    environment:
+      - TZ={{ system_timezone }}
+    ports:
+      - "9705:9705"
+    volumes:
+      - ./huntarr:/config
+
+  tdarr-server:
+    image: ghcr.io/haveagitgat/tdarr:{{ tdarr_version }}
+    container_name: tdarr-server
+    restart: unless-stopped
+    mem_limit: 10g
+    mem_reservation: 5g
+    environment:
+      - PUID={{ media_stack_puid }}
+      - PGID={{ media_stack_pgid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=6
+      - nodeName=TdarrServer
+    ports:
+      - "8265:8265"
+      - "8266:8266"
+    volumes:
+      - ./tdarr/server:/app/server
+      - ./tdarr/configs:/app/configs
+      - ./tdarr/logs:/app/logs
+      - ./tdarr/data:/app/data
+      - /mnt/data/media:/media
+      - /dev/shm/tdarr:/temp
+    devices:
+      - /dev/dri:/dev/dri
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:{{ frigate_version }}
+    container_name: frigate
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+      - FRIGATE_RTSP_PASSWORD={{ frigate_rtsp_password }}
+    ports:
+      - "5000:5000"
+      - "8554:8554"
+      - "8555:8555/tcp"
+      - "8555:8555/udp"
+    volumes:
+      - ./frigate:/config
+      - /mnt/data/frigate:/media/frigate
+      - ./frigate/models:/models:ro
+      - /dev/shm/frigate:/dev/shm
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/dri:/dev/dri
+    privileged: true
+    shm_size: 1g

@@ -12,14 +12,8 @@
       ansible.builtin.include_tasks: ../common/prereq.yml
 
   tasks:
-    - name: Configure nfs.
+    - name: Configure NFS mounts.
       ansible.builtin.include_tasks: tasks/nfs.yml
 
-    - name: Configure Traefik.
-      ansible.builtin.include_tasks: tasks/traefik.yml
-
-    - name: Configure step-ca trust.
-      ansible.builtin.include_tasks: tasks/step-ca-trust.yml  
-
-    - name: Configure media-stack.
+    - name: Configure Media Stack.
       ansible.builtin.include_tasks: tasks/media-stack.yml

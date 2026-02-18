@@ -1,30 +1,59 @@
 ---
-- name: Create deploy directory
+- name: Create media-stack directory structure.
   ansible.builtin.file:
-    path: "{{ deploy_path }}"
+    path: "{{ item }}"
     state: directory
-    mode: '0755'
+    owner: "{{ media_stack_user }}"
+    group: "{{ media_stack_group }}"
+    mode: "0755"
+  loop:
+    - "{{ media_stack_deploy_path }}"
+    - "{{ media_stack_deploy_path }}/sabnzbd"
+    - "{{ media_stack_deploy_path }}/prowlarr"
+    - "{{ media_stack_deploy_path }}/sonarr"
+    - "{{ media_stack_deploy_path }}/radarr"
+    - "{{ media_stack_deploy_path }}/bazarr"
+    - "{{ media_stack_deploy_path }}/plex"
+    - "{{ media_stack_deploy_path }}/tunarr"
+    - "{{ media_stack_deploy_path }}/pulsarr"
+    - "{{ media_stack_deploy_path }}/pulsarr/data"
+    - "{{ media_stack_deploy_path }}/cleanuparr"
+    - "{{ media_stack_deploy_path }}/huntarr"
+    - "{{ media_stack_deploy_path }}/tdarr"
+    - "{{ media_stack_deploy_path }}/tdarr/server"
+    - "{{ media_stack_deploy_path }}/tdarr/configs"
+    - "{{ media_stack_deploy_path }}/tdarr/logs"
+    - "{{ media_stack_deploy_path }}/tdarr/data"
+    - "{{ media_stack_deploy_path }}/frigate"
+    - "{{ media_stack_deploy_path }}/frigate/models"
 
-- name: Decrypt and copy cf-token
-  ansible.builtin.copy:
-    content: "{{ lookup('community.sops.sops', 'secrets/cf-token.sops') }}"
-    dest: "{{ deploy_path }}/cf-token"
-    mode: '0600'
-  no_log: true
+- name: Create tmpfs mount directories.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /dev/shm/plex
+    - /dev/shm/tunarr
+    - /dev/shm/tdarr
+    - /dev/shm/frigate
 
-- name: Deploy media-stack docker-compose file
+- name: Deploy docker-compose.yaml.
   ansible.builtin.template:
     src: templates/docker-compose.yaml.j2
-    dest: "{{ deploy_path }}/docker-compose.yml"
-    mode: '0644'
-  notify: Restart media-stack
+    dest: "{{ media_stack_deploy_path }}/docker-compose.yaml"
+    owner: "{{ media_stack_user }}"
+    group: "{{ media_stack_group }}"
+    mode: "0644"
+  notify:
+    - Restart media-stack
 
-- name: Start media-stack container
+- name: Ensure Media Stack is running.
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}"
+    project_src: "{{ media_stack_deploy_path }}"
     state: present
   register: media_stack_output
 
-- name: Display media-stack status
+- name: Display Media Stack status.
   ansible.builtin.debug:
-    msg: "Media stack deployment succeeded"
+    var: media_stack_output

@@ -14,7 +14,7 @@
 
 - name: Deploy environment file.
   ansible.builtin.template:
-    src: templates/env.j2
+    src: secrets/.env
     dest: /opt/caddy/.env
     owner: root
     group: root

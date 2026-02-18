@@ -1,15 +1,23 @@
-- name: Install NFS client packages
+---
+- name: Install NFS client packages.
   ansible.builtin.apt:
     name: nfs-common
     state: present
-    update_cache: yes
 
-- name: Add Synology NAS to fstab and mount
+- name: Create NFS mount directories.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ nfs_mounts }}"
+
+- name: Mount NFS shares.
   ansible.posix.mount:
-    src: 10.1.0.100:/volume1/nas
-    path: /mnt/nas
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
     fstype: nfs
-    opts: defaults,_netdev,vers=3
+    opts: "{{ item.opts | default(nfs_default_opts) }}"
     state: mounted
-    dump: '0'
-    passno: '0'
+    dump: "0"
+    passno: "0"
+  loop: "{{ nfs_mounts }}"

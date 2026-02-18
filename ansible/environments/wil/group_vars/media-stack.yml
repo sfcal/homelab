@@ -1,2 +1,37 @@
 ---
-deploy_path: /opt/media-stack
+# Media Stack configuration
+system_timezone: America/New_York
+media_stack_deploy_path: /opt/media-stack
+
+# User/group IDs
+media_stack_puid: "999"
+media_stack_pgid: "987"
+media_stack_user: root
+media_stack_group: root
+media_stack_render_gid: "993"
+
+# Host IP (used for pulsarr baseUrl)
+media_stack_host_ip: "10.2.0.5"
+
+# Container image versions
+sabnzbd_version: "4.5.5"
+prowlarr_version: "2.1.5"
+sonarr_version: "4.0.16"
+radarr_version: "5.28.0"
+bazarr_version: "1.5.3"
+plex_version: "1.42.2"
+tunarr_version: "0.22.11"
+pulsarr_version: "0.6.8"
+cleanuparr_version: "2.4.3"
+huntarr_version: "8.2.10"
+tdarr_version: "2.51.03"
+frigate_version: "0.16.2"
+
+# Frigate
+frigate_rtsp_password: "SuperSecure00"  # Change this to a secure password
+
+# NFS Mounts
+nfs_default_opts: "defaults"
+nfs_mounts:
+  - src: "10.2.0.100:/mnt/NAS-WIL/Media"
+    path: "/mnt/data"
