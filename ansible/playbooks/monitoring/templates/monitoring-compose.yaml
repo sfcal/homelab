@@ -1,6 +1,4 @@
 networks:
-  traefik-public:
-    external: true
   monitoring:
     driver: bridge
 
@@ -11,16 +9,7 @@ services:
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 1g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ domain_name }}`)"
-      - "traefik.http.routers.prometheus.entrypoints=https"
-      - "traefik.http.routers.prometheus.tls=true"
-      - "traefik.http.routers.prometheus.tls.certresolver=cloudflare"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     networks:
-      - traefik-public
       - monitoring
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -42,16 +31,7 @@ services:
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 1g
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.{{ domain_name }}`)"
-      - "traefik.http.routers.grafana.entrypoints=https"
-      - "traefik.http.routers.grafana.tls=true"
-      - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     networks:
-      - traefik-public
       - monitoring
     depends_on:
       - prometheus
@@ -73,16 +53,7 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.{{ domain_name }}`)"
-      - "traefik.http.routers.cadvisor.entrypoints=https"
-      - "traefik.http.routers.cadvisor.tls=true"
-      - "traefik.http.routers.cadvisor.tls.certresolver=cloudflare"
-      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
     networks:
-      - traefik-public
       - monitoring
     ports:
       - "8081:8080"
@@ -122,16 +93,7 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 512m
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.http.routers.loki.rule=Host(`loki.{{ domain_name }}`)"
-      - "traefik.http.routers.loki.entrypoints=https"
-      - "traefik.http.routers.loki.tls=true"
-      - "traefik.http.routers.loki.tls.certresolver=cloudflare"
-      - "traefik.http.services.loki.loadbalancer.server.port=3100"
     networks:
-      - traefik-public
       - monitoring
     ports:
       - "3100:3100"
@@ -163,16 +125,7 @@ services:
   #   restart: unless-stopped
   #   mem_limit: 512m
   #   mem_reservation: 256m
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.docker.network=traefik-public"
-  #     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.{{ domain_name }}`)"
-  #     - "traefik.http.routers.alertmanager.entrypoints=https"
-  #     - "traefik.http.routers.alertmanager.tls=true"
-  #     - "traefik.http.routers.alertmanager.tls.certresolver=cloudflare"
-  #     - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
   #   networks:
-  #     - traefik-public
   #     - monitoring
   #   ports:
   #     - "9093:9093"

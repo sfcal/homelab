@@ -1,0 +1,74 @@
+---
+# --- Discover available backups ---
+- name: Find available backups.
+  ansible.builtin.find:
+    paths: "{{ backup_dest_path }}"
+    patterns: "media-stack-*.tar.gz"
+  register: found_backups
+
+- name: Fail if no backups exist.
+  ansible.builtin.fail:
+    msg: "No backups found in {{ backup_dest_path }}."
+  when: found_backups.matched == 0
+
+# --- Resolve which backup to restore ---
+- name: Sort backups and select latest when restore_file is not specified.
+  ansible.builtin.set_fact:
+    resolved_backup: >-
+      {{
+        (restore_file is defined and restore_file != '')
+        | ternary(
+            backup_dest_path + '/' + (restore_file | default('')),
+            (found_backups.files | sort(attribute='mtime') | last).path
+          )
+      }}
+
+- name: Verify the target backup file exists.
+  ansible.builtin.stat:
+    path: "{{ resolved_backup }}"
+  register: backup_stat
+
+- name: Fail if the specified backup file does not exist.
+  ansible.builtin.fail:
+    msg: "Backup file not found: {{ resolved_backup }}"
+  when: not backup_stat.stat.exists
+
+- name: Display backup that will be restored.
+  ansible.builtin.debug:
+    msg: "Restoring from: {{ resolved_backup | basename }}"
+
+# --- Stop containers ---
+- name: Stop media stack before restore.
+  community.docker.docker_compose_v2:
+    project_src: "{{ media_stack_deploy_path }}"
+    state: stopped
+
+# --- Wipe existing config directories ---
+- name: Remove existing config directories for a clean restore.
+  ansible.builtin.file:
+    path: "{{ media_stack_deploy_path }}/{{ item }}"
+    state: absent
+  loop: "{{ backup_targets }}"
+  loop_control:
+    label: "{{ item }}"
+
+# --- Extract archive ---
+- name: Extract backup archive to /opt.
+  ansible.builtin.command:
+    argv:
+      - tar
+      - xzf
+      - "{{ resolved_backup }}"
+      - -C
+      - /opt
+  changed_when: true
+
+# --- Restart containers ---
+- name: Start media stack after restore.
+  community.docker.docker_compose_v2:
+    project_src: "{{ media_stack_deploy_path }}"
+    state: present
+
+- name: Display restore result.
+  ansible.builtin.debug:
+    msg: "Restore complete from {{ resolved_backup | basename }}. Media stack is back online."

@@ -1,0 +1,38 @@
+---
+- name: Schedule Media Stack Backup Cron Job
+  hosts: media-stack
+  become: true
+
+  tasks:
+    - name: Ensure ansible is available on the host for cron execution.
+      ansible.builtin.apt:
+        name: ansible
+        state: present
+
+    - name: Deploy backup cron job.
+      ansible.builtin.cron:
+        name: "media-stack config backup"
+        user: root
+        minute: "{{ backup_cron_minute }}"
+        hour: "{{ backup_cron_hour }}"
+        weekday: "{{ backup_cron_weekday }}"
+        job: >-
+          ansible-playbook
+          -i /etc/ansible/environments/wil/hosts.ini
+          /etc/ansible/playbooks/media/backup.yml
+          --limit media-stack
+          >> /var/log/media-backup.log 2>&1
+        state: present
+
+    - name: Set up log rotation for backup log.
+      ansible.builtin.copy:
+        dest: /etc/logrotate.d/media-backup
+        mode: "0644"
+        content: |
+          /var/log/media-backup.log {
+              weekly
+              rotate 4
+              compress
+              missingok
+              notifempty
+          }

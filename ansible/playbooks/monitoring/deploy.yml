@@ -17,3 +17,6 @@
       
     - name: Configure Grafana.
       ansible.builtin.include_tasks: tasks/grafana.yml
+
+    - name: Configure Uptime Kuma.
+      ansible.builtin.include_tasks: tasks/kuma.yml

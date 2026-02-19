@@ -1,0 +1,65 @@
+---
+- name: Set backup timestamp.
+  ansible.builtin.set_fact:
+    backup_timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Ensure backup destination exists.
+  ansible.builtin.file:
+    path: "{{ backup_dest_path }}"
+    state: directory
+    mode: "0755"
+
+# --- Stop containers ---
+- name: Stop media stack for consistent backup.
+  community.docker.docker_compose_v2:
+    project_src: "{{ media_stack_deploy_path }}"
+    state: stopped
+
+# --- Create the tarball ---
+- name: Build tar exclude arguments.
+  ansible.builtin.set_fact:
+    tar_exclude_args: "{{ backup_excludes | map('regex_replace', '^(.*)$', '--exclude=\\1') | list }}"
+
+- name: Create compressed backup archive.
+  ansible.builtin.command:
+    argv: >-
+      {{ ['tar', 'czf', backup_dest_path + '/media-stack-' + backup_timestamp + '.tar.gz']
+         + tar_exclude_args
+         + ['-C', '/opt']
+         + backup_targets }}
+  changed_when: true
+
+# --- Restart containers ---
+- name: Start media stack after backup.
+  community.docker.docker_compose_v2:
+    project_src: "{{ media_stack_deploy_path }}"
+    state: present
+
+# --- Get backup info ---
+- name: Get backup file size.
+  ansible.builtin.stat:
+    path: "{{ backup_dest_path }}/media-stack-{{ backup_timestamp }}.tar.gz"
+  register: backup_file_stat
+
+- name: Display backup result.
+  ansible.builtin.debug:
+    msg: >-
+      Backup complete: media-stack-{{ backup_timestamp }}.tar.gz
+      ({{ (backup_file_stat.stat.size / 1048576) | round(1) }} MB)
+
+# --- Retention cleanup ---
+- name: Find backups older than retention period.
+  ansible.builtin.find:
+    paths: "{{ backup_dest_path }}"
+    patterns: "media-stack-*.tar.gz"
+    age: "{{ backup_retain_days }}d"
+  register: old_backups
+
+- name: Remove old backups.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ old_backups.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: old_backups.matched > 0

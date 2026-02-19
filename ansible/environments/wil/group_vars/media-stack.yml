@@ -1,7 +1,7 @@
 ---
 # Media Stack configuration
 system_timezone: America/New_York
-media_stack_deploy_path: /opt/media-stack
+media_stack_deploy_path: /opt
 
 # User/group IDs
 media_stack_puid: "999"
@@ -35,3 +35,49 @@ nfs_default_opts: "defaults"
 nfs_mounts:
   - src: "10.2.0.100:/mnt/NAS-WIL/Media"
     path: "/mnt/data"
+
+# Where to store backups (on the NFS-mounted media share)
+backup_dest_path: /mnt/data/backups/media-stack
+
+# Number of daily backups to retain
+backup_retain_days: 30
+
+# Schedule (cron format) - default: 4am every Sunday
+backup_cron_hour: "4"
+backup_cron_minute: "0"
+backup_cron_weekday: "0"
+
+# Directories to back up (relative to /opt)
+backup_targets:
+  - sabnzbd
+  - prowlarr
+  - sonarr
+  - radarr
+  - bazarr
+  - plex
+  - tunarr
+  #- pulsarr
+  - cleanuparr
+  - huntarr
+  - tdarr
+  - frigate
+
+# Paths to exclude from the tarball (glob patterns)
+backup_excludes:
+  # Plex
+  - "*/plex/Library/Application Support/Plex Media Server/Cache/*"
+  - "*/plex/Library/Application Support/Plex Media Server/Codecs/*"
+  - "*/plex/Library/Application Support/Plex Media Server/Crash Reports/*"
+  - "*/plex/Library/Application Support/Plex Media Server/Logs/*"
+  # Tdarr
+  - "*/tdarr/data/*"
+  - "*/tdarr/logs/*"
+  # General
+  - "*/cache/*"
+  - "*/Cache/*"
+  - "*/logs/*"
+  - "*/Logs/*"
+  - "*/transcode/*"
+  - "*/temp/*"
+  - "*.log"
+  - "*.log.*"

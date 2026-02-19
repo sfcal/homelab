@@ -9,14 +9,72 @@
                 resolvers 1.1.1.1
         }
 
-        @radarr host radarr.5am.video
-        handle @radarr {
-                reverse_proxy 10.2.20.100:7878
+        @sabnzbd host sabnzbd.5am.video
+        handle @sabnzbd {
+                reverse_proxy 10.2.20.100:8080
+        }
+
+        @prowlarr host prowlarr.5am.video
+        handle @prowlarr {
+                reverse_proxy 10.2.20.100:9696
         }
 
         @sonarr host sonarr.5am.video
         handle @sonarr {
                 reverse_proxy 10.2.20.100:8989
+        }
+
+        @radarr host radarr.5am.video
+        handle @radarr {
+                reverse_proxy 10.2.20.100:7878
+        }
+
+        @bazarr host bazarr.5am.video
+        handle @bazarr {
+                reverse_proxy 10.2.20.100:6767
+        }
+
+        @plex host plex.5am.video
+        handle @plex {
+            encode gzip
+            reverse_proxy 10.2.20.100:32400 {
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto {scheme}
+                header_up Host {upstream_hostport}
+                transport http {
+                    read_buffer 8192
+                }
+            }
+        }
+        @tunarr host tunarr.5am.video
+        handle @tunarr {
+                reverse_proxy 10.2.20.100:8000
+        }
+
+        @pulsarr host pulsarr.5am.video
+        handle @pulsarr {
+                reverse_proxy 10.2.20.100:3003
+        }
+
+        @cleanuparr host cleanuparr.5am.video
+        handle @cleanuparr {
+                reverse_proxy 10.2.20.100:11011
+        }
+
+        @huntarr host huntarr.5am.video
+        handle @huntarr {
+                reverse_proxy 10.2.20.100:9705
+        }
+
+        @tdarr host tdarr.5am.video
+        handle @tdarr {
+                reverse_proxy 10.2.20.100:8265
+        }
+
+        @frigate host frigate.5am.video
+        handle @frigate {
+                reverse_proxy 10.2.20.100:5000
         }
 
         @trueNAS host truenas.5am.video

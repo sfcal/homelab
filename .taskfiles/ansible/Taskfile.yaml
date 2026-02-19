@@ -5,6 +5,18 @@ vars:
   HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
 
 tasks:
+  restore-media:
+    desc: Restore media stack backup
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/restore.yml
+
+  backup-media:
+    desc: backup media stack
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/backup.yml
+
   deploy-all:
     desc: Deploy entire infrastructure in correct order
     dir: '{{.ROOT_DIR}}/ansible'

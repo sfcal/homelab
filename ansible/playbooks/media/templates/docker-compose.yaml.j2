@@ -163,7 +163,7 @@ services:
       - "3003:3003"
     volumes:
       - ./pulsarr/data:/app/data
-      - ./pulsarr/.env:/app/.env
+    #  - ./pulsarr/.env:/app/.env
 
   cleanuparr:
     image: ghcr.io/cleanuparr/cleanuparr:{{ cleanuparr_version }}
