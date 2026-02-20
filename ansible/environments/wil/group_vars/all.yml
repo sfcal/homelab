@@ -5,8 +5,8 @@
 domain_name: "5am.video"
 system_timezone: America/New_York
 
-# Reverse Proxy Configuration
-reverse_proxy_deploy_path: /opt/caddy
+# Unified deploy path for all services
+deploy_path: /opt
 
 # DNS Configuration
 dns_forwarders:

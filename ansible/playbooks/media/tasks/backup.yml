@@ -12,7 +12,7 @@
 # --- Stop containers ---
 - name: Stop media stack for consistent backup.
   community.docker.docker_compose_v2:
-    project_src: "{{ media_stack_deploy_path }}"
+    project_src: "{{ deploy_path }}"
     state: stopped
 
 # --- Create the tarball ---
@@ -32,7 +32,7 @@
 # --- Restart containers ---
 - name: Start media stack after backup.
   community.docker.docker_compose_v2:
-    project_src: "{{ media_stack_deploy_path }}"
+    project_src: "{{ deploy_path }}"
     state: present
 
 # --- Get backup info ---

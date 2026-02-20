@@ -7,25 +7,25 @@
     group: "{{ media_stack_group }}"
     mode: "0755"
   loop:
-    - "{{ media_stack_deploy_path }}"
-    - "{{ media_stack_deploy_path }}/sabnzbd"
-    - "{{ media_stack_deploy_path }}/prowlarr"
-    - "{{ media_stack_deploy_path }}/sonarr"
-    - "{{ media_stack_deploy_path }}/radarr"
-    - "{{ media_stack_deploy_path }}/bazarr"
-    - "{{ media_stack_deploy_path }}/plex"
-    - "{{ media_stack_deploy_path }}/tunarr"
-    - "{{ media_stack_deploy_path }}/pulsarr"
-    - "{{ media_stack_deploy_path }}/pulsarr/data"
-    - "{{ media_stack_deploy_path }}/cleanuparr"
-    - "{{ media_stack_deploy_path }}/huntarr"
-    - "{{ media_stack_deploy_path }}/tdarr"
-    - "{{ media_stack_deploy_path }}/tdarr/server"
-    - "{{ media_stack_deploy_path }}/tdarr/configs"
-    - "{{ media_stack_deploy_path }}/tdarr/logs"
-    - "{{ media_stack_deploy_path }}/tdarr/data"
-    - "{{ media_stack_deploy_path }}/frigate"
-    - "{{ media_stack_deploy_path }}/frigate/models"
+    - "{{ deploy_path }}"
+    - "{{ deploy_path }}/sabnzbd"
+    - "{{ deploy_path }}/prowlarr"
+    - "{{ deploy_path }}/sonarr"
+    - "{{ deploy_path }}/radarr"
+    - "{{ deploy_path }}/bazarr"
+    - "{{ deploy_path }}/plex"
+    - "{{ deploy_path }}/tunarr"
+    - "{{ deploy_path }}/pulsarr"
+    - "{{ deploy_path }}/pulsarr/data"
+    - "{{ deploy_path }}/cleanuparr"
+    - "{{ deploy_path }}/huntarr"
+    - "{{ deploy_path }}/tdarr"
+    - "{{ deploy_path }}/tdarr/server"
+    - "{{ deploy_path }}/tdarr/configs"
+    - "{{ deploy_path }}/tdarr/logs"
+    - "{{ deploy_path }}/tdarr/data"
+    - "{{ deploy_path }}/frigate"
+    - "{{ deploy_path }}/frigate/models"
 
 - name: Create tmpfs mount directories.
   ansible.builtin.file:
@@ -41,7 +41,7 @@
 - name: Deploy docker-compose.yaml.
   ansible.builtin.template:
     src: templates/docker-compose.yaml.j2
-    dest: "{{ media_stack_deploy_path }}/docker-compose.yaml"
+    dest: "{{ deploy_path }}/docker-compose.yaml"
     owner: "{{ media_stack_user }}"
     group: "{{ media_stack_group }}"
     mode: "0644"
@@ -50,7 +50,7 @@
 
 - name: Ensure Media Stack is running.
   community.docker.docker_compose_v2:
-    project_src: "{{ media_stack_deploy_path }}"
+    project_src: "{{ deploy_path }}"
     state: present
   register: media_stack_output
 

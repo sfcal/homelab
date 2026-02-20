@@ -1,7 +1,6 @@
 ---
 # Media Stack configuration
 system_timezone: America/New_York
-media_stack_deploy_path: /opt
 
 # User/group IDs
 media_stack_puid: "999"

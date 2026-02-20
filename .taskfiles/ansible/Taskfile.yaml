@@ -40,12 +40,19 @@ tasks:
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/deploy.yml
-  
+
   deploy-monitoring:
     desc: Deploy monitoring stack
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/monitoring/deploy.yml
+
+  add-service:
+    desc: Deploy DNS and reverse proxy after adding service to all.yml
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
 
   # Utility tasks
   ping:

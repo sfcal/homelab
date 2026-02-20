@@ -40,13 +40,13 @@
 # --- Stop containers ---
 - name: Stop media stack before restore.
   community.docker.docker_compose_v2:
-    project_src: "{{ media_stack_deploy_path }}"
+    project_src: "{{ deploy_path }}"
     state: stopped
 
 # --- Wipe existing config directories ---
 - name: Remove existing config directories for a clean restore.
   ansible.builtin.file:
-    path: "{{ media_stack_deploy_path }}/{{ item }}"
+    path: "{{ deploy_path }}/{{ item }}"
     state: absent
   loop: "{{ backup_targets }}"
   loop_control:
@@ -66,7 +66,7 @@
 # --- Restart containers ---
 - name: Start media stack after restore.
   community.docker.docker_compose_v2:
-    project_src: "{{ media_stack_deploy_path }}"
+    project_src: "{{ deploy_path }}"
     state: present
 
 - name: Display restore result.
