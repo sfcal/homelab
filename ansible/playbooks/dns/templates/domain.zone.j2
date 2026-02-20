@@ -18,7 +18,12 @@ ns              IN A    10.2.20.53
 ; Split horizon entries - point to internal IPs
 ; These override external DNS when resolved internally
 
-; A Records
-{% for record in dns_a_records %}
+; A Records - Services (with reverse proxy)
+{% for service in services %}
+{{ "%-15s"|format(service.name) }} IN A    {{ service.dns_ip }}
+{% endfor %}
+
+; A Records - DNS-only records
+{% for record in dns_only_records %}
 {{ "%-15s"|format(record.name) }} IN A    {{ record.ip }}
 {% endfor %}

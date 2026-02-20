@@ -3,6 +3,87 @@
 
 # Primary domain name
 domain_name: "5am.video"
-
-# System timezone
 system_timezone: America/New_York
+
+# Reverse Proxy Configuration
+reverse_proxy_deploy_path: /opt/caddy
+
+# DNS Configuration
+dns_forwarders:
+  - "1.1.1.1"
+  - "1.0.0.1"
+
+dns_trusted_networks:
+  - localhost
+  - localnets
+  - 10.2.0.0/16
+
+# Unified Services List
+# Each service is exposed via reverse proxy and has a corresponding DNS record
+services:
+  - name: sabnzbd
+    backend_host: 10.2.0.5
+    backend_port: 8080
+    dns_ip: 10.2.20.80
+  - name: prowlarr
+    backend_host: 10.2.0.5
+    backend_port: 9696
+    dns_ip: 10.2.20.80
+  - name: sonarr
+    backend_host: 10.2.0.5
+    backend_port: 8989
+    dns_ip: 10.2.20.80
+  - name: radarr
+    backend_host: 10.2.0.5
+    backend_port: 7878
+    dns_ip: 10.2.20.80
+  - name: bazarr
+    backend_host: 10.2.0.5
+    backend_port: 6767
+    dns_ip: 10.2.20.80
+  - name: tunarr
+    backend_host: 10.2.0.5
+    backend_port: 8000
+    dns_ip: 10.2.20.80
+  - name: pulsarr
+    backend_host: 10.2.0.5
+    backend_port: 3003
+    dns_ip: 10.2.20.80
+  - name: cleanuparr
+    backend_host: 10.2.0.5
+    backend_port: 11011
+    dns_ip: 10.2.20.80
+  - name: huntarr
+    backend_host: 10.2.0.5
+    backend_port: 9705
+    dns_ip: 10.2.20.80
+  - name: tdarr
+    backend_host: 10.2.0.5
+    backend_port: 8265
+    dns_ip: 10.2.20.80
+  - name: frigate
+    backend_host: 10.2.0.5
+    backend_port: 5000
+    dns_ip: 10.2.20.80
+  - name: truenas
+    backend_host: 10.2.0.100
+    backend_port: 80
+    dns_ip: 10.2.0.100
+
+# DNS-only records (no reverse proxy configuration)
+dns_only_records:
+  - name: "ns"
+    ip: "10.2.20.53"
+  - name: "caddy"
+    ip: "10.2.20.80"
+  - name: "plex"
+    ip: "10.2.20.80"
+
+# Reverse Zone PTR Records
+dns_ptr_records:
+  - octet: "1"
+    hostname: "unifi.{{ domain_name }}."
+  - octet: "53"
+    hostname: "dns.{{ domain_name }}."
+  - octet: "123"
+    hostname: "time.{{ domain_name }}."

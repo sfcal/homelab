@@ -9,7 +9,7 @@
                 resolvers 1.1.1.1
         }
 
-        @plex host plex.5am.video
+        @plex host plex.{{ domain_name }}
         handle @plex {
             encode gzip
             reverse_proxy 10.2.0.5:32400 {
@@ -23,64 +23,12 @@
             }
         }
 
-        @sabnzbd host sabnzbd.5am.video
-        handle @sabnzbd {
-                reverse_proxy 10.2.0.5:8080
+{% for service in services %}
+        @{{ service.name }} host {{ service.name }}.{{ domain_name }}
+        handle @{{ service.name }} {
+                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }}
         }
 
-        @prowlarr host prowlarr.5am.video
-        handle @prowlarr {
-                reverse_proxy 10.2.0.5:9696
-        }
-
-        @sonarr host sonarr.5am.video
-        handle @sonarr {
-                reverse_proxy 10.2.0.5:8989
-        }
-
-        @radarr host radarr.5am.video
-        handle @radarr {
-                reverse_proxy 10.2.0.5:7878
-        }
-
-        @bazarr host bazarr.5am.video
-        handle @bazarr {
-                reverse_proxy 10.2.0.5:6767
-        }
-
-        @tunarr host tunarr.5am.video
-        handle @tunarr {
-                reverse_proxy 10.2.0.5:8000
-        }
-
-        @pulsarr host pulsarr.5am.video
-        handle @pulsarr {
-                reverse_proxy 10.2.0.5:3003
-        }
-
-        @cleanuparr host cleanuparr.5am.video
-        handle @cleanuparr {
-                reverse_proxy 10.2.0.5:11011
-        }
-
-        @huntarr host huntarr.5am.video
-        handle @huntarr {
-                reverse_proxy 10.2.0.5:9705
-        }
-
-        @tdarr host tdarr.5am.video
-        handle @tdarr {
-                reverse_proxy 10.2.0.5:8265
-        }
-
-        @frigate host frigate.5am.video
-        handle @frigate {
-                reverse_proxy 10.2.0.5:5000
-        }
-
-        @trueNAS host truenas.5am.video
-        handle @trueNAS {
-                reverse_proxy 10.2.0.100:80
-        }
+{% endfor %}
 
 }
