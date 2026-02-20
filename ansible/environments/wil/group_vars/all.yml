@@ -70,15 +70,6 @@ services:
     backend_port: 80
     dns_ip: 10.2.0.100
 
-# DNS-only records (no reverse proxy configuration)
-dns_only_records:
-  - name: "ns"
-    ip: "10.2.20.53"
-  - name: "caddy"
-    ip: "10.2.20.80"
-  - name: "plex"
-    ip: "10.2.20.80"
-
 # Reverse Zone PTR Records
 dns_ptr_records:
   - octet: "1"

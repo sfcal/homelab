@@ -9,6 +9,7 @@ $TTL 86400      ; 1 day
                                 )
                         NS      ns.{{ domain_name }}.
 
+; Plex requests should resolve from CF
 plex    IN    NS    ns1.cloudflare.com.
 plex    IN    NS    ns2.cloudflare.com.
 
@@ -23,7 +24,3 @@ ns              IN A    10.2.20.53
 {{ "%-15s"|format(service.name) }} IN A    {{ service.dns_ip }}
 {% endfor %}
 
-; A Records - DNS-only records
-{% for record in dns_only_records %}
-{{ "%-15s"|format(record.name) }} IN A    {{ record.ip }}
-{% endfor %}
