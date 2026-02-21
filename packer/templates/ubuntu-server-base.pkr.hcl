@@ -262,6 +262,35 @@ build {
     ]
   }
 
+  // Install Node Exporter
+  provisioner "shell" {
+    inline = [
+      "echo 'Installing Node Exporter...'",
+      "NODE_EXPORTER_VERSION='1.9.1'",
+      "wget -q https://github.com/prometheus/node_exporter/releases/download/v$${NODE_EXPORTER_VERSION}/node_exporter-$${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz -O /tmp/node_exporter.tar.gz",
+      "sudo tar xzf /tmp/node_exporter.tar.gz -C /usr/local/bin --strip-components=1 --wildcards '*/node_exporter'",
+      "rm -f /tmp/node_exporter.tar.gz",
+      "sudo useradd --no-create-home --shell /usr/sbin/nologin node_exporter || true",
+      "cat <<'EOF' | sudo tee /etc/systemd/system/node-exporter.service",
+      "[Unit]",
+      "Description=Prometheus Node Exporter",
+      "After=network.target",
+      "",
+      "[Service]",
+      "User=node_exporter",
+      "ExecStart=/usr/local/bin/node_exporter",
+      "Restart=on-failure",
+      "RestartSec=5",
+      "",
+      "[Install]",
+      "WantedBy=multi-user.target",
+      "EOF",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable node-exporter",
+      "echo 'Node Exporter installation complete!'"
+    ]
+  }
+
   // Cleanup
   provisioner "shell" {
     expect_disconnect = true // Cloud-init clean might restart network or SSH

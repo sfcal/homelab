@@ -87,9 +87,9 @@ services:
     backend_port: 3002
     dns_ip: 10.2.20.80
   - name: vm
-    backend_host: 10.2.0.7
-    backend_port: 443
-    dns_ip: 10.2.0.7
+    backend_host: 10.2.20.7
+    backend_port: 8006
+    dns_ip: 10.2.20.7
 
 # Reverse Zone PTR Records
 dns_ptr_records:

@@ -48,26 +48,6 @@ services:
       - {{ deploy_path }}/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
 
-  node-exporter:
-    image: prom/node-exporter:{{ node_exporter_version }}
-    container_name: node-exporter
-    restart: unless-stopped
-    mem_limit: 512m
-    mem_reservation: 256m
-    networks:
-      - monitoring
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    ports:
-      - "9100:9100"
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-
   uptime-kuma:
     image: louislam/uptime-kuma:{{ uptime_kuma_version }}
     container_name: uptime-kuma
@@ -95,6 +75,13 @@ services:
       - TZ={{ system_timezone }}
       - PUID={{ monitoring_uid }}
       - PGID={{ monitoring_gid }}
+      - HOMEPAGE_ALLOWED_HOSTS=homepage.{{ domain_name }}
+      - HOMEPAGE_VAR_SONARR_KEY={{ homepage_sonarr_key }}
+      - HOMEPAGE_VAR_RADARR_KEY={{ homepage_radarr_key }}
+      - HOMEPAGE_VAR_BAZARR_KEY={{ homepage_bazarr_key }}
+      - HOMEPAGE_VAR_PROWLARR_KEY={{ homepage_prowlarr_key }}
+      - HOMEPAGE_VAR_SABNZBD_KEY={{ homepage_sabnzbd_key }}
+      - HOMEPAGE_VAR_PLEX_KEY={{ homepage_plex_key }}
     ports:
       - "3002:3000"
     volumes:

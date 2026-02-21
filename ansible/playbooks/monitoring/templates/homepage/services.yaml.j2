@@ -1,0 +1,95 @@
+---
+- Media Management:
+    - Sonarr:
+        icon: sonarr.png
+        href: https://sonarr.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:8989
+        widget:
+          type: sonarr
+          url: http://10.2.0.5:8989
+          key: {% raw %}{{HOMEPAGE_VAR_SONARR_KEY}}{% endraw %}
+
+    - Radarr:
+        icon: radarr.png
+        href: https://radarr.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:7878
+        widget:
+          type: radarr
+          url: http://10.2.0.5:7878
+          key: {% raw %}{{HOMEPAGE_VAR_RADARR_KEY}}{% endraw %}
+
+    - Bazarr:
+        icon: bazarr.png
+        href: https://bazarr.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:6767
+        widget:
+          type: bazarr
+          url: http://10.2.0.5:6767
+          key: {% raw %}{{HOMEPAGE_VAR_BAZARR_KEY}}{% endraw %}
+
+    - Prowlarr:
+        icon: prowlarr.png
+        href: https://prowlarr.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:9696
+        widget:
+          type: prowlarr
+          url: http://10.2.0.5:9696
+          key: {% raw %}{{HOMEPAGE_VAR_PROWLARR_KEY}}{% endraw %}
+
+- Downloads:
+    - SABnzbd:
+        icon: sabnzbd.png
+        href: https://sabnzbd.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:8080
+        widget:
+          type: sabnzbd
+          url: http://10.2.0.5:8080
+          key: {% raw %}{{HOMEPAGE_VAR_SABNZBD_KEY}}{% endraw %}
+
+- Media Processing:
+    - Tdarr:
+        icon: tdarr.png
+        href: https://tdarr.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:8265
+        widget:
+          type: tdarr
+          url: http://10.2.0.5:8265
+
+    - Plex:
+        icon: plex.png
+        href: https://plex.{{ domain_name }}
+        widget:
+          type: plex
+          url: http://10.2.0.5:32400
+          key: {% raw %}{{HOMEPAGE_VAR_PLEX_KEY}}{% endraw %}
+
+    - Frigate:
+        icon: frigate.png
+        href: https://frigate.{{ domain_name }}
+        siteMonitor: http://10.2.0.5:5000
+        widget:
+          type: frigate
+          url: http://10.2.0.5:5000
+
+- Monitoring:
+    - Grafana:
+        icon: grafana.png
+        href: https://grafana.{{ domain_name }}
+        siteMonitor: http://10.2.20.30:3000
+
+    - Prometheus:
+        icon: prometheus.png
+        href: https://prometheus.{{ domain_name }}
+        siteMonitor: http://10.2.20.30:9090
+        widget:
+          type: prometheus
+          url: http://10.2.20.30:9090
+
+    - Uptime Kuma:
+        icon: uptime-kuma.png
+        href: https://uptime.{{ domain_name }}
+        siteMonitor: http://10.2.20.30:3001
+        widget:
+          type: uptimekuma
+          url: http://10.2.20.30:3001
+          slug: default

@@ -52,6 +52,21 @@
   notify:
     - Restart monitoring-stack
 
+- name: Deploy Homepage configuration files.
+  ansible.builtin.template:
+    src: "templates/homepage/{{ item }}.j2"
+    dest: "{{ deploy_path }}/monitoring/homepage/{{ item }}"
+    owner: "{{ monitoring_uid }}"
+    group: "{{ monitoring_gid }}"
+    mode: "0644"
+  loop:
+    - services.yaml
+    - settings.yaml
+    - widgets.yaml
+    - bookmarks.yaml
+  notify:
+    - Restart monitoring-stack
+
 - name: Deploy docker-compose.yaml.
   ansible.builtin.template:
     src: templates/docker-compose.yaml.j2
