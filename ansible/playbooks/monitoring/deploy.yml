@@ -1,5 +1,5 @@
 ---
-- name: Deploy Monitoring
+- name: Deploy Monitoring Stack
   hosts: monitoring
   become: true
 
@@ -12,11 +12,5 @@
       ansible.builtin.include_tasks: ../common/prereq.yml
 
   tasks:
-    - name: Configure Prometheus exporter.
-      ansible.builtin.include_tasks: tasks/prometheus.yml
-      
-    - name: Configure Grafana.
-      ansible.builtin.include_tasks: tasks/grafana.yml
-
-    - name: Configure Uptime Kuma.
-      ansible.builtin.include_tasks: tasks/kuma.yml
+    - name: Configure Monitoring Stack.
+      ansible.builtin.include_tasks: tasks/monitoring-stack.yml

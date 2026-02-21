@@ -1,0 +1,36 @@
+---
+# Monitoring Stack configuration
+system_timezone: America/New_York
+
+# User/group IDs
+monitoring_uid: "1000"
+monitoring_gid: "1000"
+monitoring_user: root
+monitoring_group: root
+
+# Container image versions
+prometheus_version: "v3.3.0"
+grafana_version: "11.6.0"
+node_exporter_version: "v1.9.1"
+uptime_kuma_version: "2"
+homepage_version: "latest"
+
+# Grafana
+grafana_admin_user: admin
+grafana_admin_password: "ChangeMe!"  # Vault this in production
+
+# Prometheus retention
+prometheus_retention: "30d"
+
+# Prometheus scrape targets
+# Add hosts here to have node-exporter scraped from them
+prometheus_node_targets:
+  - "node-exporter:9100"
+  # - "10.2.0.5:9100"   # media-stack (requires node-exporter on that host)
+
+# Directories to back up (relative to /opt)
+backup_targets:
+  - prometheus
+  - grafana
+  - uptime-kuma
+  - homepage

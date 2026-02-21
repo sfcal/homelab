@@ -23,6 +23,17 @@
             }
         }
 
+{% if uptime_kuma_enabled | default(false) %}
+        @uptime host uptime.{{ domain_name }}
+        handle @uptime {
+            reverse_proxy 10.2.20.30:3001 {
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+                header_up X-Forwarded-Proto {scheme}
+            }
+        }
+{% endif %}
+
 {% for service in services %}
         @{{ service.name }} host {{ service.name }}.{{ domain_name }}
         handle @{{ service.name }} {

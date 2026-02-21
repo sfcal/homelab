@@ -1,0 +1,73 @@
+---
+- name: Create monitoring-stack directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ monitoring_user }}"
+    group: "{{ monitoring_group }}"
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/monitoring"
+    - "{{ deploy_path }}/monitoring/prometheus"
+    - "{{ deploy_path }}/monitoring/prometheus-data"
+    - "{{ deploy_path }}/monitoring/grafana"
+    - "{{ deploy_path }}/monitoring/grafana/provisioning"
+    - "{{ deploy_path }}/monitoring/grafana/provisioning/datasources"
+    - "{{ deploy_path }}/monitoring/uptime-kuma"
+    - "{{ deploy_path }}/monitoring/homepage"
+
+- name: Set ownership on Grafana data directory.
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/monitoring/grafana"
+    state: directory
+    owner: "{{ monitoring_uid }}"
+    group: "{{ monitoring_gid }}"
+    recurse: true
+
+- name: Set ownership on Prometheus data directory.
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/monitoring/prometheus-data"
+    state: directory
+    owner: "{{ monitoring_uid }}"
+    group: "{{ monitoring_gid }}"
+    recurse: true
+
+- name: Deploy Prometheus configuration.
+  ansible.builtin.template:
+    src: templates/prometheus.yml.j2
+    dest: "{{ deploy_path }}/monitoring/prometheus/prometheus.yml"
+    owner: "{{ monitoring_user }}"
+    group: "{{ monitoring_group }}"
+    mode: "0644"
+  notify:
+    - Restart monitoring-stack
+
+- name: Deploy Grafana datasource provisioning.
+  ansible.builtin.template:
+    src: templates/grafana-datasources.yml.j2
+    dest: "{{ deploy_path }}/monitoring/grafana/provisioning/datasources/datasources.yml"
+    owner: "{{ monitoring_uid }}"
+    group: "{{ monitoring_gid }}"
+    mode: "0644"
+  notify:
+    - Restart monitoring-stack
+
+- name: Deploy docker-compose.yaml.
+  ansible.builtin.template:
+    src: templates/docker-compose.yaml.j2
+    dest: "{{ deploy_path }}/monitoring/docker-compose.yaml"
+    owner: "{{ monitoring_user }}"
+    group: "{{ monitoring_group }}"
+    mode: "0644"
+  notify:
+    - Restart monitoring-stack
+
+- name: Ensure Monitoring Stack is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/monitoring"
+    state: present
+  register: monitoring_stack_output
+
+- name: Display Monitoring Stack status.
+  ansible.builtin.debug:
+    var: monitoring_stack_output

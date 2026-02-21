@@ -69,6 +69,27 @@ services:
     backend_host: 10.2.0.100
     backend_port: 80
     dns_ip: 10.2.0.100
+    # Monitoring services
+  - name: grafana
+    backend_host: 10.2.20.30
+    backend_port: 3000
+    dns_ip: 10.2.20.80
+  - name: prometheus
+    backend_host: 10.2.20.30
+    backend_port: 9090
+    dns_ip: 10.2.20.80
+  - name: uptime
+    backend_host: 10.2.20.30
+    backend_port: 3001
+    dns_ip: 10.2.20.80
+  - name: homepage
+    backend_host: 10.2.20.30
+    backend_port: 3002
+    dns_ip: 10.2.20.80
+  - name: vm
+    backend_host: 10.2.0.7
+    backend_port: 443
+    dns_ip: 10.2.0.7
 
 # Reverse Zone PTR Records
 dns_ptr_records:

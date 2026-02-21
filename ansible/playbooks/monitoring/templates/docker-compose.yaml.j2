@@ -1,0 +1,102 @@
+---
+networks:
+  monitoring:
+    driver: bridge
+
+services:
+  prometheus:
+    image: prom/prometheus:{{ prometheus_version }}
+    container_name: prometheus
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    networks:
+      - monitoring
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time={{ prometheus_retention }}'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - {{ deploy_path }}/monitoring/prometheus:/etc/prometheus:ro
+      - {{ deploy_path }}/monitoring/prometheus-data:/prometheus
+    user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
+
+  grafana:
+    image: grafana/grafana:{{ grafana_version }}
+    container_name: grafana
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER={{ grafana_admin_user }}
+      - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
+      - GF_SERVER_ROOT_URL=https://grafana.{{ domain_name }}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    volumes:
+      - {{ deploy_path }}/monitoring/grafana:/var/lib/grafana
+      - {{ deploy_path }}/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
+
+  node-exporter:
+    image: prom/node-exporter:{{ node_exporter_version }}
+    container_name: node-exporter
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    networks:
+      - monitoring
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:{{ uptime_kuma_version }}
+    container_name: uptime-kuma
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    networks:
+      - monitoring
+    environment:
+      - TZ={{ system_timezone }}
+    ports:
+      - "3001:3001"
+    volumes:
+      - {{ deploy_path }}/monitoring/uptime-kuma:/app/data
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:{{ homepage_version }}
+    container_name: homepage
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    networks:
+      - monitoring
+    environment:
+      - TZ={{ system_timezone }}
+      - PUID={{ monitoring_uid }}
+      - PGID={{ monitoring_gid }}
+    ports:
+      - "3002:3000"
+    volumes:
+      - {{ deploy_path }}/monitoring/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
