@@ -29,6 +29,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
 
+  deploy-tailscale:
+    desc: Deploy reverse tailscale server
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/tailscale/deploy.yml
+
   deploy-dns:
     desc: Deploy DNS server
     dir: '{{.ROOT_DIR}}/ansible'

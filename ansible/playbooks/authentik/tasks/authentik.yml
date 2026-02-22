@@ -1,0 +1,51 @@
+---
+- name: Create authentik directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/authentik"
+    - "{{ deploy_path }}/authentik/media"
+    - "{{ deploy_path }}/authentik/templates"
+    - "{{ deploy_path }}/authentik/certs"
+    - "{{ deploy_path }}/authentik/postgres"
+    - "{{ deploy_path }}/authentik/redis"
+
+- name: Set ownership on Authentik media directory.
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/authentik/media"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    recurse: true
+
+- name: Set ownership on Redis data directory.
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/authentik/redis"
+    state: directory
+    owner: "999"
+    group: "1000"
+    recurse: true
+
+- name: Deploy docker-compose.yaml.
+  ansible.builtin.template:
+    src: templates/docker-compose.yaml.j2
+    dest: "{{ deploy_path }}/authentik/docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart authentik
+
+- name: Ensure Authentik is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/authentik"
+    state: present
+  register: authentik_output
+
+- name: Display Authentik status.
+  ansible.builtin.debug:
+    var: authentik_output

@@ -1,0 +1,9 @@
+---
+- name: Restart tailscaled
+  ansible.builtin.service:
+    name: tailscaled
+    state: restarted
+
+- name: Apply sysctl
+  ansible.builtin.command: sysctl --system
+  changed_when: true

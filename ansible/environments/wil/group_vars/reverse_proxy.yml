@@ -1,0 +1,17 @@
+---
+# Tailscale Subnet Router configuration
+
+# Auth key from Tailscale admin console (https://login.tailscale.com/admin/settings/keys)
+# Use a reusable, pre-approved key. Vault this in production.
+# Generate: Settings → Keys → Generate auth key (toggle Reusable + Pre-approved)
+tailscale_auth_key: "tskey-auth-kVZQXFpkcu11CNTRL-UbGTn35rDcS8MfH7FyxvbSV6xgJZNLNL"
+
+# Routes to advertise to the Tailscale network
+tailscale_advertise_routes:
+  - "10.2.0.0/16"
+
+# Hostname as it appears in Tailscale admin console
+tailscale_hostname: "wil-gateway"
+
+# Set to true to force re-authentication on next run
+tailscale_force_reauth: false
