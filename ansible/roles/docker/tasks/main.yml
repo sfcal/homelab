@@ -1,4 +1,5 @@
 ---
+# --- Install Docker from official repo ---
 - name: Install Docker prerequisites.
   ansible.builtin.apt:
     name:
@@ -25,11 +26,7 @@
 
 - name: Install Docker Engine.
   ansible.builtin.apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-compose-plugin
+    name: "{{ docker_packages }}"
     state: present
 
 - name: Ensure Docker is running and enabled.

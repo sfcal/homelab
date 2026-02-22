@@ -29,11 +29,11 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
 
-  deploy-vps:
-    desc: Deploy VPS proxy server
+  deploy-external-monitoring:
+    desc: Deploy external monitoring server
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/vps/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/external-monitoring/deploy.yml
 
   deploy-tailscale:
     desc: Deploy reverse tailscale server

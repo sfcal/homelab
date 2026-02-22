@@ -1,6 +1,6 @@
 ---
-- name: Deploy VPS (Tailscale + Uptime Kuma)
-  hosts: vps
+- name: Deploy External Monitoring (Tailscale + Uptime Kuma)
+  hosts: external_monitoring
   become: true
 
   handlers:
@@ -12,11 +12,9 @@
       ansible.builtin.include_tasks: ../common/prereq.yml
 
   roles:
+    - docker
     - tailscale
 
   tasks:
-    - name: Install Docker.
-      ansible.builtin.include_tasks: tasks/docker.yml
-
     - name: Deploy Uptime Kuma.
       ansible.builtin.include_tasks: tasks/uptime-kuma.yml

@@ -9,6 +9,6 @@ services:
     environment:
       - TZ={{ system_timezone }}
     ports:
-      - "{{ vps_uptime_kuma_listen }}:3001"
+      - "{{ external_monitoring_uptime_kuma_listen }}:3001"
     volumes:
       - {{ deploy_path }}/uptime-kuma/data:/app/data

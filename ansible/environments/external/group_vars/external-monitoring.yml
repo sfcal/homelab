@@ -1,11 +1,11 @@
 ---
-# VPS configuration
+# External Monitoring configuration
 
 # Tailscale - regular client node (not a subnet router)
 # Uses --accept-routes to reach 10.2.0.0/16 via wil-gateway
 tailscale_mode: "client"
 tailscale_auth_key: ""  # Vault this in production
-tailscale_hostname: "vps-monitor"
+tailscale_hostname: "external-monitor"
 tailscale_accept_routes: true
 tailscale_force_reauth: false
 
@@ -15,4 +15,4 @@ uptime_kuma_version: "2"
 # Listen address for Uptime Kuma
 # "3001" = all interfaces (publicly accessible for external alerting)
 # "127.0.0.1:3001" = localhost only (access via Tailscale SSH tunnel)
-vps_uptime_kuma_listen: "3001"
+external_monitoring_uptime_kuma_listen: "3001"
