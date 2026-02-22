@@ -1,10 +1,12 @@
 ---
 # VPS configuration
 
-# Tailscale - regular node (not a subnet router)
+# Tailscale - regular client node (not a subnet router)
 # Uses --accept-routes to reach 10.2.0.0/16 via wil-gateway
+tailscale_mode: "client"
 tailscale_auth_key: ""  # Vault this in production
 tailscale_hostname: "vps-monitor"
+tailscale_accept_routes: true
 tailscale_force_reauth: false
 
 # Uptime Kuma

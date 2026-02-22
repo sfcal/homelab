@@ -1,5 +1,6 @@
 ---
 # Tailscale Subnet Router configuration
+tailscale_mode: "subnet_router"
 
 # Auth key from Tailscale admin console (https://login.tailscale.com/admin/settings/keys)
 # Use a reusable, pre-approved key. Vault this in production.
@@ -9,6 +10,9 @@ tailscale_auth_key: ""
 # Routes to advertise to the Tailscale network
 tailscale_advertise_routes:
   - "10.2.0.0/16"
+
+# Subnet router should not accept DNS from Tailscale
+tailscale_accept_dns: false
 
 # Hostname as it appears in Tailscale admin console
 tailscale_hostname: "wil-gateway"

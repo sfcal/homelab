@@ -1,0 +1,26 @@
+---
+# tailscale_mode: "client" or "subnet_router"
+#   client        — regular Tailscale node (default)
+#   subnet_router — advertises local routes to the tailnet
+tailscale_mode: "client"
+
+# Auth key from Tailscale admin console
+# Generate: Settings → Keys → Generate auth key (toggle Reusable + Pre-approved)
+tailscale_auth_key: ""
+
+# Routes to advertise (only used when tailscale_mode == "subnet_router")
+tailscale_advertise_routes: []
+
+# Whether to accept DNS configuration from Tailscale
+# Subnet routers typically set this to false
+tailscale_accept_dns: true
+
+# Whether to accept routes advertised by other nodes
+# Client nodes typically set this to true
+tailscale_accept_routes: false
+
+# Hostname as it appears in Tailscale admin console
+tailscale_hostname: "{{ inventory_hostname }}"
+
+# Set to true to force re-authentication on next run
+tailscale_force_reauth: false

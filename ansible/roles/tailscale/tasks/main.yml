@@ -36,6 +36,7 @@
     sysctl_set: true
     state: present
     reload: true
+  when: tailscale_mode == "subnet_router"
 
 - name: Enable IPv6 forwarding.
   ansible.posix.sysctl:
@@ -44,6 +45,29 @@
     sysctl_set: true
     state: present
     reload: true
+  when: tailscale_mode == "subnet_router"
+
+# --- Build tailscale up command based on mode ---
+- name: Build tailscale up command (subnet_router).
+  ansible.builtin.set_fact:
+    _tailscale_up_cmd: >-
+      tailscale up
+      --authkey={{ tailscale_auth_key }}
+      --advertise-routes={{ tailscale_advertise_routes | join(',') }}
+      --accept-dns={{ tailscale_accept_dns | lower }}
+      --hostname={{ tailscale_hostname }}
+      --reset
+  when: tailscale_mode == "subnet_router"
+
+- name: Build tailscale up command (client).
+  ansible.builtin.set_fact:
+    _tailscale_up_cmd: >-
+      tailscale up
+      --authkey={{ tailscale_auth_key }}
+      {% if tailscale_accept_routes %}--accept-routes{% endif %}
+      --hostname={{ tailscale_hostname }}
+      --reset
+  when: tailscale_mode == "client"
 
 # --- Start and authenticate ---
 - name: Ensure tailscaled is enabled and running.
@@ -63,14 +87,8 @@
     ts_backend_state: "{{ (ts_status.stdout | from_json).BackendState | default('NoState') }}"
   when: ts_status.rc == 0
 
-- name: Bring Tailscale up as subnet router.
-  ansible.builtin.command: >-
-    tailscale up
-    --authkey={{ tailscale_auth_key }}
-    --advertise-routes={{ tailscale_advertise_routes | join(',') }}
-    --accept-dns=false
-    --hostname={{ tailscale_hostname | default('wil-gateway') }}
-    --reset
+- name: Bring Tailscale up.
+  ansible.builtin.command: "{{ _tailscale_up_cmd }}"
   register: ts_up
   changed_when: "'Success' in ts_up.stdout or ts_up.rc == 0"
   when: >-

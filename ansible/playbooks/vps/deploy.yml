@@ -11,12 +11,12 @@
     - name: Include common prerequisites.
       ansible.builtin.include_tasks: ../common/prereq.yml
 
+  roles:
+    - tailscale
+
   tasks:
     - name: Install Docker.
       ansible.builtin.include_tasks: tasks/docker.yml
-
-    - name: Configure Tailscale.
-      ansible.builtin.include_tasks: tasks/tailscale.yml
 
     - name: Deploy Uptime Kuma.
       ansible.builtin.include_tasks: tasks/uptime-kuma.yml
