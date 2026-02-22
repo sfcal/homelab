@@ -4,7 +4,7 @@
 # Auth key from Tailscale admin console (https://login.tailscale.com/admin/settings/keys)
 # Use a reusable, pre-approved key. Vault this in production.
 # Generate: Settings → Keys → Generate auth key (toggle Reusable + Pre-approved)
-tailscale_auth_key: "tskey-auth-kVZQXFpkcu11CNTRL-UbGTn35rDcS8MfH7FyxvbSV6xgJZNLNL"
+tailscale_auth_key: ""
 
 # Routes to advertise to the Tailscale network
 tailscale_advertise_routes:
