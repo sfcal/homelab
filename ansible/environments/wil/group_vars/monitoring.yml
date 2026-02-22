@@ -20,7 +20,7 @@ homepage_plex_key: "your-plex-token"
 prometheus_version: "v3.3.0"
 grafana_version: "11.6.0"
 node_exporter_version: "v1.9.1"
-uptime_kuma_version: "2"
+#uptime_kuma_version: "2"
 homepage_version: "latest"
 
 # Grafana

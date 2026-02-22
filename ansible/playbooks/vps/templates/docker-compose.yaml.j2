@@ -1,0 +1,14 @@
+---
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:{{ uptime_kuma_version }}
+    container_name: uptime-kuma
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    environment:
+      - TZ={{ system_timezone }}
+    ports:
+      - "{{ vps_uptime_kuma_listen }}:3001"
+    volumes:
+      - {{ deploy_path }}/uptime-kuma/data:/app/data

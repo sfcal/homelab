@@ -1,0 +1,9 @@
+---
+# Global variables for external environment
+
+# Must match WIL environment for DNS/cert consistency
+domain_name: "5am.video"
+system_timezone: America/New_York
+
+# Unified deploy path for all services
+deploy_path: /opt

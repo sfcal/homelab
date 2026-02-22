@@ -48,21 +48,6 @@ services:
       - {{ deploy_path }}/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
 
-  uptime-kuma:
-    image: louislam/uptime-kuma:{{ uptime_kuma_version }}
-    container_name: uptime-kuma
-    restart: unless-stopped
-    mem_limit: 1g
-    mem_reservation: 512m
-    networks:
-      - monitoring
-    environment:
-      - TZ={{ system_timezone }}
-    ports:
-      - "3001:3001"
-    volumes:
-      - {{ deploy_path }}/monitoring/uptime-kuma:/app/data
-
   homepage:
     image: ghcr.io/gethomepage/homepage:{{ homepage_version }}
     container_name: homepage

@@ -1,0 +1,70 @@
+---
+# --- Install Tailscale from official repo ---
+- name: Install prerequisites.
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg
+      - apt-transport-https
+    state: present
+
+- name: Add Tailscale signing key.
+  ansible.builtin.get_url:
+    url: https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: "0644"
+
+- name: Add Tailscale apt repository.
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg]
+      https://pkgs.tailscale.com/stable/ubuntu noble main
+    filename: tailscale
+    state: present
+    update_cache: true
+
+- name: Install Tailscale.
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+
+# --- Start and authenticate ---
+- name: Ensure tailscaled is enabled and running.
+  ansible.builtin.service:
+    name: tailscaled
+    state: started
+    enabled: true
+
+- name: Check current Tailscale status.
+  ansible.builtin.command: tailscale status --json
+  register: ts_status
+  changed_when: false
+  failed_when: false
+
+- name: Parse Tailscale backend state.
+  ansible.builtin.set_fact:
+    ts_backend_state: "{{ (ts_status.stdout | from_json).BackendState | default('NoState') }}"
+  when: ts_status.rc == 0
+
+- name: Bring Tailscale up (regular node).
+  ansible.builtin.command: >-
+    tailscale up
+    --authkey={{ tailscale_auth_key }}
+    --accept-routes
+    --hostname={{ tailscale_hostname | default('vps-monitor') }}
+    --reset
+  register: ts_up
+  changed_when: "'Success' in ts_up.stdout or ts_up.rc == 0"
+  when: >-
+    ts_status.rc != 0
+    or ts_backend_state != 'Running'
+    or tailscale_force_reauth | default(false)
+
+- name: Display Tailscale status.
+  ansible.builtin.command: tailscale status
+  register: ts_final_status
+  changed_when: false
+
+- name: Show Tailscale status.
+  ansible.builtin.debug:
+    msg: "{{ ts_final_status.stdout_lines }}"

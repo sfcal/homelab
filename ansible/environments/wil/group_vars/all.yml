@@ -79,7 +79,7 @@ services:
     backend_port: 9090
     dns_ip: 10.2.20.80
   - name: uptime
-    backend_host: 10.2.20.30
+    backend_host: 178.156.190.134
     backend_port: 3001
     dns_ip: 10.2.20.80
   - name: homepage

@@ -1,0 +1,31 @@
+---
+- name: Create Uptime Kuma directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/uptime-kuma"
+    - "{{ deploy_path }}/uptime-kuma/data"
+
+- name: Deploy docker-compose.yaml.
+  ansible.builtin.template:
+    src: templates/docker-compose.yaml.j2
+    dest: "{{ deploy_path }}/uptime-kuma/docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart uptime-kuma
+
+- name: Ensure Uptime Kuma is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/uptime-kuma"
+    state: present
+  register: uptime_kuma_output
+
+- name: Display Uptime Kuma status.
+  ansible.builtin.debug:
+    var: uptime_kuma_output
