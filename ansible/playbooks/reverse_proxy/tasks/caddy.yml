@@ -12,16 +12,6 @@
     name: caddy
     state: present
 
-- name: Deploy environment file.
-  ansible.builtin.template:
-    src: secrets/.env
-    dest: /opt/caddy/.env
-    owner: root
-    group: root
-    mode: "0600"
-  notify:
-    - Restart caddy
-
 - name: Deploy Dockerfile.
   ansible.builtin.template:
     src: templates/Dockerfile.j2

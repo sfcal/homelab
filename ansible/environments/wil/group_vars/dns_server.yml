@@ -16,8 +16,8 @@ reverse_proxy_ip: "10.2.20.80"
 # Reverse Zone PTR Records
 dns_ptr_records:
   - octet: "1"
-    hostname: "unifi.{{ domain_name }}."
+    hostname: "unifi.5am.video."
   - octet: "53"
-    hostname: "dns.{{ domain_name }}."
+    hostname: "dns.5am.video."
   - octet: "123"
-    hostname: "time.{{ domain_name }}."
+    hostname: "time.5am.video."

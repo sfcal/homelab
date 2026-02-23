@@ -5,11 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: caddy
     restart: unless-stopped
-    env_file: 
-      - .env
     environment:
-      - CLOUDFLARE_EMAIL=${CF_EMAIL}
-      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
+      - CF_API_TOKEN={{ cf_api_token }}
+      - CF_EMAIL={{ cf_email }}
       - ACME_AGREE=true
     ports:
       - 2019:2019 # remove if you do not want admin API

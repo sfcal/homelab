@@ -39,7 +39,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER={{ grafana_admin_user }}
       - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
-      - GF_SERVER_ROOT_URL=https://grafana.{{ domain_name }}
+      - GF_SERVER_ROOT_URL=https://grafana.5am.video
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
       - "3000:3000"
@@ -60,7 +60,7 @@ services:
       - TZ={{ system_timezone }}
       - PUID={{ monitoring_uid }}
       - PGID={{ monitoring_gid }}
-      - HOMEPAGE_ALLOWED_HOSTS=homepage.{{ domain_name }}
+      - HOMEPAGE_ALLOWED_HOSTS=homepage.5am.video
       - HOMEPAGE_VAR_SONARR_KEY={{ homepage_sonarr_key }}
       - HOMEPAGE_VAR_RADARR_KEY={{ homepage_radarr_key }}
       - HOMEPAGE_VAR_BAZARR_KEY={{ homepage_bazarr_key }}

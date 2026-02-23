@@ -2,17 +2,20 @@
         admin 0.0.0.0:2019
 }
 
-*.{{ domain_name }} {
+{% for domain in domains %}
+*.{{ domain.name }} {
         tls {
                 dns cloudflare {env.CF_API_TOKEN}
                 propagation_delay 2m
                 resolvers 1.1.1.1
         }
 
-        @plex host plex.{{ domain_name }}
+{% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) and service.hardcoded_proxy | default(false) %}
+{% if service.name == 'plex' %}
+        @plex host plex.{{ domain.name }}
         handle @plex {
             encode gzip
-            reverse_proxy 10.2.0.5:32400 {
+            reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
                 header_up X-Real-IP {remote_host}
                 header_up X-Forwarded-For {remote_host}
                 header_up X-Forwarded-Proto {scheme}
@@ -23,18 +26,20 @@
             }
         }
 
-        @uptime host uptime.{{ domain_name }}
+{% elif service.name == 'uptime' %}
+        @uptime host uptime.{{ domain.name }}
         handle @uptime {
-            reverse_proxy 178.156.190.134:3001 {
+            reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
                 header_up X-Real-IP {remote_host}
                 header_up X-Forwarded-For {remote_host}
                 header_up X-Forwarded-Proto {scheme}
             }
         }
 
-        @vm host vm.{{ domain_name }}
+{% elif service.name == 'vm' %}
+        @vm host vm.{{ domain.name }}
         handle @vm {
-                reverse_proxy 10.2.20.7:8006 {
+                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
                         transport http {
                                 tls
                                 tls_insecure_skip_verify
@@ -42,11 +47,15 @@
                 }
         }
 
-{% for service in services if service.proxied | default(false) and service.enabled | default(true) and not service.hardcoded_proxy | default(false) %}
-        @{{ service.name }} host {{ service.name }}.{{ domain_name }}
+{% endif %}
+{% endfor %}
+{% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) and not service.hardcoded_proxy | default(false) %}
+        @{{ service.name }} host {{ service.name }}.{{ domain.name }}
         handle @{{ service.name }} {
                 reverse_proxy {{ service.backend_host }}:{{ service.backend_port }}
         }
 
 {% endfor %}
 }
+
+{% endfor %}

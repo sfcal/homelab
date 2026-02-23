@@ -1,18 +1,20 @@
-$ORIGIN {{ domain_name }}.
+$ORIGIN {{ current_domain.name }}.
 $TTL 86400      ; 1 day
-@       IN SOA  ns.{{ domain_name }}. admin.{{ domain_name }}. (
+@       IN SOA  ns.{{ current_domain.name }}. admin.{{ current_domain.name }}. (
                                 {{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01 ; serial
                                 3600       ; refresh (1 hour)
                                 3600       ; retry (1 hour)
                                 2419200    ; expire (4 weeks)
                                 3600       ; minimum (1 hour)
                                 )
-                        NS      ns.{{ domain_name }}.
+                        NS      ns.{{ current_domain.name }}.
 
+{% if current_domain.name == '5am.video' %}
 ; Plex requests should resolve from CF
 plex    IN    NS    ns1.cloudflare.com.
 plex    IN    NS    ns2.cloudflare.com.
 
+{% endif %}
 ; Name servers (internal)
 ns              IN A    10.2.20.53
 
@@ -20,7 +22,6 @@ ns              IN A    10.2.20.53
 ; These override external DNS when resolved internally
 
 ; A Records - Services
-{% for service in services if (service.dns | default('internal')) != 'external' and service.enabled | default(true) %}
+{% for service in services if service.domain == current_domain.name and (service.dns | default('internal')) != 'external' and service.enabled | default(true) %}
 {{ "%-15s"|format(service.name) }} IN A    {{ reverse_proxy_ip if service.proxied else service.backend_host }}
 {% endfor %}
-

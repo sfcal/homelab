@@ -9,7 +9,7 @@ creation_rules:
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: packer/.*\.pkrvars\.hcl
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
-  - path_regex: (docker|ansible)/.*/(cf-token|.*secrets.*\.ya?ml)
+  - path_regex: (docker|ansible)/.*/(.+\.sops\.ya?ml|cf-token)
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: (docker|ansible)/.*\.env$
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8

@@ -272,7 +272,7 @@ services:
       - PUID=999
       - UMASK=022
       - TZ=America/New_York
-      - FRIGATE_RTSP_PASSWORD=SuperSecure00  # Change this to a secure password
+      - FRIGATE_RTSP_PASSWORD=${FRIGATE_RTSP_PASSWORD}  # Set via .env or environment
     ports:
       - "5000:5000"    # Web UI
       - "8554:8554"    # RTSP

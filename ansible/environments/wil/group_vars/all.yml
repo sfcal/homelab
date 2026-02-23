@@ -1,8 +1,10 @@
 ---
 # Global variables for WIL environment
 
-# Primary domain name
-domain_name: "5am.video"
+# Domains managed by DNS and reverse proxy
+domains:
+  - name: "5am.video"
+  - name: "samuel.computer"
 system_timezone: America/New_York
 
 # Unified deploy path for all services

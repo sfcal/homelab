@@ -4,6 +4,7 @@
 #
 # Each service entry supports the following fields:
 #   name          (required) - subdomain name
+#   domain        (required) - domain this service belongs to
 #   backend_host  (required) - IP of the backend service
 #   backend_port  (required) - port of the backend service
 #   proxied       (required) - true: routed through Caddy, DNS -> reverse_proxy_ip
@@ -14,82 +15,100 @@
 services:
   # Media services
   - name: plex
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 32400
     proxied: true
     dns: external
     hardcoded_proxy: true
   - name: sabnzbd
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 8080
     proxied: true
   - name: prowlarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 9696
     proxied: true
   - name: sonarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 8989
     proxied: true
   - name: radarr
+    domain: samuel.computer
     backend_host: 10.2.0.5
     backend_port: 7878
     proxied: true
   - name: bazarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 6767
     proxied: true
   - name: tunarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 8000
     proxied: true
   - name: pulsarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 3003
     proxied: true
   - name: cleanuparr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 11011
     proxied: true
   - name: huntarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 9705
     proxied: true
   - name: tdarr
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 8265
     proxied: true
   - name: frigate
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 5000
     proxied: true
 
   # Monitoring services
   - name: grafana
+    domain: 5am.video
     backend_host: 10.2.20.30
     backend_port: 3000
     proxied: true
   - name: prometheus
+    domain: 5am.video
     backend_host: 10.2.20.30
     backend_port: 9090
     proxied: true
   - name: uptime
+    domain: 5am.video
     backend_host: 178.156.190.134
     backend_port: 3001
     proxied: true
     hardcoded_proxy: true
   - name: homepage
+    domain: 5am.video
     backend_host: 10.2.20.30
     backend_port: 3002
     proxied: true
 
   # VM management
   - name: vm
+    domain: 5am.video
     backend_host: 10.2.20.7
     backend_port: 8006
     proxied: true
     hardcoded_proxy: true
   - name: nas
+    domain: 5am.video
     backend_host: 10.2.0.100
     backend_port: 80
     proxied: true

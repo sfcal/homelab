@@ -9,6 +9,7 @@ docker/*/.decrypted~*
 
 # ansible
 ansible/kubeconfig
+ansible/collections/
 
 # packer
 packer/environments/*/credentials.*.pkrvars.hcl

@@ -6,50 +6,52 @@ acl trusted {
 
 options {
   directory "/var/cache/bind";
-  
+
   // Enable recursion
   recursion yes;
-  
+
   // Forward to external DNS
   forwarders {
 {% for forwarder in dns_forwarders %}
     {{ forwarder }};
 {% endfor %}
   };
-  
+
   // Enable query logging for debugging
   querylog yes;
-  
+
   // Allow queries from trusted networks
   allow-query { trusted; };
-  
+
   // Allow recursive queries from trusted networks
   allow-recursion { trusted; };
-  
+
   // Prevent zone transfers
   allow-transfer { none; };
-  
+
   // Enable DNSSEC validation
   dnssec-validation auto;
-  
+
   // Listen on all interfaces
   listen-on { any; };
   listen-on-v6 { any; };
 };
 
 // Fix for plex forwarding
-zone "plex.{{ domain_name }}" IN {
+zone "plex.5am.video" IN {
   type forward;
   forward only;
   forwarders { {% for forwarder in dns_forwarders %}{{ forwarder }}; {% endfor %}};
 };
 
-// Split horizon zone for public domain
-zone "{{ domain_name }}" IN {
+// Domain zones
+{% for domain in domains %}
+zone "{{ domain.name }}" IN {
   type master;
-  file "/etc/bind/domain.zone";
+  file "/etc/bind/domain-{{ domain.name }}.zone";
 };
 
+{% endfor %}
 // Reverse zone for 10.2.20.0/24
 zone "20.2.10.in-addr.arpa" IN {
   type master;

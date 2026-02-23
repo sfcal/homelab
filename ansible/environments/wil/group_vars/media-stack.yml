@@ -27,7 +27,7 @@ tdarr_version: "2.51.03"
 frigate_version: "0.16.2"
 
 # Frigate
-frigate_rtsp_password: "SuperSecure00"  # Change this to a secure password
+# frigate_rtsp_password — stored in all.sops.yml
 
 # NFS Mounts
 nfs_default_opts: "defaults"
