@@ -1,0 +1,31 @@
+---
+- name: Create games-server directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ games_server_user }}"
+    group: "{{ games_server_group }}"
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/games-server"
+    - "{{ deploy_path }}/games-server/terraria/worlds"
+
+- name: Deploy docker-compose.yaml.
+  ansible.builtin.template:
+    src: templates/docker-compose.yaml.j2
+    dest: "{{ deploy_path }}/games-server/docker-compose.yaml"
+    owner: "{{ games_server_user }}"
+    group: "{{ games_server_group }}"
+    mode: "0644"
+  notify:
+    - Restart games-server
+
+- name: Ensure Games Server is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/games-server"
+    state: present
+  register: games_server_output
+
+- name: Display Games Server status.
+  ansible.builtin.debug:
+    var: games_server_output

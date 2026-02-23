@@ -50,4 +50,22 @@ vms = {
     network_bridge = "vmbr0"
     ssh_user       = "sfcal"
   }
+
+  games_server = {
+    name           = "games"
+    description    = "game Server"
+    proxmox_node   = "proxmox"
+    vmid           = 1111
+    template_name  = "ubuntu-server-wil-base"
+    ip_address     = "10.2.20.50"
+    gateway        = "10.2.20.1"
+    nameserver     = "10.2.20.53"
+    cores          = 1
+    memory         = 8192
+    disk_size      = "50G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    ssh_user       = "sfcal"
+  }
+
 }

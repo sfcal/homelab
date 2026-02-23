@@ -1,0 +1,41 @@
+---
+services:
+  terraria:
+    image: ryshe/terraria:{{ terraria_version }}
+    container_name: terraria
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    environment:
+      - WORLD_FILENAME={{ terraria_server_worldname }}.wld
+    ports:
+      - "{{ terraria_server_port }}:7777"
+    volumes:
+      - {{ deploy_path }}/games-server/terraria/worlds:/root/.local/share/Terraria/Worlds
+    stdin_open: true
+    tty: true
+    command:
+      - -autocreate
+      - "{{ terraria_server_worldsize }}"
+      - -worldname
+      - {{ terraria_server_worldname }}
+      - -difficulty
+      - "{{ terraria_server_difficulty }}"
+      - -maxplayers
+      - "{{ terraria_server_maxplayers }}"
+{% if terraria_server_password %}
+      - -password
+      - "{{ terraria_server_password }}"
+{% endif %}
+      - -motd
+      - "{{ terraria_server_motd }}"
+      - -lang
+      - "{{ terraria_server_language }}"
+      - -npcstream
+      - "{{ terraria_server_npcstream }}"
+{% if terraria_server_seed %}
+      - -seed
+      - "{{ terraria_server_seed }}"
+{% endif %}
+      - -secure
+      - "1"

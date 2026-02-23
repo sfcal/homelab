@@ -1,0 +1,95 @@
+---
+# Unified Services List
+# Shared between DNS (BIND9) and Reverse Proxy (Caddy) via [services:children] group
+#
+# Each service entry supports the following fields:
+#   name          (required) - subdomain name
+#   backend_host  (required) - IP of the backend service
+#   backend_port  (required) - port of the backend service
+#   proxied       (required) - true: routed through Caddy, DNS -> reverse_proxy_ip
+#                              false: DNS -> backend_host directly, no Caddy entry
+#   dns             (optional) - "external" skips A record generation (default: "internal")
+#   enabled         (optional) - false skips both DNS and Caddy (default: true)
+#   hardcoded_proxy (optional) - true: Caddy block is hardcoded in Caddyfile.j2, skipped by loop
+services:
+  # Media services
+  - name: plex
+    backend_host: 10.2.0.5
+    backend_port: 32400
+    proxied: true
+    dns: external
+    hardcoded_proxy: true
+  - name: sabnzbd
+    backend_host: 10.2.0.5
+    backend_port: 8080
+    proxied: true
+  - name: prowlarr
+    backend_host: 10.2.0.5
+    backend_port: 9696
+    proxied: true
+  - name: sonarr
+    backend_host: 10.2.0.5
+    backend_port: 8989
+    proxied: true
+  - name: radarr
+    backend_host: 10.2.0.5
+    backend_port: 7878
+    proxied: true
+  - name: bazarr
+    backend_host: 10.2.0.5
+    backend_port: 6767
+    proxied: true
+  - name: tunarr
+    backend_host: 10.2.0.5
+    backend_port: 8000
+    proxied: true
+  - name: pulsarr
+    backend_host: 10.2.0.5
+    backend_port: 3003
+    proxied: true
+  - name: cleanuparr
+    backend_host: 10.2.0.5
+    backend_port: 11011
+    proxied: true
+  - name: huntarr
+    backend_host: 10.2.0.5
+    backend_port: 9705
+    proxied: true
+  - name: tdarr
+    backend_host: 10.2.0.5
+    backend_port: 8265
+    proxied: true
+  - name: frigate
+    backend_host: 10.2.0.5
+    backend_port: 5000
+    proxied: true
+
+  # Monitoring services
+  - name: grafana
+    backend_host: 10.2.20.30
+    backend_port: 3000
+    proxied: true
+  - name: prometheus
+    backend_host: 10.2.20.30
+    backend_port: 9090
+    proxied: true
+  - name: uptime
+    backend_host: 178.156.190.134
+    backend_port: 3001
+    proxied: true
+    hardcoded_proxy: true
+  - name: homepage
+    backend_host: 10.2.20.30
+    backend_port: 3002
+    proxied: true
+
+  # VM management
+  - name: vm
+    backend_host: 10.2.20.7
+    backend_port: 8006
+    proxied: true
+    hardcoded_proxy: true
+  - name: nas
+    backend_host: 10.2.0.100
+    backend_port: 80
+    proxied: true

@@ -1,0 +1,20 @@
+---
+# Games Server configuration
+system_timezone: America/New_York
+
+# User/group IDs
+games_server_user: root
+games_server_group: root
+
+# Vanilla Terraria server
+terraria_version: "latest"
+terraria_server_port: 7777
+terraria_server_password: "123"
+terraria_server_maxplayers: 8
+terraria_server_worldname: "TerrariaWorld"
+terraria_server_worldsize: 3  # 1=small, 2=medium, 3=large
+terraria_server_difficulty: 0  # 0=normal, 1=expert, 2=master, 3=journey
+terraria_server_motd: "Welcome to the Terraria server!"
+terraria_server_language: "en-US"
+terraria_server_npcstream: 60
+terraria_server_seed: ""

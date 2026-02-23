@@ -15,3 +15,9 @@ tasks:
     desc: Show available tasks
     cmds:
       - task --list
+
+  tui:
+    desc: Launch the homelab management TUI
+    dir: '{{.ROOT_DIR}}/tui'
+    cmds:
+      - python -m homelab_tui

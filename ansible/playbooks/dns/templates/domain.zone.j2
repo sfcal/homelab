@@ -19,8 +19,8 @@ ns              IN A    10.2.20.53
 ; Split horizon entries - point to internal IPs
 ; These override external DNS when resolved internally
 
-; A Records - Services (with reverse proxy)
-{% for service in services %}
-{{ "%-15s"|format(service.name) }} IN A    {{ service.dns_ip }}
+; A Records - Services
+{% for service in services if (service.dns | default('internal')) != 'external' and service.enabled | default(true) %}
+{{ "%-15s"|format(service.name) }} IN A    {{ reverse_proxy_ip if service.proxied else service.backend_host }}
 {% endfor %}
 

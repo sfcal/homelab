@@ -1,6 +1,6 @@
 ---
-- name: Deploy Authentik SSO
-  hosts: reverse_proxy
+- name: Deploy Games Server
+  hosts: games-server
   become: true
 
   handlers:
@@ -12,5 +12,5 @@
       ansible.builtin.include_tasks: ../common/prereq.yml
 
   tasks:
-    - name: Configure Authentik.
-      ansible.builtin.include_tasks: tasks/authentik.yml
+    - name: Configure Games Server.
+      ansible.builtin.include_tasks: tasks/games-server.yml

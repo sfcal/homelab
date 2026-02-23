@@ -23,10 +23,11 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/site.yml
 
-  deploy-rproxy:
-    desc: Deploy reverse proxy server
+  deploy-services:
+    desc: Deploy DNS and reverse proxy (run after modifying services.yml)
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
 
   deploy-external-monitoring:
@@ -41,12 +42,6 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/tailscale/deploy.yml
 
-  deploy-dns:
-    desc: Deploy DNS server
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
-
   deploy-media:
     desc: Deploy media stack
     dir: '{{.ROOT_DIR}}/ansible'
@@ -59,12 +54,11 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/monitoring/deploy.yml
 
-  add-service:
-    desc: Deploy DNS and reverse proxy after adding service to all.yml
+  deploy-games:
+    desc: Deploy games server (tModLoader Terraria)
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/games-server/deploy.yml
 
   # Utility tasks
   ping:

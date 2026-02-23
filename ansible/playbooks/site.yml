@@ -38,3 +38,7 @@
 # 6. Monitoring - Depends on Step-CA
 #- import_playbook: monitoring/deploy.yml
 #  tags: ['monitoring', 'observability']
+
+# 7. Games Server - Independent
+- import_playbook: games-server/deploy.yml
+  tags: ['games', 'terraria']
