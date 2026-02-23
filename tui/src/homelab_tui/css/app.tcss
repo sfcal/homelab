@@ -1,0 +1,25 @@
+Screen {
+    background: $surface;
+}
+
+Header {
+    dock: top;
+}
+
+Footer {
+    dock: bottom;
+}
+
+#output-title {
+    padding: 0 1;
+    text-style: bold;
+    color: $text;
+    background: $primary-background;
+    width: 100%;
+}
+
+#log-viewer {
+    height: 1fr;
+    margin: 1 1;
+    border: round $primary;
+}
