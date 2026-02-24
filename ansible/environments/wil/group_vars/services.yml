@@ -112,7 +112,12 @@ services:
     backend_host: 10.2.0.100
     backend_port: 80
     proxied: true
-
+  - name: kvm
+    domain: sfc.al
+    backend_host: 10.2.0.78
+    backend_port: 443
+    proxied: true
+    hardcoded_proxy: true
   # Personal website
   - name: samuel
     domain: 5am.video

@@ -46,6 +46,16 @@
                         }
                 }
         }
+{% elif service.name == 'kvm' %}
+        @kvm host kvm.{{ domain.name }}
+        handle @kvm {
+                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
+                        transport http {
+                                tls
+                                tls_insecure_skip_verify
+                        }
+                }
+        }
 
 {% endif %}
 {% endfor %}
