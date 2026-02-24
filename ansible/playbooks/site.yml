@@ -42,3 +42,7 @@
 # 7. Games Server - Independent
 - import_playbook: games-server/deploy.yml
   tags: ['games', 'terraria']
+
+# 8. Personal Website - Independent
+- import_playbook: website/deploy.yml
+  tags: ['website']

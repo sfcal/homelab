@@ -1,0 +1,16 @@
+---
+- name: Deploy Personal Website
+  hosts: website
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../common/prereq.yml
+
+  tasks:
+    - name: Configure Personal Website.
+      ansible.builtin.include_tasks: tasks/website.yml

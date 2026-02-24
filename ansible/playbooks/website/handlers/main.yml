@@ -1,0 +1,16 @@
+---
+- name: Restart website
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/website"
+    state: restarted
+    recreate: always
+
+- name: Stop website
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/website"
+    state: stopped
+
+- name: Start website
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/website"
+    state: present

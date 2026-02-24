@@ -68,4 +68,21 @@ vms = {
     ssh_user       = "sfcal"
   }
 
+  web_server = {
+    name           = "web"
+    description    = "personal sight"
+    proxmox_node   = "proxmox"
+    vmid           = 1109
+    template_name  = "ubuntu-server-wil-base"
+    ip_address     = "10.2.20.45"
+    gateway        = "10.2.20.1"
+    nameserver     = "10.2.20.53"
+    cores          = 2
+    memory         = 2048
+    disk_size      = "20G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    ssh_user       = "sfcal"
+  }
+
 }

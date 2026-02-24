@@ -14,7 +14,7 @@ terraria_server_password: ENC[AES256_GCM,data:nU9h,iv:4FKFNfYB6LQSS8gAXWW1akd9zy
 #ENC[AES256_GCM,data:XzurXc5MH5T+/g==,iv:hj/TtsGRXfLpxd9J1oYm7dDbl5VPjw7ltcryzVkZ0Xc=,tag:qWk5ZnR2IhHO0UGHx+ItDA==,type:comment]
 tailscale_auth_key: ""
 #ENC[AES256_GCM,data:SBFUyygAVBU=,iv:94dtXtPFDjbq35QuUyUFBKEG1813Gfa2FpjcqllZDlI=,tag:EZ860NpXmSf9MC3eo7XOvg==,type:comment]
-cf_api_token: ENC[AES256_GCM,data:GEgRJuCkfaj8LnoQxv2iRooSO5TMYvk4ML3ZA6wiUHI0PWre42dXkg==,iv:OXOpnkNhwR/5eURsr9ltzK996B7/oE979nRB4evMdLo=,tag:ux5UvCl2cnqxegR7Pr2V9w==,type:str]
+cf_api_token: ENC[AES256_GCM,data:u0I7UoJ+UOpccmDi7M7T9mnDBVKXGROoD0OIUWxltNwPuOXMWAAkjw==,iv:yIfbMcORwbM9smga+Dxv8gNiLrg7IEcC3y6PO7G74yk=,tag:a9rzEzybXnj0ChGFWMQvHA==,type:str]
 cf_email: ENC[AES256_GCM,data:dA+j7b9hESpwb6u5SO/tsDxzoF3JZVVJIsIqYw==,iv:ZVK/OGgd0tdwuJSxfMhRePTxtUKG5PLnZ0hQdj9kv+M=,tag:wqPDIi+IIZXQU5WOMCWekg==,type:str]
 sops:
     age:
@@ -27,7 +27,7 @@ sops:
             eWQ2OForQXM0RjhFdE1DWldWaUpPL2sKsO1HyutGoIYXCwPSyWWvBhkunEbga8PZ
             XXv50ZQp+rd8ZyZP0cVm6Wa7Cf0RQIymanuMIDp9C7d946YjVoSg3Q==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-02-23T20:10:45Z"
-    mac: ENC[AES256_GCM,data:6jISXKmZQ2MErNOvVqD602h1UPhpc5eRPp0j+dhZTjloWhw+8mALxzOMiVpIFO6tJHnESrVDY68iYDTqDxTG18/wtytv7z6zklCYeJUFcr1bQCcjz2mksz6eEoeGe+DSFD4k9gbwskhrjS9U/kSnAerPcSXO5V5DkMlWGvuGSWg=,iv:6+sl4AW0J9UI+cNeip7od+DIxhOGeTFzwwJXIJ66g7M=,tag:RFPv4i+P2Rvbtzfi7s0t7Q==,type:str]
+    lastmodified: "2026-02-23T20:25:49Z"
+    mac: ENC[AES256_GCM,data:fByLm+pRcyjM/6vEyjUt/jhWCsSf0/fnX/RYqzeQP9s7nLtiJwp+tDq4uhp8Og5ZY7zrl4EKea3nPlSMhUwKfmFq4185L0Wik9t3RUDIMISVdIKJY7THr2abE1BZzXUbOFbkBrgTksLXAeXtpzCqHu/wT+RXuDKqeeKyj48ibLQ=,iv:UaFndlCzOjeyt+rhYyu2adM9er0pr+ICA2g/fYy7j+8=,tag:cjeXBTlMxV125iB1g5VtJw==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.11.0

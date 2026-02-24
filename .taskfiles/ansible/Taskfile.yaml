@@ -60,6 +60,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/games-server/deploy.yml
 
+  deploy-website:
+    desc: Deploy personal website
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/website/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory

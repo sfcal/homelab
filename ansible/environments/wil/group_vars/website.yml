@@ -1,0 +1,5 @@
+---
+website_image: "ghcr.io/sfcal/samuel.computer:latest"
+website_port: 8090
+website_user: root
+website_group: root

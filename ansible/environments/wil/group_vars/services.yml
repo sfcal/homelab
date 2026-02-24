@@ -37,7 +37,7 @@ services:
     backend_port: 8989
     proxied: true
   - name: radarr
-    domain: samuel.computer
+    domain: 5am.video
     backend_host: 10.2.0.5
     backend_port: 7878
     proxied: true
@@ -102,13 +102,20 @@ services:
 
   # VM management
   - name: vm
-    domain: 5am.video
+    domain: sfc.al
     backend_host: 10.2.20.7
     backend_port: 8006
     proxied: true
     hardcoded_proxy: true
   - name: nas
-    domain: 5am.video
+    domain: sfc.al
     backend_host: 10.2.0.100
     backend_port: 80
+    proxied: true
+
+  # Personal website
+  - name: samuel
+    domain: 5am.video
+    backend_host: 10.2.20.45
+    backend_port: 8090
     proxied: true

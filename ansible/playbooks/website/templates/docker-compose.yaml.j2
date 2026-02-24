@@ -1,0 +1,10 @@
+---
+services:
+  website:
+    image: {{ website_image }}
+    container_name: website
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 128m
+    ports:
+      - "{{ website_port }}:80"
