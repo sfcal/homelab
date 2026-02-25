@@ -1,0 +1,18 @@
+birdle_secret_key: ENC[AES256_GCM,data:YAGbJ5UhgqdQQtjSJrMYj89w7Wu3CcUWC0CLBzRvB6k3MVdZAoBMt6mFjMw4+viGOMWNJTQ9F9gycmh8zocnihJ/Hw==,iv:cVvIMJHDanb7SahJhzo9RIOeNgIUkoAfSUPvu5XrRig=,tag:29n5+WeblmBInSL3MrcHWw==,type:str]
+birdle_db_password: ENC[AES256_GCM,data:DSCwHrFZJDoPNYxZgHz/0xKlG3yP+y4fhK1lYZAvTa4=,iv:OnKZ6fA+Nn1o1Ssoj2w5BOtZR/4Fn08G0kPpxPEh09A=,tag:uBQnXygaKHvVJz43sZcZKA==,type:str]
+birdle_ebird_api_key: ENC[AES256_GCM,data:ypKSVJtME74TtN4l,iv:hIxFLIV8FU2UqiQqdcEOWgzGZhV7uMpWTcCkDexgIWY=,tag:rXB45hH/En7nJI/oLZpGqg==,type:str]
+sops:
+    age:
+        - recipient: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBsQWxjMDZLc2ZhMDJaSHNh
+            bmtvTEs1OHhhK2c4MVc4VS90M2xxVk5xSGpvCjRaaFc1eDNvd1lsNVFjT2xDZmY3
+            MS90SG1IQW5JMWU1ZGFOd0dLT1NIQmsKLS0tIHVjOWJZRDhxVXkxWUFFS20wUHM5
+            b2FkeHcxYXhRRVhiN2RtU1dHRTZVY1UKv9PMuJISKuDhS8/Ms5YoBgLnCYiSmLfh
+            U/cfaxPT1c1SB58HPqQr8dZ4uvfN29+SErXofQh4PcdwgMqGUMV7/Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-02-25T03:27:00Z"
+    mac: ENC[AES256_GCM,data:LYq3aiRiC1Zp5GkyPJ2T/PzjggiXso0gGiWraSMzQSEK6xxBHXuAXzpcKQRoU87ekQMK01m0Y4vSugchcfdJ6PC6+86eRtKqFQTeZyCXGKioslv5o9asGe8np2mhHj2anhzqOLHeoxeccu+U21SDGK3I8C5wMcB/U4s8vZITcJU=,iv:km5yCbQ/45cWw3gF1loGE1KuOk1FdqB5EcZfl11qGMs=,tag:j2vOF240zNa+R9XM/Y8R8w==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.11.0

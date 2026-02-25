@@ -124,3 +124,11 @@ services:
     backend_host: 10.2.20.45
     backend_port: 8090
     proxied: true
+
+  # Birdle - bird identification game
+  - name: birdle
+    domain: sfc.al
+    backend_host: 10.2.20.45
+    backend_port: 8091
+    proxied: true
+    #dns: external

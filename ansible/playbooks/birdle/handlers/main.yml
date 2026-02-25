@@ -1,0 +1,16 @@
+---
+- name: Restart birdle
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/birdle"
+    state: restarted
+    recreate: always
+
+- name: Stop birdle
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/birdle"
+    state: stopped
+
+- name: Start birdle
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/birdle"
+    state: present

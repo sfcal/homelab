@@ -46,3 +46,7 @@
 # 8. Personal Website - Independent
 - import_playbook: website/deploy.yml
   tags: ['website']
+
+# 9. Birdle - Independent
+- import_playbook: birdle/deploy.yml
+  tags: ['birdle']

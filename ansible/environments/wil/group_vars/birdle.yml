@@ -1,0 +1,5 @@
+---
+birdle_image: "ghcr.io/sfcal/new-birdle:latest"
+birdle_port: 8091
+birdle_user: root
+birdle_group: root

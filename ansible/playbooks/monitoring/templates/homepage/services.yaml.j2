@@ -93,3 +93,22 @@
           type: uptimekuma
           url: http://178.156.190.134:3001
           slug: default
+
+- Node Exporters:
+{% for target in prometheus_node_targets %}
+{% set host = target.split(':')[0] %}
+{% set port = target.split(':')[1] %}
+{% if host == 'localhost' %}
+{% set display_host = '10.2.20.30' %}
+{% else %}
+{% set display_host = host %}
+{% endif %}
+    - {{ display_host }}:
+        icon: prometheus.png
+        siteMonitor: http://{{ display_host }}:{{ port }}
+        widget:
+          type: prometheusmetric
+          url: http://10.2.20.30:9090
+          label: CPU Usage
+          query: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle", instance="{{ display_host }}:{{ port }}"}[5m])) * 100)
+{% endfor %}

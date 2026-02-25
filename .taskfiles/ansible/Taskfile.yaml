@@ -66,6 +66,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/website/deploy.yml
 
+  deploy-birdle:
+    desc: Deploy birdle game
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/birdle/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory
