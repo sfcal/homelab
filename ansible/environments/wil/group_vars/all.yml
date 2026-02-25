@@ -4,7 +4,8 @@
 # Domains managed by DNS and reverse proxy
 domains:
   - name: "5am.video"
-  - name: "sfc.al"
+  - name: "wil.5am.cloud"
+  - name: "ext.5am.cloud"
 system_timezone: America/New_York
 
 # Unified deploy path for all services

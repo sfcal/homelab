@@ -79,41 +79,41 @@ services:
 
   # Monitoring services
   - name: grafana
-    domain: 5am.video
+    domain: wil.5am.cloud
     backend_host: 10.2.20.30
     backend_port: 3000
     proxied: true
   - name: prometheus
-    domain: 5am.video
+    domain: wil.5am.cloud
     backend_host: 10.2.20.30
     backend_port: 9090
     proxied: true
   - name: uptime
-    domain: 5am.video
+    domain: ext.5am.cloud
     backend_host: 178.156.190.134
     backend_port: 3001
     proxied: true
     hardcoded_proxy: true
   - name: homepage
-    domain: 5am.video
+    domain: wil.5am.cloud
     backend_host: 10.2.20.30
     backend_port: 3002
     proxied: true
 
   # VM management
   - name: vm
-    domain: sfc.al
+    domain: wil.5am.cloud
     backend_host: 10.2.20.7
     backend_port: 8006
     proxied: true
     hardcoded_proxy: true
   - name: nas
-    domain: sfc.al
+    domain: wil.5am.cloud
     backend_host: 10.2.0.100
     backend_port: 80
     proxied: true
   - name: kvm
-    domain: sfc.al
+    domain: wil.5am.cloud
     backend_host: 10.2.0.78
     backend_port: 443
     proxied: true
@@ -127,7 +127,7 @@ services:
 
   # Birdle - bird identification game
   - name: birdle
-    domain: sfc.al
+    domain: wil.5am.cloud
     backend_host: 10.2.20.45
     backend_port: 8091
     proxied: true
