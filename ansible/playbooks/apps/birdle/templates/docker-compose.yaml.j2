@@ -32,7 +32,7 @@ services:
     environment:
       - DATABASE_URL=postgres://birdle:{{ birdle_db_password }}@db:5432/birdle
       - DJANGO_SECRET_KEY={{ birdle_secret_key }}
-      - ALLOWED_HOSTS=birdle.wil.5am.cloud
+      - ALLOWED_HOSTS=birdle.sfc.al
       - EBIRD_API_KEY={{ birdle_ebird_api_key }}
 
 volumes:

@@ -6,6 +6,7 @@ domains:
   - name: "5am.video"
   - name: "wil.5am.cloud"
   - name: "ext.5am.cloud"
+  - name: "sfc.al"
 system_timezone: America/New_York
 
 # Unified deploy path for all services

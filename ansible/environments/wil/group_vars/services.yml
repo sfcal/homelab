@@ -127,7 +127,7 @@ services:
 
   # Birdle - bird identification game
   - name: birdle
-    domain: wil.5am.cloud
+    domain: sfc.al
     backend_host: 10.2.20.45
     backend_port: 8091
     proxied: true
