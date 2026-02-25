@@ -1,0 +1,16 @@
+---
+- name: Deploy External Monitoring (Tailscale + Uptime Kuma)
+  hosts: external_monitoring
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../../common/prereq.yml
+
+  roles:
+    - docker
+    - tailscale
+    - role: docker_service
+      vars:
+        service_name: uptime-kuma
+        service_compose_template: "{{ playbook_dir }}/templates/docker-compose.yaml.j2"

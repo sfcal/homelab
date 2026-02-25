@@ -1,0 +1,74 @@
+---
+networks:
+  monitoring:
+    driver: bridge
+
+services:
+  prometheus:
+    image: prom/prometheus:{{ prometheus_version }}
+    container_name: prometheus
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    networks:
+      - monitoring
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time={{ prometheus_retention }}'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - {{ deploy_path }}/monitoring/prometheus:/etc/prometheus:ro
+      - {{ deploy_path }}/monitoring/prometheus-data:/prometheus
+    user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
+
+  grafana:
+    image: grafana/grafana:{{ grafana_version }}
+    container_name: grafana
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER={{ grafana_admin_user }}
+      - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
+      - GF_SERVER_ROOT_URL=https://grafana.5am.video
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    volumes:
+      - {{ deploy_path }}/monitoring/grafana:/var/lib/grafana
+      - {{ deploy_path }}/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:{{ homepage_version }}
+    container_name: homepage
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    networks:
+      - monitoring
+    environment:
+      - TZ={{ system_timezone }}
+      - PUID={{ monitoring_uid }}
+      - PGID={{ monitoring_gid }}
+      - HOMEPAGE_ALLOWED_HOSTS=homepage.wil.5am.cloud
+      - HOMEPAGE_VAR_SONARR_KEY={{ homepage_sonarr_key }}
+      - HOMEPAGE_VAR_RADARR_KEY={{ homepage_radarr_key }}
+      - HOMEPAGE_VAR_BAZARR_KEY={{ homepage_bazarr_key }}
+      - HOMEPAGE_VAR_PROWLARR_KEY={{ homepage_prowlarr_key }}
+      - HOMEPAGE_VAR_SABNZBD_KEY={{ homepage_sabnzbd_key }}
+      - HOMEPAGE_VAR_PLEX_KEY={{ homepage_plex_key }}
+    ports:
+      - "3002:3000"
+    volumes:
+      - {{ deploy_path }}/monitoring/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro

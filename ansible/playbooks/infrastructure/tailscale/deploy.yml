@@ -1,0 +1,11 @@
+---
+- name: Deploy Tailscale
+  hosts: reverse_proxy
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../../common/prereq.yml
+
+  roles:
+    - tailscale

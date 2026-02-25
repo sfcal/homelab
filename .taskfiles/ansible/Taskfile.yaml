@@ -9,13 +9,13 @@ tasks:
     desc: Restore media stack backup
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/restore.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/media/restore.yml
 
   backup-media:
     desc: backup media stack
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/backup.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/media/backup.yml
 
   deploy-all:
     desc: Deploy entire infrastructure in correct order
@@ -27,50 +27,50 @@ tasks:
     desc: Deploy DNS and reverse proxy (run after modifying services.yml)
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/dns/deploy.yml
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/reverse_proxy/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/dns/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/reverse_proxy/deploy.yml
 
   deploy-external-monitoring:
     desc: Deploy external monitoring server
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/external-monitoring/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/external-monitoring/deploy.yml
 
   deploy-tailscale:
     desc: Deploy reverse tailscale server
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/tailscale/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/tailscale/deploy.yml
 
   deploy-media:
     desc: Deploy media stack
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/media/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/media/deploy.yml
 
   deploy-monitoring:
     desc: Deploy monitoring stack
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/monitoring/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/monitoring/deploy.yml
 
   deploy-games:
     desc: Deploy games server (tModLoader Terraria)
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/games-server/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/games-server/deploy.yml
 
   deploy-website:
     desc: Deploy personal website
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/website/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/website/deploy.yml
 
   deploy-birdle:
     desc: Deploy birdle game
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/birdle/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/birdle/deploy.yml
 
   # Utility tasks
   ping:

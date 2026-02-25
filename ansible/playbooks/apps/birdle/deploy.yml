@@ -1,0 +1,18 @@
+---
+- name: Deploy Birdle
+  hosts: birdle
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../../common/prereq.yml
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: birdle
+        service_compose_template: "{{ playbook_dir }}/templates/docker-compose.yaml.j2"
+        service_user: "{{ birdle_user }}"
+        service_group: "{{ birdle_group }}"
+        service_images:
+          - "{{ birdle_image }}"

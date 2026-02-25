@@ -1,0 +1,19 @@
+---
+- name: Deploy Media Stack
+  hosts: media-stack
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_tasks: ../../common/prereq.yml
+
+  tasks:
+    - name: Configure NFS mounts.
+      ansible.builtin.include_tasks: tasks/nfs.yml
+
+    - name: Configure Media Stack.
+      ansible.builtin.include_tasks: tasks/media-stack.yml

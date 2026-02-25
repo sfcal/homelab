@@ -1,0 +1,39 @@
+---
+services:
+  db:
+    image: postgres:16
+    container_name: birdle-db
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    volumes:
+      - {{ deploy_path }}/birdle/postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: birdle
+      POSTGRES_USER: birdle
+      POSTGRES_PASSWORD: "{{ birdle_db_password }}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U birdle"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: {{ birdle_image }}
+    container_name: birdle
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    ports:
+      - "{{ birdle_port }}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://birdle:{{ birdle_db_password }}@db:5432/birdle
+      - DJANGO_SECRET_KEY={{ birdle_secret_key }}
+      - ALLOWED_HOSTS=birdle.wil.5am.cloud
+      - EBIRD_API_KEY={{ birdle_ebird_api_key }}
+
+volumes:
+  postgres_data:

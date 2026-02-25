@@ -1,0 +1,16 @@
+---
+- name: "Restart {{ service_name }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/{{ service_name }}"
+    state: restarted
+    recreate: always
+
+- name: "Stop {{ service_name }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/{{ service_name }}"
+    state: stopped
+
+- name: "Start {{ service_name }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/{{ service_name }}"
+    state: present

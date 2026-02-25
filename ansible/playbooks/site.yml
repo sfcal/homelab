@@ -15,38 +15,42 @@
           - "5. Media Stack (depends on Step-CA)"
           - "6. Monitoring (depends on Step-CA)"
 
+# --- Infrastructure ---
+
 # 1. DNS - No dependencies
-- import_playbook: dns/deploy.yml
+- import_playbook: infrastructure/dns/deploy.yml
   tags: ['dns', 'foundation']
 
 # 2. Step-CA - Must be second (needed by others)
-- import_playbook: ca/deploy.yml
+- import_playbook: infrastructure/ca/deploy.yml
   tags: ['step-ca', 'foundation', 'security']
 
 # 3. Time - Can run after foundation
-- import_playbook: ntp/deploy.yml
+- import_playbook: infrastructure/ntp/deploy.yml
   tags: ['time', 'ntp']
 
 # 4. PXE - Independent
-- import_playbook: pxe/deploy.yml
+- import_playbook: infrastructure/pxe/deploy.yml
   tags: ['pxe', 'netboot']
 
-# 5. Media - Depends on Step-CA
-- import_playbook: media/deploy.yml
-  tags: ['media', 'applications']
-
-# 6. Monitoring - Depends on Step-CA
-#- import_playbook: monitoring/deploy.yml
+# 5. Monitoring - Depends on Step-CA
+#- import_playbook: infrastructure/monitoring/deploy.yml
 #  tags: ['monitoring', 'observability']
 
+# --- Apps ---
+
+# 6. Media - Depends on Step-CA
+- import_playbook: apps/media/deploy.yml
+  tags: ['media', 'applications']
+
 # 7. Games Server - Independent
-- import_playbook: games-server/deploy.yml
+- import_playbook: apps/games-server/deploy.yml
   tags: ['games', 'terraria']
 
 # 8. Personal Website - Independent
-- import_playbook: website/deploy.yml
+- import_playbook: apps/website/deploy.yml
   tags: ['website']
 
 # 9. Birdle - Independent
-- import_playbook: birdle/deploy.yml
+- import_playbook: apps/birdle/deploy.yml
   tags: ['birdle']
