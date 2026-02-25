@@ -14,6 +14,13 @@ dns_trusted_networks:
 reverse_proxy_ip: "10.2.20.80"
 
 # Reverse Zone PTR Records
+# Cloudflare DDNS records to keep updated with public IP
+ddns_domains:
+  - "*.5am.video"
+  - "*.wil.5am.cloud"
+  - "*.ext.5am.cloud"
+
+# Reverse Zone PTR Records
 dns_ptr_records:
   - octet: "1"
     hostname: "unifi.5am.video."

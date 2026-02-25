@@ -1,0 +1,16 @@
+services:
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - CLOUDFLARE_API_TOKEN={{ cf_api_token }}
+      - DOMAINS={{ ddns_domains | join(',') }}
+      - PROXIED=false
+      - IP6_PROVIDER=none
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true

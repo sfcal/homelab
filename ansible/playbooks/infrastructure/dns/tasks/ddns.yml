@@ -1,0 +1,9 @@
+---
+- name: Deploy Cloudflare DDNS updater.
+  ansible.builtin.include_role:
+    name: docker_service
+  vars:
+    service_name: cloudflare-ddns
+    service_compose_template: templates/ddns-docker-compose.yaml.j2
+    service_images:
+      - favonia/cloudflare-ddns:latest

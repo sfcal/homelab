@@ -19,7 +19,7 @@
 
 # 1. DNS - No dependencies
 - import_playbook: infrastructure/dns/deploy.yml
-  tags: ['dns', 'foundation']
+  tags: ['dns', 'ddns', 'foundation']
 
 # 2. Step-CA - Must be second (needed by others)
 - import_playbook: infrastructure/ca/deploy.yml

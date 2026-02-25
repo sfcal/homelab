@@ -14,3 +14,6 @@
   tasks:
     - name: Configure BIND9.
       ansible.builtin.include_tasks: tasks/bind9.yml
+
+    - name: Configure Cloudflare DDNS.
+      ansible.builtin.include_tasks: tasks/ddns.yml

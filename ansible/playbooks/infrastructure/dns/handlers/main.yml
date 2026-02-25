@@ -12,3 +12,8 @@
 - name: Check bind9 config
   ansible.builtin.command: named-checkconf
   changed_when: false
+
+- name: Restart cloudflare-ddns
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/cloudflare-ddns"
+    state: restarted
