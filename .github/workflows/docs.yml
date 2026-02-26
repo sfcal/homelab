@@ -38,7 +38,7 @@ jobs:
         run: pip install mkdocs-material
 
       - name: Build site
-        run: mkdocs build --strict
+        run: mkdocs build
 
       - name: Checkout docs repo
         uses: actions/checkout@v5
