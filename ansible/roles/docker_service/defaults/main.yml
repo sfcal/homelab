@@ -1,6 +1,6 @@
 ---
 # service_name: name of the service (required)
-# service_compose_template: path to the docker-compose template (required)
+# service_compose_template: path to the compose template (required)
 # deploy_path: base deployment path (required)
 # service_user: owner of service files (default: root)
 # service_group: group of service files (default: root)

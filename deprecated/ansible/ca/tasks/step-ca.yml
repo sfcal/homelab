@@ -15,10 +15,10 @@
     group: "1000"
     recurse: yes
 
-- name: Deploy step-ca docker-compose file
+- name: Deploy step-ca compose file
   ansible.builtin.template:
-    src: "../templates/docker-compose.yaml.j2"
-    dest: "{{ step_ca_deploy_path }}/docker-compose.yaml"
+    src: "../templates/compose.yaml.j2"
+    dest: "{{ step_ca_deploy_path }}/compose.yaml"
     mode: '0644'
   notify: Restart step-ca
 

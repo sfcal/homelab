@@ -33,4 +33,4 @@ The media stack provides automated media management and streaming:
 
 ## How It Works
 
-Ansible uses Jinja2 templates to generate `docker-compose.yml` files from group variables, then deploys them using the `docker_service` role. This allows environment-specific configuration while keeping the compose structure consistent.
+Ansible uses Jinja2 templates to generate `compose.yaml` files from group variables, then deploys them using the `docker_service` role. This allows environment-specific configuration while keeping the compose structure consistent.

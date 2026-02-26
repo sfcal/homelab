@@ -31,7 +31,7 @@ For a minimal dev environment, you'll need:
    ```bash
    # Check if installed
    docker --version
-   docker-compose --version
+   docker compose version
    ```
 
 2. **Git**

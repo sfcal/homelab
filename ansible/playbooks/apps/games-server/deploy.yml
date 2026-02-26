@@ -12,6 +12,6 @@
     - role: docker_service
       vars:
         service_name: games-server
-        service_compose_template: "{{ playbook_dir }}/templates/docker-compose.yaml.j2"
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
         service_user: "{{ games_server_user }}"
         service_group: "{{ games_server_group }}"

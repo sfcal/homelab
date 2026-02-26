@@ -9,10 +9,10 @@
     - /opt/netbootxyz/config
     - /opt/netbootxyz/assets
 
-- name: Deploy netbootxyz docker-compose file
+- name: Deploy netbootxyz compose file
   ansible.builtin.template:
-    src: "../templates/docker-compose.yaml.j2"
-    dest: /opt/netbootxyz/docker-compose.yaml
+    src: "../templates/compose.yaml.j2"
+    dest: /opt/netbootxyz/compose.yaml
     mode: 0644
   notify: Restart netbootxyz
 
