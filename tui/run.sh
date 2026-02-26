@@ -25,5 +25,7 @@ fi
 docker run -it --rm \
     --volume "${PROJECT_ROOT}:/homelab" \
     --volume /homelab/tui/.venv \
+    --volume "${HOME}/.config/sops/age/keys.txt:/root/.config/sops/age/keys.txt:ro" \
+    --volume "${HOME}/.ssh:/root/.ssh:ro" \
     homelab-tui \
     "$@"

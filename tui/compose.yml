@@ -13,6 +13,10 @@ services:
       # Preserve the container's .venv so the bind mount above doesn't
       # overwrite it with the host's (potentially different platform) .venv
       - /homelab/tui/.venv
+      # SOPS AGE key for decrypting secrets
+      - ~/.config/sops/age/keys.txt:/root/.config/sops/age/keys.txt:ro
+      # SSH keys for Ansible to reach managed hosts
+      - ~/.ssh:/root/.ssh:ro
     develop:
       watch:
         # Rebuild the image when dependencies change

@@ -3,3 +3,5 @@ collections:
   - name: community.sops
     version: ">=2.2.0"
   - name: community.docker
+  - name: community.general
+  - name: ansible.posix
