@@ -7,7 +7,7 @@
 #   ansible-playbook restore.yml -e "restore_file=media-stack-20250218T040001.tar.gz"
 #
 - name: Restore Media Stack Configurations
-  hosts: media-stack
+  hosts: app_media-stack
   become: true
 
   handlers:

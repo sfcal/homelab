@@ -1,6 +1,6 @@
 ---
 - name: Deploy Reverse Proxy (Caddy)
-  hosts: reverse_proxy
+  hosts: infra_reverse-proxy
   become: true
   
   handlers:

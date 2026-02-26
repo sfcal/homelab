@@ -1,6 +1,6 @@
 ---
 - name: Backup Media Stack Configurations
-  hosts: media-stack
+  hosts: app_media-stack
   become: true
 
   handlers:

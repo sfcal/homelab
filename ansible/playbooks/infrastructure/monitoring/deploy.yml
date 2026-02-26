@@ -1,6 +1,6 @@
 ---
 - name: Deploy Monitoring Stack
-  hosts: monitoring
+  hosts: infra_monitoring
   become: true
 
   handlers:

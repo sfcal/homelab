@@ -1,6 +1,6 @@
 ---
 - name: Deploy Personal Website
-  hosts: website
+  hosts: app_website
   become: true
 
   pre_tasks:

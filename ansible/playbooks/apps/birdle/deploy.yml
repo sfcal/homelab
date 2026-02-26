@@ -1,6 +1,6 @@
 ---
 - name: Deploy Birdle
-  hosts: birdle
+  hosts: app_birdle
   become: true
 
   pre_tasks:

@@ -1,6 +1,6 @@
 ---
 - name: Deploy Games Server
-  hosts: games-server
+  hosts: app_games-server
   become: true
 
   pre_tasks:
