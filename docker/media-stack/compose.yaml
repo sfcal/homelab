@@ -140,7 +140,7 @@ services:
       - '993'
 
   pulsarr:
-    image: lakker/pulsarr:0.12.2
+    image: lakker/pulsarr:1.1.6
     container_name: pulsarr
     restart: unless-stopped
     mem_limit: 2g
