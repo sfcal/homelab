@@ -101,6 +101,7 @@ services:
       - PUID={{ media_stack_puid }}
       - UMASK=022
       - VERSION=docker
+      - ADVERTISE_IP=https://plex.5am.video:443
     ports:
       - 32400:32400
       - 1900:1900/udp

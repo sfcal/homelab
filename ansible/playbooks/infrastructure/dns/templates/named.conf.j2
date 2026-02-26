@@ -37,12 +37,15 @@ options {
   listen-on-v6 { any; };
 };
 
-// Fix for plex forwarding
-zone "plex.5am.video" IN {
+// Forward zones - resolve externally instead of locally
+{% for zone in dns_forward_zones | default(['plex.5am.video']) %}
+zone "{{ zone }}" IN {
   type forward;
   forward only;
   forwarders { {% for forwarder in dns_forwarders %}{{ forwarder }}; {% endfor %}};
 };
+
+{% endfor %}
 
 // Domain zones
 {% for domain in domains %}

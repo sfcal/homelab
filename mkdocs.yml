@@ -1,34 +1,68 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 site_name: Homelab Infrastructure as Code
-site_url: https://homelab.samuel.computer
-copyright: Copyright &copy; 2025 sfcal
+site_url: https://docs.5am.cloud/homelab/
+site_dir: site/homelab
+site_description: A complete infrastructure-as-code solution for managing a homelab on Proxmox with Packer, Terraform, Ansible, and Docker.
+copyright: Copyright &copy; 2025-2026 sfcal
 
 repo_url: https://github.com/sfcal/homelab
+repo_name: sfcal/homelab
 
 theme:
-  favicon: assets/images/favicon.png
   name: material
-  palette:
-    primary: black
+  favicon: assets/images/favicon.png
+  custom_dir: docs/.overrides
   features:
-    - navigation.expand
+    - navigation.path
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.sections
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.footer
+    - navigation.top
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
     - search.highlight
     - search.share
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: homelab-light
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: homelab-dark
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
 
 markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - toc:
+      anchorlink: true
+      anchorlink_class: toclink
+  - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  - attr_list
-  - admonition
-  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
   - pymdownx.snippets:
       check_paths: true
-  - def_list
-  - pymdownx.tasklist:
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -36,20 +70,53 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
 
-extra_files:
-  - CNAME
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sfcal/homelab
 
 nav:
-  - Home: index.md
-  - Setup:
-    - Quick Start: getting-started/quick-start.md
-    - Prerequisites: getting-started/prerequisites.md
-  - Plex:
-    - Overview: plex/index.md
-    - Getting Started: plex/getting-started.md
-    - Browsing & Playing: plex/browsing-and-playing.md
-    - Devices: plex/devices.md
-    - Requesting Content: plex/requesting-content.md
+  - Introduction: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Quick Start: getting-started/quick-start.md
+      - Prerequisites: getting-started/prerequisites.md
+  - Guides:
+      - guides/index.md
+      - Plex:
+          - plex/index.md
+          - Getting Started: plex/getting-started.md
+          - Browsing & Playing: plex/browsing-and-playing.md
+          - Devices: plex/devices.md
+          - Requesting Content: plex/requesting-content.md
+  - Concepts:
+      - concepts/index.md
+      - Architecture: concepts/architecture.md
+      - Network Layout: concepts/network-layout.md
+      - Secrets Management: concepts/secrets.md
+      - Multi-Environment: concepts/environments.md
+  - Infrastructure:
+      - infrastructure/index.md
+      - Packer: infrastructure/packer.md
+      - Terraform: infrastructure/terraform.md
+      - Ansible: infrastructure/ansible.md
+      - Docker Services: infrastructure/docker.md
   - Reference:
-    - FAQ: reference/faq.md
+      - reference/index.md
+      - Task Commands: reference/tasks.md
+      - TUI: reference/tui.md
+      - FAQ: reference/faq.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn

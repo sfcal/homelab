@@ -1,0 +1,204 @@
+/* ============================================
+   Homelab Docs - Dark Infrastructure Theme
+   Inspired by UV/Astral docs styling
+   ============================================ */
+
+:root {
+  --hl-deep: #0d1117;
+  --hl-surface: #161b22;
+  --hl-border: #21262d;
+  --hl-text: #e6edf3;
+  --hl-text-muted: #8b949e;
+  --hl-blue: #58a6ff;
+  --hl-green: #3fb950;
+  --hl-cyan: #39d2c0;
+  --hl-orange: #d29922;
+  --hl-red: #f85149;
+  --hl-purple: #bc8cff;
+  --hl-pink: #f778ba;
+  --hl-navy: #1b2332;
+  --hl-light-bg: #ffffff;
+  --hl-light-surface: #f6f8fa;
+  --hl-light-text: #1f2328;
+  --hl-light-muted: #656d76;
+}
+
+/* ---- Light Theme ---- */
+
+[data-md-color-scheme="homelab-light"] {
+  --md-default-bg-color: var(--hl-light-bg);
+  --md-default-fg-color: var(--hl-light-text);
+  --md-default-fg-color--light: var(--hl-light-muted);
+  --md-default-fg-color--lightest: rgba(0, 0, 0, 0.12);
+  --md-primary-fg-color: var(--hl-navy);
+  --md-primary-bg-color: var(--hl-light-bg);
+  --md-accent-fg-color: var(--hl-blue);
+  --md-typeset-a-color: var(--hl-blue);
+}
+
+/* ---- Dark Theme ---- */
+
+[data-md-color-scheme="homelab-dark"] {
+  --md-default-bg-color: var(--hl-deep);
+  --md-default-fg-color: var(--hl-text);
+  --md-default-fg-color--light: var(--hl-text-muted);
+  --md-default-fg-color--lighter: var(--hl-text-muted);
+  --md-default-fg-color--lightest: rgba(255, 255, 255, 0.12);
+  --md-primary-fg-color: var(--hl-surface);
+  --md-primary-bg-color: var(--hl-text);
+  --md-accent-fg-color: var(--hl-cyan);
+
+  --md-typeset-color: var(--hl-text);
+  --md-typeset-a-color: var(--hl-blue);
+  --md-typeset-mark-color: rgba(210, 153, 34, 0.3);
+
+  --md-code-fg-color: var(--hl-text);
+  --md-code-bg-color: var(--hl-surface);
+
+  --md-code-hl-comment-color: var(--hl-text-muted);
+  --md-code-hl-punctuation-color: var(--hl-text-muted);
+  --md-code-hl-generic-color: var(--hl-text);
+  --md-code-hl-variable-color: var(--hl-text);
+  --md-code-hl-string-color: var(--hl-green);
+  --md-code-hl-keyword-color: var(--hl-purple);
+  --md-code-hl-operator-color: var(--hl-cyan);
+  --md-code-hl-number-color: var(--hl-orange);
+  --md-code-hl-special-color: var(--hl-cyan);
+  --md-code-hl-function-color: var(--hl-blue);
+  --md-code-hl-constant-color: var(--hl-orange);
+  --md-code-hl-name-color: var(--md-code-fg-color);
+
+  --md-typeset-del-color: hsla(6, 90%, 60%, 0.15);
+  --md-typeset-ins-color: hsla(150, 90%, 44%, 0.15);
+
+  --md-typeset-table-color: hsla(0, 0%, 100%, 0.12);
+  --md-typeset-table-color--light: hsla(0, 0%, 100%, 0.035);
+
+  --md-footer-bg-color: var(--hl-surface);
+  --md-footer-bg-color--dark: var(--hl-deep);
+}
+
+/* Dark mode image toggling */
+[data-md-color-scheme="homelab-light"] img[src$="#only-dark"] {
+  display: none;
+}
+
+[data-md-color-scheme="homelab-light"] img[src$="#only-light"] {
+  display: inline;
+}
+
+[data-md-color-scheme="homelab-dark"] img[src$="#only-light"] {
+  display: none;
+}
+
+[data-md-color-scheme="homelab-dark"] img[src$="#only-dark"] {
+  display: inline;
+}
+
+/* Dark mode admonitions */
+[data-md-color-scheme="homelab-dark"] div.admonition {
+  color: var(--hl-text);
+  background-color: var(--hl-surface);
+}
+
+[data-md-color-scheme="homelab-dark"] details summary a {
+  color: var(--hl-blue);
+}
+
+/* ---- Tables ---- */
+
+.md-typeset__table {
+  min-width: 100%;
+}
+
+.md-typeset table:not([class]) {
+  display: table;
+}
+
+/* ---- Sidebar Typography (matching UV) ---- */
+
+.md-nav--primary .md-nav__title {
+  box-shadow: none;
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-nav__title {
+    display: none;
+  }
+
+  .md-main {
+    min-height: 100vh;
+  }
+
+  .md-nav--primary .md-nav {
+    font-size: 0.75rem;
+  }
+
+  .md-nav__item--section > .md-nav__link {
+    font-weight: normal;
+    font-size: 0.85rem;
+  }
+
+  .md-nav--primary .md-nav__link {
+    margin: 0;
+  }
+
+  .md-nav--primary .md-nav__item {
+    margin-top: 0.35em;
+  }
+
+  .md-nav--primary .md-nav__item--section {
+    margin-bottom: 0.75em;
+    margin-top: 1em;
+  }
+
+  .md-nav__item--section > .md-nav > .md-nav__list > .md-nav__item > .md-nav > .md-nav__list {
+    font-size: 0.725rem;
+  }
+
+  .md-nav__item--section > .md-nav > .md-nav__list > .md-nav__item > .md-nav > .md-nav__list > .md-nav__item:first-of-type {
+    margin-top: 0.5em;
+  }
+
+  .md-nav__item--section > .md-nav > .md-nav__list > .md-nav__item > .md-nav > .md-nav__list > .md-nav__item:last-of-type {
+    margin-bottom: 0.575em;
+  }
+
+  .md-nav--primary > .md-nav__list > .md-nav__item:first-of-type {
+    font-size: 0.85rem;
+    margin-bottom: 0.75em;
+  }
+}
+
+/* Active nav link styling */
+.md-nav__link--active {
+  font-weight: bold;
+}
+
+/* ---- Code Blocks ---- */
+
+/* Make shell prompts and output non-selectable (copy-safe) */
+.highlight .gp,
+.highlight .go {
+  user-select: none;
+}
+
+/* ---- TOC Anchor Links ---- */
+
+.toclink {
+  color: unset !important;
+}
+
+.toclink:hover {
+  color: var(--md-accent-fg-color) !important;
+}
+
+/* ---- Breadcrumb Path ---- */
+
+.md-path__list > .md-path__item:first-of-type {
+  display: none;
+}
+
+.md-path__list > .md-path__item:nth-of-type(2):before {
+  display: none;
+}

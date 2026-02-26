@@ -1,0 +1,26 @@
+services:
+  tui:
+    build:
+      context: .
+    image: homelab-tui
+    # TUI needs an interactive terminal
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount the homelab project root so the TUI can find Taskfile.yaml,
+      # terraform/, ansible/, etc. via find_project_root()
+      - ..:/homelab
+      # Preserve the container's .venv so the bind mount above doesn't
+      # overwrite it with the host's (potentially different platform) .venv
+      - /homelab/tui/.venv
+    develop:
+      watch:
+        # Rebuild the image when dependencies change
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: uv.lock
+        # Sync source changes into the container without rebuild
+        - action: sync
+          path: ./src
+          target: /homelab/tui/src

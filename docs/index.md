@@ -1,40 +1,35 @@
 # Homelab Infrastructure as Code
 
-Welcome to the Homelab Infrastructure as Code documentation! This guide will help you deploy and manage a complete Kubernetes homelab environment using modern DevOps practices.
+A complete infrastructure-as-code solution for managing a homelab running on Proxmox VMs. It automates the entire lifecycle from VM template creation to service deployment.
+
+---
 
 ## What is this project?
 
-This repository contains a complete infrastructure-as-code solution for managing a home Kubernetes cluster running on Proxmox VMs. It automates the entire lifecycle:
+This repository provisions and configures a full homelab environment using modern DevOps tooling:
 
 - **VM Template Creation** with Packer
-- **Infrastructure Provisioning** with Terraform  
-- **Kubernetes Deployment** with Ansible
-- **Application Management** with Flux GitOps
+- **Infrastructure Provisioning** with Terraform
+- **Configuration Management** with Ansible
+- **Service Deployment** with Docker Compose
+
+Everything is version-controlled, encrypted with SOPS, and supports multiple environments.
 
 ## Quick Links
 
-- [Quick Start Guide](getting-started/quick-start.md) - Get up and running in minutes
+- [Quick Start](getting-started/quick-start.md) - Get up and running
 - [Prerequisites](getting-started/prerequisites.md) - What you need before starting
-- [Network Layout](concepts/network-layout.md) - Understanding the network architecture
+- [Architecture](concepts/architecture.md) - How everything fits together
 - [FAQ](reference/faq.md) - Frequently asked questions
-
-## Key Features
-
-- 🚀 **Fully Automated** - From bare metal to running services
-- 🏗️ **Infrastructure as Code** - Everything is version controlled
-- 🔄 **GitOps Ready** - Flux manages your Kubernetes applications
-- 📦 **Modular Design** - Use only what you need
-- 🌍 **Multi-Environment** - Separate dev and prod configurations
 
 ## Architecture Overview
 
 ```mermaid
 graph TD
-    A[Proxmox Hosts] --> B[Packer Templates]
+    A[Proxmox VE] --> B[Packer Templates]
     B --> C[Terraform VMs]
-    C --> D[Ansible K3s]
-    D --> E[Flux GitOps]
-    E --> F[Applications]
+    C --> D[Ansible Configuration]
+    D --> E[Docker Services]
 ```
 
 ## Technology Stack
@@ -44,15 +39,26 @@ graph TD
 | Virtualization | Proxmox VE | VM hosting platform |
 | VM Templates | Packer | Automated template creation |
 | Infrastructure | Terraform | VM provisioning |
-| Configuration | Ansible | K3s deployment |
-| Kubernetes | K3s | Lightweight Kubernetes |
-| GitOps | FluxCD | Application deployment |
-| Storage | Longhorn | Distributed storage |
-| Ingress | Traefik | Reverse proxy |
+| Configuration | Ansible | Service deployment and orchestration |
+| Containers | Docker Compose | Application containerization |
+| Reverse Proxy | Caddy | HTTPS and routing |
+| DNS | BIND9 | Internal split-horizon DNS |
 | Monitoring | Prometheus + Grafana | Metrics and visualization |
+| Secrets | SOPS + Age | Encrypted configuration |
+| Automation | Task | Command orchestration |
+
+## Services
+
+| Service | Domain | Description |
+|---------|--------|-------------|
+| Plex + *arr stack | `5am.video` | Media management and streaming |
+| Prometheus + Grafana | `wil.5am.cloud` | Infrastructure monitoring |
+| Homepage | `wil.5am.cloud` | Dashboard |
+| Personal Website | `sfc.al` | Personal projects |
+| Birdle | `sfc.al` | Bird identification game |
+| Terraria | - | Game server |
 
 ## Getting Help
 
-- 📖 Browse the [full documentation](getting-started/quick-start.md)
-- 🐛 Report issues on [GitHub](https://github.com/sfcal/homelab/issues)
-- 💬 Join the discussion on [GitHub Discussions](https://github.com/sfcal/homelab/discussions)
+- Browse the [full documentation](getting-started/quick-start.md)
+- Report issues on [GitHub](https://github.com/sfcal/homelab/issues)
