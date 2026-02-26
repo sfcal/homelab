@@ -1,0 +1,6 @@
+---
+# Cloudflare DDNS records to keep updated with public IP
+ddns_domains:
+  - "*.5am.video"
+  - "*.wil.5am.cloud"
+  - "*.ext.5am.cloud"

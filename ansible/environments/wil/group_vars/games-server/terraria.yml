@@ -1,6 +1,5 @@
 ---
 # Games Server configuration
-system_timezone: America/New_York
 
 # User/group IDs
 games_server_user: root
@@ -9,7 +8,7 @@ games_server_group: root
 # Vanilla Terraria server
 terraria_version: "latest"
 terraria_server_port: 7777
-# terraria_server_password — stored in all.sops.yml
+# terraria_server_password — stored in games-server/secrets.sops.yml
 terraria_server_maxplayers: 8
 terraria_server_worldname: "TerrariaWorld"
 terraria_server_worldsize: 3  # 1=small, 2=medium, 3=large

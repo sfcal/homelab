@@ -5,10 +5,10 @@
 
   pre_tasks:
     - name: Include common prerequisites.
-      ansible.builtin.include_tasks: ../../common/prereq.yml
+      ansible.builtin.include_role:
+        name: common
 
   roles:
-    - docker
     - tailscale
     - role: docker_service
       vars:

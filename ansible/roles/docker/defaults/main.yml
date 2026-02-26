@@ -1,7 +1,0 @@
----
-# Docker Engine packages to install
-docker_packages:
-  - docker-ce
-  - docker-ce-cli
-  - containerd.io
-  - docker-compose-plugin

@@ -1,0 +1,12 @@
+---
+# Prometheus retention
+prometheus_retention: "30d"
+
+# Prometheus scrape targets
+# Add hosts here to have node-exporter scraped from them
+prometheus_node_targets:
+  - "localhost:9100"   # local (monitoring VM)
+  - "10.2.0.5:9100"        # media-stack
+  - "10.2.20.53:9100"      # dns
+  - "10.2.20.80:9100"      # reverse proxy
+  - "10.2.20.45:9100"      # website

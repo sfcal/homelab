@@ -2,8 +2,8 @@
 # Tailscale Subnet Router configuration
 tailscale_mode: "subnet_router"
 
-# tailscale_auth_key — stored in all.sops.yml
-# Generate: Tailscale Admin → Settings → Keys → Generate auth key (Reusable + Pre-approved)
+# tailscale_auth_key — stored in all/secrets.sops.yml
+# Generate: Tailscale Admin -> Settings -> Keys -> Generate auth key (Reusable + Pre-approved)
 
 # Routes to advertise to the Tailscale network
 tailscale_advertise_routes:
