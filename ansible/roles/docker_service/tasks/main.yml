@@ -7,10 +7,10 @@
     group: "{{ service_group | default('root') }}"
     mode: "0755"
 
-- name: Deploy docker-compose.yaml.
+- name: Deploy compose.yaml.
   ansible.builtin.template:
     src: "{{ service_compose_template }}"
-    dest: "{{ deploy_path }}/{{ service_name }}/docker-compose.yaml"
+    dest: "{{ deploy_path }}/{{ service_name }}/compose.yaml"
     owner: "{{ service_user | default('root') }}"
     group: "{{ service_group | default('root') }}"
     mode: "0644"

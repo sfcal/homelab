@@ -72,6 +72,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/birdle/deploy.yml
 
+  deploy-convertx:
+    desc: Deploy ConvertX file converter
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/convertx/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory

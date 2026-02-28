@@ -1,6 +1,6 @@
 ---
-- name: Deploy Personal Website
-  hosts: app_website
+- name: Deploy ConvertX
+  hosts: app_convertx
   become: true
 
   pre_tasks:
@@ -11,9 +11,9 @@
   roles:
     - role: docker_service
       vars:
-        service_name: website
+        service_name: convertx
         service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
-        service_user: "{{ website_user }}"
-        service_group: "{{ website_group }}"
+        service_user: "{{ convertx_user }}"
+        service_group: "{{ convertx_group }}"
         service_images:
-          - "{{ website_image }}"
+          - "{{ convertx_image }}"

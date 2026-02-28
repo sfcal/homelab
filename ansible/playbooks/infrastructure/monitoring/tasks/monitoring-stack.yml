@@ -67,10 +67,10 @@
   notify:
     - Restart monitoring-stack
 
-- name: Deploy docker-compose.yaml.
+- name: Deploy compose.yaml.
   ansible.builtin.template:
-    src: templates/docker-compose.yaml.j2
-    dest: "{{ deploy_path }}/monitoring/docker-compose.yaml"
+    src: templates/compose.yaml.j2
+    dest: "{{ deploy_path }}/monitoring/compose.yaml"
     owner: "{{ monitoring_user }}"
     group: "{{ monitoring_group }}"
     mode: "0644"

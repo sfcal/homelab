@@ -54,3 +54,7 @@
 # 9. Birdle - Independent
 - import_playbook: apps/birdle/deploy.yml
   tags: ['birdle']
+
+# 10. ConvertX - Independent
+- import_playbook: apps/convertx/deploy.yml
+  tags: ['convertx']

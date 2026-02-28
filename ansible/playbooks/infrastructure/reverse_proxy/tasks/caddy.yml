@@ -22,10 +22,10 @@
   notify:
     - Rebuild caddy
 
-- name: Deploy docker-compose.yaml.
+- name: Deploy compose.yaml.
   ansible.builtin.template:
-    src: templates/docker-compose.yaml.j2
-    dest: /opt/caddy/docker-compose.yaml
+    src: templates/compose.yaml.j2
+    dest: /opt/caddy/compose.yaml
     owner: root
     group: root
     mode: "0644"

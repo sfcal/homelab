@@ -38,10 +38,10 @@
     - /dev/shm/tdarr
     - /dev/shm/frigate
 
-- name: Deploy docker-compose.yaml.
+- name: Deploy compose.yaml.
   ansible.builtin.template:
-    src: templates/docker-compose.yaml.j2
-    dest: "{{ deploy_path }}/docker-compose.yaml"
+    src: templates/compose.yaml.j2
+    dest: "{{ deploy_path }}/compose.yaml"
     owner: "{{ media_stack_user }}"
     group: "{{ media_stack_group }}"
     mode: "0644"

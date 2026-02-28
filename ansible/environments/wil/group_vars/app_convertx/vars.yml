@@ -1,0 +1,5 @@
+---
+convertx_image: "ghcr.io/c4illin/convertx:latest"
+convertx_port: 3100
+convertx_user: root
+convertx_group: root
