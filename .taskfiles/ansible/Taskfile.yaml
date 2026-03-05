@@ -78,6 +78,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/convertx/deploy.yml
 
+  deploy-restreamer:
+    desc: Deploy Restreamer video streaming server
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/restreamer/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory

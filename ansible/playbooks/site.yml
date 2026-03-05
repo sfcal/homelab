@@ -58,3 +58,7 @@
 # 10. ConvertX - Independent
 - import_playbook: apps/convertx/deploy.yml
   tags: ['convertx']
+
+# 11. Restreamer - Independent
+- import_playbook: apps/restreamer/deploy.yml
+  tags: ['restreamer']

@@ -1,0 +1,19 @@
+---
+- name: Deploy Restreamer
+  hosts: app_restreamer
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: restreamer
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ restreamer_user }}"
+        service_group: "{{ restreamer_group }}"
+        service_images:
+          - "{{ restreamer_image }}"

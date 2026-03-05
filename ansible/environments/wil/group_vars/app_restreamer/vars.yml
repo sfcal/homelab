@@ -1,0 +1,7 @@
+---
+restreamer_image: "datarhei/restreamer:latest"
+restreamer_port: 8710
+restreamer_rtmp_port: 1935
+restreamer_srt_port: 6000
+restreamer_user: root
+restreamer_group: root
