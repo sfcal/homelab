@@ -57,6 +57,17 @@
                 }
         }
 
+{% elif service.name == 'ca' %}
+        @ca host ca.{{ domain.name }}
+        handle @ca {
+                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
+                        transport http {
+                                tls
+                                tls_insecure_skip_verify
+                        }
+                }
+        }
+
 {% endif %}
 {% endfor %}
 {% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) and not service.hardcoded_proxy | default(false) %}

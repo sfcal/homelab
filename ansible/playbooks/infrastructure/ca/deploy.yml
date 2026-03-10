@@ -1,0 +1,17 @@
+---
+- name: Deploy Certificate Authority (Step-CA)
+  hosts: infra_ca
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure Step-CA.
+      ansible.builtin.include_tasks: tasks/step-ca.yml

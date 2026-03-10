@@ -1,0 +1,17 @@
+---
+services:
+  step-ca:
+    image: smallstep/step-ca:{{ step_ca_version }}
+    container_name: step-ca
+    restart: unless-stopped
+    ports:
+      - "{{ step_ca_port }}:9000"
+    volumes:
+      - ./data:/home/step
+      - ./password.txt:/run/secrets/password:ro
+    environment:
+      - DOCKER_STEPCA_INIT_NAME={{ step_ca_name }}
+      - DOCKER_STEPCA_INIT_DNS_NAMES={{ step_ca_dns_names }}
+      - DOCKER_STEPCA_INIT_PROVISIONER_NAME={{ step_ca_provisioner_name }}
+      - DOCKER_STEPCA_INIT_PASSWORD_FILE=/run/secrets/password
+      - DOCKER_STEPCA_INIT_SSH={{ step_ca_init_ssh }}

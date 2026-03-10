@@ -66,3 +66,7 @@ terraform/environments/*/.terraform.tfstate.lock.info
 *.swo
 
 docker/yolo/models
+
+# certificates
+ansible/environments/*/group_vars/infra_ca/*.crt
+ansible/environments/*/group_vars/infra_ca/*.key

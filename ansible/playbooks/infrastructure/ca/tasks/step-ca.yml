@@ -1,0 +1,103 @@
+---
+- name: Create step-ca directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/step-ca"
+    - "{{ deploy_path }}/step-ca/data"
+
+- name: Set ownership on step-ca data directory.
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/step-ca/data"
+    owner: "1000"
+    group: "1000"
+    recurse: true
+
+- name: Deploy provisioner password file.
+  ansible.builtin.copy:
+    content: "{{ step_ca_provisioner_password }}"
+    dest: "{{ deploy_path }}/step-ca/password.txt"
+    owner: "1000"
+    group: "1000"
+    mode: "0600"
+  no_log: true
+
+- name: Deploy compose.yaml.
+  ansible.builtin.template:
+    src: templates/compose.yaml.j2
+    dest: "{{ deploy_path }}/step-ca/compose.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart step-ca
+
+- name: Ensure step-ca is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/step-ca"
+    state: present
+  register: step_ca_output
+
+- name: Wait for step-ca to initialize.
+  ansible.builtin.pause:
+    seconds: 10
+  when: step_ca_output.changed
+
+- name: Check step-ca health.
+  ansible.builtin.uri:
+    url: "https://127.0.0.1:{{ step_ca_port }}/health"
+    validate_certs: false
+  register: step_ca_health
+  retries: 5
+  delay: 3
+  until: step_ca_health.status == 200
+
+- name: Configure certificate duration claims.
+  ansible.builtin.shell:
+    cmd: >
+      jq '.authority.claims = {
+        "minTLSCertDuration": "5m",
+        "maxTLSCertDuration": "{{ step_ca_max_cert_duration | default('17520h') }}",
+        "defaultTLSCertDuration": "{{ step_ca_default_cert_duration | default('720h') }}"
+      }' {{ deploy_path }}/step-ca/data/config/ca.json > {{ deploy_path }}/step-ca/data/config/ca.json.tmp
+      && mv {{ deploy_path }}/step-ca/data/config/ca.json.tmp {{ deploy_path }}/step-ca/data/config/ca.json
+      && chown 1000:1000 {{ deploy_path }}/step-ca/data/config/ca.json
+  register: ca_claims_update
+  changed_when: ca_claims_update.rc == 0
+  notify: Restart step-ca
+
+- name: Flush handlers to apply config changes.
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for step-ca to restart after config change.
+  ansible.builtin.uri:
+    url: "https://127.0.0.1:{{ step_ca_port }}/health"
+    validate_certs: false
+  retries: 5
+  delay: 3
+  register: step_ca_restart_health
+  until: step_ca_restart_health.status == 200
+
+- name: Export root CA certificate.
+  ansible.builtin.command:
+    cmd: docker exec step-ca cat /home/step/certs/root_ca.crt
+  register: root_ca_cert
+  changed_when: false
+
+- name: Save root CA certificate locally.
+  ansible.builtin.copy:
+    content: "{{ root_ca_cert.stdout }}"
+    dest: "{{ deploy_path }}/step-ca/root_ca.crt"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Display step-ca status.
+  ansible.builtin.debug:
+    msg:
+      - "Step-CA is running at https://ca.ldn.5am.cloud:{{ step_ca_port }}"
+      - "Root CA cert available at {{ deploy_path }}/step-ca/root_ca.crt"
+      - "Health check: {{ step_ca_health.json }}"

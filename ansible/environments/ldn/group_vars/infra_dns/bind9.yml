@@ -18,6 +18,8 @@ dns_reverse_zone: "0.3.10.in-addr.arpa"
 
 # Reverse Zone PTR Records
 dns_ptr_records:
+  - octet: "9"
+    hostname: "ca.ldn.5am.cloud."
   - octet: "53"
     hostname: "dns.ldn.5am.cloud."
   - octet: "80"

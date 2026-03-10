@@ -6,9 +6,10 @@ vars:
 
 includes:
   ansible: .taskfiles/ansible
+  ca: .taskfiles/ca
   docker: .taskfiles/docker
   packer: .taskfiles/packer
-  terraform: .taskfiles/terraform 
+  terraform: .taskfiles/terraform
   
 tasks:
   default:

@@ -78,6 +78,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/convertx/deploy.yml
 
+  deploy-ca:
+    desc: Deploy Step-CA certificate authority
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/ca/deploy.yml
+
   deploy-restreamer:
     desc: Deploy Restreamer video streaming server
     dir: '{{.ROOT_DIR}}/ansible'

@@ -30,6 +30,21 @@ services:
     backend_port: 3002
     proxied: true
 
+  # Certificate Authority
+  - name: ca
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.9
+    backend_port: 9000
+    proxied: true
+    hardcoded_proxy: true
+
+  # Haivision
+  - name: hmp
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.108
+    backend_port: 443
+    proxied: false
+
   # VM management
   - name: vm
     domain: ldn.5am.cloud

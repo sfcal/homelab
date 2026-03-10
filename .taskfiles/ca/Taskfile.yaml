@@ -1,0 +1,48 @@
+version: '3'
+
+vars:
+  CA_HOST: '10.3.0.9'
+  CA_USER: 'sfcal'
+  CA_CONTAINER: 'step-ca'
+  CA_PORT: '9000'
+  DEFAULT_DURATION: '8760h'
+  OUTPUT_DIR: './ansible/environments/ldn/group_vars/infra_ca'
+
+tasks:
+  sign:
+    desc: "Sign a CSR using Step-CA (requires CSR=path/to/file.csr)"
+    vars:
+      CSR: '{{.CSR}}'
+      DURATION: '{{.DURATION | default .DEFAULT_DURATION}}'
+      CSR_BASENAME:
+        sh: basename "{{.CSR}}"
+      CERT_NAME: '{{.CSR_BASENAME | replace ".csr" ""}}'
+    preconditions:
+      - sh: test -n "{{.CSR}}"
+        msg: "CSR is required. Usage: task ca:sign CSR=path/to/file.csr [DURATION=8760h]"
+      - sh: test -f "{{.CSR}}"
+        msg: "CSR file not found: {{.CSR}}"
+    cmds:
+      - mkdir -p {{.OUTPUT_DIR}}
+      - echo ">>> Uploading CSR to CA host..."
+      - scp "{{.CSR}}" {{.CA_USER}}@{{.CA_HOST}}:/tmp/{{.CSR_BASENAME}}
+      - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker cp /tmp/{{.CSR_BASENAME}} {{.CA_CONTAINER}}:/tmp/{{.CSR_BASENAME}}"
+      - echo ">>> Signing CSR (duration={{.DURATION}})..."
+      - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker exec {{.CA_CONTAINER}} step ca sign --force --ca-url=https://127.0.0.1:9000 --root=/home/step/certs/root_ca.crt --password-file=/run/secrets/password --not-after={{.DURATION}} /tmp/{{.CSR_BASENAME}} /tmp/{{.CERT_NAME}}.crt"
+      - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker cp {{.CA_CONTAINER}}:/tmp/{{.CERT_NAME}}.crt /tmp/{{.CERT_NAME}}.crt && sudo chmod 644 /tmp/{{.CERT_NAME}}.crt"
+      - scp {{.CA_USER}}@{{.CA_HOST}}:/tmp/{{.CERT_NAME}}.crt {{.OUTPUT_DIR}}/{{.CERT_NAME}}.crt
+      - scp {{.CA_USER}}@{{.CA_HOST}}:/opt/step-ca/root_ca.crt {{.OUTPUT_DIR}}/root_ca.crt
+      - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo rm -f /tmp/{{.CSR_BASENAME}} /tmp/{{.CERT_NAME}}.crt && sudo docker exec {{.CA_CONTAINER}} rm -f /tmp/{{.CSR_BASENAME}} /tmp/{{.CERT_NAME}}.crt"
+      - echo ">>> Done! Certificate saved to {{.OUTPUT_DIR}}/{{.CERT_NAME}}.crt"
+
+  root:
+    desc: "Fetch the root CA certificate"
+    cmds:
+      - mkdir -p {{.OUTPUT_DIR}}
+      - scp {{.CA_USER}}@{{.CA_HOST}}:/opt/step-ca/root_ca.crt {{.OUTPUT_DIR}}/root_ca.crt
+      - echo "Root CA certificate saved to {{.OUTPUT_DIR}}/root_ca.crt"
+
+  health:
+    desc: "Check Step-CA health"
+    cmds:
+      - curl -sk https://{{.CA_HOST}}:{{.CA_PORT}}/health | python3 -m json.tool
