@@ -34,8 +34,8 @@
 
 - name: Deploy BIND9 reverse zone.
   ansible.builtin.template:
-    src: "templates/20.2.10.in-addr.arpa.zone.j2"
-    dest: "/etc/bind/20.2.10.in-addr.arpa.zone"
+    src: "templates/reverse.zone.j2"
+    dest: "/etc/bind/{{ dns_reverse_zone }}.zone"
     owner: bind
     group: bind
     mode: 0644

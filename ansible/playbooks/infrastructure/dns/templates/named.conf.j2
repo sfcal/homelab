@@ -55,8 +55,8 @@ zone "{{ domain.name }}" IN {
 };
 
 {% endfor %}
-// Reverse zone for 10.2.20.0/24
-zone "20.2.10.in-addr.arpa" IN {
+// Reverse zone
+zone "{{ dns_reverse_zone }}" IN {
   type master;
-  file "/etc/bind/20.2.10.in-addr.arpa.zone";
+  file "/etc/bind/{{ dns_reverse_zone }}.zone";
 };

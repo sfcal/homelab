@@ -1,0 +1,19 @@
+---
+# Tailscale Subnet Router configuration
+tailscale_mode: "subnet_router"
+
+# tailscale_auth_key — stored in all/secrets.sops.yml
+# Generate: Tailscale Admin -> Settings -> Keys -> Generate auth key (Reusable + Pre-approved)
+
+# Routes to advertise to the Tailscale network
+tailscale_advertise_routes:
+  - "10.3.0.0/24"
+
+# Subnet router should not accept DNS from Tailscale
+tailscale_accept_dns: false
+
+# Hostname as it appears in Tailscale admin console
+tailscale_hostname: "ldn-gateway"
+
+# Set to true to force re-authentication on next run
+tailscale_force_reauth: false

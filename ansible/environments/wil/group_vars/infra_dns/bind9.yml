@@ -18,6 +18,9 @@ dns_forward_zones:
 # Reverse Proxy IP (used for DNS A records of proxied services)
 reverse_proxy_ip: "10.2.20.80"
 
+# Reverse DNS zone name (derived from subnet)
+dns_reverse_zone: "20.2.10.in-addr.arpa"
+
 # Reverse Zone PTR Records
 dns_ptr_records:
   - octet: "1"

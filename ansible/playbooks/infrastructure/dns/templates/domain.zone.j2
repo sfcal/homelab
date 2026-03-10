@@ -16,7 +16,7 @@ plex    IN    NS    ns2.cloudflare.com.
 
 {% endif %}
 ; Name servers (internal)
-ns              IN A    10.2.20.53
+ns              IN A    {{ inventory_hostname }}
 
 ; Split horizon entries - point to internal IPs
 ; These override external DNS when resolved internally

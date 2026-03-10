@@ -1,0 +1,10 @@
+---
+# Global variables for LDN environment
+
+# Domains managed by DNS and reverse proxy
+domains:
+  - name: "ldn.5am.cloud"
+system_timezone: Europe/London
+
+# Unified deploy path for all services
+deploy_path: /opt

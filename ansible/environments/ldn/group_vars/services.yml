@@ -1,0 +1,39 @@
+---
+# Unified Services List
+# Shared between DNS (BIND9) and Reverse Proxy (Caddy) via [services:children] group
+#
+# Each service entry supports the following fields:
+#   name          (required) - subdomain name
+#   domain        (required) - domain this service belongs to
+#   backend_host  (required) - IP of the backend service
+#   backend_port  (required) - port of the backend service
+#   proxied       (required) - true: routed through Caddy, DNS -> reverse_proxy_ip
+#                              false: DNS -> backend_host directly, no Caddy entry
+#   dns             (optional) - "external" skips A record generation (default: "internal")
+#   enabled         (optional) - false skips both DNS and Caddy (default: true)
+#   hardcoded_proxy (optional) - true: Caddy block is hardcoded in Caddyfile.j2, skipped by loop
+services:
+  # Monitoring services
+  - name: grafana
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.30
+    backend_port: 3000
+    proxied: true
+  - name: prometheus
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.30
+    backend_port: 9090
+    proxied: true
+  - name: homepage
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.30
+    backend_port: 3002
+    proxied: true
+
+  # VM management
+  - name: vm
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.10
+    backend_port: 8006
+    proxied: true
+    hardcoded_proxy: true
