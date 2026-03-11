@@ -1,12 +1,15 @@
 version: '3'
 
 vars:
-  CA_HOST: '10.3.0.9'
+  ENV_DIR: '{{.ROOT_DIR}}/ansible/environments/{{.ENV}}'
+  HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
+  CA_HOST:
+    sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
   CA_USER: 'sfcal'
   CA_CONTAINER: 'step-ca'
   CA_PORT: '9000'
   DEFAULT_DURATION: '8760h'
-  OUTPUT_DIR: './ansible/environments/ldn/group_vars/infra_ca'
+  OUTPUT_DIR: '{{.ENV_DIR}}/group_vars/infra_ca'
 
 tasks:
   sign:

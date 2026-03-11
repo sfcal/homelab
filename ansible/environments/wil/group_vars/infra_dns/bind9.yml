@@ -25,6 +25,8 @@ dns_reverse_zone: "20.2.10.in-addr.arpa"
 dns_ptr_records:
   - octet: "1"
     hostname: "unifi.5am.video."
+  - octet: "9"
+    hostname: "ca.wil.5am.cloud."
   - octet: "53"
     hostname: "dns.5am.video."
   - octet: "123"

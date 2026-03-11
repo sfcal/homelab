@@ -84,6 +84,14 @@ services:
     backend_port: 8710
     proxied: true
 
+  # Certificate Authority
+  - name: ca
+    domain: wil.5am.cloud
+    backend_host: 10.2.20.9
+    backend_port: 9000
+    proxied: true
+    hardcoded_proxy: true
+
   # Monitoring services
   - name: grafana
     domain: wil.5am.cloud
@@ -106,6 +114,13 @@ services:
     backend_host: 10.2.20.30
     backend_port: 3002
     proxied: true
+
+  # Haivision
+  - name: hmp
+    domain: wil.5am.cloud
+    backend_host: 10.2.20.40
+    backend_port: 443
+    proxied: false
 
   # VM management
   - name: vm

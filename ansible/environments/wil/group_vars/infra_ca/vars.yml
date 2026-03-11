@@ -1,0 +1,8 @@
+---
+# Step-CA configuration
+step_ca_version: "0.27.5"
+step_ca_port: 9000
+step_ca_name: "WIL Homelab CA"
+step_ca_dns_names: "ca.wil.5am.cloud,10.2.20.9,127.0.0.1"
+step_ca_provisioner_name: "admin"
+step_ca_init_ssh: "false"
