@@ -38,10 +38,18 @@ services:
     proxied: true
     hardcoded_proxy: true
 
-  # Haivision
-  - name: hmp
+  # Home Assistant
+  - name: homeassistant
     domain: ldn.5am.cloud
-    backend_host: 10.3.0.108
+    backend_host: 10.3.0.50
+    backend_port: 8123
+    proxied: true
+    hardcoded_proxy: true
+
+  # Haivision
+  - name: hmg
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.111
     backend_port: 443
     proxied: false
 

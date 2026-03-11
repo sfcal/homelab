@@ -1,0 +1,67 @@
+---
+- name: Deploy Home Assistant
+  hosts: app_homeassistant
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: homeassistant
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ homeassistant_user }}"
+        service_group: "{{ homeassistant_group }}"
+        service_images:
+          - "{{ homeassistant_image }}"
+
+  post_tasks:
+    - name: Ensure Home Assistant config directory exists.
+      ansible.builtin.file:
+        path: "{{ deploy_path }}/homeassistant/config"
+        state: directory
+        owner: "{{ homeassistant_user }}"
+        group: "{{ homeassistant_group }}"
+        mode: "0755"
+
+    - name: Deploy Home Assistant configuration for reverse proxy.
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/configuration.yaml.j2"
+        dest: "{{ deploy_path }}/homeassistant/config/configuration.yaml"
+        owner: "{{ homeassistant_user }}"
+        group: "{{ homeassistant_group }}"
+        mode: "0644"
+      notify: Restart Home Assistant
+
+    - name: Check if HACS is already installed.
+      ansible.builtin.stat:
+        path: "{{ deploy_path }}/homeassistant/config/custom_components/hacs"
+      register: hacs_installed
+
+    - name: Download HACS installation script.
+      ansible.builtin.get_url:
+        url: https://get.hacs.xyz
+        dest: "{{ deploy_path }}/homeassistant/config/hacs_install.sh"
+        mode: "0755"
+      when: not hacs_installed.stat.exists
+
+    - name: Install HACS into Home Assistant container.
+      community.docker.docker_container_exec:
+        container: homeassistant
+        command: bash /config/hacs_install.sh
+      when: not hacs_installed.stat.exists
+      notify: Restart Home Assistant
+
+    - name: Remove HACS installation script.
+      ansible.builtin.file:
+        path: "{{ deploy_path }}/homeassistant/config/hacs_install.sh"
+        state: absent
+
+  handlers:
+    - name: Restart Home Assistant
+      community.docker.docker_compose_v2:
+        project_src: "{{ deploy_path }}/homeassistant"
+        state: restarted

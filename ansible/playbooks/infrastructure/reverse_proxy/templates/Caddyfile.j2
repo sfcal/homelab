@@ -57,6 +57,16 @@
                 }
         }
 
+{% elif service.name == 'homeassistant' %}
+        @homeassistant host homeassistant.{{ domain.name }}
+        handle @homeassistant {
+                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
+                        header_up X-Real-IP {remote_host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                }
+        }
+
 {% elif service.name == 'ca' %}
         @ca host ca.{{ domain.name }}
         handle @ca {

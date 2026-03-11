@@ -1,0 +1,9 @@
+homeassistant:
+  name: Home
+  unit_system: metric
+  time_zone: "{{ system_timezone }}"
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - {{ homeassistant_trusted_proxy }}

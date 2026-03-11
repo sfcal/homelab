@@ -90,6 +90,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/restreamer/deploy.yml
 
+  deploy-homeassistant:
+    desc: Deploy Home Assistant
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/homeassistant/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory
