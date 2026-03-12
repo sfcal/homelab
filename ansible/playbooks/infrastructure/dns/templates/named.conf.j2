@@ -38,12 +38,20 @@ options {
 };
 
 // Forward zones - resolve externally instead of locally
-{% for zone in dns_forward_zones | default(['plex.5am.video']) %}
+{% for zone in dns_forward_zones | default([]) %}
+{% if zone is string %}
 zone "{{ zone }}" IN {
   type forward;
   forward only;
   forwarders { {% for forwarder in dns_forwarders %}{{ forwarder }}; {% endfor %}};
 };
+{% else %}
+zone "{{ zone.name }}" IN {
+  type forward;
+  forward only;
+  forwarders { {% for forwarder in zone.forwarders %}{{ forwarder }}; {% endfor %}};
+};
+{% endif %}
 
 {% endfor %}
 

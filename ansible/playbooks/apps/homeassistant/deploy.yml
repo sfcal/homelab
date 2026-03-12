@@ -36,30 +36,6 @@
         mode: "0644"
       notify: Restart Home Assistant
 
-    - name: Check if HACS is already installed.
-      ansible.builtin.stat:
-        path: "{{ deploy_path }}/homeassistant/config/custom_components/hacs"
-      register: hacs_installed
-
-    - name: Download HACS installation script.
-      ansible.builtin.get_url:
-        url: https://get.hacs.xyz
-        dest: "{{ deploy_path }}/homeassistant/config/hacs_install.sh"
-        mode: "0755"
-      when: not hacs_installed.stat.exists
-
-    - name: Install HACS into Home Assistant container.
-      community.docker.docker_container_exec:
-        container: homeassistant
-        command: bash /config/hacs_install.sh
-      when: not hacs_installed.stat.exists
-      notify: Restart Home Assistant
-
-    - name: Remove HACS installation script.
-      ansible.builtin.file:
-        path: "{{ deploy_path }}/homeassistant/config/hacs_install.sh"
-        state: absent
-
   handlers:
     - name: Restart Home Assistant
       community.docker.docker_compose_v2:

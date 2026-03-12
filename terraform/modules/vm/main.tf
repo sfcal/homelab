@@ -11,6 +11,7 @@ resource "proxmox_vm_qemu" "vm" {
   target_node = var.proxmox_node
   vmid        = var.vmid
   agent       = 1
+  tags        = ""
 
   # Clone settings
   clone      = var.template_name

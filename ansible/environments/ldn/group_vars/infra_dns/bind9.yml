@@ -9,6 +9,22 @@ dns_trusted_networks:
   - localhost
   - localnets
   - 10.3.0.0/24
+  - 10.2.0.0/16
+
+# Cross-site forwarding to WIL DNS
+dns_forward_zones:
+  - name: "5am.video"
+    forwarders:
+      - "10.2.20.53"
+  - name: "wil.5am.cloud"
+    forwarders:
+      - "10.2.20.53"
+  - name: "ext.5am.cloud"
+    forwarders:
+      - "10.2.20.53"
+  - name: "sfc.al"
+    forwarders:
+      - "10.2.20.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
 reverse_proxy_ip: "10.3.0.80"

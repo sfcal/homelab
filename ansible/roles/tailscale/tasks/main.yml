@@ -54,6 +54,7 @@
       tailscale up
       --authkey={{ tailscale_auth_key }}
       --advertise-routes={{ tailscale_advertise_routes | join(',') }}
+      {% if tailscale_accept_routes %}--accept-routes{% endif %}
       --accept-dns={{ tailscale_accept_dns | lower }}
       --hostname={{ tailscale_hostname }}
       --reset

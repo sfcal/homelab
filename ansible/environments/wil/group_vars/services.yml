@@ -121,6 +121,11 @@ services:
     backend_host: 10.2.20.40
     backend_port: 443
     proxied: false
+  - name: hmg
+    domain: wil.5am.cloud
+    backend_host: 10.2.20.186
+    backend_port: 443
+    proxied: false
 
   # VM management
   - name: vm

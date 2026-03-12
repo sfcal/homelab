@@ -9,11 +9,16 @@ dns_trusted_networks:
   - localhost
   - localnets
   - 10.2.0.0/16
+  - 10.3.0.0/24
 
 # Zones forwarded to external DNS (not resolved locally)
 dns_forward_zones:
   - "plex.5am.video"
   - "docs.5am.cloud"
+  # Cross-site forwarding to LDN DNS
+  - name: "ldn.5am.cloud"
+    forwarders:
+      - "10.3.0.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
 reverse_proxy_ip: "10.2.20.80"

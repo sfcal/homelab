@@ -1,10 +1,8 @@
 version: '3'
 
 vars:
-  ENV_DIR: '{{.ROOT_DIR}}/ansible/environments/{{.ENV}}'
+  ENV_DIR: 'environments/{{.ENV}}'
   HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
-  CA_HOST:
-    sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
   CA_USER: 'sfcal'
   CA_CONTAINER: 'step-ca'
   CA_PORT: '9000'
@@ -13,8 +11,13 @@ vars:
 
 tasks:
   sign:
+    dir: '{{.ROOT_DIR}}/ansible'
     desc: "Sign a CSR using Step-CA (requires CSR=path/to/file.csr)"
     vars:
+      CA_HOST:
+        sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
+      CSR_ABS:
+        sh: realpath "{{.USER_WORKING_DIR}}/{{.CSR}}"
       CSR: '{{.CSR}}'
       DURATION: '{{.DURATION | default .DEFAULT_DURATION}}'
       CSR_BASENAME:
@@ -23,12 +26,12 @@ tasks:
     preconditions:
       - sh: test -n "{{.CSR}}"
         msg: "CSR is required. Usage: task ca:sign CSR=path/to/file.csr [DURATION=8760h]"
-      - sh: test -f "{{.CSR}}"
+      - sh: test -f "{{.CSR_ABS}}"
         msg: "CSR file not found: {{.CSR}}"
     cmds:
       - mkdir -p {{.OUTPUT_DIR}}
       - echo ">>> Uploading CSR to CA host..."
-      - scp "{{.CSR}}" {{.CA_USER}}@{{.CA_HOST}}:/tmp/{{.CSR_BASENAME}}
+      - scp "{{.CSR_ABS}}" {{.CA_USER}}@{{.CA_HOST}}:/tmp/{{.CSR_BASENAME}}
       - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker cp /tmp/{{.CSR_BASENAME}} {{.CA_CONTAINER}}:/tmp/{{.CSR_BASENAME}}"
       - echo ">>> Signing CSR (duration={{.DURATION}})..."
       - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker exec {{.CA_CONTAINER}} step ca sign --force --ca-url=https://127.0.0.1:9000 --root=/home/step/certs/root_ca.crt --password-file=/run/secrets/password --not-after={{.DURATION}} /tmp/{{.CSR_BASENAME}} /tmp/{{.CERT_NAME}}.crt"
@@ -39,13 +42,21 @@ tasks:
       - echo ">>> Done! Certificate saved to {{.OUTPUT_DIR}}/{{.CERT_NAME}}.crt"
 
   root:
+    dir: '{{.ROOT_DIR}}/ansible'
     desc: "Fetch the root CA certificate"
+    vars:
+      CA_HOST:
+        sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
     cmds:
       - mkdir -p {{.OUTPUT_DIR}}
       - scp {{.CA_USER}}@{{.CA_HOST}}:/opt/step-ca/root_ca.crt {{.OUTPUT_DIR}}/root_ca.crt
       - echo "Root CA certificate saved to {{.OUTPUT_DIR}}/root_ca.crt"
 
   health:
+    dir: '{{.ROOT_DIR}}/ansible'
     desc: "Check Step-CA health"
+    vars:
+      CA_HOST:
+        sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
     cmds:
       - curl -sk https://{{.CA_HOST}}:{{.CA_PORT}}/health | python3 -m json.tool
