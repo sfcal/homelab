@@ -9,7 +9,7 @@ Available commands via the [Task](https://taskfile.dev/) runner.
 | Command | Description |
 |---------|-------------|
 | `task ansible:deploy-all` | Deploy entire infrastructure |
-| `task ansible:deploy-services` | Deploy DNS and reverse proxy |
+| `task ansible:deploy-networking` | Deploy networking stack (DNS, reverse proxy) |
 | `task ansible:deploy-media` | Deploy media stack |
 | `task ansible:deploy-monitoring` | Deploy Prometheus + Grafana |
 | `task ansible:deploy-games` | Deploy Terraria server |

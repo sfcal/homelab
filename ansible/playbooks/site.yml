@@ -8,7 +8,7 @@
       ansible.builtin.debug:
         msg:
           - "Deploying infrastructure in the following order:"
-          - "1. DNS Server (foundational)"
+          - "1. Networking - DNS, Reverse Proxy, Tailscale (foundational)"
           - "2. Step-CA (required for TLS)"
           - "3. Time Server"
           - "4. PXE Server"
@@ -17,9 +17,9 @@
 
 # --- Infrastructure ---
 
-# 1. DNS - No dependencies
-- import_playbook: infrastructure/dns/deploy.yml
-  tags: ['dns', 'ddns', 'foundation']
+# 1. Networking (DNS, Reverse Proxy, Tailscale) - No dependencies
+- import_playbook: infrastructure/networking/deploy.yml
+  tags: ['networking', 'dns', 'ddns', 'caddy', 'foundation']
 
 # 2. Step-CA - Must be second (needed by others)
 - import_playbook: infrastructure/ca/deploy.yml

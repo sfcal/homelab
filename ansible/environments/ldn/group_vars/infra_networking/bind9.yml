@@ -27,7 +27,7 @@ dns_forward_zones:
       - "10.2.20.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
-reverse_proxy_ip: "10.3.0.80"
+reverse_proxy_ip: "10.3.0.53"
 
 # Reverse DNS zone name (derived from subnet)
 dns_reverse_zone: "0.3.10.in-addr.arpa"
@@ -38,7 +38,5 @@ dns_ptr_records:
     hostname: "ca.ldn.5am.cloud."
   - octet: "53"
     hostname: "dns.ldn.5am.cloud."
-  - octet: "80"
-    hostname: "caddy.ldn.5am.cloud."
   - octet: "30"
     hostname: "monitoring.ldn.5am.cloud."

@@ -23,12 +23,11 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/site.yml
 
-  deploy-services:
-    desc: Deploy DNS and reverse proxy (run after modifying services.yml)
+  deploy-networking:
+    desc: Deploy networking stack (DNS, reverse proxy, Tailscale)
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/dns/deploy.yml
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/reverse_proxy/deploy.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/networking/deploy.yml
 
   deploy-external-monitoring:
     desc: Deploy external monitoring server
@@ -37,7 +36,7 @@ tasks:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/external-monitoring/deploy.yml
 
   deploy-tailscale:
-    desc: Deploy reverse tailscale server
+    desc: Deploy Tailscale subnet router
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/tailscale/deploy.yml

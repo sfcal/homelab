@@ -6,7 +6,7 @@ from .tfstate_reader import get_provisioned_vm_keys
 
 ANSIBLE_TASKS = [
     AnsiblePlaybook("ansible:deploy-all", "Deploy All", "Deploy entire infrastructure"),
-    AnsiblePlaybook("ansible:deploy-services", "Deploy Services", "Deploy DNS + reverse proxy", "services"),
+    AnsiblePlaybook("ansible:deploy-networking", "Deploy Networking", "Deploy DNS + reverse proxy + Tailscale", "networking"),
     AnsiblePlaybook("ansible:deploy-media", "Deploy Media Stack", "Deploy media stack", "media-stack"),
     AnsiblePlaybook("ansible:deploy-monitoring", "Deploy Monitoring", "Deploy monitoring stack", "monitoring"),
     AnsiblePlaybook("ansible:deploy-games", "Deploy Games Server", "Deploy games server", "games-server"),

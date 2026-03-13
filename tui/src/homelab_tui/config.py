@@ -29,8 +29,7 @@ ENVIRONMENTS: dict[str, dict[str, Path | str]] = {
 }
 
 VM_TO_ANSIBLE_GROUP: dict[str, str] = {
-    "dns_server": "dns_server",
-    "reverse_proxy": "reverse_proxy",
+    "networking": "networking",
     "monitoring_server": "monitoring",
     "games_server": "games-server",
 }

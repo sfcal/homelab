@@ -3,4 +3,4 @@ homeassistant_image: "ghcr.io/home-assistant/home-assistant:stable"
 homeassistant_port: 8123
 homeassistant_user: root
 homeassistant_group: root
-homeassistant_trusted_proxy: "10.3.0.80"
+homeassistant_trusted_proxy: "10.3.0.53"

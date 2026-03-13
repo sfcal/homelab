@@ -21,7 +21,7 @@ dns_forward_zones:
       - "10.3.0.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
-reverse_proxy_ip: "10.2.20.80"
+reverse_proxy_ip: "10.2.20.53"
 
 # Reverse DNS zone name (derived from subnet)
 dns_reverse_zone: "20.2.10.in-addr.arpa"

@@ -28,6 +28,12 @@ variable "template_name" {
   type        = string
 }
 
+variable "tags" {
+  description = "Proxmox tags (semicolon-separated)"
+  type        = string
+  default     = ""
+}
+
 variable "onboot" {
   description = "Start VM on boot"
   type        = bool

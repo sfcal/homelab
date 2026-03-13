@@ -271,7 +271,7 @@ hl task ansible:deploy-all ENV=dev
 
 ```bash
 # Infrastructure
-hl task ansible:deploy-services ENV=dev     # DNS + reverse proxy
+hl task ansible:deploy-networking ENV=dev   # DNS + reverse proxy + Tailscale
 hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana, Homepage
 hl task ansible:deploy-tailscale ENV=dev    # Tailscale subnet router
 hl task ansible:deploy-external-monitoring ENV=dev  # Uptime Kuma (external VPS)
@@ -301,7 +301,7 @@ hl task ansible:ping ENV=dev
 
 Adding a new service? Update `ansible/environments/<env>/group_vars/services.yml` then run:
 ```bash
-hl task ansible:deploy-services ENV=dev
+hl task ansible:deploy-networking ENV=dev
 ```
 This regenerates both DNS records (BIND9) and reverse proxy config (Caddy) from the unified services list.
 

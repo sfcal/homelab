@@ -1,8 +1,8 @@
 # VMs to create
 vms = {
-  dns_server = {
-    name           = "dns"
-    description    = "DNS Server (BIND9)"
+  networking = {
+    name           = "networking"
+    description    = "Networking (DNS, Reverse Proxy, Tailscale)"
     proxmox_node   = "pve-lon"
     vmid           = 3000
     template_name  = "ubuntu-server-ldn-base"
@@ -11,26 +11,10 @@ vms = {
     nameserver     = "10.3.0.1"
     cores          = 2
     memory         = 4096
-    disk_size      = "20G"
-    storage_pool   = "local-lvm"
-    network_bridge = "vmbr0"
-    ssh_user       = "sfcal"
-  }
-
-  reverse_proxy = {
-    name           = "caddy"
-    description    = "Reverse Proxy"
-    proxmox_node   = "pve-lon"
-    vmid           = 3001
-    template_name  = "ubuntu-server-ldn-base"
-    ip_address     = "10.3.0.80"
-    gateway        = "10.3.0.1"
-    nameserver     = "10.3.0.53"
-    cores          = 1
-    memory         = 2048
     disk_size      = "50G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
+    tags           = "infrastructure"
     ssh_user       = "sfcal"
   }
 
@@ -48,6 +32,7 @@ vms = {
     disk_size      = "20G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
+    tags           = "infrastructure"
     ssh_user       = "sfcal"
   }
 
@@ -65,6 +50,7 @@ vms = {
     disk_size      = "50G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
+    tags           = "infrastructure"
     ssh_user       = "sfcal"
   }
 
@@ -82,6 +68,7 @@ vms = {
     disk_size      = "50G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
+    tags           = "application"
     ssh_user       = "sfcal"
   }
 

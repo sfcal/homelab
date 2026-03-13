@@ -16,6 +16,7 @@ module "vms" {
   # Proxmox Configuration
   proxmox_node  = each.value.proxmox_node
   template_name = each.value.template_name
+  tags          = each.value.tags
 
   # Network Configuration
   ip_address     = each.value.ip_address

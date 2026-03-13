@@ -17,3 +17,14 @@
   community.docker.docker_compose_v2:
     project_src: "{{ deploy_path }}/cloudflare-ddns"
     state: restarted
+
+- name: Rebuild caddy
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/caddy"
+    build: always
+    state: present
+
+- name: Restart caddy
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/caddy"
+    state: restarted
