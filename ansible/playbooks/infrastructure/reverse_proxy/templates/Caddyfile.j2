@@ -10,80 +10,33 @@
                 resolvers 1.1.1.1
         }
 
-{% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) and service.hardcoded_proxy | default(false) %}
-{% if service.name == 'plex' %}
-        @plex host plex.{{ domain.name }}
-        handle @plex {
-            encode gzip
-            reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
-                header_up X-Real-IP {remote_host}
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up Host {upstream_hostport}
-                transport http {
-                    read_buffer 8192
-                }
-            }
-        }
-
-{% elif service.name == 'uptime' %}
-        @uptime host uptime.{{ domain.name }}
-        handle @uptime {
-            reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
-                header_up X-Real-IP {remote_host}
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-            }
-        }
-
-{% elif service.name == 'vm' %}
-        @vm host vm.{{ domain.name }}
-        handle @vm {
+{% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) %}
+        @{{ service.name }} host {{ service.name }}.{{ domain.name }}
+        handle @{{ service.name }} {
+{% if service.encode | default(false) %}
+                encode {{ service.encode }}
+{% endif %}
                 reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
-                        transport http {
-                                tls
-                                tls_insecure_skip_verify
-                        }
-                }
-        }
-{% elif service.name == 'kvm' %}
-        @kvm host kvm.{{ domain.name }}
-        handle @kvm {
-                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
-                        transport http {
-                                tls
-                                tls_insecure_skip_verify
-                        }
-                }
-        }
-
-{% elif service.name == 'homeassistant' %}
-        @homeassistant host homeassistant.{{ domain.name }}
-        handle @homeassistant {
-                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
+{% if service.forward_headers | default(false) %}
                         header_up X-Real-IP {remote_host}
                         header_up X-Forwarded-For {remote_host}
                         header_up X-Forwarded-Proto {scheme}
-                }
-        }
-
-{% elif service.name == 'ca' %}
-        @ca host ca.{{ domain.name }}
-        handle @ca {
-                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
+{% endif %}
+{% if service.host_header | default(false) %}
+                        header_up Host {upstream_hostport}
+{% endif %}
+{% if service.tls_skip_verify | default(false) or service.read_buffer | default(false) %}
                         transport http {
+{% if service.tls_skip_verify | default(false) %}
                                 tls
                                 tls_insecure_skip_verify
-                        }
-                }
-        }
-
 {% endif %}
-{% endfor %}
-{% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) and not service.hardcoded_proxy | default(false) %}
-        @{{ service.name }} host {{ service.name }}.{{ domain.name }}
-        handle @{{ service.name }} {
-                reverse_proxy {{ service.backend_host }}:{{ service.backend_port }}
+{% if service.read_buffer | default(false) %}
+                                read_buffer {{ service.read_buffer }}
+{% endif %}
+                        }
+{% endif %}
+                }
         }
 
 {% endfor %}

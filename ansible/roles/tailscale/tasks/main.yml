@@ -47,6 +47,23 @@
     reload: true
   when: tailscale_mode == "subnet_router"
 
+# --- Ensure tailscaled starts after network is online ---
+- name: Create tailscaled systemd override directory.
+  ansible.builtin.file:
+    path: /etc/systemd/system/tailscaled.service.d
+    state: directory
+    mode: "0755"
+
+- name: Add network-online ordering to tailscaled.
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tailscaled.service.d/network-online.conf
+    mode: "0644"
+    content: |
+      [Unit]
+      After=network-online.target
+      Wants=network-online.target
+  notify: Restart tailscaled
+
 # --- Build tailscale up command based on mode ---
 - name: Build tailscale up command (subnet_router).
   ansible.builtin.set_fact:

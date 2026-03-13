@@ -11,7 +11,11 @@
 #                              false: DNS -> backend_host directly, no Caddy entry
 #   dns             (optional) - "external" skips A record generation (default: "internal")
 #   enabled         (optional) - false skips both DNS and Caddy (default: true)
-#   hardcoded_proxy (optional) - true: Caddy block is hardcoded in Caddyfile.j2, skipped by loop
+#   tls_skip_verify (optional) - true: backend uses HTTPS with self-signed cert
+#   forward_headers (optional) - true: adds X-Real-IP, X-Forwarded-For, X-Forwarded-Proto
+#   host_header     (optional) - "upstream": adds Host header override
+#   encode          (optional) - encoding type, e.g. "gzip"
+#   read_buffer     (optional) - transport read buffer size in bytes
 services:
   # Monitoring services
   - name: grafana
@@ -36,7 +40,7 @@ services:
     backend_host: 10.3.0.9
     backend_port: 9000
     proxied: true
-    hardcoded_proxy: true
+    tls_skip_verify: true
 
   # Home Assistant
   - name: homeassistant
@@ -44,7 +48,7 @@ services:
     backend_host: 10.3.0.50
     backend_port: 8123
     proxied: true
-    hardcoded_proxy: true
+    forward_headers: true
 
   # Haivision
   - name: hmg
@@ -53,10 +57,17 @@ services:
     backend_port: 443
     proxied: false
 
+  - name: kr
+    domain: ldn.5am.cloud
+    backend_host: 10.3.0.248
+    backend_port: 443
+    proxied: false
+
+
   # VM management
   - name: vm
     domain: ldn.5am.cloud
     backend_host: 10.3.0.10
     backend_port: 8006
     proxied: true
-    hardcoded_proxy: true
+    tls_skip_verify: true
