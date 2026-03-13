@@ -7,11 +7,11 @@
 resource "proxmox_vm_qemu" "vm" {
   # General settings
   name        = var.name
-  desc        = var.description
+  description = var.description
   target_node = var.proxmox_node
   vmid        = var.vmid
   agent       = 1
-  tags        = var.tags != "" ? var.tags : null
+  tags        = var.tags
 
   # Clone settings
   clone      = var.template_name
@@ -22,12 +22,15 @@ resource "proxmox_vm_qemu" "vm" {
   automatic_reboot = true
 
   # Hardware settings
-  qemu_os  = "other"
-  bios     = "seabios"
-  cores    = var.cores
-  sockets  = 1
-  cpu_type = "host"
-  memory   = var.memory
+  qemu_os = "other"
+  bios    = "seabios"
+  memory  = var.memory
+
+  cpu {
+    cores   = var.cores
+    sockets = 1
+    type    = "host"
+  }
 
   # Network settings
   network {

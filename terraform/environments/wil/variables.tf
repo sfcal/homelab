@@ -44,6 +44,7 @@ variable "vms" {
     disk_size      = optional(string, "20G")
     storage_pool   = string
     network_bridge = optional(string, "vmbr0")
+    tags           = optional(string, "")
     onboot         = optional(bool, true)
     ssh_user       = string
   }))

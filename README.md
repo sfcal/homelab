@@ -273,7 +273,6 @@ hl task ansible:deploy-all ENV=dev
 # Infrastructure
 hl task ansible:deploy-networking ENV=dev   # DNS + reverse proxy + Tailscale
 hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana, Homepage
-hl task ansible:deploy-tailscale ENV=dev    # Tailscale subnet router
 hl task ansible:deploy-external-monitoring ENV=dev  # Uptime Kuma (external VPS)
 
 # Applications

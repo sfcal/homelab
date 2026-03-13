@@ -12,9 +12,8 @@ Ansible configures provisioned VMs and deploys all services. A master playbook (
 
 | Playbook | Purpose |
 |----------|---------|
-| `infrastructure/networking` | DNS (BIND9), Reverse Proxy (Caddy), DDNS |
+| `infrastructure/networking` | DNS (BIND9), Reverse Proxy (Caddy), DDNS, Tailscale |
 | `infrastructure/monitoring` | Prometheus + Grafana |
-| `infrastructure/tailscale` | Tailscale subnet router |
 | `infrastructure/external-monitoring` | Uptime Kuma (VPS) |
 | `apps/media` | Plex + *arr media stack |
 | `apps/games-server` | Terraria server |
@@ -34,6 +33,6 @@ Ansible configures provisioned VMs and deploys all services. A master playbook (
 ```bash
 task ansible:deploy-all       # Deploy everything
 task ansible:deploy-media     # Deploy media stack only
-task ansible:deploy-networking # Deploy networking stack (DNS, reverse proxy)
+task ansible:deploy-networking # Deploy networking stack (DNS, reverse proxy, Tailscale)
 task ansible:ping             # Test connectivity
 ```

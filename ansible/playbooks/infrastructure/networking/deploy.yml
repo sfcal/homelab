@@ -21,3 +21,7 @@
 
     - name: Configure Caddy.
       ansible.builtin.include_tasks: tasks/caddy.yml
+
+    - name: Configure Tailscale.
+      ansible.builtin.include_role:
+        name: tailscale

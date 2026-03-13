@@ -11,7 +11,6 @@ ANSIBLE_TASKS = [
     AnsiblePlaybook("ansible:deploy-monitoring", "Deploy Monitoring", "Deploy monitoring stack", "monitoring"),
     AnsiblePlaybook("ansible:deploy-games", "Deploy Games Server", "Deploy games server", "games-server"),
     AnsiblePlaybook("ansible:deploy-website", "Deploy Website", "Deploy personal website", "website"),
-    AnsiblePlaybook("ansible:deploy-tailscale", "Deploy Tailscale", "Deploy tailscale"),
     AnsiblePlaybook("ansible:deploy-external-monitoring", "Deploy Ext Monitoring", "Deploy external monitoring", "external_monitoring"),
     AnsiblePlaybook("ansible:ping", "Ping All Hosts", "Ping all hosts in inventory"),
     AnsiblePlaybook("ansible:backup-media", "Backup Media", "Backup media stack", "media-stack"),
