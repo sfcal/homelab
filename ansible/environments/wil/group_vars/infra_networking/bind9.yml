@@ -10,6 +10,7 @@ dns_trusted_networks:
   - localnets
   - 10.2.0.0/16
   - 10.3.0.0/24
+  - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
 # Zones forwarded to external DNS (not resolved locally)
 dns_forward_zones:
