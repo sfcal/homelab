@@ -1,0 +1,5 @@
+---
+ittools_image: "corentinth/it-tools:latest"
+ittools_port: 8070
+ittools_user: root
+ittools_group: root

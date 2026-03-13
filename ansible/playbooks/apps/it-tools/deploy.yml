@@ -1,0 +1,19 @@
+---
+- name: Deploy IT-Tools
+  hosts: app_ittools
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: it-tools
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ ittools_user }}"
+        service_group: "{{ ittools_group }}"
+        service_images:
+          - "{{ ittools_image }}"

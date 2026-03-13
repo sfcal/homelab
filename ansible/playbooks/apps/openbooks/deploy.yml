@@ -1,0 +1,19 @@
+---
+- name: Deploy OpenBooks
+  hosts: app_openbooks
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: openbooks
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ openbooks_user }}"
+        service_group: "{{ openbooks_group }}"
+        service_images:
+          - "{{ openbooks_image }}"

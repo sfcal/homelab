@@ -1,0 +1,37 @@
+---
+services:
+  bookstack:
+    image: {{ bookstack_image }}
+    container_name: bookstack
+    restart: unless-stopped
+    ports:
+      - "{{ bookstack_port }}:80"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ system_timezone }}
+      - APP_URL=https://bookstack.wil.5am.cloud
+      - DB_HOST=bookstack-db
+      - DB_PORT=3306
+      - DB_USERNAME=bookstack
+      - "DB_PASSWORD={{ bookstack_db_password }}"
+      - DB_DATABASE=bookstack
+    volumes:
+      - "{{ deploy_path }}/bookstack/config:/config"
+    depends_on:
+      - bookstack-db
+
+  bookstack-db:
+    image: {{ bookstack_db_image }}
+    container_name: bookstack-db
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ system_timezone }}
+      - "MYSQL_ROOT_PASSWORD={{ bookstack_db_password }}"
+      - MYSQL_DATABASE=bookstack
+      - MYSQL_USER=bookstack
+      - "MYSQL_PASSWORD={{ bookstack_db_password }}"
+    volumes:
+      - "{{ deploy_path }}/bookstack/db:/config"

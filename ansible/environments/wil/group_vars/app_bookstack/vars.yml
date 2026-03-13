@@ -1,0 +1,6 @@
+---
+bookstack_image: "lscr.io/linuxserver/bookstack:latest"
+bookstack_db_image: "lscr.io/linuxserver/mariadb:latest"
+bookstack_port: 8074
+bookstack_user: root
+bookstack_group: root

@@ -1,0 +1,12 @@
+---
+services:
+  stirling-pdf:
+    image: {{ stirlingpdf_image }}
+    container_name: stirling-pdf
+    restart: unless-stopped
+    ports:
+      - "{{ stirlingpdf_port }}:8080"
+    volumes:
+      - {{ deploy_path }}/stirling-pdf/configs:/configs
+      - {{ deploy_path }}/stirling-pdf/logs:/logs
+      - {{ deploy_path }}/stirling-pdf/data:/usr/share/tessdata

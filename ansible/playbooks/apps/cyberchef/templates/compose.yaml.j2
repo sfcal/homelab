@@ -1,0 +1,8 @@
+---
+services:
+  cyberchef:
+    image: {{ cyberchef_image }}
+    container_name: cyberchef
+    restart: unless-stopped
+    ports:
+      - "{{ cyberchef_port }}:80"

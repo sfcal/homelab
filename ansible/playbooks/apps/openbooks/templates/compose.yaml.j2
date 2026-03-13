@@ -1,0 +1,11 @@
+---
+services:
+  openbooks:
+    image: {{ openbooks_image }}
+    container_name: openbooks
+    restart: unless-stopped
+    command: --persist
+    ports:
+      - "{{ openbooks_port }}:80"
+    volumes:
+      - {{ deploy_path }}/openbooks/books:/books

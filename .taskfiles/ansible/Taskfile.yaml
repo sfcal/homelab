@@ -95,6 +95,42 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/homeassistant/deploy.yml
 
+  deploy-ittools:
+    desc: Deploy IT-Tools developer utilities
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/it-tools/deploy.yml
+
+  deploy-bookstack:
+    desc: Deploy BookStack documentation wiki
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/bookstack/deploy.yml
+
+  deploy-cyberchef:
+    desc: Deploy CyberChef data analysis tool
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/cyberchef/deploy.yml
+
+  deploy-openbooks:
+    desc: Deploy OpenBooks ebook downloader
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/openbooks/deploy.yml
+
+  deploy-stirlingpdf:
+    desc: Deploy Stirling-PDF tools
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/stirling-pdf/deploy.yml
+
+  deploy-kasm:
+    desc: Deploy Kasm Workspaces
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/kasm/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory

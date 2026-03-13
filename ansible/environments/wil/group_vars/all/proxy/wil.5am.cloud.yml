@@ -45,3 +45,28 @@ wil_services:
     backend_host: 10.2.0.5
     backend_port: 3100
     proxied: true
+  - name: tools
+    backend_host: 10.2.20.45
+    backend_port: 8070
+    proxied: true
+  - name: bookstack
+    backend_host: 10.2.20.45
+    backend_port: 8074
+    proxied: true
+  - name: cyberchef
+    backend_host: 10.2.20.45
+    backend_port: 8071
+    proxied: true
+  - name: openbooks
+    backend_host: 10.2.20.45
+    backend_port: 8072
+    proxied: true
+  - name: pdf
+    backend_host: 10.2.20.45
+    backend_port: 8073
+    proxied: true
+  - name: kasm
+    backend_host: 10.2.20.45
+    backend_port: 4443
+    proxied: true
+    tls_skip_verify: true

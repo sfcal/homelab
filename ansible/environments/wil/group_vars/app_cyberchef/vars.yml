@@ -1,0 +1,5 @@
+---
+cyberchef_image: "ghcr.io/gchq/cyberchef:latest"
+cyberchef_port: 8071
+cyberchef_user: root
+cyberchef_group: root

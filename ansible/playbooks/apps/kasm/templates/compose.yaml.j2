@@ -1,0 +1,14 @@
+---
+services:
+  kasm:
+    image: {{ kasm_image }}
+    container_name: kasm
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - "{{ kasm_port }}:{{ kasm_port }}"
+      - "{{ kasm_wizard_port }}:3000"
+    environment:
+      - KASM_PORT={{ kasm_port }}
+    volumes:
+      - "{{ deploy_path }}/kasm/data:/opt"

@@ -1,0 +1,19 @@
+---
+- name: Deploy Kasm Workspaces
+  hosts: app_kasm
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: kasm
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ kasm_user }}"
+        service_group: "{{ kasm_group }}"
+        service_images:
+          - "{{ kasm_image }}"

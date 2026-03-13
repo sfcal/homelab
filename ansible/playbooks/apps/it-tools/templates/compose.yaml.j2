@@ -1,0 +1,8 @@
+---
+services:
+  it-tools:
+    image: {{ ittools_image }}
+    container_name: it-tools
+    restart: unless-stopped
+    ports:
+      - "{{ ittools_port }}:80"

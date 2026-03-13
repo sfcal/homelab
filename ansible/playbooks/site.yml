@@ -66,3 +66,27 @@
 # 12. Home Assistant - Independent
 - import_playbook: apps/homeassistant/deploy.yml
   tags: ['homeassistant']
+
+# 13. IT-Tools - Independent
+- import_playbook: apps/it-tools/deploy.yml
+  tags: ['it-tools']
+
+# 14. BookStack - Independent
+- import_playbook: apps/bookstack/deploy.yml
+  tags: ['bookstack']
+
+# 15. CyberChef - Independent
+- import_playbook: apps/cyberchef/deploy.yml
+  tags: ['cyberchef']
+
+# 16. OpenBooks - Independent
+- import_playbook: apps/openbooks/deploy.yml
+  tags: ['openbooks']
+
+# 17. Stirling-PDF - Independent
+- import_playbook: apps/stirling-pdf/deploy.yml
+  tags: ['stirling-pdf']
+
+# 18. Kasm Workspaces - Independent
+- import_playbook: apps/kasm/deploy.yml
+  tags: ['kasm']

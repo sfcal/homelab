@@ -1,0 +1,19 @@
+---
+- name: Deploy CyberChef
+  hosts: app_cyberchef
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  roles:
+    - role: docker_service
+      vars:
+        service_name: cyberchef
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ cyberchef_user }}"
+        service_group: "{{ cyberchef_group }}"
+        service_images:
+          - "{{ cyberchef_image }}"
