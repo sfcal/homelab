@@ -39,5 +39,5 @@ dns_ptr_records:
     hostname: "ca.ldn.5am.cloud."
   - octet: "53"
     hostname: "dns.ldn.5am.cloud."
-  - octet: "30"
-    hostname: "monitoring.ldn.5am.cloud."
+  - octet: "123"
+    hostname: "time.ldn.5am.cloud."

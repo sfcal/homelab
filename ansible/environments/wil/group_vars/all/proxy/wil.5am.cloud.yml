@@ -1,11 +1,6 @@
 ---
 wil_services:
   # Infrastructure
-  - name: ca
-    backend_host: 10.2.20.9
-    backend_port: 9000
-    proxied: true
-    tls_skip_verify: true
   - name: vm
     backend_host: 10.2.20.7
     backend_port: 8006

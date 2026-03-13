@@ -1,0 +1,52 @@
+---
+- name: Install chrony.
+  ansible.builtin.apt:
+    name: chrony
+    state: present
+    update_cache: true
+
+- name: Deploy upstream NTP server configuration.
+  ansible.builtin.template:
+    src: templates/servers.conf.j2
+    dest: /etc/chrony/conf.d/servers.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony
+
+- name: Deploy client access configuration.
+  ansible.builtin.template:
+    src: templates/allow.conf.j2
+    dest: /etc/chrony/conf.d/allow.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony
+
+- name: Deploy server mode configuration.
+  ansible.builtin.template:
+    src: templates/server.conf.j2
+    dest: /etc/chrony/conf.d/server.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony
+
+- name: Enable and start chrony.
+  ansible.builtin.service:
+    name: chrony
+    state: started
+    enabled: true
+
+- name: Flush handlers to apply configuration.
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify chrony tracking status.
+  ansible.builtin.command:
+    cmd: chronyc tracking
+  register: chrony_tracking
+  changed_when: false
+
+- name: Display chrony status.
+  ansible.builtin.debug:
+    msg: "{{ chrony_tracking.stdout_lines }}"

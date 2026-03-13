@@ -77,6 +77,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/ca/deploy.yml
 
+  deploy-ntp:
+    desc: Deploy NTP time server (Chrony)
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/ntp/deploy.yml
+
   deploy-restreamer:
     desc: Deploy Restreamer video streaming server
     dir: '{{.ROOT_DIR}}/ansible'

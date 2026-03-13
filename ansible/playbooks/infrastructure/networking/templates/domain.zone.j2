@@ -9,12 +9,6 @@ $TTL 86400      ; 1 day
                                 )
                         NS      ns.{{ current_domain.name }}.
 
-{% if current_domain.name == '5am.video' %}
-; Plex requests should resolve from CF
-plex    IN    NS    ns1.cloudflare.com.
-plex    IN    NS    ns2.cloudflare.com.
-
-{% endif %}
 ; Name servers (internal)
 ns              IN A    {{ inventory_hostname }}
 

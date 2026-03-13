@@ -1,0 +1,11 @@
+---
+# Chrony NTP server configuration
+
+chrony_ntp_servers:
+  - ntp1.npl.co.uk
+  - ntp2.npl.co.uk
+  - time.cloudflare.com
+  - nts.netnod.se
+
+chrony_allow:
+  - 10.3.0.0/24

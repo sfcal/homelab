@@ -1,0 +1,4 @@
+# Networks allowed to query this NTP server
+{% for network in chrony_allow %}
+allow {{ network }}
+{% endfor %}

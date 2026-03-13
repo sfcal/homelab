@@ -90,4 +90,22 @@ vms = {
     ssh_user       = "sfcal"
   }
 
+  ntp_server = {
+    name           = "ntp"
+    description    = "NTP Time Server (Chrony)"
+    proxmox_node   = "proxmox"
+    vmid           = 1002
+    template_name  = "ubuntu-server-wil-base"
+    ip_address     = "10.2.20.123"
+    gateway        = "10.2.20.1"
+    nameserver     = "10.2.20.53"
+    cores          = 1
+    memory         = 1024
+    disk_size      = "20G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    tags           = "infrastructure"
+    ssh_user       = "sfcal"
+  }
+
 }

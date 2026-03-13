@@ -1,0 +1,11 @@
+---
+# Chrony NTP server configuration
+
+chrony_ntp_servers:
+  - clock.nyc.he.net
+  - tick.usno.navy.mil
+  - tock.usno.navy.mil
+  - time-a-g.nist.gov
+
+chrony_allow:
+  - 10.2.0.0/16
