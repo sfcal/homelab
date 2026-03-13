@@ -21,7 +21,6 @@ backup_targets:
   - tunarr
   #- pulsarr
   - cleanuparr
-  - huntarr
   - tdarr
   - frigate
 

@@ -46,7 +46,7 @@ UDM Pro WIL - 10.2.x.x Network                       UDM Pro NYC - 10.1.x.x Netw
 <details>
 <summary>📺 Media</summary>
 
-Plex, Sonarr, Radarr, Prowlarr, Sabnzbd, Bazarr, Tunarr, Pulsarr, Cleanuparr, Huntarr, Tdarr, Frigate
+Plex, Sonarr, Radarr, Prowlarr, Sabnzbd, Bazarr, Tunarr, Pulsarr, Cleanuparr, Tdarr, Frigate
 
 </details>
 

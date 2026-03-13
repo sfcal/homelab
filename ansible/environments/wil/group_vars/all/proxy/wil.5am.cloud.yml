@@ -1,0 +1,52 @@
+---
+wil_services:
+  # Infrastructure
+  - name: ca
+    backend_host: 10.2.20.9
+    backend_port: 9000
+    proxied: true
+    tls_skip_verify: true
+  - name: vm
+    backend_host: 10.2.20.7
+    backend_port: 8006
+    proxied: true
+    tls_skip_verify: true
+  - name: nas
+    backend_host: 10.2.0.100
+    backend_port: 80
+    proxied: true
+  - name: kvm
+    backend_host: 10.2.0.78
+    backend_port: 443
+    proxied: true
+    tls_skip_verify: true
+
+  # Monitoring
+  - name: grafana
+    backend_host: 10.2.20.30
+    backend_port: 3000
+    proxied: true
+  - name: prometheus
+    backend_host: 10.2.20.30
+    backend_port: 9090
+    proxied: true
+  - name: homepage
+    backend_host: 10.2.20.30
+    backend_port: 3002
+    proxied: true
+
+  # Haivision
+  - name: hmp
+    backend_host: 10.2.20.40
+    backend_port: 443
+    proxied: false
+  - name: hmg
+    backend_host: 10.2.20.186
+    backend_port: 443
+    proxied: false
+
+  # Apps
+  - name: convert
+    backend_host: 10.2.0.5
+    backend_port: 3100
+    proxied: true

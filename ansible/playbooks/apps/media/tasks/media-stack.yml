@@ -18,7 +18,6 @@
     - "{{ deploy_path }}/pulsarr"
     - "{{ deploy_path }}/pulsarr/data"
     - "{{ deploy_path }}/cleanuparr"
-    - "{{ deploy_path }}/huntarr"
     - "{{ deploy_path }}/tdarr"
     - "{{ deploy_path }}/tdarr/server"
     - "{{ deploy_path }}/tdarr/configs"

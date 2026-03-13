@@ -1,6 +1,6 @@
 ---
 - name: Deploy Media Stack
-  hosts: app_media-stack
+  hosts: app_mediastack
   become: true
 
   handlers:

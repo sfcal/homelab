@@ -1,6 +1,6 @@
 ---
 - name: Deploy External Monitoring (Tailscale + Uptime Kuma)
-  hosts: infra_external-monitoring
+  hosts: infra_externalmonitoring
   become: true
 
   pre_tasks:

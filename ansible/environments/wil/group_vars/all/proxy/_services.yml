@@ -1,0 +1,26 @@
+---
+# Proxy/DNS Service Definitions
+# Aggregated from per-domain files and shared between DNS (BIND9) and Reverse Proxy (Caddy)
+#
+# Each service entry supports the following fields:
+#   name            (required) - subdomain name
+#   backend_host    (required) - IP of the backend service
+#   backend_port    (required) - port of the backend service
+#   proxied         (required) - true: routed through Caddy, DNS -> reverse_proxy_ip
+#                                false: DNS -> backend_host directly, no Caddy entry
+#   dns             (optional) - "external" skips A record generation (default: "internal")
+#   enabled         (optional) - false skips both DNS and Caddy (default: true)
+#   tls_skip_verify (optional) - true: backend uses HTTPS with self-signed cert
+#   forward_headers (optional) - true: adds X-Real-IP, X-Forwarded-For, X-Forwarded-Proto
+#   host_header     (optional) - "upstream": adds Host header override
+#   encode          (optional) - encoding type, e.g. "gzip"
+#   read_buffer     (optional) - transport read buffer size in bytes
+#
+# Note: 'domain' is injected automatically from each file's aggregation line below.
+services: >-
+  {{
+    (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
+    (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
+    (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
+    (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list)
+  }}

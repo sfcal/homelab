@@ -1,6 +1,6 @@
 ---
 - name: Deploy Tailscale
-  hosts: infra_reverse-proxy
+  hosts: infra_reverseproxy
   become: true
 
   pre_tasks:

@@ -1,0 +1,6 @@
+---
+sfc_services:
+  - name: birdle
+    backend_host: 10.2.20.45
+    backend_port: 8091
+    proxied: true

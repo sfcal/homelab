@@ -187,23 +187,6 @@ services:
     volumes:
       - ./cleanuparr:/config
 
-  huntarr:
-    image: ghcr.io/plexguide/huntarr:{{ huntarr_version }}
-    container_name: huntarr
-    restart: unless-stopped
-    mem_limit: 1g
-    mem_reservation: 512m
-    depends_on:
-      - sonarr
-      - radarr
-      - prowlarr
-    environment:
-      - TZ={{ system_timezone }}
-    ports:
-      - "9705:9705"
-    volumes:
-      - ./huntarr:/config
-
   tdarr-server:
     image: ghcr.io/haveagitgat/tdarr:{{ tdarr_version }}
     container_name: tdarr-server

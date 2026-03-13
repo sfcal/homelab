@@ -1,6 +1,6 @@
 ---
 - name: Schedule Media Stack Backup Cron Job
-  hosts: app_media-stack
+  hosts: app_mediastack
   become: true
 
   tasks:
@@ -20,7 +20,7 @@
           ansible-playbook
           -i /etc/ansible/environments/wil/hosts.ini
           /etc/ansible/playbooks/media/backup.yml
-          --limit app_media-stack
+          --limit app_mediastack
           >> /var/log/media-backup.log 2>&1
         state: present
 
