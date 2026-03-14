@@ -65,6 +65,10 @@ terraform/environments/*/.terraform.tfstate.lock.info
 *.swp
 *.swo
 
+# python
+__pycache__/
+*.pyc
+
 docker/yolo/models
 
 # certificates
