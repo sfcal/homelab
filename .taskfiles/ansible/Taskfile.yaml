@@ -131,6 +131,12 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/kasm/deploy.yml
 
+  deploy-seafile:
+    desc: Deploy Seafile file sync & share
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/seafile/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory

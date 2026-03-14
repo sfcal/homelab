@@ -70,3 +70,7 @@ wil_services:
     backend_port: 4443
     proxied: true
     tls_skip_verify: true
+  - name: files
+    backend_host: 10.2.20.70
+    backend_port: 8080
+    proxied: true

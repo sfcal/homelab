@@ -90,3 +90,7 @@
 # 18. Kasm Workspaces - Independent
 - import_playbook: apps/kasm/deploy.yml
   tags: ['kasm']
+
+# 19. Seafile - Independent
+- import_playbook: apps/seafile/deploy.yml
+  tags: ['seafile', 'applications']
