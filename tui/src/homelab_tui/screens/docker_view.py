@@ -17,7 +17,7 @@ from ..data.environment import get_all_host_ips, get_ssh_user
 class DockerScreen(Screen):
     BINDINGS = [
         Binding("r", "refresh", "Refresh"),
-        Binding("l", "lazydocker", "Lazydocker"),
+        Binding("z", "lazydocker", "Lazydocker"),
     ]
 
     DEFAULT_CSS = """

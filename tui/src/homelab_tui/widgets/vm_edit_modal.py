@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
@@ -13,6 +14,10 @@ from ..data.models import VMConfig
 
 
 class VMEditModal(ModalScreen[bool]):
+    BINDINGS = [
+        Binding("escape", "cancel", "Cancel", show=False),
+    ]
+
     DEFAULT_CSS = """
     VMEditModal {
         align: center middle;
@@ -103,6 +108,9 @@ class VMEditModal(ModalScreen[bool]):
 
     def _get_input(self, field_id: str) -> str:
         return self.query_one(f"#input-{field_id}", Input).value.strip()
+
+    def action_cancel(self) -> None:
+        self.dismiss(False)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-cancel":

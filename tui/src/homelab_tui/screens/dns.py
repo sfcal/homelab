@@ -1,8 +1,11 @@
-"""DNS screen — live DNS query results against the environment's DNS server."""
+"""DNS screen — resolve every service FQDN against the environment DNS server."""
 
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
+
+import yaml
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -10,7 +13,37 @@ from textual.screen import Screen
 from textual.widgets import DataTable, Footer, Header, Static
 from textual import work
 
-from ..data.environment import get_infra_host_ip
+from ..data.environment import get_env_ansible_dir, get_infra_host_ip
+
+
+def _load_services(env_name: str) -> list[dict]:
+    """Parse all proxy YAML files for an environment and return service dicts."""
+    proxy_dir = get_env_ansible_dir(env_name) / "group_vars" / "all" / "proxy"
+    if not proxy_dir.is_dir():
+        return []
+
+    services: list[dict] = []
+    for yml_file in sorted(proxy_dir.glob("*.yml")):
+        if yml_file.name.startswith("_"):
+            continue
+        try:
+            data = yaml.safe_load(yml_file.read_text()) or {}
+        except Exception:
+            continue
+        # Each file has one top-level key like wil_services, video_services, etc.
+        # The domain is the filename without .yml
+        domain = yml_file.stem
+        for _key, svc_list in data.items():
+            if not isinstance(svc_list, list):
+                continue
+            for svc in svc_list:
+                if not isinstance(svc, dict):
+                    continue
+                if svc.get("enabled") is False:
+                    continue
+                svc["domain"] = domain
+                services.append(svc)
+    return services
 
 
 class DNSScreen(Screen):
@@ -34,22 +67,16 @@ class DNSScreen(Screen):
     }
     """
 
-    DOMAINS_TO_CHECK = [
-        "google.com",
-        "github.com",
-        "cloudflare.com",
-    ]
-
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Static("DNS Queries", id="dns-title")
+        yield Static("DNS — Services", id="dns-title")
         yield DataTable(id="dns-table")
         yield Static("", id="dns-status")
         yield Footer()
 
     def on_mount(self) -> None:
         table = self.query_one("#dns-table", DataTable)
-        table.add_columns("Domain", "Type", "Result", "Response Time")
+        table.add_columns("Service", "FQDN", "Expected", "Resolved", "Status")
         self._load_data()
 
     def on_screen_resume(self) -> None:
@@ -60,42 +87,102 @@ class DNSScreen(Screen):
 
     @work(thread=False)
     async def _run_dns_queries(self) -> None:
-        dns_server = get_infra_host_ip(self.app.current_env, "infra_networking")
+        env = self.app.current_env
+        dns_server = get_infra_host_ip(env, "infra_networking")
         if not dns_server:
-            self.query_one("#dns-status", Static).update("No DNS server found (infra_networking)")
+            self.query_one("#dns-status", Static).update(
+                "No DNS server found (infra_networking)"
+            )
+            return
+
+        services = _load_services(env)
+        if not services:
+            self.query_one("#dns-status", Static).update("No services found")
             return
 
         self.query_one("#dns-title", Static).update(
-            f"DNS Queries — server: {dns_server} — env: [bold]{self.app.current_env}[/bold]"
+            f"DNS — Services — server: {dns_server} — env: [bold]{env}[/bold]"
+        )
+        self.query_one("#dns-status", Static).update(
+            f"Querying {len(services)} services…"
         )
 
-        results = []
-        for domain in self.DOMAINS_TO_CHECK:
-            for rtype in ["A", "AAAA"]:
-                result = await self._query_dns(dns_server, domain, rtype)
-                results.append(result)
+        # Query all services concurrently
+        tasks = []
+        for svc in services:
+            fqdn = f"{svc['name']}.{svc['domain']}"
+            expected = svc.get("backend_host", "")
+            tasks.append(self._query_service(dns_server, svc, fqdn, expected))
+
+        results = sorted(await asyncio.gather(*tasks), key=lambda r: r["fqdn"][::-1])
 
         table = self.query_one("#dns-table", DataTable)
         table.clear()
+
+        ok_count = 0
         for r in results:
-            table.add_row(r["domain"], r["type"], r["result"], r["time"])
+            status = r["status"]
+            if status == "OK":
+                ok_count += 1
+                status_display = "[green]OK[/green]"
+            elif status == "MISMATCH":
+                status_display = "[yellow]MISMATCH[/yellow]"
+            else:
+                status_display = f"[red]{status}[/red]"
+            table.add_row(
+                r["name"], r["fqdn"], r["expected"], r["resolved"], status_display
+            )
 
-        self.query_one("#dns-status", Static).update(f"{len(results)} queries completed")
+        total = len(results)
+        self.query_one("#dns-status", Static).update(
+            f"{ok_count}/{total} services resolving correctly"
+        )
 
-    async def _query_dns(self, server: str, domain: str, rtype: str) -> dict:
+    async def _query_service(
+        self, dns_server: str, svc: dict, fqdn: str, expected: str
+    ) -> dict:
+        name = svc.get("name", "")
         try:
             proc = await asyncio.create_subprocess_exec(
-                "dig", f"@{server}", domain, rtype, "+short", "+time=2", "+tries=1",
+                "dig", f"@{dns_server}", fqdn, "A", "+short", "+time=2", "+tries=1",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5.0)
-            result = stdout.decode().strip() or "(no result)"
-            return {"domain": domain, "type": rtype, "result": result, "time": "OK"}
+            resolved = stdout.decode().strip().splitlines()
+            resolved_str = resolved[-1] if resolved else ""
+
+            if not resolved_str:
+                status = "NXDOMAIN"
+            elif resolved_str == expected:
+                status = "OK"
+            else:
+                # For proxied services the DNS points to the reverse proxy, not the backend
+                status = "OK" if svc.get("proxied") else "MISMATCH"
+
+            return {
+                "name": name,
+                "fqdn": fqdn,
+                "expected": expected if not svc.get("proxied") else "(proxied)",
+                "resolved": resolved_str or "(no result)",
+                "status": status,
+            }
         except asyncio.TimeoutError:
-            return {"domain": domain, "type": rtype, "result": "(timeout)", "time": "TIMEOUT"}
+            return {
+                "name": name,
+                "fqdn": fqdn,
+                "expected": expected,
+                "resolved": "(timeout)",
+                "status": "TIMEOUT",
+            }
         except Exception as e:
-            return {"domain": domain, "type": rtype, "result": str(e), "time": "ERROR"}
+            return {
+                "name": name,
+                "fqdn": fqdn,
+                "expected": expected,
+                "resolved": str(e),
+                "status": "ERROR",
+            }
 
     def action_refresh(self) -> None:
         self._load_data()

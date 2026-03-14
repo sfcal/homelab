@@ -17,10 +17,10 @@ from .task_runner.runner import TaskRunner
 
 TABS = [
     ("1", "dashboard", "Dashboard"),
-    ("2", "dns", "DNS"),
-    ("3", "ntp", "NTP"),
-    ("4", "docker", "Docker"),
-    ("5", "tasks", "Tasks"),
+    ("2", "docker", "Docker"),
+    ("3", "tasks", "Tasks"),
+    ("4", "dns", "DNS"),
+    ("5", "ntp", "NTP"),
     ("6", "output", "Output"),
 ]
 
@@ -33,20 +33,21 @@ class HomelabApp(App):
 
     BINDINGS = [
         Binding("1", "tab_1", "Dashboard", show=True),
-        Binding("2", "tab_2", "DNS", show=True),
-        Binding("3", "tab_3", "NTP", show=True),
-        Binding("4", "tab_4", "Docker", show=True),
-        Binding("5", "tab_5", "Tasks", show=True),
+        Binding("2", "tab_2", "Docker", show=True),
+        Binding("3", "tab_3", "Tasks", show=True),
+        Binding("4", "tab_4", "DNS", show=True),
+        Binding("5", "tab_5", "NTP", show=True),
         Binding("6", "tab_6", "Output", show=True),
         Binding("e", "switch_env", "Env", show=True),
         Binding("q", "quit", "Quit", show=True),
-        Binding("h", "vim_left", show=False),
+        Binding("h", "tab_prev", "←Tab", show=True),
+        Binding("l", "tab_next", "Tab→", show=True),
         Binding("j", "vim_down", show=False),
         Binding("k", "vim_up", show=False),
-        Binding("l", "vim_right", show=False),
     ]
 
     current_env: str = ""
+    _tab_index: int = 0
 
     def __init__(self):
         super().__init__()
@@ -57,34 +58,49 @@ class HomelabApp(App):
 
     def on_mount(self) -> None:
         self.install_screen(DashboardScreen(), name="dashboard")
-        self.install_screen(DNSScreen(), name="dns")
-        self.install_screen(NTPScreen(), name="ntp")
         self.install_screen(DockerScreen(), name="docker")
         self.install_screen(TasksScreen(), name="tasks")
+        self.install_screen(DNSScreen(), name="dns")
+        self.install_screen(NTPScreen(), name="ntp")
         self.install_screen(OutputScreen(), name="output")
         self.push_screen("dashboard")
         self.sub_title = f"env: {self.current_env}"
 
-    def _switch_to(self, name: str) -> None:
+    def _switch_to(self, name: str, index: int | None = None) -> None:
+        if index is not None:
+            self._tab_index = index
+        else:
+            for i, (_, tab_name, _) in enumerate(TABS):
+                if tab_name == name:
+                    self._tab_index = i
+                    break
         self.switch_screen(name)
 
     def action_tab_1(self) -> None:
-        self._switch_to("dashboard")
+        self._switch_to("dashboard", 0)
 
     def action_tab_2(self) -> None:
-        self._switch_to("dns")
+        self._switch_to("docker", 1)
 
     def action_tab_3(self) -> None:
-        self._switch_to("ntp")
+        self._switch_to("tasks", 2)
 
     def action_tab_4(self) -> None:
-        self._switch_to("docker")
+        self._switch_to("dns", 3)
 
     def action_tab_5(self) -> None:
-        self._switch_to("tasks")
+        self._switch_to("ntp", 4)
 
     def action_tab_6(self) -> None:
-        self._switch_to("output")
+        self._switch_to("output", 5)
+
+    def action_tab_prev(self) -> None:
+        idx = (self._tab_index - 1) % len(TABS)
+        self._switch_to(TABS[idx][1], idx)
+
+    def action_tab_next(self) -> None:
+        idx = (self._tab_index + 1) % len(TABS)
+        self._switch_to(TABS[idx][1], idx)
 
     def _vim_navigate(self, direction: str) -> None:
         focused = self.focused
@@ -94,17 +110,11 @@ class HomelabApp(App):
         if hasattr(focused, f"action_{action}"):
             getattr(focused, f"action_{action}")()
 
-    def action_vim_left(self) -> None:
-        self._vim_navigate("left")
-
     def action_vim_down(self) -> None:
         self._vim_navigate("down")
 
     def action_vim_up(self) -> None:
         self._vim_navigate("up")
-
-    def action_vim_right(self) -> None:
-        self._vim_navigate("right")
 
     def action_switch_env(self) -> None:
         """Cycle through available environments."""
@@ -140,7 +150,7 @@ class HomelabApp(App):
         pane_id = output_screen.create_pane(description)
         output_screen.append_line(pane_id, f"$ {' '.join(command)}")
         output_screen.append_line(pane_id, "")
-        self.switch_screen("output")
+        self._switch_to("output", 5)
         self._execute_task(command, description, pane_id, on_success)
 
     @work(thread=False)

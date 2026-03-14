@@ -1,10 +1,15 @@
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
 
 class ConfirmDialog(ModalScreen[bool]):
+    BINDINGS = [
+        Binding("escape,q", "cancel", "Cancel", show=False),
+    ]
+
     DEFAULT_CSS = """
     ConfirmDialog {
         align: center middle;
@@ -46,6 +51,9 @@ class ConfirmDialog(ModalScreen[bool]):
             with Horizontal(id="confirm-buttons"):
                 yield Button("Confirm", variant="error", id="btn-confirm")
                 yield Button("Cancel", variant="default", id="btn-cancel")
+
+    def action_cancel(self) -> None:
+        self.dismiss(False)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.dismiss(event.button.id == "btn-confirm")
