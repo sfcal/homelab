@@ -1,4 +1,3 @@
-# VMs to create
 vms = {
   networking = {
     name           = "networking"
@@ -74,7 +73,7 @@ vms = {
 
   web_server = {
     name           = "web"
-    description    = "personal sight"
+    description    = "personal site"
     proxmox_node   = "proxmox"
     vmid           = 1109
     template_name  = "ubuntu-server-wil-base"
@@ -84,6 +83,24 @@ vms = {
     cores          = 2
     memory         = 4096
     disk_size      = "20G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    tags           = "application"
+    ssh_user       = "sfcal"
+  }
+
+  work_server = {
+    name           = "work"
+    description    = "Work Apps (IT-Tools, CyberChef, Stirling-PDF, BookStack, Kasm)"
+    proxmox_node   = "proxmox"
+    vmid           = 1112
+    template_name  = "ubuntu-server-wil-base"
+    ip_address     = "10.2.20.60"
+    gateway        = "10.2.20.1"
+    nameserver     = "10.2.20.53"
+    cores          = 4
+    memory         = 8192
+    disk_size      = "256G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
     tags           = "application"

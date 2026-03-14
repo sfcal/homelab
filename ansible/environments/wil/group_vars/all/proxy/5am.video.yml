@@ -45,6 +45,10 @@ video_services:
     backend_host: 10.2.0.5
     backend_port: 8265
     proxied: true
+  - name: wizarr
+    backend_host: 10.2.0.5
+    backend_port: 5690
+    proxied: true
   - name: frigate
     backend_host: 10.2.0.5
     backend_port: 5000

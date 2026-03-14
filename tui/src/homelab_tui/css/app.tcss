@@ -10,16 +10,111 @@ Footer {
     dock: bottom;
 }
 
-#output-title {
+/* --- Dashboard --- */
+
+#dash-env-label {
     padding: 0 1;
     text-style: bold;
-    color: $text;
     background: $primary-background;
     width: 100%;
 }
 
-#log-viewer {
+/* --- Tables --- */
+
+DataTable {
     height: 1fr;
-    margin: 1 1;
+}
+
+DataTable > .datatable--cursor {
+    background: $accent;
+}
+
+/* --- Output tabs --- */
+
+#output-tabs {
+    height: 1fr;
+}
+
+#output-tabs TabPane {
+    padding: 0;
+}
+
+#output-tabs RichLog {
+    height: 1fr;
     border: round $primary;
+    margin: 0 1;
+}
+
+/* --- Status bars --- */
+
+#dns-status,
+#ntp-status,
+#ca-status,
+#docker-status,
+#tasks-status,
+#packer-status,
+#output-status {
+    height: 1;
+    padding: 0 1;
+    color: $text-muted;
+    background: $surface-darken-1;
+}
+
+/* --- Title bars --- */
+
+#dns-title,
+#ntp-title,
+#ca-title,
+#docker-title,
+#tasks-title,
+#tf-title,
+#packer-title,
+#output-title {
+    padding: 0 1;
+    text-style: bold;
+    background: $primary-background;
+    width: 100%;
+}
+
+/* --- Action button rows --- */
+
+#quick-actions,
+#ca-actions,
+#tf-actions {
+    height: auto;
+    min-height: 3;
+    padding: 0 1;
+    align: center middle;
+}
+
+#quick-actions Button,
+#ca-actions Button,
+#tf-actions Button {
+    margin: 0 1;
+}
+
+/* --- NTP panels --- */
+
+#ntp-panels {
+    height: 1fr;
+}
+
+#ntp-tracking,
+#ntp-sources {
+    width: 1fr;
+    border: round $primary;
+    margin: 0 1;
+}
+
+/* --- CA panels --- */
+
+#ca-content {
+    height: 1fr;
+}
+
+#ca-health,
+#ca-info {
+    width: 1fr;
+    border: round $primary;
+    margin: 0 1;
 }

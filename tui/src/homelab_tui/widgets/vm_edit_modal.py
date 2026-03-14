@@ -5,7 +5,8 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label
 
-from ..config import DEFAULT_VM_VALUES, ENVIRONMENTS, VM_TO_ANSIBLE_GROUP
+from ..config import DEFAULT_VM_VALUES
+from ..data.environment import get_env_terraform_dir, get_env_ansible_dir
 from ..data.hcl_parser import parse_vms_tfvars, write_vms_tfvars
 from ..data.inventory_parser import parse_hosts_ini, write_hosts_ini
 from ..data.models import VMConfig
@@ -65,6 +66,7 @@ class VMEditModal(ModalScreen[bool]):
         ("disk_size", "Disk Size", "e.g. 20G"),
         ("storage_pool", "Storage Pool", ""),
         ("network_bridge", "Network Bridge", ""),
+        ("tags", "Tags", "infrastructure or application"),
         ("ssh_user", "SSH User", ""),
     ]
 
@@ -106,7 +108,6 @@ class VMEditModal(ModalScreen[bool]):
         if event.button.id == "btn-cancel":
             self.dismiss(False)
             return
-
         if event.button.id == "btn-save":
             self._save()
 
@@ -128,6 +129,7 @@ class VMEditModal(ModalScreen[bool]):
                 storage_pool=self._get_input("storage_pool"),
                 network_bridge=self._get_input("network_bridge"),
                 ssh_user=self._get_input("ssh_user"),
+                tags=self._get_input("tags"),
             )
         except ValueError as e:
             self.notify(f"Invalid input: {e}", severity="error")
@@ -137,29 +139,27 @@ class VMEditModal(ModalScreen[bool]):
             self.notify("VM Key is required", severity="error")
             return
 
-        env_cfg = ENVIRONMENTS[self._env_name]
-        tfvars_path: Path = env_cfg["terraform_dir"] / "vms.auto.tfvars"
+        tf_dir = get_env_terraform_dir(self._env_name)
+        tfvars_path = tf_dir / "vms.auto.tfvars"
 
-        # Read existing VMs, update/add, write back
         existing = parse_vms_tfvars(tfvars_path) if tfvars_path.exists() else {}
-        old_ip = existing[vm.key].ip_address if vm.key in existing else None
         existing[vm.key] = vm
         write_vms_tfvars(tfvars_path, existing)
 
-        # Update hosts.ini if this VM has an ansible group mapping
-        ansible_group = VM_TO_ANSIBLE_GROUP.get(vm.key)
-        if ansible_group:
-            hosts_path: Path = env_cfg["ansible_dir"] / "hosts.ini"
-            groups = parse_hosts_ini(hosts_path) if hosts_path.exists() else {}
-            if ansible_group in groups:
-                # Replace old IP with new IP
-                hosts = groups[ansible_group]
-                if old_ip and old_ip in hosts:
-                    groups[ansible_group] = [vm.ip_address if h == old_ip else h for h in hosts]
-                elif vm.ip_address not in hosts:
-                    groups[ansible_group].append(vm.ip_address)
+        # Update hosts.ini — add the IP under the appropriate group
+        ansible_dir = get_env_ansible_dir(self._env_name)
+        hosts_path = ansible_dir / "hosts.ini"
+        if hosts_path.exists():
+            groups = parse_hosts_ini(hosts_path)
+            # Find matching group by tag prefix + key pattern
+            group_name = None
+            if vm.tags == "infrastructure":
+                group_name = f"infra_{vm.key}"
             else:
-                groups[ansible_group] = [vm.ip_address]
-            write_hosts_ini(hosts_path, groups)
+                group_name = f"app_{vm.key}"
+            if group_name and group_name in groups:
+                if vm.ip_address not in groups[group_name]:
+                    groups[group_name].append(vm.ip_address)
+                write_hosts_ini(hosts_path, groups)
 
         self.dismiss(True)

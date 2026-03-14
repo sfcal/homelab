@@ -10,5 +10,7 @@ services:
       - "{{ kasm_wizard_port }}:3000"
     environment:
       - KASM_PORT={{ kasm_port }}
+      - DOCKER_MTU=1500
     volumes:
       - "{{ deploy_path }}/kasm/data:/opt"
+      - "{{ deploy_path }}/kasm/docker:/var/lib/docker"

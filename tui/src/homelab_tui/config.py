@@ -14,25 +14,7 @@ def find_project_root() -> Path:
 PROJECT_ROOT = find_project_root()
 TERRAFORM_DIR = PROJECT_ROOT / "terraform"
 ANSIBLE_DIR = PROJECT_ROOT / "ansible"
-
-ENVIRONMENTS: dict[str, dict[str, Path | str]] = {
-    "wil": {
-        "terraform_dir": TERRAFORM_DIR / "environments" / "wil",
-        "ansible_dir": ANSIBLE_DIR / "environments" / "wil",
-        "env_var": "wil",
-    },
-    "nyc": {
-        "terraform_dir": TERRAFORM_DIR / "environments" / "nyc",
-        "ansible_dir": ANSIBLE_DIR / "environments" / "nyc",
-        "env_var": "nyc",
-    },
-}
-
-VM_TO_ANSIBLE_GROUP: dict[str, str] = {
-    "networking": "networking",
-    "monitoring_server": "monitoring",
-    "games_server": "games-server",
-}
+PACKER_DIR = PROJECT_ROOT / "packer"
 
 DEFAULT_VM_VALUES = {
     "proxmox_node": "proxmox",
@@ -45,4 +27,5 @@ DEFAULT_VM_VALUES = {
     "storage_pool": "local-lvm",
     "network_bridge": "vmbr0",
     "ssh_user": "sfcal",
+    "tags": "application",
 }

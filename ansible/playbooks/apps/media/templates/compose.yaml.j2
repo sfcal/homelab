@@ -218,6 +218,23 @@ services:
     devices:
       - /dev/dri:/dev/dri
 
+  wizarr:
+    image: ghcr.io/wizarrrr/wizarr:{{ wizarr_version }}
+    container_name: wizarr
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    depends_on:
+      - plex
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - TZ={{ system_timezone }}
+    ports:
+      - "5690:5690"
+    volumes:
+      - ./wizarr:/data
+
   frigate:
     image: ghcr.io/blakeblackshear/frigate:{{ frigate_version }}
     container_name: frigate

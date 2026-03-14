@@ -22,11 +22,32 @@ def parse_hosts_ini(ini_path: Path) -> dict[str, list[str]]:
 
 
 def write_hosts_ini(ini_path: Path, groups: dict[str, list[str]]) -> None:
-    """Write hosts.ini from groups dict."""
+    """Write hosts.ini from groups dict, preserving structure."""
     lines: list[str] = []
-    for group, hosts in groups.items():
-        lines.append(f"[{group}]")
-        for host in hosts:
-            lines.append(host)
-        lines.append("")
+    # Separate into categories for clean output
+    infra_groups = {k: v for k, v in groups.items() if k.startswith("infra_")}
+    app_groups = {k: v for k, v in groups.items() if k.startswith("app_")}
+    parent_groups = {k: v for k, v in groups.items() if ":children" in k}
+    other_groups = {
+        k: v for k, v in groups.items()
+        if k not in infra_groups and k not in app_groups and k not in parent_groups
+    }
+
+    def write_section(section_groups: dict[str, list[str]], header: str = "") -> None:
+        if not section_groups:
+            return
+        if header:
+            lines.append(f"# --- {header} ---")
+            lines.append("")
+        for group, hosts in section_groups.items():
+            lines.append(f"[{group}]")
+            for host in hosts:
+                lines.append(host)
+            lines.append("")
+
+    write_section(infra_groups, "Infrastructure")
+    write_section(app_groups, "Apps")
+    write_section(other_groups)
+    write_section(parent_groups, "Parent groups")
+
     ini_path.write_text("\n".join(lines))

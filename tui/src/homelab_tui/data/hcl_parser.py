@@ -32,13 +32,14 @@ def parse_vms_tfvars(tfvars_path: Path) -> dict[str, VMConfig]:
             storage_pool=attrs["storage_pool"],
             network_bridge=attrs.get("network_bridge", "vmbr0"),
             ssh_user=attrs["ssh_user"],
+            tags=attrs.get("tags", "application"),
         )
     return vms
 
 
 def write_vms_tfvars(tfvars_path: Path, vms: dict[str, VMConfig]) -> None:
     """Write vms.auto.tfvars from VMConfig dict using template generation."""
-    lines = ["# VMs to create", "vms = {"]
+    lines = ["vms = {"]
     for key, vm in vms.items():
         lines.append(f"  {key} = {{")
         lines.append(f'    name           = "{vm.name}"')
@@ -54,6 +55,7 @@ def write_vms_tfvars(tfvars_path: Path, vms: dict[str, VMConfig]) -> None:
         lines.append(f'    disk_size      = "{vm.disk_size}"')
         lines.append(f'    storage_pool   = "{vm.storage_pool}"')
         lines.append(f'    network_bridge = "{vm.network_bridge}"')
+        lines.append(f'    tags           = "{vm.tags}"')
         lines.append(f'    ssh_user       = "{vm.ssh_user}"')
         lines.append("  }")
         lines.append("")

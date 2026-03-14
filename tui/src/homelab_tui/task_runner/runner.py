@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import asyncio
+import re
 import shlex
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 
 
 class TaskStatus(Enum):
@@ -41,6 +44,10 @@ class TaskRunner:
         self._counter += 1
         return f"task-{self._counter}"
 
+    @property
+    def running_count(self) -> int:
+        return sum(1 for t in self.tasks.values() if t.status == TaskStatus.RUNNING)
+
     async def run(
         self,
         command: list[str],
@@ -69,6 +76,7 @@ class TaskRunner:
 
             async for line in process.stdout:
                 decoded = line.decode("utf-8", errors="replace").rstrip("\n")
+                decoded = _ANSI_RE.sub("", decoded)
                 task.output_lines.append(decoded)
                 if on_output:
                     on_output(task_id, decoded)
@@ -95,3 +103,9 @@ class TaskRunner:
         if task and task._process and task.status == TaskStatus.RUNNING:
             task._process.terminate()
             task.status = TaskStatus.CANCELLED
+
+    def clear_completed(self) -> None:
+        self.tasks = {
+            k: v for k, v in self.tasks.items()
+            if v.status == TaskStatus.RUNNING
+        }

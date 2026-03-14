@@ -1,6 +1,4 @@
-"""Dashboard screen — unified VM overview with CRUD and deployment operations."""
-
-import subprocess
+"""Terraform screen — VM CRUD and deployment operations."""
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -8,49 +6,46 @@ from textual.containers import Horizontal
 from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Static
 
-from ..data.environment import load_environment, get_env_terraform_dir
+from ..data.environment import load_environment, get_env_terraform_dir, get_env_ansible_dir
 from ..data.hcl_parser import parse_vms_tfvars, write_vms_tfvars
+from ..data.inventory_parser import parse_hosts_ini, write_hosts_ini
 from ..data.models import VMState
 from ..task_runner.registry import (
-    task_command,
     terraform_clean,
     terraform_deploy_all,
     terraform_deploy_vm,
+    terraform_destroy_all,
     terraform_destroy_vm,
 )
 from ..widgets.confirm_dialog import ConfirmDialog
 from ..widgets.vm_edit_modal import VMEditModal
 
 
-class DashboardScreen(Screen):
+class TerraformScreen(Screen):
     BINDINGS = [
-        Binding("r", "refresh", "Refresh"),
-        Binding("n", "new_vm", "New"),
+        Binding("n", "new_vm", "New VM"),
+        Binding("e", "edit_vm", "Edit"),
         Binding("d", "deploy_vm", "Deploy"),
         Binding("x", "destroy_vm", "Destroy"),
+        Binding("r", "refresh", "Refresh"),
         Binding("delete", "delete_vm", "Delete"),
-        Binding("t", "ssh_into", "SSH"),
     ]
 
     DEFAULT_CSS = """
-    #dash-stats {
-        height: 3;
+    #tf-title {
         padding: 0 1;
-        align: left middle;
+        text-style: bold;
     }
-    #dash-stats Static {
-        margin: 0 2 0 0;
-    }
-    #vm-overview {
+    #tf-table {
         height: 1fr;
         margin: 0 1;
     }
-    #quick-actions {
+    #tf-actions {
         height: 3;
         padding: 0 1;
         align: center middle;
     }
-    #quick-actions Button {
+    #tf-actions Button {
         margin: 0 1;
     }
     """
@@ -61,22 +56,20 @@ class DashboardScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Static("", id="dash-env-label")
-        with Horizontal(id="dash-stats"):
-            yield Static("", id="stat-vms")
-            yield Static("", id="stat-hosts")
-            yield Static("", id="stat-provisioned")
-        yield DataTable(id="vm-overview", cursor_type="row")
-        with Horizontal(id="quick-actions"):
+        yield Static("Terraform", id="tf-title")
+        yield DataTable(id="tf-table", cursor_type="row")
+        with Horizontal(id="tf-actions"):
             yield Button("New [n]", id="btn-new", variant="success")
-            yield Button("Deploy All (TF)", id="btn-tf-deploy", variant="warning")
-            yield Button("Deploy All (Ansible)", id="btn-ansible-deploy")
-            yield Button("Ping All", id="btn-ping")
+            yield Button("Edit [e]", id="btn-edit", variant="primary")
+            yield Button("Deploy [d]", id="btn-deploy", variant="warning")
+            yield Button("Deploy All", id="btn-deploy-all", variant="warning")
+            yield Button("Destroy [x]", id="btn-destroy", variant="error")
+            yield Button("Clean", id="btn-clean", variant="error")
         yield Footer()
 
     def on_mount(self) -> None:
-        table = self.query_one("#vm-overview", DataTable)
-        table.add_columns("Key", "Name", "Description", "IP", "VMID", "Cores", "RAM", "Disk", "Status")
+        table = self.query_one("#tf-table", DataTable)
+        table.add_columns("Key", "Name", "Description", "IP", "Cores", "RAM", "Disk", "Status")
         self._load_data()
 
     def on_screen_resume(self) -> None:
@@ -87,64 +80,47 @@ class DashboardScreen(Screen):
         env = load_environment(env_name)
         self._vms = env.vms
 
-        self.query_one("#dash-env-label", Static).update(
-            f"  Dashboard — [bold]{env_name}[/bold]"
+        self.query_one("#tf-title", Static).update(
+            f"Terraform — env: [bold]{env_name}[/bold]"
         )
 
-        vm_count = len(env.vms)
-        provisioned = sum(1 for v in env.vms.values() if v.status.value == "provisioned")
-        host_count = sum(len(g.hosts) for g in env.host_groups.values())
-
-        self.query_one("#stat-vms", Static).update(f"VMs: {vm_count}")
-        self.query_one("#stat-hosts", Static).update(f"Hosts: {host_count}")
-        self.query_one("#stat-provisioned", Static).update(f"Provisioned: {provisioned}/{vm_count}")
-
-        table = self.query_one("#vm-overview", DataTable)
+        table = self.query_one("#tf-table", DataTable)
         table.clear()
         for key, vm_state in env.vms.items():
             c = vm_state.config
             table.add_row(
-                key, c.name, c.description, c.ip_address, str(c.vmid),
+                key, c.name, c.description, c.ip_address,
                 str(c.cores), str(c.memory), c.disk_size,
                 vm_state.status.value,
                 key=key,
             )
 
     def _get_selected_key(self) -> str | None:
-        table = self.query_one("#vm-overview", DataTable)
+        table = self.query_one("#tf-table", DataTable)
         if table.row_count == 0:
             return None
         row_key = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
         return str(row_key.value)
-
-    # --- Edit (Enter) ---
-
-    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
-        key = str(event.row_key.value)
-        if key not in self._vms:
-            self.notify("No VM selected", severity="warning")
-            return
-
-        def on_save(result: bool) -> None:
-            if result:
-                self._load_data()
-                self.notify("VM updated")
-
-        self.app.push_screen(
-            VMEditModal(self.app.current_env, self._vms[key].config), on_save
-        )
-
-    # --- New VM ---
 
     def action_new_vm(self) -> None:
         def on_save(result: bool) -> None:
             if result:
                 self._load_data()
                 self.notify("VM created")
-
         self.app.push_screen(VMEditModal(self.app.current_env), on_save)
 
-    # --- Deploy ---
+    def action_edit_vm(self) -> None:
+        key = self._get_selected_key()
+        if not key or key not in self._vms:
+            self.notify("No VM selected", severity="warning")
+            return
+        def on_save(result: bool) -> None:
+            if result:
+                self._load_data()
+                self.notify("VM updated")
+        self.app.push_screen(
+            VMEditModal(self.app.current_env, self._vms[key].config), on_save
+        )
 
     def action_deploy_vm(self) -> None:
         key = self._get_selected_key()
@@ -155,8 +131,6 @@ class DashboardScreen(Screen):
             terraform_deploy_vm(self.app.current_env, key),
             f"Deploy VM: {key}",
         )
-
-    # --- Destroy ---
 
     def action_destroy_vm(self) -> None:
         key = self._get_selected_key()
@@ -180,9 +154,8 @@ class DashboardScreen(Screen):
             on_confirm,
         )
 
-    # --- Delete from config ---
-
     def action_delete_vm(self) -> None:
+        """Delete VM from tfvars (does not destroy in Proxmox)."""
         key = self._get_selected_key()
         if not key:
             self.notify("No VM selected", severity="warning")
@@ -199,20 +172,6 @@ class DashboardScreen(Screen):
             ),
             on_confirm,
         )
-
-    # --- SSH ---
-
-    def action_ssh_into(self) -> None:
-        key = self._get_selected_key()
-        if not key or key not in self._vms:
-            self.notify("No VM selected", severity="warning")
-            return
-        ip = self._vms[key].config.ip_address
-        user = self._vms[key].config.ssh_user
-        with self.app.suspend():
-            subprocess.run(["ssh", f"{user}@{ip}"])
-
-    # --- File operations ---
 
     def _remove_vm_from_tfvars(self, key: str) -> None:
         """Remove a VM definition from the tfvars file (file I/O only)."""
@@ -231,23 +190,34 @@ class DashboardScreen(Screen):
         self._load_data()
         self.notify(f"VM '{key}' removed from config")
 
-    # --- Refresh / Buttons ---
-
     def action_refresh(self) -> None:
         self._load_data()
         self.notify("Refreshed")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         env = self.app.current_env
-        if event.button.id == "btn-new":
-            self.action_new_vm()
-        elif event.button.id == "btn-tf-deploy":
-            self.app.run_task(terraform_deploy_all(env), "Deploy All (Terraform)")
-        elif event.button.id == "btn-ansible-deploy":
-            self.app.run_task(
-                task_command("ansible:deploy-all", env), "Deploy All (Ansible)"
-            )
-        elif event.button.id == "btn-ping":
-            self.app.run_task(
-                task_command("ansible:ping", env), "Ping All Hosts"
-            )
+        actions = {
+            "btn-new": self.action_new_vm,
+            "btn-edit": self.action_edit_vm,
+            "btn-deploy": self.action_deploy_vm,
+            "btn-deploy-all": lambda: self.app.run_task(
+                terraform_deploy_all(env), "Deploy All (Terraform)"
+            ),
+            "btn-destroy": self.action_destroy_vm,
+            "btn-clean": lambda: self._confirm_and_run(
+                "Clean terraform state?", "Clean Terraform",
+                terraform_clean(env), "Clean Terraform",
+            ),
+        }
+        action = actions.get(event.button.id)
+        if action:
+            action()
+
+    def _confirm_and_run(
+        self, message: str, title: str, command: list[str], desc: str
+    ) -> None:
+        def on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self.app.run_task(command, desc)
+
+        self.app.push_screen(ConfirmDialog(message, title=title), on_confirm)

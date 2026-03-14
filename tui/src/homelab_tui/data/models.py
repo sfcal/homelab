@@ -25,6 +25,7 @@ class VMConfig:
     storage_pool: str
     network_bridge: str
     ssh_user: str
+    tags: str = "application"
 
 
 @dataclass
@@ -34,15 +35,29 @@ class VMState:
 
 
 @dataclass
-class AnsiblePlaybook:
-    task_name: str
-    display_name: str
+class TaskInfo:
+    name: str
     description: str
-    hosts_group: str | None = None
+    namespace: str
+    short_name: str
+
+
+@dataclass
+class PackerTemplate:
+    name: str
+    filename: str
+    path: str
+
+
+@dataclass
+class HostGroup:
+    name: str
+    hosts: list[str] = field(default_factory=list)
+    category: str = ""
 
 
 @dataclass
 class Environment:
     name: str
     vms: dict[str, VMState] = field(default_factory=dict)
-    playbooks: list[AnsiblePlaybook] = field(default_factory=list)
+    host_groups: dict[str, HostGroup] = field(default_factory=dict)

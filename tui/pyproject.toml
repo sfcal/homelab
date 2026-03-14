@@ -2,7 +2,7 @@
 name = "homelab-tui"
 version = "0.1.0"
 description = "Terminal UI for homelab infrastructure management"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "textual>=0.89.0",
     "python-hcl2>=4.3.0",

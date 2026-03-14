@@ -1,28 +1,28 @@
-from ..config import ENVIRONMENTS
+"""Load environment state by merging terraform config with state."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from ..config import ANSIBLE_DIR, TERRAFORM_DIR
 from .hcl_parser import parse_vms_tfvars
 from .inventory_parser import parse_hosts_ini
-from .models import AnsiblePlaybook, Environment, VMState, VMStatus
+from .models import Environment, HostGroup, VMState, VMStatus
 from .tfstate_reader import get_provisioned_vm_keys
 
-ANSIBLE_TASKS = [
-    AnsiblePlaybook("ansible:deploy-all", "Deploy All", "Deploy entire infrastructure"),
-    AnsiblePlaybook("ansible:deploy-networking", "Deploy Networking", "Deploy DNS + reverse proxy + Tailscale", "networking"),
-    AnsiblePlaybook("ansible:deploy-media", "Deploy Media Stack", "Deploy media stack", "media-stack"),
-    AnsiblePlaybook("ansible:deploy-monitoring", "Deploy Monitoring", "Deploy monitoring stack", "monitoring"),
-    AnsiblePlaybook("ansible:deploy-games", "Deploy Games Server", "Deploy games server", "games-server"),
-    AnsiblePlaybook("ansible:deploy-website", "Deploy Website", "Deploy personal website", "website"),
-    AnsiblePlaybook("ansible:deploy-external-monitoring", "Deploy Ext Monitoring", "Deploy external monitoring", "external_monitoring"),
-    AnsiblePlaybook("ansible:ping", "Ping All Hosts", "Ping all hosts in inventory"),
-    AnsiblePlaybook("ansible:backup-media", "Backup Media", "Backup media stack", "media-stack"),
-    AnsiblePlaybook("ansible:restore-media", "Restore Media", "Restore media stack backup", "media-stack"),
-]
+
+def get_env_terraform_dir(env_name: str) -> Path:
+    return TERRAFORM_DIR / "environments" / env_name
+
+
+def get_env_ansible_dir(env_name: str) -> Path:
+    return ANSIBLE_DIR / "environments" / env_name
 
 
 def load_environment(env_name: str) -> Environment:
     """Load full state for an environment by merging HCL config with tfstate."""
-    env_cfg = ENVIRONMENTS[env_name]
-    tf_dir = env_cfg["terraform_dir"]
-    ansible_dir = env_cfg["ansible_dir"]
+    tf_dir = get_env_terraform_dir(env_name)
+    ansible_dir = get_env_ansible_dir(env_name)
 
     # Parse VM definitions
     tfvars_path = tf_dir / "vms.auto.tfvars"
@@ -38,4 +38,59 @@ def load_environment(env_name: str) -> Environment:
         status = VMStatus.PROVISIONED if key in provisioned_keys else VMStatus.DEFINED
         vms[key] = VMState(config=config, status=status)
 
-    return Environment(name=env_name, vms=vms, playbooks=list(ANSIBLE_TASKS))
+    # Parse host groups
+    hosts_path = ansible_dir / "hosts.ini"
+    raw_groups = parse_hosts_ini(hosts_path) if hosts_path.exists() else {}
+    host_groups: dict[str, HostGroup] = {}
+    for group_name, hosts in raw_groups.items():
+        if ":children" in group_name:
+            continue
+        category = "infrastructure" if group_name.startswith("infra_") else "apps"
+        host_groups[group_name] = HostGroup(
+            name=group_name,
+            hosts=hosts,
+            category=category,
+        )
+
+    return Environment(name=env_name, vms=vms, host_groups=host_groups)
+
+
+def get_infra_host_ip(env_name: str, group_prefix: str) -> str | None:
+    """Get the first host IP from an infrastructure group."""
+    ansible_dir = get_env_ansible_dir(env_name)
+    hosts_path = ansible_dir / "hosts.ini"
+    if not hosts_path.exists():
+        return None
+    groups = parse_hosts_ini(hosts_path)
+    for group_name, hosts in groups.items():
+        if group_name.startswith(group_prefix) and hosts:
+            return hosts[0]
+    return None
+
+
+def get_all_host_ips(env_name: str) -> list[str]:
+    """Get all unique host IPs from the environment inventory."""
+    ansible_dir = get_env_ansible_dir(env_name)
+    hosts_path = ansible_dir / "hosts.ini"
+    if not hosts_path.exists():
+        return []
+    groups = parse_hosts_ini(hosts_path)
+    ips: set[str] = set()
+    for group_name, hosts in groups.items():
+        if ":children" in group_name:
+            continue
+        for h in hosts:
+            stripped = h.strip().split()[0]
+            ips.add(stripped)
+    return sorted(ips)
+
+
+def get_ssh_user(env_name: str) -> str:
+    """Get the SSH user for the environment from VM configs."""
+    tf_dir = get_env_terraform_dir(env_name)
+    tfvars_path = tf_dir / "vms.auto.tfvars"
+    if tfvars_path.exists():
+        vms = parse_vms_tfvars(tfvars_path)
+        for vm in vms.values():
+            return vm.ssh_user
+    return "sfcal"
