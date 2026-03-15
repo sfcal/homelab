@@ -5,156 +5,170 @@ vars:
   HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
 
 tasks:
-  restore-media:
-    desc: Restore media stack backup
+  # --- Internal Tasks ---
+
+  _deploy:
+    internal: true
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/media/restore.yml
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/{{.PLAYBOOK_PATH}}
+
+  # --- Media Operations ---
+
+  restore-media:
+    desc: Restore media stack backup
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/media/restore.yml }
 
   backup-media:
     desc: backup media stack
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/media/backup.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/media/backup.yml }
+
+  # --- Full Deployment ---
 
   deploy-all:
     desc: Deploy entire infrastructure in correct order
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/site.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: site.yml }
+
+  # --- Infrastructure ---
 
   deploy-networking:
     desc: Deploy networking stack (DNS, reverse proxy, Tailscale)
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/networking/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/networking/deploy.yml }
 
   deploy-external-monitoring:
     desc: Deploy external monitoring server
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/external-monitoring/deploy.yml
-
-  deploy-media:
-    desc: Deploy media stack
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/media/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/external-monitoring/deploy.yml }
 
   deploy-monitoring:
     desc: Deploy monitoring stack
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/monitoring/deploy.yml
-
-  deploy-games:
-    desc: Deploy games server (tModLoader Terraria)
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/games-server/deploy.yml
-
-  deploy-website:
-    desc: Deploy personal website
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/website/deploy.yml
-
-  deploy-birdle:
-    desc: Deploy birdle game
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/birdle/deploy.yml
-
-  deploy-convertx:
-    desc: Deploy ConvertX file converter
-    dir: '{{.ROOT_DIR}}/ansible'
-    cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/convertx/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/monitoring/deploy.yml }
 
   deploy-ca:
     desc: Deploy Step-CA certificate authority
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/ca/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/ca/deploy.yml }
 
   deploy-ntp:
     desc: Deploy NTP time server (Chrony)
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/infrastructure/ntp/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/ntp/deploy.yml }
+
+  # --- Applications ---
+
+  deploy-media:
+    desc: Deploy media stack
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/media/deploy.yml }
+
+  deploy-games:
+    desc: Deploy games server (tModLoader Terraria)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/games-server/deploy.yml }
+
+  deploy-website:
+    desc: Deploy personal website
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/website/deploy.yml }
+
+  deploy-birdle:
+    desc: Deploy birdle game
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/birdle/deploy.yml }
+
+  deploy-convertx:
+    desc: Deploy ConvertX file converter
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/convertx/deploy.yml }
 
   deploy-restreamer:
     desc: Deploy Restreamer video streaming server
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/restreamer/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/restreamer/deploy.yml }
 
   deploy-homeassistant:
     desc: Deploy Home Assistant
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/homeassistant/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/homeassistant/deploy.yml }
 
   deploy-ittools:
     desc: Deploy IT-Tools developer utilities
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/it-tools/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/it-tools/deploy.yml }
 
   deploy-bookstack:
     desc: Deploy BookStack documentation wiki
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/bookstack/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/bookstack/deploy.yml }
 
   deploy-cyberchef:
     desc: Deploy CyberChef data analysis tool
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/cyberchef/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/cyberchef/deploy.yml }
 
   deploy-openbooks:
     desc: Deploy OpenBooks ebook downloader
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/openbooks/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/openbooks/deploy.yml }
 
   deploy-stirlingpdf:
     desc: Deploy Stirling-PDF tools
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/stirling-pdf/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/stirling-pdf/deploy.yml }
 
   deploy-kasm:
     desc: Deploy Kasm Workspaces
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/kasm/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/kasm/deploy.yml }
 
   deploy-seafile:
     desc: Deploy Seafile file sync & share
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/seafile/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/seafile/deploy.yml }
 
   deploy-romm:
     desc: Deploy RomM game library manager
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/romm/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/romm/deploy.yml }
 
   deploy-microbin:
     desc: Deploy MicroBin paste bin
-    dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/microbin/deploy.yml
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/microbin/deploy.yml }
 
-  # Utility tasks
+  # --- Utility Tasks ---
+
   ping:
     desc: Ping all hosts in inventory
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - ansible -i {{.HOSTS_FILE}} all -m ping
-
-
-

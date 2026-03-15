@@ -13,16 +13,16 @@
 - name: Set ownership on step-ca data directory.
   ansible.builtin.file:
     path: "{{ deploy_path }}/step-ca/data"
-    owner: "1000"
-    group: "1000"
+    owner: "{{ step_ca_uid }}"
+    group: "{{ step_ca_gid }}"
     recurse: true
 
 - name: Deploy provisioner password file.
   ansible.builtin.copy:
     content: "{{ step_ca_provisioner_password }}"
     dest: "{{ deploy_path }}/step-ca/password.txt"
-    owner: "1000"
-    group: "1000"
+    owner: "{{ step_ca_uid }}"
+    group: "{{ step_ca_gid }}"
     mode: "0600"
   no_log: true
 
@@ -64,7 +64,7 @@
         "defaultTLSCertDuration": "{{ step_ca_default_cert_duration | default('720h') }}"
       }' {{ deploy_path }}/step-ca/data/config/ca.json > {{ deploy_path }}/step-ca/data/config/ca.json.tmp
       && mv {{ deploy_path }}/step-ca/data/config/ca.json.tmp {{ deploy_path }}/step-ca/data/config/ca.json
-      && chown 1000:1000 {{ deploy_path }}/step-ca/data/config/ca.json
+      && chown {{ step_ca_uid }}:{{ step_ca_gid }} {{ deploy_path }}/step-ca/data/config/ca.json
   register: ca_claims_update
   changed_when: ca_claims_update.rc == 0
   notify: Restart step-ca
@@ -98,6 +98,6 @@
 - name: Display step-ca status.
   ansible.builtin.debug:
     msg:
-      - "Step-CA is running at https://ca.ldn.5am.cloud:{{ step_ca_port }}"
+      - "Step-CA is running at https://{{ step_ca_dns_names.split(',') | first }}:{{ step_ca_port }}"
       - "Root CA cert available at {{ deploy_path }}/step-ca/root_ca.crt"
       - "Health check: {{ step_ca_health.json }}"

@@ -8,8 +8,10 @@
       ansible.builtin.include_role:
         name: common
 
-  roles:
-    - role: docker_service
+  tasks:
+    - name: Deploy Home Assistant via docker_service role.
+      ansible.builtin.include_role:
+        name: docker_service
       vars:
         service_name: homeassistant
         service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
@@ -18,7 +20,6 @@
         service_images:
           - "{{ homeassistant_image }}"
 
-  post_tasks:
     - name: Ensure Home Assistant config directory exists.
       ansible.builtin.file:
         path: "{{ deploy_path }}/homeassistant/config"
@@ -34,10 +35,4 @@
         owner: "{{ homeassistant_user }}"
         group: "{{ homeassistant_group }}"
         mode: "0644"
-      notify: Restart Home Assistant
-
-  handlers:
-    - name: Restart Home Assistant
-      community.docker.docker_compose_v2:
-        project_src: "{{ deploy_path }}/homeassistant"
-        state: restarted
+      notify: Restart homeassistant

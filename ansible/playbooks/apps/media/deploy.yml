@@ -14,7 +14,8 @@
 
   tasks:
     - name: Configure NFS mounts.
-      ansible.builtin.include_tasks: tasks/nfs.yml
+      ansible.builtin.include_role:
+        name: nfs_mount
 
     - name: Configure Media Stack.
       ansible.builtin.include_tasks: tasks/media-stack.yml

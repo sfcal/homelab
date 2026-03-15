@@ -13,7 +13,7 @@
       vars:
         service_name: it-tools
         service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
-        service_user: "{{ ittools_user }}"
-        service_group: "{{ ittools_group }}"
+        service_user: "{{ it_tools_user }}"
+        service_group: "{{ it_tools_group }}"
         service_images:
-          - "{{ ittools_image }}"
+          - "{{ it_tools_image }}"

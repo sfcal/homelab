@@ -10,7 +10,8 @@
 
   tasks:
     - name: Configure NFS mounts.
-      ansible.builtin.include_tasks: tasks/nfs.yml
+      ansible.builtin.include_role:
+        name: nfs_mount
 
     - name: Deploy Seafile via docker_service role.
       ansible.builtin.include_role:

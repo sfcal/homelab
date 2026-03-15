@@ -10,7 +10,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ={{ system_timezone }}
-      - APP_URL=https://bookstack.wil.5am.cloud
+      - APP_URL={{ bookstack_app_url }}
       - DB_HOST=bookstack-db
       - DB_PORT=3306
       - DB_USERNAME=bookstack
