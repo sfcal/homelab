@@ -235,6 +235,19 @@ services:
     volumes:
       - ./wizarr:/data
 
+  dispatcharr:
+    image: ghcr.io/dispatcharr/dispatcharr:{{ dispatcharr_version }}
+    container_name: dispatcharr
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
+    environment:
+      - TZ={{ system_timezone }}
+    ports:
+      - "9191:9191"
+    volumes:
+      - ./dispatcharr:/data
+
   frigate:
     image: ghcr.io/blakeblackshear/frigate:{{ frigate_version }}
     container_name: frigate

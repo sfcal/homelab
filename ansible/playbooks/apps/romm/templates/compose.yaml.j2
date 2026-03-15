@@ -1,0 +1,60 @@
+---
+services:
+  romm-db:
+    image: {{ romm_db_image }}
+    container_name: romm-db
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD={{ romm_db_root_password }}
+      - MARIADB_DATABASE=romm
+      - MARIADB_USER=romm-user
+      - MARIADB_PASSWORD={{ romm_db_password }}
+    volumes:
+      - "{{ deploy_path }}/romm/db:/var/lib/mysql"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - romm-net
+
+  romm-valkey:
+    image: {{ romm_valkey_image }}
+    container_name: romm-valkey
+    restart: unless-stopped
+    networks:
+      - romm-net
+
+  romm:
+    image: {{ romm_image }}
+    container_name: romm
+    restart: unless-stopped
+    ports:
+      - "{{ romm_port }}:8080"
+    environment:
+      - DB_HOST=romm-db
+      - DB_NAME=romm
+      - DB_USER=romm-user
+      - DB_PASSWD={{ romm_db_password }}
+      - ROMM_AUTH_SECRET_KEY={{ romm_auth_secret }}
+      - IGDB_CLIENT_ID={{ romm_igdb_client_id }}
+      - IGDB_CLIENT_SECRET={{ romm_igdb_client_secret }}
+      - REDIS_HOST=romm-valkey
+      - REDIS_PORT=6379
+    volumes:
+      - "{{ deploy_path }}/romm/resources:/romm/resources"
+      - "{{ deploy_path }}/romm/redis:/redis-data"
+      - "{{ deploy_path }}/romm/config:/romm/config"
+      - /mnt/data/roms:/romm/library
+    depends_on:
+      romm-db:
+        condition: service_healthy
+      romm-valkey:
+        condition: service_started
+    networks:
+      - romm-net
+
+networks:
+  romm-net:
+    driver: bridge

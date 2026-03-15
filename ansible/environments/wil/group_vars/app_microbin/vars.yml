@@ -1,0 +1,6 @@
+---
+microbin_image: "danielszabo99/microbin:latest"
+microbin_port: 8081
+microbin_user: root
+microbin_group: root
+microbin_hostname: "bin.wil.5am.cloud"

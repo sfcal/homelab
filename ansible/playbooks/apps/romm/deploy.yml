@@ -1,0 +1,39 @@
+---
+- name: Deploy RomM
+  hosts: app_romm
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Ensure RomM config directory exists.
+      ansible.builtin.file:
+        path: "{{ deploy_path }}/romm/config"
+        state: directory
+        owner: "{{ romm_user }}"
+        group: "{{ romm_group }}"
+        mode: "0755"
+
+    - name: Deploy RomM config file.
+      ansible.builtin.template:
+        src: templates/config.yml.j2
+        dest: "{{ deploy_path }}/romm/config/config.yml"
+        owner: "{{ romm_user }}"
+        group: "{{ romm_group }}"
+        mode: "0644"
+
+    - name: Deploy RomM via docker_service role.
+      ansible.builtin.include_role:
+        name: docker_service
+      vars:
+        service_name: romm
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ romm_user }}"
+        service_group: "{{ romm_group }}"
+        service_images:
+          - "{{ romm_image }}"
+          - "{{ romm_db_image }}"
+          - "{{ romm_valkey_image }}"

@@ -23,6 +23,7 @@
     - "{{ deploy_path }}/tdarr/configs"
     - "{{ deploy_path }}/tdarr/logs"
     - "{{ deploy_path }}/tdarr/data"
+    - "{{ deploy_path }}/dispatcharr"
     - "{{ deploy_path }}/frigate"
     - "{{ deploy_path }}/frigate/models"
 

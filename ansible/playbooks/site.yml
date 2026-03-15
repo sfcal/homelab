@@ -94,3 +94,11 @@
 # 19. Seafile - Independent
 - import_playbook: apps/seafile/deploy.yml
   tags: ['seafile', 'applications']
+
+# 20. MicroBin - Independent
+- import_playbook: apps/microbin/deploy.yml
+  tags: ['microbin', 'applications']
+
+# 21. RomM - Independent
+- import_playbook: apps/romm/deploy.yml
+  tags: ['romm', 'applications']

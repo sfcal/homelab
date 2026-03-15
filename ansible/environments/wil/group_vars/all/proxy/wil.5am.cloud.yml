@@ -75,3 +75,11 @@ wil_services:
     backend_port: 8080
     proxied: true
     forward_headers: true
+  - name: bin
+    backend_host: 10.2.20.70
+    backend_port: 8081
+    proxied: true
+  - name: roms
+    backend_host: 10.2.0.5
+    backend_port: 8085
+    proxied: true

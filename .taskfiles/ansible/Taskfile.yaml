@@ -137,6 +137,18 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/seafile/deploy.yml
 
+  deploy-romm:
+    desc: Deploy RomM game library manager
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/romm/deploy.yml
+
+  deploy-microbin:
+    desc: Deploy MicroBin paste bin
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/apps/microbin/deploy.yml
+
   # Utility tasks
   ping:
     desc: Ping all hosts in inventory

@@ -22,6 +22,7 @@ backup_targets:
   #- pulsarr
   - cleanuparr
   - tdarr
+  - dispatcharr
   - frigate
 
 # Paths to exclude from the tarball (glob patterns)
