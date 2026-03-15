@@ -18,8 +18,8 @@
         weekday: "{{ backup_cron_weekday }}"
         job: >-
           ansible-playbook
-          -i /etc/ansible/environments/wil/hosts.ini
-          /etc/ansible/playbooks/media/backup.yml
+          -i {{ backup_ansible_inventory }}
+          {{ backup_ansible_playbook }}
           --limit app_mediastack
           >> /var/log/media-backup.log 2>&1
         state: present

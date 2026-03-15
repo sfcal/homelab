@@ -11,9 +11,7 @@
           - "1. Networking - DNS, Reverse Proxy, Tailscale (foundational)"
           - "2. Step-CA (required for TLS)"
           - "3. Time Server"
-          - "4. PXE Server"
-          - "5. Media Stack (depends on Step-CA)"
-          - "6. Monitoring (depends on Step-CA)"
+          - "4. Monitoring (depends on Step-CA)"
 
 # --- Infrastructure ---
 
@@ -29,76 +27,72 @@
 - import_playbook: infrastructure/ntp/deploy.yml
   tags: ['time', 'ntp']
 
-# 4. PXE - Independent
-- import_playbook: infrastructure/pxe/deploy.yml
-  tags: ['pxe', 'netboot']
-
-# 5. Monitoring - Depends on Step-CA
+# 4. Monitoring - Depends on Step-CA
 #- import_playbook: infrastructure/monitoring/deploy.yml
 #  tags: ['monitoring', 'observability']
 
 # --- Apps ---
 
-# 6. Media - Depends on Step-CA
+# 5. Media - Depends on Step-CA
 - import_playbook: apps/media/deploy.yml
   tags: ['media', 'applications']
 
-# 7. Games Server - Independent
+# 6. Games Server - Independent
 - import_playbook: apps/games-server/deploy.yml
   tags: ['games', 'terraria']
 
-# 8. Personal Website - Independent
+# 7. Personal Website - Independent
 - import_playbook: apps/website/deploy.yml
   tags: ['website']
 
-# 9. Birdle - Independent
+# 8. Birdle - Independent
 - import_playbook: apps/birdle/deploy.yml
   tags: ['birdle']
 
-# 10. ConvertX - Independent
+# 9. ConvertX - Independent
 - import_playbook: apps/convertx/deploy.yml
   tags: ['convertx']
 
-# 11. Restreamer - Independent
+# 10. Restreamer - Independent
 - import_playbook: apps/restreamer/deploy.yml
   tags: ['restreamer']
 
-# 12. Home Assistant - Independent
+# 11. Home Assistant - Independent
 - import_playbook: apps/homeassistant/deploy.yml
   tags: ['homeassistant']
 
-# 13. IT-Tools - Independent
+# 12. IT-Tools - Independent
 - import_playbook: apps/it-tools/deploy.yml
   tags: ['it-tools']
 
-# 14. BookStack - Independent
+# 13. BookStack - Independent
 - import_playbook: apps/bookstack/deploy.yml
   tags: ['bookstack']
 
-# 15. CyberChef - Independent
+# 14. CyberChef - Independent
 - import_playbook: apps/cyberchef/deploy.yml
   tags: ['cyberchef']
 
-# 16. OpenBooks - Independent
+# 15. OpenBooks - Independent
 - import_playbook: apps/openbooks/deploy.yml
   tags: ['openbooks']
 
-# 17. Stirling-PDF - Independent
+# 16. Stirling-PDF - Independent
 - import_playbook: apps/stirling-pdf/deploy.yml
   tags: ['stirling-pdf']
 
-# 18. Kasm Workspaces - Independent
+# 17. Kasm Workspaces - Independent
 - import_playbook: apps/kasm/deploy.yml
   tags: ['kasm']
 
-# 19. Seafile - Independent
+# 18. Seafile - Independent
 - import_playbook: apps/seafile/deploy.yml
   tags: ['seafile', 'applications']
 
-# 20. MicroBin - Independent
+# 19. MicroBin - Independent
 - import_playbook: apps/microbin/deploy.yml
   tags: ['microbin', 'applications']
 
-# 21. RomM - Independent
+# 20. RomM - Independent
 - import_playbook: apps/romm/deploy.yml
   tags: ['romm', 'applications']

@@ -10,6 +10,10 @@ backup_cron_hour: "4"
 backup_cron_minute: "0"
 backup_cron_weekday: "0"
 
+# Ansible paths on the target host (used by the cron job)
+backup_ansible_inventory: /etc/ansible/environments/wil/hosts.ini
+backup_ansible_playbook: /etc/ansible/playbooks/media/backup.yml
+
 # Directories to back up (relative to /opt)
 backup_targets:
   - sabnzbd

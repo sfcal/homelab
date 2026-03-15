@@ -3,3 +3,4 @@ collections:
   - name: community.sops
     version: ">=2.2.0"
   - name: community.docker
+    version: ">=3.0.0"
