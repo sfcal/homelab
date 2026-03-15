@@ -1,0 +1,64 @@
+---
+services:
+  db:
+    image: {{ seafile_db_image }}
+    container_name: seafile-db
+    restart: unless-stopped
+    environment:
+      - "MYSQL_ROOT_PASSWORD={{ seafile_db_password }}"
+      - MYSQL_LOG_CONSOLE=true
+      - MARIADB_AUTO_UPGRADE=1
+    volumes:
+      - "{{ deploy_path }}/seafile/db:/var/lib/mysql"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - seafile-net
+
+  redis:
+    image: {{ seafile_redis_image }}
+    container_name: seafile-redis
+    restart: unless-stopped
+    networks:
+      - seafile-net
+
+  seafile:
+    image: {{ seafile_image }}
+    container_name: seafile
+    restart: unless-stopped
+    ports:
+      - "{{ seafile_port }}:80"
+    volumes:
+      - /mnt/seafile-data:/shared
+    environment:
+      - SEAFILE_MYSQL_DB_HOST=db
+      - "INIT_SEAFILE_MYSQL_ROOT_PASSWORD={{ seafile_db_password }}"
+      - SEAFILE_MYSQL_DB_USER=seafile
+      - "SEAFILE_MYSQL_DB_PASSWORD={{ seafile_db_password }}"
+      - SEAFILE_MYSQL_DB_CCNET_DB_NAME=ccnet_db
+      - SEAFILE_MYSQL_DB_SEAFILE_DB_NAME=seafile_db
+      - SEAFILE_MYSQL_DB_SEAHUB_DB_NAME=seahub_db
+      - "SEAFILE_SERVER_HOSTNAME={{ seafile_hostname }}"
+      - SEAFILE_SERVER_PROTOCOL=https
+      - "TIME_ZONE={{ system_timezone }}"
+      - "JWT_PRIVATE_KEY={{ seafile_jwt_key }}"
+      - SEAFILE_SERVER_LETSENCRYPT=false
+      - CACHE_PROVIDER=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - "INIT_SEAFILE_ADMIN_EMAIL={{ seafile_admin_email }}"
+      - "INIT_SEAFILE_ADMIN_PASSWORD={{ seafile_admin_password }}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - seafile-net
+
+networks:
+  seafile-net:
+    driver: bridge

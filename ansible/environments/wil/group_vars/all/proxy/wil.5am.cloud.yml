@@ -74,3 +74,4 @@ wil_services:
     backend_host: 10.2.20.70
     backend_port: 8080
     proxied: true
+    forward_headers: true

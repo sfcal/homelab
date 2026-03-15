@@ -1,0 +1,26 @@
+---
+- name: Deploy Seafile
+  hosts: app_seafile
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure NFS mounts.
+      ansible.builtin.include_tasks: tasks/nfs.yml
+
+    - name: Deploy Seafile via docker_service role.
+      ansible.builtin.include_role:
+        name: docker_service
+      vars:
+        service_name: seafile
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_user: "{{ seafile_user }}"
+        service_group: "{{ seafile_group }}"
+        service_images:
+          - "{{ seafile_image }}"
+          - "{{ seafile_db_image }}"
+          - "{{ seafile_redis_image }}"
