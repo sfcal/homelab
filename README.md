@@ -10,6 +10,8 @@
 [Deployment] | [Documentation] | [Contributing]
 </div>
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sfcal/homelab)
+
 [Deployment]: #get-started
 [Documentation]: https://homelab.samuel.computer
 [Contributing]: CONTRIBUTING.md
