@@ -1,7 +1,7 @@
 ---
 services:
   db:
-    image: {{ seafile_db_image }}
+    image: {{ apps[app_name].db_image }}
     container_name: seafile-db
     restart: unless-stopped
     environment:
@@ -19,18 +19,18 @@ services:
       - seafile-net
 
   redis:
-    image: {{ seafile_redis_image }}
+    image: {{ apps[app_name].redis_image }}
     container_name: seafile-redis
     restart: unless-stopped
     networks:
       - seafile-net
 
   seafile:
-    image: {{ seafile_image }}
+    image: {{ apps[app_name].image }}
     container_name: seafile
     restart: unless-stopped
     ports:
-      - "{{ seafile_port }}:80"
+      - "{{ apps[app_name].port }}:80"
     volumes:
       - /mnt/seafile-data:/shared
     environment:
@@ -41,7 +41,7 @@ services:
       - SEAFILE_MYSQL_DB_CCNET_DB_NAME=ccnet_db
       - SEAFILE_MYSQL_DB_SEAFILE_DB_NAME=seafile_db
       - SEAFILE_MYSQL_DB_SEAHUB_DB_NAME=seahub_db
-      - "SEAFILE_SERVER_HOSTNAME={{ seafile_hostname }}"
+      - "SEAFILE_SERVER_HOSTNAME={{ apps[app_name].hostname }}"
       - SEAFILE_SERVER_PROTOCOL=https
       - "TIME_ZONE={{ system_timezone }}"
       - "JWT_PRIVATE_KEY={{ seafile_jwt_key }}"

@@ -1,5 +1,0 @@
----
-stirlingpdf_image: "stirlingtools/stirling-pdf:latest"
-stirlingpdf_port: 8073
-stirlingpdf_user: root
-stirlingpdf_group: root

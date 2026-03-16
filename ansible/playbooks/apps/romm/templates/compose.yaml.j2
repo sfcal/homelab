@@ -1,7 +1,7 @@
 ---
 services:
   romm-db:
-    image: {{ romm_db_image }}
+    image: {{ apps[app_name].db_image }}
     container_name: romm-db
     restart: unless-stopped
     environment:
@@ -20,18 +20,18 @@ services:
       - romm-net
 
   romm-valkey:
-    image: {{ romm_valkey_image }}
+    image: {{ apps[app_name].valkey_image }}
     container_name: romm-valkey
     restart: unless-stopped
     networks:
       - romm-net
 
   romm:
-    image: {{ romm_image }}
+    image: {{ apps[app_name].image }}
     container_name: romm
     restart: unless-stopped
     ports:
-      - "{{ romm_port }}:8080"
+      - "{{ apps[app_name].port }}:8080"
     environment:
       - DB_HOST=romm-db
       - DB_NAME=romm

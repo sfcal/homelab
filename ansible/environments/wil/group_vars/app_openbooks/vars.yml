@@ -1,5 +1,0 @@
----
-openbooks_image: "evanbuss/openbooks:latest"
-openbooks_port: 8072
-openbooks_user: root
-openbooks_group: root

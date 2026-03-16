@@ -1,15 +1,15 @@
 ---
 services:
   kasm:
-    image: {{ kasm_image }}
+    image: {{ apps[app_name].image }}
     container_name: kasm
     privileged: true
     restart: unless-stopped
     ports:
-      - "{{ kasm_port }}:{{ kasm_port }}"
-      - "{{ kasm_wizard_port }}:3000"
+      - "{{ apps[app_name].port }}:{{ apps[app_name].port }}"
+      - "{{ apps[app_name].wizard_port }}:3000"
     environment:
-      - KASM_PORT={{ kasm_port }}
+      - KASM_PORT={{ apps[app_name].port }}
       - DOCKER_MTU=1500
     volumes:
       - "{{ deploy_path }}/kasm/data:/opt"

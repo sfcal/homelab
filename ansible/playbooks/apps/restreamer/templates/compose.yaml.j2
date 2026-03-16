@@ -1,15 +1,15 @@
 ---
 services:
   restreamer:
-    image: {{ restreamer_image }}
+    image: {{ apps[app_name].image }}
     container_name: restreamer
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 512m
     ports:
-      - "{{ restreamer_port }}:8080"
-      - "{{ restreamer_rtmp_port }}:1935"
-      - "{{ restreamer_srt_port }}:6000/udp"
+      - "{{ apps[app_name].port }}:8080"
+      - "{{ apps[app_name].rtmp_port }}:1935"
+      - "{{ apps[app_name].srt_port }}:6000/udp"
     volumes:
       - {{ deploy_path }}/restreamer/config:/core/config
       - {{ deploy_path }}/restreamer/data:/core/data

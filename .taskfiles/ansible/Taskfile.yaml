@@ -3,6 +3,7 @@ version: '3'
 vars:
   ENV_DIR: 'environments/{{.ENV}}'
   HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
+  APPS_FILE: '{{.ENV_DIR}}/group_vars/all/apps.yml'
 
 tasks:
   # --- Internal Tasks ---
@@ -11,7 +12,7 @@ tasks:
     internal: true
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/{{.PLAYBOOK_PATH}}
+      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/{{.PLAYBOOK_PATH}} {{.EXTRA_ARGS | default ""}}
 
   # --- Media Operations ---
 
@@ -33,7 +34,7 @@ tasks:
     desc: Deploy entire infrastructure in correct order
     cmds:
       - task: _deploy
-        vars: { PLAYBOOK_PATH: site.yml }
+        vars: { PLAYBOOK_PATH: site.yml, EXTRA_ARGS: '-e @{{.APPS_FILE}}' }
 
   # --- Infrastructure ---
 
@@ -69,101 +70,23 @@ tasks:
 
   # --- Applications ---
 
+  deploy-app:
+    desc: "Deploy an app by name (APP=<name>)"
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: deploy-app.yml, EXTRA_ARGS: '-e app_name={{.APP}} -e @{{.APPS_FILE}}' }
+
   deploy-media:
     desc: Deploy media stack
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/media/deploy.yml }
 
-  deploy-games:
-    desc: Deploy games server (tModLoader Terraria)
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/games-server/deploy.yml }
-
-  deploy-website:
-    desc: Deploy personal website
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/website/deploy.yml }
-
-  deploy-birdle:
-    desc: Deploy birdle game
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/birdle/deploy.yml }
-
-  deploy-convertx:
-    desc: Deploy ConvertX file converter
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/convertx/deploy.yml }
-
-  deploy-restreamer:
-    desc: Deploy Restreamer video streaming server
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/restreamer/deploy.yml }
-
   deploy-homeassistant:
     desc: Deploy Home Assistant
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/homeassistant/deploy.yml }
-
-  deploy-ittools:
-    desc: Deploy IT-Tools developer utilities
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/it-tools/deploy.yml }
-
-  deploy-bookstack:
-    desc: Deploy BookStack documentation wiki
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/bookstack/deploy.yml }
-
-  deploy-cyberchef:
-    desc: Deploy CyberChef data analysis tool
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/cyberchef/deploy.yml }
-
-  deploy-openbooks:
-    desc: Deploy OpenBooks ebook downloader
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/openbooks/deploy.yml }
-
-  deploy-stirlingpdf:
-    desc: Deploy Stirling-PDF tools
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/stirling-pdf/deploy.yml }
-
-  deploy-kasm:
-    desc: Deploy Kasm Workspaces
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/kasm/deploy.yml }
-
-  deploy-seafile:
-    desc: Deploy Seafile file sync & share
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/seafile/deploy.yml }
-
-  deploy-romm:
-    desc: Deploy RomM game library manager
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/romm/deploy.yml }
-
-  deploy-microbin:
-    desc: Deploy MicroBin paste bin
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/microbin/deploy.yml }
 
   # --- Utility Tasks ---
 

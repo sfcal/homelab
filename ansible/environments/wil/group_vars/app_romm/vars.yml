@@ -1,7 +1,0 @@
----
-romm_image: "rommapp/romm:latest"
-romm_db_image: "mariadb:10.11"
-romm_valkey_image: "valkey/valkey:latest"
-romm_port: 8085
-romm_user: root
-romm_group: root

@@ -1,6 +1,0 @@
----
-kasm_image: "lscr.io/linuxserver/kasm:latest"
-kasm_port: 4443
-kasm_wizard_port: 3001
-kasm_user: root
-kasm_group: root

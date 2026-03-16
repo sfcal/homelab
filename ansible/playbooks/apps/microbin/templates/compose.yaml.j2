@@ -1,16 +1,16 @@
 ---
 services:
   microbin:
-    image: {{ microbin_image }}
+    image: {{ apps[app_name].image }}
     container_name: microbin
     restart: unless-stopped
     ports:
-      - "{{ microbin_port }}:8080"
+      - "{{ apps[app_name].port }}:8080"
     volumes:
       - "{{ deploy_path }}/microbin/data:/app/microbin_data"
     environment:
       - MICROBIN_PORT=8080
-      - MICROBIN_PUBLIC_PATH=https://{{ microbin_hostname }}
+      - MICROBIN_PUBLIC_PATH=https://{{ apps[app_name].hostname }}
       - MICROBIN_EDITABLE=true
       - MICROBIN_HIGHLIGHTSYNTAX=true
       - MICROBIN_PRIVATE=true

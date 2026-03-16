@@ -1,8 +1,0 @@
----
-seafile_image: "seafileltd/seafile-mc:13.0-latest"
-seafile_db_image: "mariadb:10.11"
-seafile_redis_image: "redis:7"
-seafile_port: 8080
-seafile_user: root
-seafile_group: root
-seafile_hostname: "files.wil.5am.cloud"

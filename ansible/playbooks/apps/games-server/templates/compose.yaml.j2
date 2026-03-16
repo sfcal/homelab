@@ -1,41 +1,41 @@
 ---
 services:
   terraria:
-    image: ryshe/terraria:{{ terraria_version }}
+    image: {{ apps[app_name].terraria.image }}
     container_name: terraria
     restart: unless-stopped
     mem_limit: 4g
     mem_reservation: 2g
     environment:
-      - WORLD_FILENAME={{ terraria_server_worldname }}.wld
+      - WORLD_FILENAME={{ apps[app_name].terraria.worldname }}.wld
     ports:
-      - "{{ terraria_server_port }}:7777"
+      - "{{ apps[app_name].terraria.port }}:7777"
     volumes:
       - {{ deploy_path }}/games-server/terraria/worlds:/root/.local/share/Terraria/Worlds
     stdin_open: true
     tty: true
     command:
       - -autocreate
-      - "{{ terraria_server_worldsize }}"
+      - "{{ apps[app_name].terraria.worldsize }}"
       - -worldname
-      - {{ terraria_server_worldname }}
+      - {{ apps[app_name].terraria.worldname }}
       - -difficulty
-      - "{{ terraria_server_difficulty }}"
+      - "{{ apps[app_name].terraria.difficulty }}"
       - -maxplayers
-      - "{{ terraria_server_maxplayers }}"
+      - "{{ apps[app_name].terraria.maxplayers }}"
 {% if terraria_server_password %}
       - -password
       - "{{ terraria_server_password }}"
 {% endif %}
       - -motd
-      - "{{ terraria_server_motd }}"
+      - "{{ apps[app_name].terraria.motd }}"
       - -lang
-      - "{{ terraria_server_language }}"
+      - "{{ apps[app_name].terraria.language }}"
       - -npcstream
-      - "{{ terraria_server_npcstream }}"
-{% if terraria_server_seed %}
+      - "{{ apps[app_name].terraria.npcstream }}"
+{% if apps[app_name].terraria.seed %}
       - -seed
-      - "{{ terraria_server_seed }}"
+      - "{{ apps[app_name].terraria.seed }}"
 {% endif %}
       - -secure
       - "1"

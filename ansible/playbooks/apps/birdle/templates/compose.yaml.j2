@@ -19,13 +19,13 @@ services:
       retries: 5
 
   web:
-    image: {{ birdle_image }}
+    image: {{ apps[app_name].image }}
     container_name: birdle
     restart: unless-stopped
     mem_limit: 512m
     mem_reservation: 256m
     ports:
-      - "{{ birdle_port }}:8000"
+      - "{{ apps[app_name].port }}:8000"
     depends_on:
       db:
         condition: service_healthy

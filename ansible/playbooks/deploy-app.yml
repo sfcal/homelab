@@ -1,0 +1,25 @@
+---
+- name: "Deploy {{ app_name }}"
+  hosts: "{{ apps[app_name].host_group }}"
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure NFS mounts.
+      ansible.builtin.include_role:
+        name: nfs_mount
+      when: apps[app_name].nfs | default(false)
+
+    - name: "Deploy {{ app_name }} via docker_service role."
+      ansible.builtin.include_role:
+        name: docker_service
+      vars:
+        service_name: "{{ app_name }}"
+        service_compose_template: "{{ playbook_dir }}/apps/{{ app_name }}/templates/compose.yaml.j2"
+        service_user: "{{ apps[app_name].user | default('root') }}"
+        service_group: "{{ apps[app_name].group | default('root') }}"
+        service_images: "{{ apps[app_name].images }}"

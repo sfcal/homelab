@@ -31,68 +31,70 @@
 #- import_playbook: infrastructure/monitoring/deploy.yml
 #  tags: ['monitoring', 'observability']
 
-# --- Apps ---
+# --- Apps (custom playbooks) ---
 
 # 5. Media - Depends on Step-CA
 - import_playbook: apps/media/deploy.yml
   tags: ['media', 'applications']
 
-# 6. Games Server - Independent
-- import_playbook: apps/games-server/deploy.yml
-  tags: ['games', 'terraria']
-
-# 7. Personal Website - Independent
-- import_playbook: apps/website/deploy.yml
-  tags: ['website']
-
-# 8. Birdle - Independent
-- import_playbook: apps/birdle/deploy.yml
-  tags: ['birdle']
-
-# 9. ConvertX - Independent
-- import_playbook: apps/convertx/deploy.yml
-  tags: ['convertx']
-
-# 10. Restreamer - Independent
-- import_playbook: apps/restreamer/deploy.yml
-  tags: ['restreamer']
-
-# 11. Home Assistant - Independent
+# 6. Home Assistant
 - import_playbook: apps/homeassistant/deploy.yml
-  tags: ['homeassistant']
+  tags: ['homeassistant', 'applications']
 
-# 12. IT-Tools - Independent
-- import_playbook: apps/it-tools/deploy.yml
-  tags: ['it-tools']
+# --- Apps (data-driven) ---
 
-# 13. BookStack - Independent
-- import_playbook: apps/bookstack/deploy.yml
-  tags: ['bookstack']
+- import_playbook: deploy-app.yml
+  vars: { app_name: birdle }
+  tags: ['birdle', 'applications']
 
-# 14. CyberChef - Independent
-- import_playbook: apps/cyberchef/deploy.yml
-  tags: ['cyberchef']
+- import_playbook: deploy-app.yml
+  vars: { app_name: bookstack }
+  tags: ['bookstack', 'applications']
 
-# 15. OpenBooks - Independent
-- import_playbook: apps/openbooks/deploy.yml
-  tags: ['openbooks']
+- import_playbook: deploy-app.yml
+  vars: { app_name: convertx }
+  tags: ['convertx', 'applications']
 
-# 16. Stirling-PDF - Independent
-- import_playbook: apps/stirling-pdf/deploy.yml
-  tags: ['stirling-pdf']
+- import_playbook: deploy-app.yml
+  vars: { app_name: cyberchef }
+  tags: ['cyberchef', 'applications']
 
-# 17. Kasm Workspaces - Independent
-- import_playbook: apps/kasm/deploy.yml
-  tags: ['kasm']
+- import_playbook: deploy-app.yml
+  vars: { app_name: games-server }
+  tags: ['games-server', 'applications']
 
-# 18. Seafile - Independent
-- import_playbook: apps/seafile/deploy.yml
-  tags: ['seafile', 'applications']
+- import_playbook: deploy-app.yml
+  vars: { app_name: it-tools }
+  tags: ['it-tools', 'applications']
 
-# 19. MicroBin - Independent
-- import_playbook: apps/microbin/deploy.yml
+- import_playbook: deploy-app.yml
+  vars: { app_name: kasm }
+  tags: ['kasm', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: microbin }
   tags: ['microbin', 'applications']
 
-# 20. RomM - Independent
-- import_playbook: apps/romm/deploy.yml
+- import_playbook: deploy-app.yml
+  vars: { app_name: openbooks }
+  tags: ['openbooks', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: restreamer }
+  tags: ['restreamer', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: romm }
   tags: ['romm', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: seafile }
+  tags: ['seafile', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: stirling-pdf }
+  tags: ['stirling-pdf', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: website }
+  tags: ['website', 'applications']
