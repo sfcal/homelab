@@ -39,6 +39,10 @@ wil_services:
     backend_host: 10.2.20.186
     backend_port: 443
     proxied: false
+  - name: kr
+    backend_host: 10.2.20.104
+    backend_port: 443
+    proxied: false
 
   # Apps
   - name: convert

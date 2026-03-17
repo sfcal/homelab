@@ -47,6 +47,23 @@
     reload: true
   when: tailscale_mode == "subnet_router"
 
+- name: Install iptables-persistent.
+  ansible.builtin.apt:
+    name: iptables-persistent
+    state: present
+  when: tailscale_mode == "subnet_router"
+
+- name: Add masquerade rule for Tailscale subnet routing.
+  ansible.builtin.iptables:
+    table: nat
+    chain: POSTROUTING
+    source: 100.64.0.0/10
+    out_interface: "{{ ansible_default_ipv4.interface }}"
+    jump: MASQUERADE
+    comment: "Tailscale subnet router NAT"
+  when: tailscale_mode == "subnet_router"
+  notify: Save iptables rules
+
 # --- Ensure tailscaled starts after network is online ---
 - name: Create tailscaled systemd override directory.
   ansible.builtin.file:

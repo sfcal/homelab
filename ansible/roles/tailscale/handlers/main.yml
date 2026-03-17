@@ -3,3 +3,7 @@
   ansible.builtin.service:
     name: tailscaled
     state: restarted
+
+- name: Save iptables rules
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+  changed_when: true
