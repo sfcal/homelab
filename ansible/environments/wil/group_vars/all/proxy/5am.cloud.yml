@@ -1,0 +1,7 @@
+---
+cloud_services:
+  # Haivision
+  - name: hmp
+    backend_host: 10.2.20.40
+    backend_port: 443
+    proxied: false

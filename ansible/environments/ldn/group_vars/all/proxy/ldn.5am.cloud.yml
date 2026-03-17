@@ -6,7 +6,11 @@ ldn_services:
     backend_port: 8006
     proxied: true
     tls_skip_verify: true
-
+  - name: kvm
+    backend_host: 10.3.0.210
+    backend_port: 80
+    proxied: true
+    
   # Monitoring
   - name: grafana
     backend_host: 10.3.0.30

@@ -31,10 +31,6 @@ wil_services:
     proxied: true
 
   # Haivision
-  - name: hmp
-    backend_host: 10.2.20.40
-    backend_port: 443
-    proxied: false
   - name: hmg
     backend_host: 10.2.20.186
     backend_port: 443

@@ -17,6 +17,9 @@ dns_forward_zones:
   - name: "5am.video"
     forwarders:
       - "10.2.20.53"
+  - name: "5am.cloud"
+    forwarders:
+      - "10.2.20.53"
   - name: "wil.5am.cloud"
     forwarders:
       - "10.2.20.53"

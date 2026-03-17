@@ -20,6 +20,7 @@
 services: >-
   {{
     (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
+    (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
     (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
     (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
     (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list)
