@@ -47,6 +47,8 @@ graph LR
     WIL_VM -.->|"via subnet router"| LDN_VM
 ```
 
+<small>**Source:** `ansible/roles/tailscale/tasks/main.yml`</small>
+
 ## Configuration Reference
 
 All variables are set in the host or group vars for machines running Tailscale. Defaults are defined in `ansible/roles/tailscale/defaults/main.yml`.
@@ -158,6 +160,8 @@ Force re-authentication on the next Ansible run. Use when the auth key has chang
 tailscale_force_reauth: true
 ```
 
+<small>**Source:** `ansible/roles/tailscale/defaults/main.yml`</small>
+
 ## Cross-Site Connectivity
 
 Tailscale subnet routers enable three critical cross-site functions. For non-Tailscale devices on the local network to use these routes, the [UDM Pro must have static routes](unifi.md#static-routes) pointing remote subnets at the Tailscale subnet router VM.
@@ -185,6 +189,8 @@ dns_trusted_networks:
 
 This allows DNS queries and zone transfers originating from Tailscale IPs.
 
+<small>**Sources:** `ansible/environments/wil/group_vars/infra_networking/bind9.yml` · `ansible/environments/ldn/group_vars/infra_networking/bind9.yml`</small>
+
 ## DNS Integration
 
 Networking VMs run both BIND9 and Tailscale. To prevent Tailscale from overriding the local DNS configuration:
@@ -194,6 +200,8 @@ tailscale_accept_dns: false
 ```
 
 Without this, Tailscale would push its own DNS servers (MagicDNS), which would conflict with the locally running BIND9 instance.
+
+<small>**Source:** `ansible/roles/tailscale/tasks/main.yml`</small>
 
 ## Security
 

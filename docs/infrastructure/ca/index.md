@@ -59,6 +59,8 @@ The task file performs these steps in order:
 8. Exports the root CA certificate to `/opt/step-ca/root_ca.crt`
 9. Displays status output
 
+<small>**Source:** `ansible/playbooks/infrastructure/ca/tasks/step-ca.yml`</small>
+
 ## Docker Compose
 
 The container runs `smallstep/step-ca` with the following configuration:
@@ -67,6 +69,8 @@ The container runs `smallstep/step-ca` with the following configuration:
 - **Volumes:** `./data` for CA state, `./password.txt` mounted read-only
 - **Restart policy:** `unless-stopped`
 - **Initialization:** handled via `DOCKER_STEPCA_INIT_*` environment variables on first run
+
+<small>**Source:** `ansible/playbooks/infrastructure/ca/templates/compose.yaml.j2`</small>
 
 ## Configuration Reference
 
@@ -227,6 +231,8 @@ Password for the admin provisioner. Used to authenticate certificate requests.
 
 !!! warning
     Stored in SOPS-encrypted `secrets.sops.yml`, never in plaintext.
+
+<small>**Sources:** `ansible/environments/<env>/group_vars/infra_ca/vars.yml` · `ansible/environments/<env>/group_vars/infra_ca/secrets.sops.yml`</small>
 
 ## Common Tasks
 

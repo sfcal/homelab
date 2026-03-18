@@ -144,6 +144,8 @@ scrape_configs:
 - **Storage:** persistent volume at `/prometheus`
 - **User:** runs as `monitoring_uid:monitoring_gid`
 
+<small>**Source:** `ansible/playbooks/infrastructure/monitoring/templates/prometheus.yml.j2`</small>
+
 ### Configuration Reference
 
 ---
@@ -197,6 +199,8 @@ List of node exporter endpoints to scrape. Each entry is a `host:port` string.
       - "localhost:9100"
       - "10.3.0.53:9100"
     ```
+
+<small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/prometheus.yml` · `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml`</small>
 
 ---
 
@@ -289,6 +293,8 @@ Root URL for Grafana. Used for links in notifications and provisioned dashboards
 grafana_url: "https://grafana.5am.video"
 ```
 
+<small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/grafana.yml` · `ansible/playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2`</small>
+
 ---
 
 ## Homepage
@@ -348,6 +354,8 @@ Homepage is configured via four YAML template files:
 | `settings.yaml.j2` | Theme (dark, slate), layout (row style, column counts) |
 | `widgets.yaml.j2` | Global widgets (search bar, datetime) |
 
+<small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml` · `ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2`</small>
+
 ---
 
 ## External Monitoring (Uptime Kuma)
@@ -393,6 +401,8 @@ tailscale_accept_routes: true
 ```
 
 This allows Uptime Kuma to reach internal services (e.g., `10.2.20.53`) through the Tailscale mesh without exposing them publicly. See [VPN (Tailscale)](../networking/tailscale.md) for details.
+
+<small>**Sources:** `ansible/environments/external/group_vars/infra_externalmonitoring/vars.yml` · `ansible/playbooks/infrastructure/external-monitoring/templates/compose.yaml.j2`</small>
 
 ---
 

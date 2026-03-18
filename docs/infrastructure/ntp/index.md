@@ -70,6 +70,8 @@ hwtimestamp *
 - `rtcsync` — synchronizes the system clock with the hardware clock
 - `hwtimestamp *` — enables hardware timestamping on all interfaces for precision
 
+<small>**Sources:** `ansible/playbooks/infrastructure/ntp/tasks/chrony.yml` · `ansible/playbooks/infrastructure/ntp/templates/server.conf.j2`</small>
+
 ## Configuration Reference
 
 All variables are set in `ansible/environments/<env>/group_vars/infra_ntp/chrony.yml`.
@@ -105,6 +107,8 @@ List of upstream NTP servers to synchronize from. Each server is configured with
 !!! tip
     Each environment uses geographically local NTP servers for lower latency. WIL uses US-based servers (NIST, USNO); LDN uses UK and European servers (NPL, Cloudflare, Netnod).
 
+<small>**Sources:** `ansible/environments/wil/group_vars/infra_ntp/chrony.yml` · `ansible/playbooks/infrastructure/ntp/templates/servers.conf.j2`</small>
+
 ---
 
 ### `chrony_allow`
@@ -126,6 +130,8 @@ Networks allowed to query this NTP server. Controls which clients can synchroniz
     chrony_allow:
       - 10.3.0.0/24
     ```
+
+<small>**Sources:** `ansible/environments/<env>/group_vars/infra_ntp/chrony.yml` · `ansible/playbooks/infrastructure/ntp/templates/allow.conf.j2`</small>
 
 ## Common Tasks
 

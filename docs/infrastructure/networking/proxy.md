@@ -26,6 +26,8 @@ The Caddyfile is generated from the unified `services` list. For each domain, a 
 
 Only services with `proxied: true` and `enabled: true` (default) generate Caddy entries.
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2`</small>
+
 ```
 *.5am.video {
     tls { dns cloudflare ... }
@@ -60,6 +62,8 @@ The custom Docker image is built with `xcaddy` to include the `caddy-dns/cloudfl
 | `CF_EMAIL` | SOPS-encrypted secrets | Cloudflare account email |
 
 The Caddy container exposes ports `80`, `443`, and `2019` (admin API), and mounts persistent volumes for certificate storage.
+
+<small>**Sources:** `ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2` · `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2`</small>
 
 ## Service Definition Reference
 
@@ -218,6 +222,8 @@ Transport read buffer size in bytes. Increase for services with large response h
 read_buffer: 8192
 ```
 
+<small>**Sources:** `ansible/environments/<env>/group_vars/all/proxy/_services.yml` · `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2`</small>
+
 ## Service Configuration Examples
 
 ### Minimal service
@@ -269,6 +275,8 @@ A service that gets a DNS record pointing directly to its IP, with no Caddy prox
   proxied: false
 ```
 
+<small>**Sources:** `ansible/environments/wil/group_vars/all/proxy/5am.video.yml` · `ansible/environments/wil/group_vars/all/proxy/wil.5am.cloud.yml`</small>
+
 ## Service Aggregation
 
 The `_services.yml` file in each environment aggregates all per-domain service lists and injects the `domain` field:
@@ -296,6 +304,8 @@ The `_services.yml` file in each environment aggregates all per-domain service l
     ```
 
 Both BIND9 zone templates and the Caddyfile template consume the resulting `services` list.
+
+<small>**Sources:** `ansible/environments/wil/group_vars/all/proxy/_services.yml` · `ansible/environments/ldn/group_vars/all/proxy/_services.yml`</small>
 
 ## Best Practices
 

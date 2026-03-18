@@ -39,6 +39,8 @@ This logic lives in the `domain.zone.j2` template:
 {{ service.name }} IN A {{ reverse_proxy_ip if service.proxied else service.backend_host }}
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2`</small>
+
 ## Zone Configuration
 
 BIND9 generates zone files from two data sources:
@@ -72,6 +74,8 @@ For each domain, the `domain.zone.j2` template generates:
     domains:
       - name: "ldn.5am.cloud"
     ```
+
+<small>**Sources:** `ansible/environments/<env>/group_vars/all/vars.yml` · `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2`</small>
 
 ## Cross-Site Zone Transfers
 
@@ -146,6 +150,8 @@ Zone transfer configuration is set per-environment:
 !!! note
     Cross-site zone transfers work over Tailscale. The CGNAT range (`100.64.0.0/10`) is included in both `dns_trusted_networks` and `dns_transfer_clients` to allow queries and transfers through the VPN tunnel.
 
+<small>**Sources:** `ansible/environments/wil/group_vars/infra_networking/bind9.yml` · `ansible/environments/ldn/group_vars/infra_networking/bind9.yml`</small>
+
 ### Cross-Site Query Flow
 
 When an LDN client accesses a WIL service (e.g., `plex.5am.video`), the query is resolved locally from the replicated secondary zone — no live forwarding to WIL is needed. The resulting IP routes through Tailscale to reach WIL's Caddy.
@@ -179,6 +185,8 @@ Key points:
 - **Traffic routing** — the [UDM Pro static route](unifi.md#static-routes) sends `10.2.0.0/16` traffic to the Tailscale subnet router, which tunnels it to WIL
 - **Full TLS chain** — Caddy terminates TLS on the WIL side using the wildcard certificate for `*.5am.video`
 
+<small>**Sources:** `ansible/environments/ldn/group_vars/infra_networking/bind9.yml` · `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
+
 ## Reverse DNS (PTR Records)
 
 Reverse DNS maps IP addresses back to hostnames. Each environment defines a reverse zone for its services subnet and a list of PTR records.
@@ -196,6 +204,8 @@ dns_ptr_records:
 ```
 
 The `octet` is the last octet of the IP address. The `hostname` must end with a trailing dot (`.`).
+
+<small>**Sources:** `ansible/environments/<env>/group_vars/infra_networking/bind9.yml` · `ansible/playbooks/infrastructure/networking/templates/reverse.zone.j2`</small>
 
 ## Configuration Reference
 
@@ -217,6 +227,8 @@ dns_forwarders:
   - "1.0.0.1"
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
+
 ---
 
 ### `dns_trusted_networks`
@@ -234,6 +246,8 @@ dns_trusted_networks:
   - 100.64.0.0/10       # Tailscale CGNAT
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
+
 ---
 
 ### `dns_secondary_zones`
@@ -249,6 +263,8 @@ dns_secondary_zones:
       - "10.3.20.53"
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
+
 ---
 
 ### `dns_transfer_clients`
@@ -263,6 +279,8 @@ dns_transfer_clients:
   - "100.64.0.0/10"
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
+
 ---
 
 ### `dns_notify_targets`
@@ -275,6 +293,8 @@ IPs to notify when a zone changes. Must be specific IPs, not CIDRs. Triggers the
 dns_notify_targets:
   - "10.3.20.53"
 ```
+
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
 
 ---
 
@@ -298,6 +318,8 @@ dns_forward_zones:
       - "8.8.8.8"
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
+
 ---
 
 ### `reverse_proxy_ip`
@@ -310,6 +332,8 @@ IP address used for DNS A records of proxied services. This is the IP of the Cad
 reverse_proxy_ip: "10.2.20.53"
 ```
 
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2`</small>
+
 ---
 
 ### `dns_reverse_zone`
@@ -321,6 +345,8 @@ Reverse DNS zone name, derived from the services subnet. Follows the `in-addr.ar
 ```yaml
 dns_reverse_zone: "20.2.10.in-addr.arpa"    # for 10.2.20.x
 ```
+
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
 
 ---
 
@@ -338,6 +364,8 @@ dns_ptr_records:
 
 !!! note
     The `hostname` must end with a trailing dot (`.`) to be treated as a FQDN.
+
+<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/reverse.zone.j2`</small>
 
 ## Common Tasks
 
