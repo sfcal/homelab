@@ -26,8 +26,16 @@ options {
   // Allow recursive queries from trusted networks
   allow-recursion { trusted; };
 
-  // Prevent zone transfers
+  // Allow zone transfers to secondary DNS servers
+{% if dns_transfer_clients | default([]) | length > 0 %}
+  allow-transfer { {% for client in dns_transfer_clients %}{{ client }}; {% endfor %}};
+{% else %}
   allow-transfer { none; };
+{% endif %}
+{% if dns_notify_targets | default([]) | length > 0 %}
+  also-notify { {% for target in dns_notify_targets %}{{ target }}; {% endfor %}};
+  notify yes;
+{% endif %}
 
   // Enable DNSSEC validation
   dnssec-validation auto;
@@ -55,6 +63,15 @@ zone "{{ zone.name }}" IN {
 
 {% endfor %}
 
+// Secondary zones - replicated from remote primaries
+{% for zone in dns_secondary_zones | default([]) %}
+zone "{{ zone.name }}" IN {
+  type slave;
+  file "/var/cache/bind/secondary-{{ zone.name }}.zone";
+  masters { {% for master in zone.masters %}{{ master }}; {% endfor %}};
+};
+
+{% endfor %}
 // Domain zones
 {% for domain in domains %}
 zone "{{ domain.name }}" IN {

@@ -1,7 +1,7 @@
 $ORIGIN {{ current_domain.name }}.
-$TTL 86400      ; 1 day
+$TTL 300        ; 5 minutes
 @       IN SOA  ns.{{ current_domain.name }}. admin.{{ current_domain.name }}. (
-                                {{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01 ; serial
+                                {{ ansible_date_time.epoch }} ; serial
                                 3600       ; refresh (1 hour)
                                 3600       ; retry (1 hour)
                                 2419200    ; expire (4 weeks)

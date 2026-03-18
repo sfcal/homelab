@@ -27,11 +27,11 @@ ldn_services:
 
   # Haivision
   - name: hmg
-    backend_host: 10.3.0.111
+    backend_host: 10.3.20.111
     backend_port: 443
     proxied: false
   - name: kr
-    backend_host: 10.3.0.248
+    backend_host: 10.3.20.248
     backend_port: 443
     proxied: false
 

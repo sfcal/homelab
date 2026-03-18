@@ -12,23 +12,32 @@ dns_trusted_networks:
   - 10.2.0.0/16
   - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
-# Cross-site forwarding to WIL DNS
-dns_forward_zones:
+# Secondary zones - replicated from remote primaries via AXFR
+dns_secondary_zones:
   - name: "5am.video"
-    forwarders:
+    masters:
       - "10.2.20.53"
   - name: "5am.cloud"
-    forwarders:
+    masters:
       - "10.2.20.53"
   - name: "wil.5am.cloud"
-    forwarders:
+    masters:
       - "10.2.20.53"
   - name: "ext.5am.cloud"
-    forwarders:
+    masters:
       - "10.2.20.53"
   - name: "sfc.al"
-    forwarders:
+    masters:
       - "10.2.20.53"
+
+# IPs allowed to pull zone transfers from this server
+dns_transfer_clients:
+  - "10.2.20.53"
+  - "100.64.0.0/10"
+
+# IPs to notify on zone changes (must be specific IPs, not CIDRs)
+dns_notify_targets:
+  - "10.2.20.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
 reverse_proxy_ip: "10.3.20.53"

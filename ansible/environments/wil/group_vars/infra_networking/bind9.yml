@@ -15,10 +15,21 @@ dns_trusted_networks:
 # Zones forwarded to external DNS (not resolved locally)
 dns_forward_zones:
   - "docs.5am.cloud"
-  # Cross-site forwarding to LDN DNS
+
+# Secondary zones - replicated from remote primaries via AXFR
+dns_secondary_zones:
   - name: "ldn.5am.cloud"
-    forwarders:
+    masters:
       - "10.3.20.53"
+
+# IPs allowed to pull zone transfers from this server
+dns_transfer_clients:
+  - "10.3.20.53"
+  - "100.64.0.0/10"
+
+# IPs to notify on zone changes (must be specific IPs, not CIDRs)
+dns_notify_targets:
+  - "10.3.20.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
 reverse_proxy_ip: "10.2.20.53"

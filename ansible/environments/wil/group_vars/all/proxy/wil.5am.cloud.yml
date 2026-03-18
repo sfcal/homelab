@@ -36,7 +36,7 @@ wil_services:
     backend_port: 443
     proxied: false
   - name: kr
-    backend_host: 10.2.20.104
+    backend_host: 10.2.20.83
     backend_port: 443
     proxied: false
 
