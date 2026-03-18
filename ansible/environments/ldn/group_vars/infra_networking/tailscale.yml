@@ -7,7 +7,7 @@ tailscale_mode: "subnet_router"
 
 # Routes to advertise to the Tailscale network
 tailscale_advertise_routes:
-  - "10.3.0.0/24"
+  - "10.3.0.0/16"
 
 # Accept routes from other subnet routers (enables cross-site routing)
 tailscale_accept_routes: true

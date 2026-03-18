@@ -8,7 +8,7 @@ dns_forwarders:
 dns_trusted_networks:
   - localhost
   - localnets
-  - 10.3.0.0/24
+  - 10.3.0.0/16
   - 10.2.0.0/16
   - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
@@ -31,10 +31,10 @@ dns_forward_zones:
       - "10.2.20.53"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
-reverse_proxy_ip: "10.3.0.53"
+reverse_proxy_ip: "10.3.20.53"
 
 # Reverse DNS zone name (derived from subnet)
-dns_reverse_zone: "0.3.10.in-addr.arpa"
+dns_reverse_zone: "20.3.10.in-addr.arpa"
 
 # Reverse Zone PTR Records
 dns_ptr_records:

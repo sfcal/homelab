@@ -2,7 +2,7 @@
 ldn_services:
   # Infrastructure
   - name: vm
-    backend_host: 10.3.0.10
+    backend_host: 10.3.20.10
     backend_port: 8006
     proxied: true
     tls_skip_verify: true
@@ -13,15 +13,15 @@ ldn_services:
     
   # Monitoring
   - name: grafana
-    backend_host: 10.3.0.30
+    backend_host: 10.3.20.30
     backend_port: 3000
     proxied: true
   - name: prometheus
-    backend_host: 10.3.0.30
+    backend_host: 10.3.20.30
     backend_port: 9090
     proxied: true
   - name: homepage
-    backend_host: 10.3.0.30
+    backend_host: 10.3.20.30
     backend_port: 3002
     proxied: true
 
@@ -37,7 +37,7 @@ ldn_services:
 
   # Apps
   - name: homeassistant
-    backend_host: 10.3.0.50
+    backend_host: 10.3.20.50
     backend_port: 8123
     proxied: true
     forward_headers: true

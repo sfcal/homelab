@@ -4,7 +4,7 @@
 environment = "ldn"
 
 // Environment-specific settings
-proxmox_node = "pve-lon"
+proxmox_node = "pve-ldn"
 
 // Common VM Settings
 template_prefix      = "ubuntu-server"
