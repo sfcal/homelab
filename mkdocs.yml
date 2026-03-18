@@ -114,6 +114,9 @@ nav:
           - DNS (BIND9): infrastructure/networking/dns.md
           - Reverse Proxy (Caddy): infrastructure/networking/proxy.md
           - VPN (Tailscale): infrastructure/networking/tailscale.md
+      - Certificate Authority: infrastructure/ca/index.md
+      - Time Server: infrastructure/ntp/index.md
+      - Monitoring: infrastructure/monitoring/index.md
       - Docker Services: infrastructure/docker.md
   - Reference:
       - reference/index.md
