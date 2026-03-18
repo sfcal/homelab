@@ -109,6 +109,11 @@ nav:
       - Packer: infrastructure/packer.md
       - Terraform: infrastructure/terraform.md
       - Ansible: infrastructure/ansible.md
+      - Networking:
+          - infrastructure/networking/index.md
+          - DNS (BIND9): infrastructure/networking/dns.md
+          - Reverse Proxy (Caddy): infrastructure/networking/proxy.md
+          - VPN (Tailscale): infrastructure/networking/tailscale.md
       - Docker Services: infrastructure/docker.md
   - Reference:
       - reference/index.md

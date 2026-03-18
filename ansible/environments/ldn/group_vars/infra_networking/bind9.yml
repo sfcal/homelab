@@ -34,7 +34,6 @@ dns_secondary_zones:
 dns_transfer_clients:
   - "10.2.20.53"
   - "100.64.0.0/10"
-
 # IPs to notify on zone changes (must be specific IPs, not CIDRs)
 dns_notify_targets:
   - "10.2.20.53"

@@ -12,10 +12,6 @@ dns_trusted_networks:
   - 10.3.0.0/16
   - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
-# Zones forwarded to external DNS (not resolved locally)
-dns_forward_zones:
-  - "docs.5am.cloud"
-
 # Secondary zones - replicated from remote primaries via AXFR
 dns_secondary_zones:
   - name: "ldn.5am.cloud"
@@ -26,7 +22,6 @@ dns_secondary_zones:
 dns_transfer_clients:
   - "10.3.20.53"
   - "100.64.0.0/10"
-
 # IPs to notify on zone changes (must be specific IPs, not CIDRs)
 dns_notify_targets:
   - "10.3.20.53"

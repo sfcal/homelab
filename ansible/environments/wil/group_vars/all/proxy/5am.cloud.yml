@@ -5,3 +5,8 @@ cloud_services:
     backend_host: 10.2.20.40
     backend_port: 443
     proxied: false
+  # GitHub Pages docs site
+  - name: docs
+    backend_host: 185.199.108.153
+    backend_port: 443
+    proxied: false
