@@ -49,7 +49,10 @@ graph TD
 
 ## Key Concepts
 
+- **VLANs** — each site uses a UDM Pro gateway with VLANs for network segmentation (infrastructure, VMs, storage, clients, IoT). See [Gateway (UniFi)](../infrastructure/networking/unifi.md).
 - **Split-Horizon DNS** — internal and external clients get different answers for the same hostname. See [DNS Services](../infrastructure/networking/dns.md#split-horizon-dns).
 - **Unified Service Definitions** — a single YAML entry per service drives both DNS records and reverse proxy configuration. See [Service Definition Reference](../infrastructure/networking/proxy.md#service-definition-reference).
 - **Zone Transfers** — WIL and LDN replicate each other's DNS zones for cross-site resolution. See [Cross-Site Zone Transfers](../infrastructure/networking/dns.md#cross-site-zone-transfers).
 - **Wildcard TLS** — Caddy obtains one wildcard certificate per domain via Cloudflare DNS-01 challenge. See [TLS Certificate Management](../infrastructure/networking/proxy.md#tls-certificate-management).
+- **Static Routes** — UDM Pro routes cross-site traffic to the Tailscale subnet router VM. See [Static Routes](../infrastructure/networking/unifi.md#static-routes).
+- **Port Forwarding** — UDM Pro forwards ports 80/443 to Caddy for external access. See [Port Forwarding](../infrastructure/networking/unifi.md#port-forwarding).

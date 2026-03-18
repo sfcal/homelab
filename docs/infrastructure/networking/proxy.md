@@ -50,6 +50,8 @@ Caddy obtains wildcard certificates for each domain using the Cloudflare DNS-01 
 - One wildcard cert covers all subdomains per domain (e.g., `*.5am.video`)
 - Certificates auto-renew before expiry
 
+External traffic reaches Caddy via [port forwarding on the UDM Pro](unifi.md#port-forwarding) (ports 80 and 443).
+
 The custom Docker image is built with `xcaddy` to include the `caddy-dns/cloudflare` plugin. Two environment variables authenticate with Cloudflare:
 
 | Variable | Source | Purpose |

@@ -10,11 +10,13 @@ The networking stack provides DNS resolution, reverse proxying, dynamic DNS, and
 ```mermaid
 graph TD
     subgraph External
+        ExtClient[External Client]
         CloudflareDNS[Cloudflare DNS]
         DDNS[Cloudflare DDNS]
     end
 
     subgraph Internal
+        UDM[UDM Pro Gateway]
         Client[Internal Client]
         BIND9[BIND9 DNS]
         Caddy[Caddy Reverse Proxy]
@@ -25,16 +27,19 @@ graph TD
     BIND9 -->|"2a. proxied: true"| Caddy
     BIND9 -->|"2b. proxied: false"| Backend
     Caddy -->|3. reverse proxy| Backend
-    CloudflareDNS -->|external clients| Caddy
+    ExtClient -->|DNS query| CloudflareDNS
+    CloudflareDNS -->|public IP| UDM
+    UDM -->|"port forward\n80/443"| Caddy
     DDNS -->|updates public IP| CloudflareDNS
 ```
 
-Internal clients query BIND9 for service hostnames. Proxied services resolve to the Caddy reverse proxy IP, which terminates TLS and forwards to backends. Non-proxied services resolve directly to the backend IP. External clients resolve via Cloudflare DNS and reach Caddy over the public IP, kept current by DDNS.
+Internal clients query BIND9 for service hostnames. Proxied services resolve to the Caddy reverse proxy IP, which terminates TLS and forwards to backends. Non-proxied services resolve directly to the backend IP. External clients resolve via Cloudflare DNS and reach Caddy over the public IP — the [UDM Pro](unifi.md) port-forwards ports 80/443 to Caddy, and DDNS keeps the public IP current.
 
 ## Components
 
 | Component | Purpose | Docs |
 |-----------|---------|------|
+| [UniFi UDM Pro](unifi.md) | Gateway, VLANs, static routes, port forwarding | [Gateway](unifi.md) |
 | [BIND9](dns.md) | Internal authoritative DNS with split-horizon resolution | [DNS Services](dns.md) |
 | [Caddy](proxy.md) | Reverse proxy with automatic wildcard TLS via Cloudflare | [Reverse Proxy](proxy.md) |
 | [Tailscale](tailscale.md) | Encrypted WireGuard VPN mesh between sites | [VPN](tailscale.md) |
@@ -61,7 +66,7 @@ graph LR
     LDN_DNS -->|"zone transfer\n(AXFR)"| WIL_DNS
 ```
 
-Each environment runs its own networking VM at `.53` in the services subnet. WIL is the primary DNS for 5 domains; LDN is primary for `ldn.5am.cloud`. Each site replicates the other's zones as secondary via AXFR. Tailscale subnet routers provide L3 connectivity between sites over the CGNAT range (`100.64.0.0/10`).
+Each environment runs a [UDM Pro gateway](unifi.md) with VLANs and a networking VM at `.53` on VLAN 20. WIL is the primary DNS for 5 domains; LDN is primary for `ldn.5am.cloud`. Each site replicates the other's zones as secondary via AXFR. Tailscale subnet routers provide L3 connectivity between sites over the CGNAT range (`100.64.0.0/10`), with [static routes on the UDM Pro](unifi.md#static-routes) directing cross-site traffic to the Tailscale VM.
 
 | Environment | Network | DNS Server | Domains (primary) |
 |-------------|---------|------------|-------------------|

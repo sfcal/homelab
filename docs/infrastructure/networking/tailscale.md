@@ -160,7 +160,7 @@ tailscale_force_reauth: true
 
 ## Cross-Site Connectivity
 
-Tailscale subnet routers enable three critical cross-site functions:
+Tailscale subnet routers enable three critical cross-site functions. For non-Tailscale devices on the local network to use these routes, the [UDM Pro must have static routes](unifi.md#static-routes) pointing remote subnets at the Tailscale subnet router VM.
 
 ### DNS Zone Transfers
 
@@ -233,9 +233,10 @@ Without this, Tailscale would push its own DNS servers (MagicDNS), which would c
 
 1. Set up Tailscale on the new site's networking VM as a subnet router (see above)
 2. On existing sites, ensure `tailscale_accept_routes: true` so they accept the new site's routes
-3. Add the new site's subnet to `dns_trusted_networks` on existing DNS servers
-4. Configure zone transfers between the new site and existing sites (see [DNS — Configure zone transfer to a new secondary](dns.md#configure-zone-transfer-to-a-new-secondary))
-5. Deploy all affected environments
+3. Add [static routes on each site's UDM Pro](unifi.md#adding-a-new-site-route) pointing the new subnet at the local Tailscale VM
+4. Add the new site's subnet to `dns_trusted_networks` on existing DNS servers
+5. Configure zone transfers between the new site and existing sites (see [DNS — Configure zone transfer to a new secondary](dns.md#configure-zone-transfer-to-a-new-secondary))
+6. Deploy all affected environments
 
 ### Force re-authentication
 

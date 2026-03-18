@@ -111,6 +111,7 @@ nav:
       - Ansible: infrastructure/ansible.md
       - Networking:
           - infrastructure/networking/index.md
+          - Gateway (UniFi): infrastructure/networking/unifi.md
           - DNS (BIND9): infrastructure/networking/dns.md
           - Reverse Proxy (Caddy): infrastructure/networking/proxy.md
           - VPN (Tailscale): infrastructure/networking/tailscale.md

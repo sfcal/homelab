@@ -146,6 +146,39 @@ Zone transfer configuration is set per-environment:
 !!! note
     Cross-site zone transfers work over Tailscale. The CGNAT range (`100.64.0.0/10`) is included in both `dns_trusted_networks` and `dns_transfer_clients` to allow queries and transfers through the VPN tunnel.
 
+### Cross-Site Query Flow
+
+When an LDN client accesses a WIL service (e.g., `plex.5am.video`), the query is resolved locally from the replicated secondary zone — no live forwarding to WIL is needed. The resulting IP routes through Tailscale to reach WIL's Caddy.
+
+```mermaid
+sequenceDiagram
+    participant Client as LDN Client<br/>10.3.0.50
+    participant LDNS as LDN BIND9<br/>10.3.20.53
+    participant TS as Tailscale VPN<br/>100.64.x.x
+    participant Caddy as WIL Caddy<br/>10.2.20.53
+    participant Plex as Plex Server<br/>10.2.0.5
+
+    Client->>LDNS: Query: plex.5am.video
+    note over LDNS: Secondary zone for 5am.video<br/>(replicated from WIL via AXFR)
+    LDNS-->>Client: A: 10.2.20.53
+
+    Client->>TS: Connect to 10.2.20.53:443
+    note over TS: UDM Pro static route<br/>10.2.0.0/16 → Tailscale subnet router
+    TS->>Caddy: Route via WireGuard tunnel
+    note over Caddy: TLS termination<br/>Match @plex host matcher
+    Caddy->>Plex: Reverse proxy to 10.2.0.5:32400
+    Plex-->>Caddy: Response
+    Caddy-->>TS: Encrypted response
+    TS-->>Client: Response
+```
+
+Key points:
+
+- **No live DNS forwarding** — LDN BIND9 answers from its local secondary copy of the `5am.video` zone, so the query resolves instantly without crossing the VPN
+- **Zone data reflects WIL's `reverse_proxy_ip`** — the replicated A record points to `10.2.20.53` (WIL Caddy), not `10.3.20.53` (LDN Caddy)
+- **Traffic routing** — the [UDM Pro static route](unifi.md#static-routes) sends `10.2.0.0/16` traffic to the Tailscale subnet router, which tunnels it to WIL
+- **Full TLS chain** — Caddy terminates TLS on the WIL side using the wildcard certificate for `*.5am.video`
+
 ## Reverse DNS (PTR Records)
 
 Reverse DNS maps IP addresses back to hostnames. Each environment defines a reverse zone for its services subnet and a list of PTR records.
