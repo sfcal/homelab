@@ -2,19 +2,16 @@
 
 Caddy serves as the reverse proxy for all web-facing services. It runs as a Docker container with a custom-built image that includes the Cloudflare DNS plugin for automatic wildcard TLS certificates.
 
-!!! tip
-    For an overview of the full networking stack, see [Networking](index.md).
-
 ## File Locations
 
 | File | Purpose |
 |------|---------|
-| `playbooks/infrastructure/networking/tasks/caddy.yml` | Installation and configuration task |
-| `playbooks/infrastructure/networking/templates/Caddyfile.j2` | Reverse proxy configuration |
-| `playbooks/infrastructure/networking/templates/compose.yaml.j2` | Docker Compose service definition |
-| `playbooks/infrastructure/networking/templates/Dockerfile.j2` | Custom xcaddy build with Cloudflare plugin |
-| `environments/<env>/group_vars/all/proxy/*.yml` | Per-domain service definitions |
-| `environments/<env>/group_vars/all/proxy/_services.yml` | Service aggregation |
+| `ansible/playbooks/infrastructure/networking/tasks/caddy.yml` | Installation and configuration task |
+| `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2` | Reverse proxy configuration |
+| `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2` | Docker Compose service definition |
+| `ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2` | Custom xcaddy build with Cloudflare plugin |
+| `ansible/environments/<env>/group_vars/all/proxy/*.yml` | Per-domain service definitions |
+| `ansible/environments/<env>/group_vars/all/proxy/_services.yml` | Service aggregation |
 
 ## Architecture
 
@@ -25,8 +22,6 @@ The Caddyfile is generated from the unified `services` list. For each domain, a 
 3. **Reverse proxy directives** — each service gets a `handle` block with optional headers, encoding, and transport configuration
 
 Only services with `proxied: true` and `enabled: true` (default) generate Caddy entries.
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2`</small>
 
 ```
 *.5am.video {
@@ -62,8 +57,6 @@ The custom Docker image is built with `xcaddy` to include the `caddy-dns/cloudfl
 | `CF_EMAIL` | SOPS-encrypted secrets | Cloudflare account email |
 
 The Caddy container exposes ports `80`, `443`, and `2019` (admin API), and mounts persistent volumes for certificate storage.
-
-<small>**Sources:** `ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2` · `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2`</small>
 
 ## Service Definition Reference
 
@@ -222,8 +215,6 @@ Transport read buffer size in bytes. Increase for services with large response h
 read_buffer: 8192
 ```
 
-<small>**Sources:** `ansible/environments/<env>/group_vars/all/proxy/_services.yml` · `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2`</small>
-
 ## Service Configuration Examples
 
 ### Minimal service
@@ -275,8 +266,6 @@ A service that gets a DNS record pointing directly to its IP, with no Caddy prox
   proxied: false
 ```
 
-<small>**Sources:** `ansible/environments/wil/group_vars/all/proxy/5am.video.yml` · `ansible/environments/wil/group_vars/all/proxy/wil.5am.cloud.yml`</small>
-
 ## Service Aggregation
 
 The `_services.yml` file in each environment aggregates all per-domain service lists and injects the `domain` field:
@@ -304,8 +293,6 @@ The `_services.yml` file in each environment aggregates all per-domain service l
     ```
 
 Both BIND9 zone templates and the Caddyfile template consume the resulting `services` list.
-
-<small>**Sources:** `ansible/environments/wil/group_vars/all/proxy/_services.yml` · `ansible/environments/ldn/group_vars/all/proxy/_services.yml`</small>
 
 ## Best Practices
 
@@ -400,3 +387,13 @@ Set `enabled: false` on the service entry. This removes both the DNS record and 
   proxied: true
   enabled: false
 ```
+
+## Troubleshooting
+
+**502 Bad Gateway** — Caddy can reach the backend but it's not responding. Check the backend container is running: `ssh <host> docker ps`. Verify `backend_port` matches the container's exposed port.
+
+**Certificate not issuing** — Check Caddy logs: `ssh <networking-ip> docker logs caddy`. Common causes: Cloudflare API token expired, domain not on Cloudflare, or Let's Encrypt rate limit hit.
+
+**Service accessible via IP but not hostname** — The DNS record is missing or pointing to the wrong IP. Check with `dig <service>.<domain> @10.2.20.53` and verify the service entry in the domain file.
+
+**Headers not forwarded** — Ensure `forward_headers: true` is set on the service entry and redeploy networking.

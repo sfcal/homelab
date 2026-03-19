@@ -2,16 +2,13 @@
 
 Tailscale creates an encrypted WireGuard mesh network between geographically distributed environments. Subnet routers on each site's networking VM advertise local subnets, enabling cross-site communication over the CGNAT range (`100.64.0.0/10`).
 
-!!! tip
-    For an overview of the full networking stack, see [Networking](index.md).
-
 ## File Locations
 
 | File | Purpose |
 |------|---------|
-| `roles/tailscale/tasks/main.yml` | Installation, configuration, and authentication |
-| `roles/tailscale/defaults/main.yml` | Default variable values |
-| `roles/tailscale/handlers/main.yml` | Service restart handler |
+| `ansible/roles/tailscale/tasks/main.yml` | Installation, configuration, and authentication |
+| `ansible/roles/tailscale/defaults/main.yml` | Default variable values |
+| `ansible/roles/tailscale/handlers/main.yml` | Service restart handler |
 
 ## Deployment Modes
 
@@ -47,120 +44,21 @@ graph LR
     WIL_VM -.->|"via subnet router"| LDN_VM
 ```
 
-<small>**Source:** `ansible/roles/tailscale/tasks/main.yml`</small>
+![Tailscale subnet router with approved routes](../../assets/tailscale-subnets.png)
 
 ## Configuration Reference
 
 All variables are set in the host or group vars for machines running Tailscale. Defaults are defined in `ansible/roles/tailscale/defaults/main.yml`.
 
----
-
-### `tailscale_mode`
-
-Deployment mode. `"client"` joins the mesh as a regular node. `"subnet_router"` advertises local routes and enables IP forwarding.
-
-**Type:** `string`
-
-**Default:** `"client"`
-
-**Possible values:** `"client"`, `"subnet_router"`
-
-```yaml
-tailscale_mode: "subnet_router"
-```
-
----
-
-### `tailscale_auth_key`
-
-Authentication key from the Tailscale admin console. Generate under Settings → Keys → Generate auth key. Enable **Reusable** and **Pre-approved** for automated deployments.
-
-**Type:** `string`
-
-**Default:** `""`
-
-!!! warning
-    Store auth keys in SOPS-encrypted secrets files, never in plaintext group vars.
-
-```yaml
-tailscale_auth_key: "{{ tailscale_auth_key_secret }}"
-```
-
----
-
-### `tailscale_advertise_routes`
-
-CIDR ranges to advertise to the Tailscale mesh. Only used when `tailscale_mode` is `"subnet_router"`.
-
-**Type:** `list[string]`
-
-**Default:** `[]`
-
-```yaml
-tailscale_advertise_routes:
-  - "10.2.0.0/16"
-```
-
-!!! note
-    After deploying, routes must be approved in the Tailscale admin console before other nodes can use them.
-
----
-
-### `tailscale_accept_dns`
-
-Accept DNS configuration from Tailscale. Subnet routers running BIND9 should set this to `false` to avoid conflicts with the local DNS server.
-
-**Type:** `boolean`
-
-**Default:** `true`
-
-```yaml
-tailscale_accept_dns: false
-```
-
----
-
-### `tailscale_accept_routes`
-
-Accept routes advertised by other Tailscale nodes. Client nodes that need to reach other sites should set this to `true`.
-
-**Type:** `boolean`
-
-**Default:** `false`
-
-```yaml
-tailscale_accept_routes: true
-```
-
----
-
-### `tailscale_hostname`
-
-Hostname as it appears in the Tailscale admin console.
-
-**Type:** `string`
-
-**Default:** `"{{ inventory_hostname }}"`
-
-```yaml
-tailscale_hostname: "wil-networking"
-```
-
----
-
-### `tailscale_force_reauth`
-
-Force re-authentication on the next Ansible run. Use when the auth key has changed or the node needs to rejoin the mesh.
-
-**Type:** `boolean`
-
-**Default:** `false`
-
-```yaml
-tailscale_force_reauth: true
-```
-
-<small>**Source:** `ansible/roles/tailscale/defaults/main.yml`</small>
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `tailscale_mode` | `string` | `"client"` or `"subnet_router"` (advertises routes, enables IP forwarding) | `"client"` |
+| `tailscale_auth_key` | `string` | Auth key from Tailscale admin console (SOPS-encrypted) | `""` |
+| `tailscale_advertise_routes` | `list[string]` | CIDRs to advertise (subnet_router only, requires admin approval) | `[]` |
+| `tailscale_accept_dns` | `boolean` | Accept DNS from Tailscale (disable on BIND9 hosts) | `true` |
+| `tailscale_accept_routes` | `boolean` | Accept routes from other Tailscale nodes | `false` |
+| `tailscale_hostname` | `string` | Hostname in the Tailscale admin console | `"{{ inventory_hostname }}"` |
+| `tailscale_force_reauth` | `boolean` | Force re-authentication on next run | `false` |
 
 ## Cross-Site Connectivity
 
@@ -189,8 +87,6 @@ dns_trusted_networks:
 
 This allows DNS queries and zone transfers originating from Tailscale IPs.
 
-<small>**Sources:** `ansible/environments/wil/group_vars/infra_networking/bind9.yml` · `ansible/environments/ldn/group_vars/infra_networking/bind9.yml`</small>
-
 ## DNS Integration
 
 Networking VMs run both BIND9 and Tailscale. To prevent Tailscale from overriding the local DNS configuration:
@@ -201,7 +97,9 @@ tailscale_accept_dns: false
 
 Without this, Tailscale would push its own DNS servers (MagicDNS), which would conflict with the locally running BIND9 instance.
 
-<small>**Source:** `ansible/roles/tailscale/tasks/main.yml`</small>
+Split DNS entries in the Tailscale admin console route domain queries to the correct BIND9 server per site:
+
+![Tailscale nameserver and split DNS configuration](../../assets/tailscale-nameservers.png)
 
 ## Security
 
@@ -258,3 +156,11 @@ If a node's auth key expires or the node needs to rejoin:
     ```
 
 3. Reset `tailscale_force_reauth: false` after successful authentication to avoid re-authing on every future run
+
+## Troubleshooting
+
+**Cross-site traffic not routing** — Verify the subnet router is advertising routes: `ssh <networking-ip> tailscale status`. Check that routes are approved in the Tailscale admin console. Verify UDM Pro static routes point to the correct next hop.
+
+**"login required" on deploy** — The auth key has expired. Generate a new one from the Tailscale admin console, update the SOPS-encrypted secret, and redeploy with `tailscale_force_reauth: true`.
+
+**DNS queries failing over Tailscale** — Ensure `100.64.0.0/10` is in `dns_trusted_networks` on the target DNS server. Check that `tailscale_accept_dns: false` is set on networking VMs to prevent MagicDNS from overriding BIND9.

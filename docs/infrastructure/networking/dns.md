@@ -2,19 +2,16 @@
 
 BIND9 provides internal authoritative DNS with split-horizon resolution across all environments. Internal clients resolve service hostnames to local IPs, while external clients resolve via Cloudflare to public IPs.
 
-!!! tip
-    For an overview of the full networking stack, see [Networking](index.md).
-
 ## File Locations
 
 | File | Purpose |
 |------|---------|
-| `playbooks/infrastructure/networking/tasks/bind9.yml` | Installation and configuration task |
-| `playbooks/infrastructure/networking/templates/named.conf.j2` | Main BIND9 configuration |
-| `playbooks/infrastructure/networking/templates/domain.zone.j2` | Per-domain zone file template |
-| `playbooks/infrastructure/networking/templates/reverse.zone.j2` | Reverse DNS zone template |
-| `environments/<env>/group_vars/infra_networking/bind9.yml` | Per-environment DNS variables |
-| `environments/<env>/group_vars/all/vars.yml` | Domain list (`domains` variable) |
+| `ansible/playbooks/infrastructure/networking/tasks/bind9.yml` | Installation and configuration task |
+| `ansible/playbooks/infrastructure/networking/templates/named.conf.j2` | Main BIND9 configuration |
+| `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2` | Per-domain zone file template |
+| `ansible/playbooks/infrastructure/networking/templates/reverse.zone.j2` | Reverse DNS zone template |
+| `ansible/environments/<env>/group_vars/infra_networking/bind9.yml` | Per-environment DNS variables |
+| `ansible/environments/<env>/group_vars/all/vars.yml` | Domain list (`domains` variable) |
 
 ## Split-Horizon DNS
 
@@ -38,8 +35,6 @@ This logic lives in the `domain.zone.j2` template:
 ```jinja2
 {{ service.name }} IN A {{ reverse_proxy_ip if service.proxied else service.backend_host }}
 ```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2`</small>
 
 ## Zone Configuration
 
@@ -74,8 +69,6 @@ For each domain, the `domain.zone.j2` template generates:
     domains:
       - name: "ldn.5am.cloud"
     ```
-
-<small>**Sources:** `ansible/environments/<env>/group_vars/all/vars.yml` · `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2`</small>
 
 ## Cross-Site Zone Transfers
 
@@ -150,8 +143,6 @@ Zone transfer configuration is set per-environment:
 !!! note
     Cross-site zone transfers work over Tailscale. The CGNAT range (`100.64.0.0/10`) is included in both `dns_trusted_networks` and `dns_transfer_clients` to allow queries and transfers through the VPN tunnel.
 
-<small>**Sources:** `ansible/environments/wil/group_vars/infra_networking/bind9.yml` · `ansible/environments/ldn/group_vars/infra_networking/bind9.yml`</small>
-
 ### Cross-Site Query Flow
 
 When an LDN client accesses a WIL service (e.g., `plex.5am.video`), the query is resolved locally from the replicated secondary zone — no live forwarding to WIL is needed. The resulting IP routes through Tailscale to reach WIL's Caddy.
@@ -185,8 +176,6 @@ Key points:
 - **Traffic routing** — the [UDM Pro static route](unifi.md#static-routes) sends `10.2.0.0/16` traffic to the Tailscale subnet router, which tunnels it to WIL
 - **Full TLS chain** — Caddy terminates TLS on the WIL side using the wildcard certificate for `*.5am.video`
 
-<small>**Sources:** `ansible/environments/ldn/group_vars/infra_networking/bind9.yml` · `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
 ## Reverse DNS (PTR Records)
 
 Reverse DNS maps IP addresses back to hostnames. Each environment defines a reverse zone for its services subnet and a list of PTR records.
@@ -205,167 +194,21 @@ dns_ptr_records:
 
 The `octet` is the last octet of the IP address. The `hostname` must end with a trailing dot (`.`).
 
-<small>**Sources:** `ansible/environments/<env>/group_vars/infra_networking/bind9.yml` · `ansible/playbooks/infrastructure/networking/templates/reverse.zone.j2`</small>
-
 ## Configuration Reference
 
 All variables are set in `ansible/environments/<env>/group_vars/infra_networking/bind9.yml`.
 
----
-
-### `dns_forwarders`
-
-Upstream DNS servers for recursive queries. Used when BIND9 cannot resolve a domain from its own zones.
-
-**Type:** `list[string]`
-
-**Default:** `["1.1.1.1", "1.0.0.1"]`
-
-```yaml
-dns_forwarders:
-  - "1.1.1.1"
-  - "1.0.0.1"
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `dns_trusted_networks`
-
-Networks allowed to query the DNS server and use recursion. Queries from outside these networks are refused.
-
-**Type:** `list[string]`
-
-```yaml
-dns_trusted_networks:
-  - localhost
-  - localnets
-  - 10.2.0.0/16         # local network
-  - 10.3.0.0/16         # cross-site network
-  - 100.64.0.0/10       # Tailscale CGNAT
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `dns_secondary_zones`
-
-Zones to replicate from remote primaries via AXFR. Each entry specifies the zone name and the IP(s) of the primary server(s).
-
-**Type:** `list[object]`
-
-```yaml
-dns_secondary_zones:
-  - name: "ldn.5am.cloud"
-    masters:
-      - "10.3.20.53"
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `dns_transfer_clients`
-
-IPs or CIDRs allowed to pull AXFR zone transfers from this server.
-
-**Type:** `list[string]`
-
-```yaml
-dns_transfer_clients:
-  - "10.3.20.53"
-  - "100.64.0.0/10"
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `dns_notify_targets`
-
-IPs to notify when a zone changes. Must be specific IPs, not CIDRs. Triggers the secondary to pull the updated zone.
-
-**Type:** `list[string]`
-
-```yaml
-dns_notify_targets:
-  - "10.3.20.53"
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `dns_forward_zones`
-
-Zones to forward to external resolvers instead of resolving locally. Accepts either a string (uses default forwarders) or an object with custom forwarders.
-
-**Type:** `list[string | object]`
-
-**Default:** `[]`
-
-```yaml
-# Simple: forward using dns_forwarders
-dns_forward_zones:
-  - "example.com"
-
-# Custom forwarders
-dns_forward_zones:
-  - name: "example.com"
-    forwarders:
-      - "8.8.8.8"
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `reverse_proxy_ip`
-
-IP address used for DNS A records of proxied services. This is the IP of the Caddy reverse proxy — typically the networking VM itself.
-
-**Type:** `string`
-
-```yaml
-reverse_proxy_ip: "10.2.20.53"
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2`</small>
-
----
-
-### `dns_reverse_zone`
-
-Reverse DNS zone name, derived from the services subnet. Follows the `in-addr.arpa` convention.
-
-**Type:** `string`
-
-```yaml
-dns_reverse_zone: "20.2.10.in-addr.arpa"    # for 10.2.20.x
-```
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/named.conf.j2`</small>
-
----
-
-### `dns_ptr_records`
-
-PTR records for reverse DNS lookups. Each entry maps the last IP octet to a fully-qualified hostname.
-
-**Type:** `list[object]`
-
-```yaml
-dns_ptr_records:
-  - octet: "53"
-    hostname: "dns.wil.5am.cloud."
-```
-
-!!! note
-    The `hostname` must end with a trailing dot (`.`) to be treated as a FQDN.
-
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/reverse.zone.j2`</small>
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `dns_forwarders` | `list[string]` | Upstream DNS servers for recursive queries | `["1.1.1.1", "1.0.0.1"]` |
+| `dns_trusted_networks` | `list[string]` | Networks allowed to query and use recursion | (per-env) |
+| `dns_secondary_zones` | `list[object]` | Zones to replicate from remote primaries via AXFR | `[]` |
+| `dns_transfer_clients` | `list[string]` | IPs/CIDRs allowed to pull AXFR zone transfers | `[]` |
+| `dns_notify_targets` | `list[string]` | IPs to notify on zone changes (must be IPs, not CIDRs) | `[]` |
+| `dns_forward_zones` | `list[string\|object]` | Zones to forward to external resolvers | `[]` |
+| `reverse_proxy_ip` | `string` | IP for DNS A records of proxied services (Caddy IP) | (per-env) |
+| `dns_reverse_zone` | `string` | Reverse DNS zone name (`in-addr.arpa` format) | (per-env) |
+| `dns_ptr_records` | `list[object]` | PTR records mapping last IP octet to FQDN (trailing dot required) | `[]` |
 
 ## Common Tasks
 
@@ -431,3 +274,13 @@ dig -x 10.2.20.53 @10.2.20.53
 # Verify zone transfer
 dig AXFR 5am.video @10.2.20.53
 ```
+
+## Troubleshooting
+
+**Service not resolving** — Check BIND9 is running: `ssh <networking-ip> docker logs bind9`. Verify the service has an entry in the correct domain file under `group_vars/all/proxy/` and redeploy: `task ansible:deploy-networking ENV=wil`.
+
+**Wrong IP returned** — If a proxied service resolves to `backend_host` instead of `reverse_proxy_ip`, check that `proxied: true` is set. If a non-proxied service resolves to the Caddy IP, check that `proxied: false` is set.
+
+**Zone transfer not working** — Verify Tailscale connectivity between sites. Check that `dns_transfer_clients` includes the remote DNS server IP and the CGNAT range. Test with `dig AXFR <zone> @<primary-dns>`.
+
+**Serial number not incrementing** — Zone serials use the current epoch. If BIND9 doesn't pick up changes, restart the container: `ssh <networking-ip> docker restart bind9`.

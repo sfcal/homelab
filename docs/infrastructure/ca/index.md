@@ -59,7 +59,7 @@ The task file performs these steps in order:
 8. Exports the root CA certificate to `/opt/step-ca/root_ca.crt`
 9. Displays status output
 
-<small>**Source:** `ansible/playbooks/infrastructure/ca/tasks/step-ca.yml`</small>
+<small>**Source:** [`ansible/playbooks/infrastructure/ca/tasks/step-ca.yml`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/ca/tasks/step-ca.yml)</small>
 
 ## Docker Compose
 
@@ -70,167 +70,25 @@ The container runs `smallstep/step-ca` with the following configuration:
 - **Restart policy:** `unless-stopped`
 - **Initialization:** handled via `DOCKER_STEPCA_INIT_*` environment variables on first run
 
-<small>**Source:** `ansible/playbooks/infrastructure/ca/templates/compose.yaml.j2`</small>
+<small>**Source:** [`ansible/playbooks/infrastructure/ca/templates/compose.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/ca/templates/compose.yaml.j2)</small>
 
 ## Configuration Reference
 
 All variables are set in `ansible/environments/<env>/group_vars/infra_ca/vars.yml`.
 
----
-
-### `step_ca_version`
-
-Docker image tag for the Step-CA container.
-
-**Type:** `string`
-
-=== "WIL"
-
-    ```yaml
-    step_ca_version: "0.27.5"
-    ```
-
-=== "LDN"
-
-    ```yaml
-    step_ca_version: "0.27.5"
-    ```
-
----
-
-### `step_ca_port`
-
-Port the Step-CA HTTPS API listens on.
-
-**Type:** `integer`
-
-**Default:** `9000`
-
-```yaml
-step_ca_port: 9000
-```
-
----
-
-### `step_ca_name`
-
-Display name for the certificate authority. Used during initialization and appears in issued certificates.
-
-**Type:** `string`
-
-=== "WIL"
-
-    ```yaml
-    step_ca_name: "WIL Homelab CA"
-    ```
-
-=== "LDN"
-
-    ```yaml
-    step_ca_name: "LDN Homelab CA"
-    ```
-
----
-
-### `step_ca_dns_names`
-
-Comma-separated list of DNS names and IPs the CA server responds to. Used to generate the CA's own TLS certificate.
-
-**Type:** `string`
-
-=== "WIL"
-
-    ```yaml
-    step_ca_dns_names: "ca.wil.5am.cloud,10.2.20.9,127.0.0.1"
-    ```
-
-=== "LDN"
-
-    ```yaml
-    step_ca_dns_names: "ca.ldn.5am.cloud,10.3.0.9,127.0.0.1"
-    ```
-
----
-
-### `step_ca_provisioner_name`
-
-Name of the admin provisioner used to issue certificates.
-
-**Type:** `string`
-
-**Default:** `"admin"`
-
-```yaml
-step_ca_provisioner_name: "admin"
-```
-
----
-
-### `step_ca_init_ssh`
-
-Whether to initialize SSH certificate support.
-
-**Type:** `string`
-
-**Default:** `"false"`
-
-```yaml
-step_ca_init_ssh: "false"
-```
-
----
-
-### `step_ca_uid` / `step_ca_gid`
-
-UID and GID for the container's file ownership.
-
-**Type:** `string`
-
-**Default:** `"1000"`
-
-```yaml
-step_ca_uid: "1000"
-step_ca_gid: "1000"
-```
-
----
-
-### `step_ca_default_cert_duration`
-
-Default certificate validity period. Applied to `ca.json` claims after initialization.
-
-**Type:** `string`
-
-**Default:** `"720h"` (30 days)
-
-```yaml
-step_ca_default_cert_duration: "720h"
-```
-
----
-
-### `step_ca_max_cert_duration`
-
-Maximum allowed certificate validity period.
-
-**Type:** `string`
-
-**Default:** `"17520h"` (2 years)
-
-```yaml
-step_ca_max_cert_duration: "17520h"
-```
-
----
-
-### `step_ca_provisioner_password`
-
-Password for the admin provisioner. Used to authenticate certificate requests.
-
-**Type:** `string`
-
-!!! warning
-    Stored in SOPS-encrypted `secrets.sops.yml`, never in plaintext.
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `step_ca_version` | `string` | Docker image tag for Step-CA | (per-env) |
+| `step_ca_port` | `integer` | HTTPS API listen port | `9000` |
+| `step_ca_name` | `string` | CA display name, appears in issued certificates | (per-env) |
+| `step_ca_dns_names` | `string` | Comma-separated DNS names and IPs for the CA's TLS cert | (per-env) |
+| `step_ca_provisioner_name` | `string` | Admin provisioner name | `"admin"` |
+| `step_ca_init_ssh` | `string` | Initialize SSH certificate support | `"false"` |
+| `step_ca_uid` | `string` | Container file ownership UID | `"1000"` |
+| `step_ca_gid` | `string` | Container file ownership GID | `"1000"` |
+| `step_ca_default_cert_duration` | `string` | Default certificate validity period | `"720h"` |
+| `step_ca_max_cert_duration` | `string` | Maximum certificate validity period | `"17520h"` |
+| `step_ca_provisioner_password` | `string` | Admin provisioner password (SOPS-encrypted) | (required) |
 
 <small>**Sources:** `ansible/environments/<env>/group_vars/infra_ca/vars.yml` · `ansible/environments/<env>/group_vars/infra_ca/secrets.sops.yml`</small>
 

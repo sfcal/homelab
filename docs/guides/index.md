@@ -1,7 +1,8 @@
 # Guides
 
-Step-by-step instructions for using the services deployed on the homelab.
+Step-by-step procedures for common homelab operations.
 
-## Available Guides
-
-- [**Plex**](../plex/index.md) - Media server setup, browsing, playback, and requesting content
+- [**Deploy a Service**](deploy-service.md) — add a new application to the homelab
+- [**Add a New VM**](add-vm.md) — provision a new virtual machine
+- [**Networking Changes**](networking-changes.md) — add DNS records, proxy entries, and domains
+- [**Certificates**](certificates.md) — manage TLS certificates (public and private CA)

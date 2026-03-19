@@ -1,26 +1,35 @@
 /* ============================================
-   Homelab Docs - Dark Infrastructure Theme
-   Inspired by UV/Astral docs styling
+   Homelab Docs Theme
+   Warm blue palette inspired by Astral UV
    ============================================ */
 
 :root {
-  --hl-deep: #0d1117;
-  --hl-surface: #161b22;
-  --hl-border: #21262d;
-  --hl-text: #e6edf3;
-  --hl-text-muted: #8b949e;
-  --hl-blue: #58a6ff;
-  --hl-green: #3fb950;
-  --hl-cyan: #39d2c0;
-  --hl-orange: #d29922;
-  --hl-red: #f85149;
-  --hl-purple: #bc8cff;
-  --hl-pink: #f778ba;
-  --hl-navy: #1b2332;
-  --hl-light-bg: #ffffff;
-  --hl-light-surface: #f6f8fa;
-  --hl-light-text: #1f2328;
-  --hl-light-muted: #656d76;
+  /* --- Core palette (dark mode) --- */
+  --hl-deep:        #0f1729;   /* Deep navy - page background */
+  --hl-surface:     #162036;   /* Slightly lighter navy - cards, code blocks */
+  --hl-surface-alt: #1c2a44;   /* Hover states */
+  --hl-border:      #253552;   /* Subtle blue border */
+  --hl-text:        #f0f2f5;   /* Soft white */
+  --hl-text-muted:  #b8c4d6;   /* Cool light blue-gray */
+  --hl-text-faint:  #7b8da6;   /* Dimmer blue-gray */
+  --hl-link:        #6dd0f7;   /* Sky blue - links */
+  --hl-accent:      #5a9cf5;   /* Bright blue - accent */
+  --hl-purple:      #b4a3f5;   /* Soft lavender - keywords */
+  --hl-green:       #5ce8a0;   /* Mint green - strings */
+  --hl-cyan:        #46ebe1;   /* Bright cyan */
+  --hl-orange:      #f5a623;   /* Warm amber - numbers */
+  --hl-pink:        #e879a8;   /* Soft pink */
+  --hl-blue:        #6c8ef5;   /* Medium blue - functions */
+  --hl-red:         #f57878;   /* Soft coral */
+  --hl-header:      #6dd0f7;   /* Sky blue - section headers */
+
+  /* --- Light mode palette --- */
+  --hl-light-bg:      #ffffff;
+  --hl-light-surface: #f5f7fb;  /* Cool blue-tinted white */
+  --hl-light-text:    #1a2233;  /* Deep navy text */
+  --hl-light-muted:   #5b6b82;  /* Blue-gray muted */
+  --hl-light-link:    #2563a8;  /* Rich blue links */
+  --hl-light-accent:  #3b82f6;  /* Bright blue accent */
 }
 
 /* ---- Light Theme ---- */
@@ -29,11 +38,24 @@
   --md-default-bg-color: var(--hl-light-bg);
   --md-default-fg-color: var(--hl-light-text);
   --md-default-fg-color--light: var(--hl-light-muted);
-  --md-default-fg-color--lightest: rgba(0, 0, 0, 0.12);
-  --md-primary-fg-color: var(--hl-navy);
+  --md-default-fg-color--lighter: rgba(26, 34, 51, 0.32);
+  --md-default-fg-color--lightest: rgba(26, 34, 51, 0.10);
+  --md-primary-fg-color: var(--hl-deep);
   --md-primary-bg-color: var(--hl-light-bg);
-  --md-accent-fg-color: var(--hl-blue);
-  --md-typeset-a-color: var(--hl-blue);
+  --md-accent-fg-color: var(--hl-light-accent);
+  --md-typeset-a-color: var(--hl-light-link);
+
+  --md-code-fg-color: #2d3748;
+  --md-code-bg-color: var(--hl-light-surface);
+
+  --md-code-hl-comment-color: var(--hl-light-muted);
+  --md-code-hl-string-color: #1a7f5a;
+  --md-code-hl-keyword-color: #2563a8;
+  --md-code-hl-operator-color: var(--hl-light-muted);
+  --md-code-hl-number-color: #c93c37;
+  --md-code-hl-function-color: #7c3aed;
+  --md-code-hl-constant-color: #5a4fcf;
+  --md-code-hl-special-color: #d926a9;
 }
 
 /* ---- Dark Theme ---- */
@@ -42,37 +64,37 @@
   --md-default-bg-color: var(--hl-deep);
   --md-default-fg-color: var(--hl-text);
   --md-default-fg-color--light: var(--hl-text-muted);
-  --md-default-fg-color--lighter: var(--hl-text-muted);
+  --md-default-fg-color--lighter: var(--hl-text-faint);
   --md-default-fg-color--lightest: rgba(255, 255, 255, 0.12);
   --md-primary-fg-color: var(--hl-surface);
   --md-primary-bg-color: var(--hl-text);
-  --md-accent-fg-color: var(--hl-cyan);
+  --md-accent-fg-color: var(--hl-accent);
 
   --md-typeset-color: var(--hl-text);
-  --md-typeset-a-color: var(--hl-blue);
-  --md-typeset-mark-color: rgba(210, 153, 34, 0.3);
+  --md-typeset-a-color: var(--hl-link);
+  --md-typeset-mark-color: rgba(245, 166, 35, 0.3);
 
   --md-code-fg-color: var(--hl-text);
   --md-code-bg-color: var(--hl-surface);
 
-  --md-code-hl-comment-color: var(--hl-text-muted);
-  --md-code-hl-punctuation-color: var(--hl-text-muted);
+  --md-code-hl-comment-color: var(--hl-text-faint);
+  --md-code-hl-punctuation-color: var(--hl-text-faint);
   --md-code-hl-generic-color: var(--hl-text);
   --md-code-hl-variable-color: var(--hl-text);
   --md-code-hl-string-color: var(--hl-green);
   --md-code-hl-keyword-color: var(--hl-purple);
-  --md-code-hl-operator-color: var(--hl-cyan);
-  --md-code-hl-number-color: var(--hl-orange);
+  --md-code-hl-operator-color: var(--hl-purple);
+  --md-code-hl-number-color: var(--hl-cyan);
   --md-code-hl-special-color: var(--hl-cyan);
   --md-code-hl-function-color: var(--hl-blue);
   --md-code-hl-constant-color: var(--hl-orange);
   --md-code-hl-name-color: var(--md-code-fg-color);
 
-  --md-typeset-del-color: hsla(6, 90%, 60%, 0.15);
-  --md-typeset-ins-color: hsla(150, 90%, 44%, 0.15);
+  --md-typeset-del-color: hsla(350, 60%, 65%, 0.15);
+  --md-typeset-ins-color: hsla(155, 70%, 50%, 0.15);
 
-  --md-typeset-table-color: hsla(0, 0%, 100%, 0.12);
-  --md-typeset-table-color--light: hsla(0, 0%, 100%, 0.035);
+  --md-typeset-table-color: hsla(215, 30%, 60%, 0.12);
+  --md-typeset-table-color--light: hsla(215, 30%, 60%, 0.05);
 
   --md-footer-bg-color: var(--hl-surface);
   --md-footer-bg-color--dark: var(--hl-deep);
@@ -102,7 +124,7 @@
 }
 
 [data-md-color-scheme="homelab-dark"] details summary a {
-  color: var(--hl-blue);
+  color: var(--hl-link);
 }
 
 /* ---- Tables ---- */
@@ -115,7 +137,7 @@
   display: table;
 }
 
-/* ---- Sidebar Typography (matching UV) ---- */
+/* ---- Sidebar Typography ---- */
 
 .md-nav--primary .md-nav__title {
   box-shadow: none;
@@ -173,6 +195,15 @@
 /* Active nav link styling */
 .md-nav__link--active {
   font-weight: bold;
+}
+
+/* Section header colors (lime-green like UV's sidebar) */
+[data-md-color-scheme="homelab-dark"] .md-nav__item--section > .md-nav__link {
+  color: var(--hl-header);
+}
+
+[data-md-color-scheme="homelab-light"] .md-nav__item--section > .md-nav__link {
+  color: var(--hl-light-link);
 }
 
 /* ---- Code Blocks ---- */

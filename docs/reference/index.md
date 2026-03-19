@@ -1,9 +1,9 @@
 # Reference
 
-Quick-access reference material for day-to-day operations.
+Quick-access reference for tools and configuration formats.
 
-## Topics
-
-- [**Task Commands**](tasks.md) - Available Taskfile commands for deployment and management
-- [**TUI**](tui.md) - Terminal UI for interactive homelab management
-- [**FAQ**](faq.md) - Frequently asked questions
+- [**Terraform**](terraform.md) — VM module, variables, and provisioning commands
+- [**Ansible**](ansible.md) — playbooks, roles, and deployment commands
+- [**Packer**](packer.md) — VM template building
+- [**Task Commands**](tasks.md) — full CLI command reference
+- [**Config Reference**](config.md) — service definitions, VM definitions, and file conventions

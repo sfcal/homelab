@@ -1,35 +1,12 @@
 # Homelab Infrastructure as Code
 
-A complete infrastructure-as-code solution for managing a homelab running on Proxmox VMs. It automates the entire lifecycle from VM template creation to service deployment.
-
----
-
-## What is this project?
-
-This repository provisions and configures a full homelab environment using modern DevOps tooling:
-
-- **VM Template Creation** with Packer
-- **Infrastructure Provisioning** with Terraform
-- **Configuration Management** with Ansible
-- **Service Deployment** with Docker Compose
-
-Everything is version-controlled, encrypted with SOPS, and supports multiple environments.
-
-## Quick Links
-
-- [Quick Start](getting-started/quick-start.md) - Get up and running
-- [Prerequisites](getting-started/prerequisites.md) - What you need before starting
-- [Architecture](concepts/architecture.md) - How everything fits together
-- [FAQ](reference/faq.md) - Frequently asked questions
-
-## Architecture Overview
+An infrastructure-as-code homelab on Proxmox. Automates the full lifecycle from VM template creation to service deployment across multiple environments.
 
 ```mermaid
-graph TD
-    A[Proxmox VE] --> B[Packer Templates]
-    B --> C[Terraform VMs]
-    C --> D[Ansible Configuration]
-    D --> E[Docker Services]
+graph LR
+    A[Packer] -->|VM templates| B[Terraform]
+    B -->|Provisioned VMs| C[Ansible]
+    C -->|Configured hosts| D[Docker]
 ```
 
 ## Technology Stack
@@ -41,24 +18,17 @@ graph TD
 | Infrastructure | Terraform | VM provisioning |
 | Configuration | Ansible | Service deployment and orchestration |
 | Containers | Docker Compose | Application containerization |
-| Reverse Proxy | Caddy | HTTPS and routing |
+| Reverse Proxy | Caddy | Automatic HTTPS and routing |
 | DNS | BIND9 | Internal split-horizon DNS |
-| Monitoring | Prometheus + Grafana | Metrics and visualization |
+| Monitoring | Prometheus + Grafana | Metrics and dashboards |
 | Secrets | SOPS + Age | Encrypted configuration |
-| Automation | Task | Command orchestration |
+| Task Runner | Task | Unified CLI for all operations |
 
-## Services
+## Quick Links
 
-| Service | Domain | Description |
-|---------|--------|-------------|
-| Plex + *arr stack | `5am.video` | Media management and streaming |
-| Prometheus + Grafana | `wil.5am.cloud` | Infrastructure monitoring |
-| Homepage | `wil.5am.cloud` | Dashboard |
-| Personal Website | `sfc.al` | Personal projects |
-| Birdle | `sfc.al` | Bird identification game |
-| Terraria | - | Game server |
-
-## Getting Help
-
-- Browse the [full documentation](getting-started/quick-start.md)
-- Report issues on [GitHub](https://github.com/sfcal/homelab/issues)
+| | |
+|---|---|
+| [Prerequisites](getting-started/index.md) | What you need before deploying |
+| [Quick Start](getting-started/quick-start.md) | Deploy the homelab from scratch |
+| [Architecture](concepts/architecture.md) | How the pipeline stages connect |
+| [Task Commands](reference/tasks.md) | Full command reference |

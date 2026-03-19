@@ -2,9 +2,6 @@
 
 Each site runs a UniFi Dream Machine Pro (UDM Pro) as the network gateway. The UDM Pro handles VLANs, inter-VLAN routing, static routes for Tailscale, and port forwarding for the reverse proxy. Gateway configuration is managed manually through the UniFi controller UI — it is not automated via Ansible.
 
-!!! tip
-    For the software-defined networking stack deployed on top of this gateway, see [Networking](index.md).
-
 ## VLANs
 
 Each environment uses the same VLAN layout with environment-specific IP ranges.
@@ -41,8 +38,6 @@ Each environment uses the same VLAN layout with environment-specific IP ranges.
 
 All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN.
 
-<small>**Source:** `README.md`</small>
-
 ## Static Routes
 
 Static routes on the UDM Pro direct traffic for remote site subnets through the local Tailscale subnet router. Without these routes, traffic destined for other sites would be sent to the default gateway (the ISP) instead of through the Tailscale tunnel.
@@ -62,6 +57,8 @@ graph LR
 
 In the UniFi controller: **Settings → Routing → Static Routes**
 
+![UniFi static route configuration](../../assets/unifi-static-route.png)
+
 === "WIL"
 
     | Name | Destination | Next Hop | Purpose |
@@ -78,8 +75,6 @@ In the UniFi controller: **Settings → Routing → Static Routes**
 
 !!! note
     The next hop is always the Tailscale subnet router VM (`.53` on VLAN 20). This VM runs Tailscale in `subnet_router` mode with IP forwarding and NAT masquerade enabled. See [VPN (Tailscale) — Deployment Modes](tailscale.md#deployment-modes).
-
-<small>**Source:** `ansible/roles/tailscale/tasks/main.yml`</small>
 
 ### Adding a New Site Route
 
@@ -98,6 +93,8 @@ Port forwarding rules on the UDM Pro direct inbound internet traffic to the Cadd
 ### Configuration
 
 In the UniFi controller: **Settings → Firewall & Security → Port Forwarding**
+
+![UniFi port forwarding configuration](../../assets/unifi-port-forwarding.png)
 
 | Name | External Port | Internal IP | Internal Port | Protocol | Purpose |
 |------|--------------|-------------|---------------|----------|---------|
@@ -122,8 +119,6 @@ graph LR
 2. UDM Pro receives traffic on port 443, forwards to `10.2.20.53:443`
 3. Caddy terminates TLS, matches the hostname, and proxies to the backend
 
-<small>**Source:** `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2`</small>
-
 ## Inter-VLAN Routing
 
 The UDM Pro routes traffic between VLANs by default. Key inter-VLAN traffic patterns:
@@ -138,3 +133,11 @@ The UDM Pro routes traffic between VLANs by default. Key inter-VLAN traffic patt
 
 !!! tip
     Firewall rules on the UDM Pro can restrict inter-VLAN traffic. For example, IoT devices on VLAN 245 might only be allowed to reach specific IPs on VLAN 20 (like Home Assistant) and nothing else.
+
+## Troubleshooting
+
+**Cross-site traffic not reaching destination** — Verify the static route exists in the UniFi controller (Settings → Routing → Static Routes). The next hop must be the Tailscale subnet router VM (`.53`). Check that the subnet router VM is running and Tailscale is connected.
+
+**Port forwarding not working** — Verify the rules in Settings → Firewall & Security → Port Forwarding. Ensure ports 80 and 443 forward to the networking VM IP. Check that no firewall rules are blocking inbound traffic.
+
+**Inter-VLAN access denied** — Check UniFi firewall rules. By default, inter-VLAN routing is allowed, but custom rules may restrict it. Verify the source and destination VLANs in the firewall policy.

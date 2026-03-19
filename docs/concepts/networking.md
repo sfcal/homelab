@@ -1,0 +1,66 @@
+# Networking
+
+The homelab runs a unified networking stack across multiple sites: internal DNS, a reverse proxy with automatic TLS, dynamic DNS for external access, and a VPN mesh connecting everything together.
+
+!!! tip
+    For deep operational reference, see the [Infrastructure Networking docs](../infrastructure/networking/index.md).
+
+## Domains
+
+| Domain | Environment | Purpose |
+|--------|-------------|---------|
+| `5am.video` | WIL | Media services (Plex, *arr stack) |
+| `5am.cloud` | WIL | Top-level cloud services |
+| `wil.5am.cloud` | WIL | Internal infrastructure (monitoring, apps) |
+| `ext.5am.cloud` | WIL | External-facing services |
+| `sfc.al` | WIL | Personal projects |
+| `ldn.5am.cloud` | LDN | LDN internal infrastructure |
+
+## How It Works
+
+```mermaid
+graph TD
+    subgraph External
+        ExtClient[External Client]
+        Cloudflare[Cloudflare DNS]
+        DDNS[DDNS Updater]
+    end
+
+    subgraph Internal
+        IntClient[Internal Client]
+        BIND9[BIND9 DNS]
+        Caddy[Caddy Reverse Proxy]
+        Backend[Backend Service]
+    end
+
+    IntClient -->|DNS query| BIND9
+    BIND9 -->|"proxied service"| Caddy
+    BIND9 -->|"direct service"| Backend
+    Caddy -->|reverse proxy| Backend
+
+    ExtClient -->|DNS query| Cloudflare
+    Cloudflare -->|public IP| Caddy
+    DDNS -->|updates IP| Cloudflare
+```
+
+- **Internal clients** query [BIND9](../infrastructure/networking/dns.md) for service hostnames. Proxied services resolve to [Caddy](../infrastructure/networking/proxy.md), which terminates TLS and forwards to backends. Non-proxied services resolve directly to the backend.
+- **External clients** resolve via Cloudflare DNS and reach Caddy over the public IP, kept current by DDNS.
+- **Cross-site** communication runs over [Tailscale](../infrastructure/networking/tailscale.md) WireGuard tunnels. DNS zone transfers replicate zones between sites so each site can resolve the other's services.
+
+## Key Concepts
+
+- **VLANs** — each site uses a UDM Pro gateway with VLANs for network segmentation (infrastructure, VMs, storage, clients, IoT). See [UniFi Gateway](../infrastructure/networking/unifi.md).
+- **Split-Horizon DNS** — internal and external clients get different answers for the same hostname. See [DNS](../infrastructure/networking/dns.md#split-horizon-dns).
+- **Unified Service Definitions** — a single YAML entry per service drives both DNS records and reverse proxy configuration. See [Service Definitions](../infrastructure/networking/proxy.md#service-definition-reference).
+- **Zone Transfers** — WIL and LDN replicate each other's DNS zones for cross-site resolution. See [Zone Transfers](../infrastructure/networking/dns.md#cross-site-zone-transfers).
+- **Wildcard TLS** — Caddy obtains one wildcard certificate per domain via Cloudflare DNS-01 challenge. See [TLS](../infrastructure/networking/proxy.md#tls-certificate-management).
+- **Static Routes** — UDM Pro routes cross-site traffic to the Tailscale subnet router VM. See [Static Routes](../infrastructure/networking/unifi.md#static-routes).
+- **Port Forwarding** — UDM Pro forwards ports 80/443 to Caddy for external access. See [Port Forwarding](../infrastructure/networking/unifi.md#port-forwarding).
+
+## Troubleshooting
+
+**Service not resolving internally** — Check that BIND9 is running on the networking VM and that the service has an entry in the appropriate domain file under `group_vars/all/proxy/`. Redeploy networking: `task ansible:deploy-networking ENV=wil`.
+
+**External access not working** — Verify DDNS is updating Cloudflare with the correct public IP. Check that ports 80/443 are forwarded to Caddy on the UDM Pro.
+
+**Cross-site resolution failing** — Ensure Tailscale is connected on both subnet routers and that zone transfers are configured. Check with `dig @10.2.20.53 <hostname>.ldn.5am.cloud`.

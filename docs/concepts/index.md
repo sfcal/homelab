@@ -1,10 +1,8 @@
 # Concepts
 
-Understand the design decisions and architecture behind the homelab.
+Understand the design decisions behind the homelab.
 
-## Topics
-
-- [**Architecture**](architecture.md) - How Packer, Terraform, Ansible, and Docker work together
-- [**Network Layout**](network-layout.md) - Split-horizon DNS, domains, and routing
-- [**Secrets Management**](secrets.md) - SOPS + Age encryption workflow
-- [**Multi-Environment**](environments.md) - WIL (dev) and NYC (production) environments
+- [**Architecture**](architecture.md) — pipeline stages, deployment order, repository structure
+- [**Environments**](environments.md) — WIL, LDN, External and how `ENV=` threads through tools
+- [**Networking**](networking.md) — split-horizon DNS, domains, routing, and VPN mesh
+- [**Secrets**](secrets.md) — SOPS + Age encryption workflow

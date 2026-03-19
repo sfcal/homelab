@@ -3,7 +3,7 @@
 site_name: Homelab Infrastructure as Code
 site_url: https://docs.5am.cloud/homelab/
 site_dir: site/homelab
-site_description: A complete infrastructure-as-code solution for managing a homelab on Proxmox with Packer, Terraform, Ansible, and Docker.
+site_description: Infrastructure-as-code homelab on Proxmox with Packer, Terraform, Ansible, and Docker.
 copyright: Copyright &copy; 2025-2026 sfcal
 
 repo_url: https://github.com/sfcal/homelab
@@ -20,6 +20,7 @@ theme:
     - navigation.instant.progress
     - navigation.sections
     - navigation.indexes
+    - navigation.expand
     - navigation.tracking
     - navigation.footer
     - navigation.top
@@ -85,45 +86,41 @@ extra:
       link: https://github.com/sfcal/homelab
 
 nav:
-  - Introduction: index.md
+  - Home: index.md
   - Getting Started:
-      - getting-started/index.md
-      - Quick Start: getting-started/quick-start.md
-      - Prerequisites: getting-started/prerequisites.md
-  - Guides:
-      - guides/index.md
-      - Plex:
-          - plex/index.md
-          - Getting Started: plex/getting-started.md
-          - Browsing & Playing: plex/browsing-and-playing.md
-          - Devices: plex/devices.md
-          - Requesting Content: plex/requesting-content.md
+    - getting-started/index.md
+    - Quick Start: getting-started/quick-start.md
   - Concepts:
-      - concepts/index.md
-      - Architecture: concepts/architecture.md
-      - Network Layout: concepts/network-layout.md
-      - Secrets Management: concepts/secrets.md
-      - Multi-Environment: concepts/environments.md
-  - Infrastructure:
-      - infrastructure/index.md
-      - Packer: infrastructure/packer.md
-      - Terraform: infrastructure/terraform.md
-      - Ansible: infrastructure/ansible.md
-      - Networking:
-          - infrastructure/networking/index.md
-          - Gateway (UniFi): infrastructure/networking/unifi.md
-          - DNS (BIND9): infrastructure/networking/dns.md
-          - Reverse Proxy (Caddy): infrastructure/networking/proxy.md
-          - VPN (Tailscale): infrastructure/networking/tailscale.md
-      - Certificate Authority: infrastructure/ca/index.md
-      - Time Server: infrastructure/ntp/index.md
-      - Monitoring: infrastructure/monitoring/index.md
-      - Docker Services: infrastructure/docker.md
+    - concepts/index.md
+    - Architecture: concepts/architecture.md
+    - Environments: concepts/environments.md
+    - Networking: concepts/networking.md
+    - Secrets: concepts/secrets.md
+  - Guides:
+    - guides/index.md
+    - Deploy a Service: guides/deploy-service.md
+    - Add a New VM: guides/add-vm.md
+    - Networking Changes: guides/networking-changes.md
+    - Certificates: guides/certificates.md
   - Reference:
-      - reference/index.md
-      - Task Commands: reference/tasks.md
-      - TUI: reference/tui.md
-      - FAQ: reference/faq.md
+    - reference/index.md
+    - Terraform: reference/terraform.md
+    - Ansible: reference/ansible.md
+    - Packer: reference/packer.md
+    - Task Commands: reference/tasks.md
+    - Config Reference: reference/config.md
+  - Infrastructure:
+    - infrastructure/index.md
+    - Networking:
+      - infrastructure/networking/index.md
+      - DNS (BIND9): infrastructure/networking/dns.md
+      - Reverse Proxy (Caddy): infrastructure/networking/proxy.md
+      - Tailscale: infrastructure/networking/tailscale.md
+      - UniFi Gateway: infrastructure/networking/unifi.md
+    - Certificate Authority: infrastructure/ca/index.md
+    - Time Server: infrastructure/ntp/index.md
+    - Monitoring: infrastructure/monitoring/index.md
+    - Docker Services: infrastructure/docker.md
 
 validation:
   omitted_files: warn
