@@ -29,7 +29,7 @@ tunarr_image: "chrisbenincasa/tunarr:0.22.11"
 # renovate: datasource=docker
 pulsarr_image: "lakker/pulsarr:0.6.8"
 # renovate: datasource=docker
-cleanuparr_image: "ghcr.io/cleanuparr/cleanuparr:2.4.3"
+cleanuparr_image: "ghcr.io/cleanuparr/cleanuparr:2.4.7"
 # renovate: datasource=docker
 tdarr_image: "ghcr.io/haveagitgat/tdarr:2.51.03"
 # renovate: datasource=docker
