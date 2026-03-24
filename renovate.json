@@ -12,7 +12,7 @@
       "pinDigests": false
     },
     {
-      "description": "Auto-merge patch after 1 day",
+      "description": "Auto-merge patch immediately",
       "matchDatasources": [
         "docker"
       ],
@@ -20,11 +20,11 @@
         "patch"
       ],
       "automerge": true,
-      "minimumReleaseAge": "1 day",
+      "minimumReleaseAge": "0 days",
       "automergeType": "pr"
     },
     {
-      "description": "Auto-merge minor after 3 days",
+      "description": "Auto-merge minor after 1 day",
       "matchDatasources": [
         "docker"
       ],
@@ -32,19 +32,29 @@
         "minor"
       ],
       "automerge": true,
-      "minimumReleaseAge": "3 days",
+      "minimumReleaseAge": "1 day",
       "automergeType": "pr"
     },
     {
-      "description": "Manual review for major",
+      "description": "Auto-merge major after 3 days",
       "matchDatasources": [
         "docker"
       ],
       "matchUpdateTypes": [
         "major"
       ],
-      "automerge": false,
-      "minimumReleaseAge": "7 days"
+      "automerge": true,
+      "minimumReleaseAge": "3 days",
+      "automergeType": "pr"
+    },
+    {
+      "description": "Auto-merge GitHub Actions immediately",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "automerge": true,
+      "minimumReleaseAge": "0 days",
+      "automergeType": "pr"
     },
     {
       "description": "Pin pulsarr to 0.x (no v1 exists on Docker Hub)",
@@ -61,6 +71,14 @@
         "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\n\\s*\\w+:\\s*\"(?<depName>[^:]+):(?<currentValue>[^\"]+)\""
       ],
       "versioningTemplate": "docker"
+    }
+  ],
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "docker.io",
+      "username": "{{ secrets.DOCKER_HUB_USERNAME }}",
+      "password": "{{ secrets.DOCKER_HUB_PASSWORD }}"
     }
   ],
   "schedule": [
