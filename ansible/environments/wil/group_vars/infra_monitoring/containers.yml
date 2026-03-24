@@ -11,7 +11,7 @@ monitoring_group: root
 # renovate: datasource=docker
 prometheus_image: "prom/prometheus:v3.3.0"
 # renovate: datasource=docker
-grafana_image: "grafana/grafana:11.6.0"
+grafana_image: "grafana/grafana:11.6.13"
 # renovate: datasource=docker
 node_exporter_image: "prom/node-exporter:v1.9.1"
 # renovate: datasource=docker
