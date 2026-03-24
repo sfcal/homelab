@@ -1,5 +1,0 @@
-# {{ ansible_managed }}
-# NTP server references
-{% for server in chrony_servers %}
-server {{ server }} {{ chrony_server_options }}
-{% endfor %}

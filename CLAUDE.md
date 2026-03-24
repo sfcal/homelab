@@ -11,7 +11,6 @@ ansible/                    Playbooks, roles, per-environment inventories and gr
 terraform/                  VM provisioning with per-environment tfvars and state
 packer/                     VM template building (Ubuntu, Debian)
 docker/                     Docker execution environment
-tui/                        Textual-based terminal UI (Python, UV)
 .taskfiles/                 Modular Taskfile configs (ansible, terraform, packer, ca, docker)
 docs/                       MkDocs documentation site
 Taskfile.yaml               Root task runner entry point
@@ -111,7 +110,6 @@ SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
 | VM module | `terraform/modules/vm/main.tf` |
 | Master playbook | `ansible/playbooks/site.yml` |
 | SOPS config | `.sops.yaml` |
-| TUI prompt/spec | `tui/PROMPT.md` |
 
 ## Common Operations
 
