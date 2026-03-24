@@ -45,6 +45,11 @@
       ],
       "automerge": false,
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Pin pulsarr to 0.x (no v1 exists on Docker Hub)",
+      "matchPackageNames": ["lakker/pulsarr"],
+      "allowedVersions": "<1.0.0"
     }
   ],
   "customManagers": [
