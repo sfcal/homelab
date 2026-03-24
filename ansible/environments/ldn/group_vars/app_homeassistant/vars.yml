@@ -1,4 +1,5 @@
 ---
+# renovate: datasource=docker
 homeassistant_image: "ghcr.io/home-assistant/home-assistant:stable"
 homeassistant_port: 8123
 homeassistant_user: root

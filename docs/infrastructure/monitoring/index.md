@@ -150,10 +150,10 @@ scrape_configs:
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| `prometheus_version` | `string` | Docker image tag for Prometheus | (per-env) |
+| `prometheus_image` | `string` | Docker image for Prometheus | (per-env) |
 | `prometheus_retention` | `string` | Metrics data retention period | `"30d"` |
 | `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`) | (per-env) |
-| `node_exporter_version` | `string` | Docker image tag for Node Exporter sidecar | (per-env) |
+| `node_exporter_image` | `string` | Docker image for Node Exporter sidecar | (per-env) |
 
 <small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/prometheus.yml` · `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml`</small>
 
@@ -189,7 +189,7 @@ datasources:
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| `grafana_version` | `string` | Docker image tag for Grafana | (per-env) |
+| `grafana_image` | `string` | Docker image for Grafana | (per-env) |
 | `grafana_admin_user` | `string` | Admin username for the web UI | `"admin"` |
 | `grafana_admin_password` | `string` | Admin password (SOPS-encrypted) | (required) |
 | `grafana_url` | `string` | Root URL for links in notifications and dashboards | (per-env) |
@@ -212,7 +212,7 @@ Homepage provides a service dashboard with status widgets, service health indica
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| `homepage_version` | `string` | Docker image tag for Homepage | `"latest"` |
+| `homepage_image` | `string` | Docker image for Homepage | (per-env) |
 | `homepage_allowed_hosts` | `string` | Comma-separated hostnames Homepage responds to | (per-env) |
 
 ### Dashboard Configuration
@@ -238,7 +238,7 @@ Uptime Kuma runs on an external VPS to provide independent uptime monitoring. It
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| `uptime_kuma_version` | `string` | Docker image tag for Uptime Kuma | (per-env) |
+| `uptime_kuma_image` | `string` | Docker image for Uptime Kuma | (per-env) |
 | `external_monitoring_uptime_kuma_listen` | `string` | Listen port for Uptime Kuma | `"3001"` |
 
 ### Tailscale Integration

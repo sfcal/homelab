@@ -1,7 +1,7 @@
 ---
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:{{ uptime_kuma_version }}
+    image: {{ uptime_kuma_image }}
     container_name: uptime-kuma
     restart: unless-stopped
     mem_limit: 1g

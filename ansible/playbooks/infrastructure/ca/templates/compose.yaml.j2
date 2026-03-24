@@ -1,7 +1,7 @@
 ---
 services:
   step-ca:
-    image: smallstep/step-ca:{{ step_ca_version }}
+    image: {{ step_ca_image }}
     container_name: step-ca
     restart: unless-stopped
     ports:

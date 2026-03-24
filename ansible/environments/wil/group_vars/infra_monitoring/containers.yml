@@ -7,12 +7,15 @@ monitoring_gid: "1000"
 monitoring_user: root
 monitoring_group: root
 
-# Container image versions
-prometheus_version: "v3.3.0"
-grafana_version: "11.6.0"
-node_exporter_version: "v1.9.1"
-#uptime_kuma_version: "2"
-homepage_version: "latest"
+# Container images
+# renovate: datasource=docker
+prometheus_image: "prom/prometheus:v3.3.0"
+# renovate: datasource=docker
+grafana_image: "grafana/grafana:11.6.0"
+# renovate: datasource=docker
+node_exporter_image: "prom/node-exporter:v1.9.1"
+# renovate: datasource=docker
+homepage_image: "ghcr.io/gethomepage/homepage:latest"
 homepage_allowed_hosts: "homepage.wil.5am.cloud"
 
 # Directories to back up (relative to /opt)

@@ -18,6 +18,7 @@
 apps:
   birdle:
     host_group: app_birdle
+    # renovate: datasource=docker
     image: "ghcr.io/sfcal/new-birdle:latest"
     port: 8091
     images:
@@ -25,7 +26,9 @@ apps:
 
   bookstack:
     host_group: app_bookstack
+    # renovate: datasource=docker
     image: "lscr.io/linuxserver/bookstack:latest"
+    # renovate: datasource=docker
     db_image: "lscr.io/linuxserver/mariadb:latest"
     port: 8074
     app_url: "https://bookstack.wil.5am.cloud"
@@ -35,6 +38,7 @@ apps:
 
   convertx:
     host_group: app_convertx
+    # renovate: datasource=docker
     image: "ghcr.io/c4illin/convertx:latest"
     port: 3100
     images:
@@ -42,6 +46,7 @@ apps:
 
   cyberchef:
     host_group: app_cyberchef
+    # renovate: datasource=docker
     image: "ghcr.io/gchq/cyberchef:latest"
     port: 8071
     images:
@@ -51,6 +56,7 @@ apps:
     host_group: app_gamesserver
     images: []
     terraria:
+      # renovate: datasource=docker
       image: "ryshe/terraria:latest"
       port: 7777
       maxplayers: 8
@@ -64,6 +70,7 @@ apps:
 
   it-tools:
     host_group: app_ittools
+    # renovate: datasource=docker
     image: "corentinth/it-tools:latest"
     port: 8070
     images:
@@ -71,6 +78,7 @@ apps:
 
   kasm:
     host_group: app_kasm
+    # renovate: datasource=docker
     image: "lscr.io/linuxserver/kasm:latest"
     port: 4443
     wizard_port: 3001
@@ -79,6 +87,7 @@ apps:
 
   microbin:
     host_group: app_microbin
+    # renovate: datasource=docker
     image: "danielszabo99/microbin:latest"
     port: 8081
     hostname: "bin.wil.5am.cloud"
@@ -87,6 +96,7 @@ apps:
 
   openbooks:
     host_group: app_openbooks
+    # renovate: datasource=docker
     image: "evanbuss/openbooks:latest"
     port: 8072
     images:
@@ -94,6 +104,7 @@ apps:
 
   restreamer:
     host_group: app_restreamer
+    # renovate: datasource=docker
     image: "datarhei/restreamer:latest"
     port: 8710
     rtmp_port: 1935
@@ -103,8 +114,11 @@ apps:
 
   romm:
     host_group: app_romm
+    # renovate: datasource=docker
     image: "rommapp/romm:latest"
+    # renovate: datasource=docker
     db_image: "mariadb:10.11"
+    # renovate: datasource=docker
     valkey_image: "valkey/valkey:latest"
     port: 8085
     images:
@@ -115,8 +129,11 @@ apps:
   seafile:
     host_group: app_seafile
     nfs: true
+    # renovate: datasource=docker
     image: "seafileltd/seafile-mc:13.0-latest"
+    # renovate: datasource=docker
     db_image: "mariadb:10.11"
+    # renovate: datasource=docker
     redis_image: "redis:7"
     port: 8080
     hostname: "files.wil.5am.cloud"
@@ -127,6 +144,7 @@ apps:
 
   stirling-pdf:
     host_group: app_stirlingpdf
+    # renovate: datasource=docker
     image: "stirlingtools/stirling-pdf:latest"
     port: 8073
     images:
@@ -134,6 +152,7 @@ apps:
 
   website:
     host_group: app_website
+    # renovate: datasource=docker
     image: "ghcr.io/sfcal/samuel.computer:latest"
     port: 8090
     images:

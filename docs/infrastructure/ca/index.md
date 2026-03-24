@@ -78,7 +78,7 @@ All variables are set in `ansible/environments/<env>/group_vars/infra_ca/vars.ym
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| `step_ca_version` | `string` | Docker image tag for Step-CA | (per-env) |
+| `step_ca_image` | `string` | Docker image for Step-CA | (per-env) |
 | `step_ca_port` | `integer` | HTTPS API listen port | `9000` |
 | `step_ca_name` | `string` | CA display name, appears in issued certificates | (per-env) |
 | `step_ca_dns_names` | `string` | Comma-separated DNS names and IPs for the CA's TLS cert | (per-env) |

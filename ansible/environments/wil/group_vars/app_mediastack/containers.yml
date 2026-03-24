@@ -11,17 +11,30 @@ media_stack_render_gid: "993"
 # Host IP (used for pulsarr baseUrl)
 media_stack_host_ip: "10.2.0.5"
 
-# Container image versions
-sabnzbd_version: "4.5.5"
-prowlarr_version: "2.1.5"
-sonarr_version: "4.0.16"
-radarr_version: "5.28.0"
-bazarr_version: "1.5.3"
-plex_version: "1.42.2"
-tunarr_version: "0.22.11"
-pulsarr_version: "0.6.8"
-cleanuparr_version: "2.4.3"
-tdarr_version: "2.51.03"
-frigate_version: "0.16.2"
-wizarr_version: "latest"
-dispatcharr_version: "latest"
+# Container images
+# renovate: datasource=docker
+sabnzbd_image: "lscr.io/linuxserver/sabnzbd:4.5.5"
+# renovate: datasource=docker
+prowlarr_image: "lscr.io/linuxserver/prowlarr:2.1.5"
+# renovate: datasource=docker
+sonarr_image: "lscr.io/linuxserver/sonarr:4.0.16"
+# renovate: datasource=docker
+radarr_image: "lscr.io/linuxserver/radarr:5.28.0"
+# renovate: datasource=docker
+bazarr_image: "lscr.io/linuxserver/bazarr:1.5.6"
+# renovate: datasource=docker
+plex_image: "lscr.io/linuxserver/plex:1.42.2"
+# renovate: datasource=docker
+tunarr_image: "chrisbenincasa/tunarr:0.22.11"
+# renovate: datasource=docker
+pulsarr_image: "lakker/pulsarr:0.6.8"
+# renovate: datasource=docker
+cleanuparr_image: "ghcr.io/cleanuparr/cleanuparr:2.4.3"
+# renovate: datasource=docker
+tdarr_image: "ghcr.io/haveagitgat/tdarr:2.51.03"
+# renovate: datasource=docker
+frigate_image: "ghcr.io/blakeblackshear/frigate:0.16.2"
+# renovate: datasource=docker
+wizarr_image: "ghcr.io/wizarrrr/wizarr:latest"
+# renovate: datasource=docker
+dispatcharr_image: "ghcr.io/dispatcharr/dispatcharr:latest"

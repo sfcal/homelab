@@ -1,7 +1,7 @@
 ---
 services:
   sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:{{ sabnzbd_version }}
+    image: {{ sabnzbd_image }}
     container_name: sabnzbd
     restart: unless-stopped
     mem_limit: 4g
@@ -17,7 +17,7 @@ services:
       - /mnt/data/usenet:/data/usenet
 
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:{{ prowlarr_version }}
+    image: {{ prowlarr_image }}
     container_name: prowlarr
     restart: unless-stopped
     mem_limit: 2g
@@ -32,7 +32,7 @@ services:
       - ./prowlarr:/config
 
   sonarr:
-    image: lscr.io/linuxserver/sonarr:{{ sonarr_version }}
+    image: {{ sonarr_image }}
     container_name: sonarr
     restart: unless-stopped
     mem_limit: 4g
@@ -51,7 +51,7 @@ services:
       - /mnt/data:/data
 
   radarr:
-    image: lscr.io/linuxserver/radarr:{{ radarr_version }}
+    image: {{ radarr_image }}
     container_name: radarr
     restart: unless-stopped
     mem_limit: 4g
@@ -70,7 +70,7 @@ services:
       - /mnt/data:/data
 
   bazarr:
-    image: lscr.io/linuxserver/bazarr:{{ bazarr_version }}
+    image: {{ bazarr_image }}
     container_name: bazarr
     restart: unless-stopped
     mem_limit: 2g
@@ -91,7 +91,7 @@ services:
       - /mnt/data/media/tv:/tv
 
   plex:
-    image: lscr.io/linuxserver/plex:{{ plex_version }}
+    image: {{ plex_image }}
     container_name: plex
     restart: unless-stopped
     mem_limit: 20g
@@ -120,7 +120,7 @@ services:
       - /dev/dri:/dev/dri
 
   tunarr:
-    image: chrisbenincasa/tunarr:{{ tunarr_version }}
+    image: {{ tunarr_image }}
     container_name: tunarr
     restart: unless-stopped
     mem_limit: 6g
@@ -142,7 +142,7 @@ services:
       - '{{ media_stack_render_gid }}'
 
   pulsarr:
-    image: lakker/pulsarr:{{ pulsarr_version }}
+    image: {{ pulsarr_image }}
     container_name: pulsarr
     restart: unless-stopped
     mem_limit: 2g
@@ -167,7 +167,7 @@ services:
     #  - ./pulsarr/.env:/app/.env
 
   cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:{{ cleanuparr_version }}
+    image: {{ cleanuparr_image }}
     container_name: cleanuparr
     restart: unless-stopped
     mem_limit: 1g
@@ -188,7 +188,7 @@ services:
       - ./cleanuparr:/config
 
   tdarr-server:
-    image: ghcr.io/haveagitgat/tdarr:{{ tdarr_version }}
+    image: {{ tdarr_image }}
     container_name: tdarr-server
     restart: unless-stopped
     mem_limit: 10g
@@ -219,7 +219,7 @@ services:
       - /dev/dri:/dev/dri
 
   wizarr:
-    image: ghcr.io/wizarrrr/wizarr:{{ wizarr_version }}
+    image: {{ wizarr_image }}
     container_name: wizarr
     restart: unless-stopped
     mem_limit: 1g
@@ -236,7 +236,7 @@ services:
       - ./wizarr:/data
 
   dispatcharr:
-    image: ghcr.io/dispatcharr/dispatcharr:{{ dispatcharr_version }}
+    image: {{ dispatcharr_image }}
     container_name: dispatcharr
     restart: unless-stopped
     mem_limit: 2g
@@ -249,7 +249,7 @@ services:
       - ./dispatcharr:/data
 
   frigate:
-    image: ghcr.io/blakeblackshear/frigate:{{ frigate_version }}
+    image: {{ frigate_image }}
     container_name: frigate
     restart: unless-stopped
     mem_limit: 4g

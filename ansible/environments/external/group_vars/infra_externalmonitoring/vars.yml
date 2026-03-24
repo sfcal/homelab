@@ -10,7 +10,8 @@ tailscale_accept_routes: true
 tailscale_force_reauth: false
 
 # Uptime Kuma
-uptime_kuma_version: "2"
+# renovate: datasource=docker
+uptime_kuma_image: "louislam/uptime-kuma:2"
 
 # Listen address for Uptime Kuma
 # "3001" = all interfaces (publicly accessible for external alerting)
