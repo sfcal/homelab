@@ -117,7 +117,7 @@ apps:
     # renovate: datasource=docker
     image: "rommapp/romm:latest"
     # renovate: datasource=docker
-    db_image: "mariadb:10.11"
+    db_image: "mariadb:12.2"
     # renovate: datasource=docker
     valkey_image: "valkey/valkey:latest"
     port: 8085
@@ -132,7 +132,7 @@ apps:
     # renovate: datasource=docker
     image: "seafileltd/seafile-mc:13.0-latest"
     # renovate: datasource=docker
-    db_image: "mariadb:10.11"
+    db_image: "mariadb:12.2"
     # renovate: datasource=docker
     redis_image: "redis:7"
     port: 8080
