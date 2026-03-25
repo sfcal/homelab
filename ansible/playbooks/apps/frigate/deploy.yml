@@ -1,0 +1,21 @@
+---
+- name: Deploy Frigate
+  hosts: app_frigate
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure NFS mounts.
+      ansible.builtin.include_role:
+        name: nfs_mount
+
+    - name: Configure Frigate.
+      ansible.builtin.include_tasks: tasks/frigate.yml

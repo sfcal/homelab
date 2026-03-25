@@ -88,6 +88,12 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/homeassistant/deploy.yml }
 
+  deploy-frigate:
+    desc: Deploy Frigate NVR
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/frigate/deploy.yml }
+
   # --- Utility Tasks ---
 
   ping:

@@ -1,0 +1,54 @@
+---
+- name: Create frigate directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ frigate_user }}"
+    group: "{{ frigate_group }}"
+    mode: "0755"
+  loop:
+    - "{{ frigate_deploy_path }}"
+    - "{{ frigate_deploy_path }}/build"
+    - "{{ frigate_deploy_path }}/config"
+
+- name: Create tmpfs mount directory.
+  ansible.builtin.file:
+    path: /dev/shm/frigate
+    state: directory
+    mode: "0755"
+
+- name: Copy build context files.
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ frigate_deploy_path }}/build/{{ item | basename }}"
+    owner: "{{ frigate_user }}"
+    group: "{{ frigate_group }}"
+    mode: "0644"
+  loop:
+    - Dockerfile
+    - pyproject.toml
+    - generate_model.py
+    - coco-80.txt
+  notify:
+    - Restart frigate
+
+- name: Deploy compose.yaml.
+  ansible.builtin.template:
+    src: templates/compose.yaml.j2
+    dest: "{{ frigate_deploy_path }}/compose.yaml"
+    owner: "{{ frigate_user }}"
+    group: "{{ frigate_group }}"
+    mode: "0644"
+  notify:
+    - Restart frigate
+
+- name: Ensure Frigate is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ frigate_deploy_path }}"
+    state: present
+    build: always
+  register: frigate_output
+
+- name: Display Frigate status.
+  ansible.builtin.debug:
+    var: frigate_output

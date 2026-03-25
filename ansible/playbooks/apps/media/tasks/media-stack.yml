@@ -24,8 +24,6 @@
     - "{{ media_stack_deploy_path }}/tdarr/logs"
     - "{{ media_stack_deploy_path }}/tdarr/data"
     - "{{ media_stack_deploy_path }}/dispatcharr"
-    - "{{ media_stack_deploy_path }}/frigate"
-    - "{{ media_stack_deploy_path }}/frigate/models"
 
 - name: Create tmpfs mount directories.
   ansible.builtin.file:
@@ -36,7 +34,6 @@
     - /dev/shm/plex
     - /dev/shm/tunarr
     - /dev/shm/tdarr
-    - /dev/shm/frigate
 
 - name: Deploy compose.yaml.
   ansible.builtin.template:

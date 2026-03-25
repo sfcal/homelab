@@ -1,0 +1,14 @@
+[project]
+name = "yolo-model-generator"
+version = "0.1.0"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "torch==1.13.1",
+    "torchvision==0.14.1",
+    "super-gradients==3.7.1",
+    "setuptools<78",
+]
+
+[tool.uv]
+extra-index-url = ["https://download.pytorch.org/whl/cpu"]
+index-strategy = "unsafe-best-match"

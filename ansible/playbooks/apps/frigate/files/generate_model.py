@@ -15,6 +15,7 @@ print("[2/2] Exporting model to ONNX format...")
 model.export("yolo_nas_s.onnx",
     output_predictions_format=DetectionOutputFormatMode.FLAT_FORMAT,
     max_predictions_per_image=20,
+    num_pre_nms_predictions=300,
     confidence_threshold=0.4,
     input_image_shape=(320,320),
 )

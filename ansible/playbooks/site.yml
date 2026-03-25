@@ -41,6 +41,10 @@
 - import_playbook: apps/homeassistant/deploy.yml
   tags: ['homeassistant', 'applications']
 
+# 7. Frigate NVR
+- import_playbook: apps/frigate/deploy.yml
+  tags: ['frigate', 'applications']
+
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml

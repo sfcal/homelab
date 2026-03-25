@@ -1,0 +1,16 @@
+---
+- name: Restart frigate
+  community.docker.docker_compose_v2:
+    project_src: "{{ frigate_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop frigate
+  community.docker.docker_compose_v2:
+    project_src: "{{ frigate_deploy_path }}"
+    state: stopped
+
+- name: Start frigate
+  community.docker.docker_compose_v2:
+    project_src: "{{ frigate_deploy_path }}"
+    state: present

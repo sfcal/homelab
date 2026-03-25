@@ -1,0 +1,15 @@
+---
+# Frigate configuration
+
+# User/group IDs
+frigate_puid: "999"
+frigate_pgid: "987"
+frigate_user: root
+frigate_group: root
+
+# Deploy path
+frigate_deploy_path: "{{ deploy_path }}/frigate"
+
+# Container image (base image for multi-stage build)
+# renovate: datasource=docker
+frigate_image: "ghcr.io/blakeblackshear/frigate:0.16.4"

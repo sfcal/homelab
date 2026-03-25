@@ -1,0 +1,33 @@
+---
+services:
+  frigate:
+    build:
+      context: ./build
+      dockerfile: Dockerfile
+      args:
+        FRIGATE_IMAGE: {{ frigate_image }}
+    image: frigate-yolo:latest
+    container_name: frigate
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    environment:
+      - PGID={{ frigate_pgid }}
+      - PUID={{ frigate_puid }}
+      - UMASK=022
+      - TZ={{ system_timezone }}
+      - FRIGATE_RTSP_PASSWORD={{ frigate_rtsp_password }}
+    ports:
+      - "5000:5000"
+      - "8554:8554"
+      - "8555:8555/tcp"
+      - "8555:8555/udp"
+    volumes:
+      - ./config:/config
+      - /mnt/data/frigate:/media/frigate
+      - /dev/shm/frigate:/dev/shm
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/dri:/dev/dri
+    privileged: true
+    shm_size: 1g
