@@ -1,16 +1,16 @@
 ---
 - name: Restart media-stack
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}"
+    project_src: "{{ media_stack_deploy_path }}"
     state: restarted
     recreate: always
 
 - name: Stop media-stack
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}"
+    project_src: "{{ media_stack_deploy_path }}"
     state: stopped
 
 - name: Start media-stack
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}"
+    project_src: "{{ media_stack_deploy_path }}"
     state: present

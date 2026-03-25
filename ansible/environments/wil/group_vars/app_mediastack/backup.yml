@@ -14,7 +14,7 @@ backup_cron_weekday: "0"
 backup_ansible_inventory: /etc/ansible/environments/wil/hosts.ini
 backup_ansible_playbook: /etc/ansible/playbooks/media/backup.yml
 
-# Directories to back up (relative to /opt)
+# Directories to back up (relative to media_stack_deploy_path)
 backup_targets:
   - sabnzbd
   - prowlarr

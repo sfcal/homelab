@@ -8,6 +8,9 @@ media_stack_user: root
 media_stack_group: root
 media_stack_render_gid: "993"
 
+# Deploy path
+media_stack_deploy_path: "{{ deploy_path }}/media-stack"
+
 # Host IP (used for pulsarr baseUrl)
 media_stack_host_ip: "10.2.0.5"
 

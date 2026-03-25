@@ -14,7 +14,7 @@ services:
       - "8080:8080"
     volumes:
       - ./sabnzbd:/config
-      - /mnt/data/usenet:/data/usenet
+      - /mnt/data/downloads/usenet:/data/downloads/usenet
 
   prowlarr:
     image: {{ prowlarr_image }}
