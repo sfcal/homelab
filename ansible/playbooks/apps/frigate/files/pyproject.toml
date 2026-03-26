@@ -6,7 +6,7 @@ dependencies = [
     "torch==1.13.1",
     "torchvision==0.14.1",
     "super-gradients==3.7.1",
-    "setuptools<78",
+    "setuptools<83",
 ]
 
 [tool.uv]
