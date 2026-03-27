@@ -100,5 +100,9 @@
   tags: ['stirling-pdf', 'applications']
 
 - import_playbook: deploy-app.yml
+  vars: { app_name: subsearch }
+  tags: ['subsearch', 'applications']
+
+- import_playbook: deploy-app.yml
   vars: { app_name: website }
   tags: ['website', 'applications']

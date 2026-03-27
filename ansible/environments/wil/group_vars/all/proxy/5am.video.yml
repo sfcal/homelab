@@ -58,6 +58,12 @@ video_services:
     backend_port: 5000
     proxied: true
 
+  # Subtitle Search
+  - name: subsearch
+    backend_host: 10.2.0.5
+    backend_port: 7700
+    proxied: true
+
   # Haivision
   - name: restreamer
     backend_host: 10.2.0.5

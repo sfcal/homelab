@@ -150,6 +150,19 @@ apps:
     images:
       - "stirlingtools/stirling-pdf:latest"
 
+  subsearch:
+    host_group: app_subsearch
+    nfs: true
+    # renovate: datasource=docker
+    image: "getmeili/meilisearch:v1.13"
+    # renovate: datasource=docker
+    indexer_image: "ghcr.io/sfcal/subtitle-fts:latest"
+    port: 7700
+    index_interval: "21600"
+    images:
+      - "getmeili/meilisearch:v1.13"
+      - "ghcr.io/sfcal/subtitle-fts:latest"
+
   website:
     host_group: app_website
     # renovate: datasource=docker
