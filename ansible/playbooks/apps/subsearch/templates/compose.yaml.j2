@@ -4,23 +4,28 @@ services:
     image: {{ apps[app_name].image }}
     container_name: subsearch
     restart: unless-stopped
-    mem_limit: 2g
-    mem_reservation: 512m
+    mem_limit: 4g
+    mem_reservation: 1g
     environment:
-      - MEILI_ENV=production
+      - MEILI_ENV=development
       - MEILI_NO_ANALYTICS=true
       - "MEILI_MASTER_KEY={{ subsearch_master_key }}"
     ports:
       - "{{ apps[app_name].port }}:7700"
     volumes:
       - ./meilisearch-data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   indexer:
     image: {{ apps[app_name].indexer_image }}
     container_name: subsearch-indexer
     restart: unless-stopped
-    mem_limit: 512m
-    mem_reservation: 256m
+    mem_limit: 2g
+    mem_reservation: 512m
     environment:
       - MEILI_URL=http://meilisearch:7700
       - "MEILI_MASTER_KEY={{ subsearch_master_key }}"
@@ -30,4 +35,5 @@ services:
       - ./indexer-data:/data
       - /mnt/data/media:/media:ro
     depends_on:
-      - meilisearch
+      meilisearch:
+        condition: service_healthy

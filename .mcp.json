@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "homelable": {
+      "type": "http",
+      "url": "http://10.2.20.60:8001/mcp",
+      "headers": {
+        "MCP_API_KEY": "${HOMELABLE_API_KEY}"
+      }
+    }
+  }
+}

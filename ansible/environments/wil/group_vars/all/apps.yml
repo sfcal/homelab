@@ -79,11 +79,11 @@ apps:
   kasm:
     host_group: app_kasm
     # renovate: datasource=docker
-    image: "lscr.io/linuxserver/kasm:latest"
+    image: "lscr.io/linuxserver/kasm:1.18.0"
     port: 4443
     wizard_port: 3001
     images:
-      - "lscr.io/linuxserver/kasm:latest"
+      - "lscr.io/linuxserver/kasm:1.18.0"
 
   microbin:
     host_group: app_microbin
@@ -123,7 +123,7 @@ apps:
     port: 8085
     images:
       - "rommapp/romm:latest"
-      - "mariadb:10.11"
+      - "mariadb:12.2"
       - "valkey/valkey:latest"
 
   seafile:
@@ -139,7 +139,7 @@ apps:
     hostname: "files.wil.5am.cloud"
     images:
       - "seafileltd/seafile-mc:13.0-latest"
-      - "mariadb:10.11"
+      - "mariadb:12.2"
       - "redis:7"
 
   stirling-pdf:

@@ -1,4 +1,8 @@
 ---
+networks:
+  media:
+    driver: bridge
+
 services:
   sabnzbd:
     image: {{ sabnzbd_image }}
@@ -15,6 +19,8 @@ services:
     volumes:
       - ./sabnzbd:/config
       - /mnt/data/downloads/usenet:/data/downloads/usenet
+    networks:
+      - media
 
   prowlarr:
     image: {{ prowlarr_image }}
@@ -30,6 +36,8 @@ services:
       - "9696:9696"
     volumes:
       - ./prowlarr:/config
+    networks:
+      - media
 
   sonarr:
     image: {{ sonarr_image }}
@@ -49,6 +57,8 @@ services:
     volumes:
       - ./sonarr:/config
       - /mnt/data:/data
+    networks:
+      - media
 
   radarr:
     image: {{ radarr_image }}
@@ -68,6 +78,8 @@ services:
     volumes:
       - ./radarr:/config
       - /mnt/data:/data
+    networks:
+      - media
 
   bazarr:
     image: {{ bazarr_image }}
@@ -89,6 +101,8 @@ services:
       - ./bazarr:/config
       - /mnt/data/media/movies:/movies
       - /mnt/data/media/tv:/tv
+    networks:
+      - media
 
   plex:
     image: {{ plex_image }}
@@ -118,6 +132,8 @@ services:
       - /dev/shm/plex:/transcode
     devices:
       - /dev/dri:/dev/dri
+    networks:
+      - media
 
   tunarr:
     image: {{ tunarr_image }}
@@ -140,6 +156,8 @@ services:
       - /dev/dri:/dev/dri
     group_add:
       - '{{ media_stack_render_gid }}'
+    networks:
+      - media
 
   pulsarr:
     image: {{ pulsarr_image }}
@@ -165,6 +183,8 @@ services:
     volumes:
       - ./pulsarr/data:/app/data
     #  - ./pulsarr/.env:/app/.env
+    networks:
+      - media
 
   cleanuparr:
     image: {{ cleanuparr_image }}
@@ -186,6 +206,8 @@ services:
       - "11011:11011"
     volumes:
       - ./cleanuparr:/config
+    networks:
+      - media
 
   tdarr-server:
     image: {{ tdarr_image }}
@@ -217,6 +239,8 @@ services:
       - /dev/shm/tdarr:/temp
     devices:
       - /dev/dri:/dev/dri
+    networks:
+      - media
 
   wizarr:
     image: {{ wizarr_image }}
@@ -234,6 +258,8 @@ services:
       - "5690:5690"
     volumes:
       - ./wizarr:/data
+    networks:
+      - media
 
   dispatcharr:
     image: {{ dispatcharr_image }}
@@ -247,3 +273,5 @@ services:
       - "9191:9191"
     volumes:
       - ./dispatcharr:/data
+    networks:
+      - media

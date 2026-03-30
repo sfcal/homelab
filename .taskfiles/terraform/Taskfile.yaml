@@ -21,6 +21,7 @@ tasks:
   destroy:
     desc: Destroy all VMs and infrastructure for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'
+    prompt: "This will DESTROY all VMs in the '{{.ENV}}' environment. Are you sure?"
     cmds:
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform destroy -auto-approve
@@ -28,14 +29,13 @@ tasks:
   destroy-vm:
     desc: Destroy specific VM for {{.ENV}} environment (requires VM=vm-key)
     dir: '{{.ROOT_DIR}}/terraform'
+    prompt: "This will DESTROY VM '{{.VM}}' in the '{{.ENV}}' environment. Are you sure?"
     cmds:
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform destroy -target='module.infrastructure.module.vms["{{.VM}}"]' -auto-approve
 
   clean:
-    desc: Clean up all Terraform files for {{.ENV}} environment
+    desc: Clean up Terraform plugin cache for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'
     cmds:
       - rm -rf {{.ENV_DIR}}/.terraform
-      - rm -f {{.ENV_DIR}}/.terraform.lock.hcl
-      - rm -f {{.ENV_DIR}}/terraform.tfstate*

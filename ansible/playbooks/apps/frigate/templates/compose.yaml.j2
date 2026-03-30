@@ -29,5 +29,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     devices:
       - /dev/dri:/dev/dri
-    privileged: true
+    group_add:
+      - '{{ frigate_render_gid }}'
     shm_size: 1g

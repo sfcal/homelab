@@ -4,6 +4,7 @@
 # User/group IDs
 frigate_puid: "999"
 frigate_pgid: "987"
+frigate_render_gid: "993"
 frigate_user: root
 frigate_group: root
 
