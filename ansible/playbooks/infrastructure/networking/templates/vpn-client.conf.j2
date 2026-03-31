@@ -1,0 +1,41 @@
+# Managed by Ansible — OpenVPN client config for {{ client.name }}
+# Source: {{ client.ovpn_config_src }}
+#
+# The original .ovpn is inlined below with Linux-incompatible directives
+# filtered out and protocol names normalized.
+
+{% set ovpn_content = lookup('file', client.ovpn_config_src) %}
+{% for line in ovpn_content.split('\n') %}
+{% set stripped = line.strip() %}
+{% if stripped.startswith('setenv opt block-outside-dns') %}
+# {{ stripped }} (removed — Windows-only)
+{% elif stripped == 'lport 0' %}
+# {{ stripped }} (removed — conflicts with client/nobind)
+{% elif stripped.startswith('auth-user-pass') and not stripped.startswith('auth-user-pass ') and client.auth_user is defined %}
+# {{ stripped }} (replaced — using credentials file below)
+{% elif stripped.startswith('remote ') %}
+{{ stripped | regex_replace(' UDP4$', ' udp') | regex_replace(' TCP4$', ' tcp') }}
+{% else %}
+{{ line }}
+{% endif %}
+{% endfor %}
+
+# --- PBR integration ---
+# Allow execution of up/down scripts
+script-security 2
+
+# Do not install server-pushed routes into the main table — our up script
+# handles routing into the custom policy table instead
+route-noexec
+
+# PBR up/down scripts manage ip rules, ip routes, and iptables masquerade
+up /etc/openvpn/client/{{ client.name }}-up.sh
+down /etc/openvpn/client/{{ client.name }}-down.sh
+
+# Re-run the up script on tunnel reconnect (e.g., after a network blip)
+up-restart
+{% if client.auth_user is defined and client.auth_password is defined %}
+
+# Credentials file (username on line 1, password on line 2)
+auth-user-pass /etc/openvpn/client/{{ client.name }}.auth
+{% endif %}

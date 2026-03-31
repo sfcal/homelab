@@ -1,0 +1,44 @@
+#!/bin/bash
+# Managed by Ansible — PBR up script for {{ client.name }} VPN
+#
+# Called by OpenVPN with env vars:
+#   $dev              — tun interface name (e.g. tun0)
+#   $ifconfig_local   — VPN-assigned IP address
+#   $route_vpn_gateway — remote VPN gateway IP (not always set on soft restart)
+set -eo pipefail
+
+TABLE="{{ client.route_table_name }}"
+
+# Add default route in custom routing table.
+# On soft restarts (ping-restart), $route_vpn_gateway may not be set.
+# For point-to-point tun interfaces, routing via dev alone is sufficient.
+if [ -n "${route_vpn_gateway:-}" ]; then
+  ip route replace default via "$route_vpn_gateway" dev "$dev" table "$TABLE"
+else
+  ip route replace default dev "$dev" table "$TABLE"
+fi
+
+# Add ip rules: packets destined for company subnets use our custom table.
+# Priority is based on route_table_id to avoid collisions between VPN clients.
+{% for subnet in client.routed_subnets %}
+ip rule del to {{ subnet }} table "$TABLE" priority {{ client.route_table_id + loop.index0 }} 2>/dev/null || true
+ip rule add to {{ subnet }} table "$TABLE" priority {{ client.route_table_id + loop.index0 }}
+{% endfor %}
+# Allow forwarding LAN traffic to/from the VPN tunnel.
+# The FORWARD chain policy is DROP (due to Docker), so explicit rules are needed.
+{% for subnet in client.routed_subnets %}
+iptables -C FORWARD -d {{ subnet }} -o "$dev" -j ACCEPT -m comment --comment "vpn_{{ client.name }}" 2>/dev/null \
+  || iptables -I FORWARD -d {{ subnet }} -o "$dev" -j ACCEPT -m comment --comment "vpn_{{ client.name }}"
+iptables -C FORWARD -s {{ subnet }} -i "$dev" -j ACCEPT -m comment --comment "vpn_{{ client.name }}" 2>/dev/null \
+  || iptables -I FORWARD -s {{ subnet }} -i "$dev" -j ACCEPT -m comment --comment "vpn_{{ client.name }}"
+{% endfor %}
+{% if client.masquerade | default(false) %}
+
+# Masquerade: rewrite source IP of outbound packets on the tunnel to the
+# VPN-assigned IP. Required because the company network cannot route back
+# to our LAN addresses (e.g. 10.3.x.x).
+iptables -t nat -C POSTROUTING -o "$dev" -j MASQUERADE -m comment --comment "vpn_{{ client.name }}" 2>/dev/null \
+  || iptables -t nat -A POSTROUTING -o "$dev" -j MASQUERADE -m comment --comment "vpn_{{ client.name }}"
+{% endif %}
+
+logger -t "openvpn-pbr" "{{ client.name }}: up script completed — routing {{ client.routed_subnets | join(', ') }} via $dev"

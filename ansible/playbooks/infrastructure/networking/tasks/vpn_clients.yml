@@ -1,0 +1,106 @@
+---
+# --- OpenVPN Clients with Policy-Based Routing ---
+
+- name: Install OpenVPN.
+  ansible.builtin.apt:
+    name: openvpn
+    state: present
+
+- name: Enable IPv4 forwarding.
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+# Aggregate DNS forward zones from all enabled VPN clients into the play-level
+# dns_forward_zones variable. This runs before bind9.yml so named.conf.j2 picks
+# up the VPN forward zones automatically.
+- name: Aggregate VPN DNS forward zones.
+  ansible.builtin.set_fact:
+    dns_forward_zones: >-
+      {{ (dns_forward_zones | default([])) +
+         (vpn_clients
+           | default([])
+           | selectattr('enabled', 'equalto', true)
+           | selectattr('dns_forward_zones', 'defined')
+           | map(attribute='dns_forward_zones')
+           | flatten
+           | list) }}
+
+# --- Per-client configuration ---
+
+- name: Deploy OpenVPN client config.
+  ansible.builtin.template:
+    src: templates/vpn-client.conf.j2
+    dest: "/etc/openvpn/client/{{ client.name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ vpn_clients | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"
+  notify: Restart openvpn clients
+
+- name: Deploy VPN auth credentials file.
+  ansible.builtin.template:
+    src: templates/vpn-client-auth.j2
+    dest: "/etc/openvpn/client/{{ client.name }}.auth"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ vpn_clients | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"
+  when: client.auth_user is defined and client.auth_password is defined
+  notify: Restart openvpn clients
+
+- name: Register custom routing table.
+  ansible.builtin.lineinfile:
+    path: /etc/iproute2/rt_tables
+    line: "{{ client.route_table_id }}    {{ client.route_table_name }}"
+    regexp: "^{{ client.route_table_id }}\\s"
+    state: present
+  loop: "{{ vpn_clients | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"
+
+- name: Deploy VPN PBR up script.
+  ansible.builtin.template:
+    src: templates/vpn-client-up.sh.j2
+    dest: "/etc/openvpn/client/{{ client.name }}-up.sh"
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ vpn_clients | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"
+  notify: Restart openvpn clients
+
+- name: Deploy VPN PBR down script.
+  ansible.builtin.template:
+    src: templates/vpn-client-down.sh.j2
+    dest: "/etc/openvpn/client/{{ client.name }}-down.sh"
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ vpn_clients | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"
+  notify: Restart openvpn clients
+
+- name: Enable and start OpenVPN client service.
+  ansible.builtin.service:
+    name: "openvpn-client@{{ client.name }}"
+    state: started
+    enabled: true
+  loop: "{{ vpn_clients | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"

@@ -1,0 +1,26 @@
+#!/bin/bash
+# Managed by Ansible — PBR down script for {{ client.name }} VPN
+set -euo pipefail
+
+TABLE="{{ client.route_table_name }}"
+
+# Remove ip rules for company subnets
+{% for subnet in client.routed_subnets %}
+ip rule del to {{ subnet }} table "$TABLE" priority {{ client.route_table_id + loop.index0 }} 2>/dev/null || true
+{% endfor %}
+
+# Flush all routes in the custom routing table
+ip route flush table "$TABLE" 2>/dev/null || true
+
+# Remove FORWARD rules
+{% for subnet in client.routed_subnets %}
+iptables -D FORWARD -d {{ subnet }} -o "$dev" -j ACCEPT -m comment --comment "vpn_{{ client.name }}" 2>/dev/null || true
+iptables -D FORWARD -s {{ subnet }} -i "$dev" -j ACCEPT -m comment --comment "vpn_{{ client.name }}" 2>/dev/null || true
+{% endfor %}
+{% if client.masquerade | default(false) %}
+
+# Remove masquerade rule
+iptables -t nat -D POSTROUTING -o "$dev" -j MASQUERADE -m comment --comment "vpn_{{ client.name }}" 2>/dev/null || true
+{% endif %}
+
+logger -t "openvpn-pbr" "{{ client.name }}: down script completed — cleaned up PBR rules"

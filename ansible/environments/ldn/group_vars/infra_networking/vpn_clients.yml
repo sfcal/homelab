@@ -1,0 +1,34 @@
+---
+# --- VPN Client Connections with Policy-Based Routing ---
+# Each entry defines an OpenVPN client that terminates a VPN tunnel on this VM
+# and policy-routes specific destination subnets through it.
+
+vpn_clients:
+  - name: haivision
+    # Path to the company-provided .ovpn config file (relative to playbook)
+    ovpn_config_src: files/vpn/haivision.ovpn
+    # Credentials (stored in secrets.sops.yml)
+    auth_user: "{{ vault_haivision_vpn_user }}"
+    auth_password: "{{ vault_haivision_vpn_password }}"
+    # Custom routing table for policy-based routing
+    route_table_id: 100
+    route_table_name: vpn_haivision
+    # Destination subnets to route through this VPN tunnel
+    routed_subnets:
+      - "10.5.0.0/16"
+      - "10.17.0.0/16"
+      - "10.65.0.0/16"
+      - "10.66.0.0/16"
+      - "10.68.0.0/16"
+      - "10.129.0.0/16"
+      - "10.130.0.0/16"
+      - "10.131.0.0/16"
+    # NAT outbound traffic on the tunnel interface
+    masquerade: true
+    # Forward internal Haivision DNS queries through the VPN tunnel
+    dns_forward_zones:
+      - name: "mtl.haivision.com"
+        forwarders:
+          - "10.65.0.10"
+          - "10.66.0.10"
+    enabled: true

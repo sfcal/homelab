@@ -28,3 +28,11 @@
   community.docker.docker_compose_v2:
     project_src: "{{ deploy_path }}/caddy"
     state: restarted
+
+- name: Restart openvpn clients
+  ansible.builtin.service:
+    name: "openvpn-client@{{ item.name }}"
+    state: restarted
+  loop: "{{ vpn_clients | default([]) | selectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    label: "{{ item.name }}"

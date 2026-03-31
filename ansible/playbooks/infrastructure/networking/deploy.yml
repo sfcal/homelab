@@ -17,6 +17,10 @@
       ansible.builtin.include_role:
         name: tailscale
 
+    - name: Configure VPN clients.
+      ansible.builtin.include_tasks: tasks/vpn_clients.yml
+      when: vpn_clients | default([]) | length > 0
+
     - name: Configure BIND9.
       ansible.builtin.include_tasks: tasks/bind9.yml
 
