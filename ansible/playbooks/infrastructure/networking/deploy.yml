@@ -13,6 +13,10 @@
         name: common
 
   tasks:
+    - name: Configure Tailscale.
+      ansible.builtin.include_role:
+        name: tailscale
+
     - name: Configure BIND9.
       ansible.builtin.include_tasks: tasks/bind9.yml
 
@@ -21,7 +25,3 @@
 
     - name: Configure Caddy.
       ansible.builtin.include_tasks: tasks/caddy.yml
-
-    - name: Configure Tailscale.
-      ansible.builtin.include_role:
-        name: tailscale
