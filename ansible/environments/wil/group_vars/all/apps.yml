@@ -134,7 +134,7 @@ apps:
     # renovate: datasource=docker
     db_image: "mariadb:12.2"
     # renovate: datasource=docker
-    redis_image: "redis:7"
+    redis_image: "redis:8"
     port: 8080
     hostname: "files.wil.5am.cloud"
     images:
