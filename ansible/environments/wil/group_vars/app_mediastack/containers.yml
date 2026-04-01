@@ -28,9 +28,9 @@ bazarr_image: "lscr.io/linuxserver/bazarr:1.5.6"
 # renovate: datasource=docker
 plex_image: "lscr.io/linuxserver/plex:1.43.0"
 # renovate: datasource=docker
-tunarr_image: "chrisbenincasa/tunarr:1.2.6"
+tunarr_image: "chrisbenincasa/tunarr:1.2.9"
 # renovate: datasource=docker
-pulsarr_image: "lakker/pulsarr:0.14.0"
+pulsarr_image: "lakker/pulsarr:0.14.6"
 # renovate: datasource=docker
 cleanuparr_image: "ghcr.io/cleanuparr/cleanuparr:2.4.7"
 # renovate: datasource=docker
