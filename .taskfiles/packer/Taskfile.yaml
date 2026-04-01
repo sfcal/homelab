@@ -54,6 +54,22 @@ tasks:
           TEMPLATE_PREFIX: netboot-vm
           VAR_FILE: 'environments/{{.ENV}}/netboot-variables.pkrvars.hcl'
 
+  build-ubuntu-gpu:
+    desc: Build Ubuntu GPU/UEFI template
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_PREFIX: ubuntu-server-gpu
+          VAR_FILE: 'environments/{{.ENV}}/ubuntu-gpu-variables.pkrvars.hcl'
+
+  build-haivision:
+    desc: Build Haivision VF Kicker iPXE template
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_PREFIX: haivision-vfkicker
+          VAR_FILE: 'environments/{{.ENV}}/haivision-variables.pkrvars.hcl'
+
   clean:
     desc: Clean up Packer artifacts
     dir: '{{.ROOT_DIR}}/packer'
