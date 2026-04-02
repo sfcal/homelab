@@ -20,7 +20,8 @@ scsi_controller   = "virtio-scsi-pci"
 cpu_type          = "host"       // Required for AVX instruction passthrough
 network_model     = "e1000"      // VF Kicker kernel lacks virtio-net drivers
 
-// ISO Settings - standard iPXE ISO (downloaded automatically by Packer)
-iso_url          = "https://boot.ipxe.org/ipxe.iso"
+// ISO Settings - custom iPXE ISO with embedded Haivision boot script
+// Built by: task docker:ipxe-builder
+iso_url          = "iso/ipxe.iso"
 iso_checksum     = "none"
 iso_storage_pool = "local"

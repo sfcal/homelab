@@ -1,8 +1,8 @@
 // Haivision VF Kicker iPXE Boot Template
-// Builds a Proxmox template that boots into iPXE for manual chainloading of
-// the Haivision VF Kicker installer. When cloned and booted, type at the iPXE prompt:
-//   dhcp
-//   chain http://install.mtl.haivision.com/vfkicker/boot.php
+// Builds a Proxmox template that boots into iPXE with an embedded boot script
+// that automatically runs DHCP and chains the Haivision VF Kicker installer.
+// Custom iPXE ISO built by: task docker:ipxe-builder
+// No manual iPXE commands required.
 
 packer {
   required_plugins {
@@ -172,7 +172,7 @@ source "proxmox-iso" "haivision-vfkicker-base" {
   // VM Hard Disk Settings
   scsi_controller = var.scsi_controller
   disks {
-    type         = "virtio"
+    type         = "scsi"
     disk_size    = var.disk_size
     storage_pool = var.storage_pool
     format       = "raw"

@@ -1,0 +1,3 @@
+#!ipxe
+dhcp || dhcp || shell
+chain http://install.mtl.haivision.com/vfkicker/boot.php || shell

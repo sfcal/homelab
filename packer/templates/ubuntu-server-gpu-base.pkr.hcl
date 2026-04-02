@@ -298,7 +298,10 @@ build {
     inline = [
       "echo 'Installing GPU and SR-IOV driver prerequisites...'",
       "sudo apt-get update",
-      "sudo apt-get install -y dkms build-essential linux-headers-$(uname -r) pciutils sysfsutils",
+      "sudo apt-get install -y dkms build-essential linux-headers-$(uname -r) pciutils sysfsutils intel-media-va-driver-non-free libva2 vainfo",
+
+      // Add user to render and video groups for GPU access
+      "sudo usermod -aG render,video ${var.ssh_username}",
 
       // Blacklist nouveau driver (conflicts with NVIDIA vGPU/SR-IOV)
       "echo 'blacklist nouveau' | sudo tee /etc/modprobe.d/blacklist-nouveau.conf",
