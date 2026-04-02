@@ -1,0 +1,45 @@
+---
+# Work apps configuration
+
+work_user: root
+work_group: root
+
+# --- Bookstack ---
+bookstack_deploy_path: "{{ deploy_path }}/bookstack"
+# renovate: datasource=docker
+bookstack_image: "lscr.io/linuxserver/bookstack:latest"
+# renovate: datasource=docker
+bookstack_db_image: "lscr.io/linuxserver/mariadb:latest"
+bookstack_port: 8074
+bookstack_app_url: "https://bookstack.wil.5am.cloud"
+
+# --- ConvertX ---
+convertx_deploy_path: "{{ deploy_path }}/convertx"
+# renovate: datasource=docker
+convertx_image: "ghcr.io/c4illin/convertx:latest"
+convertx_port: 3100
+
+# --- CyberChef ---
+cyberchef_deploy_path: "{{ deploy_path }}/cyberchef"
+# renovate: datasource=docker
+cyberchef_image: "ghcr.io/gchq/cyberchef:latest"
+cyberchef_port: 8071
+
+# --- IT Tools ---
+ittools_deploy_path: "{{ deploy_path }}/it-tools"
+# renovate: datasource=docker
+ittools_image: "corentinth/it-tools:latest"
+ittools_port: 8070
+
+# --- Microbin ---
+microbin_deploy_path: "{{ deploy_path }}/microbin"
+# renovate: datasource=docker
+microbin_image: "danielszabo99/microbin:latest"
+microbin_port: 8081
+microbin_hostname: "bin.wil.5am.cloud"
+
+# --- Stirling PDF ---
+stirlingpdf_deploy_path: "{{ deploy_path }}/stirling-pdf"
+# renovate: datasource=docker
+stirlingpdf_image: "stirlingtools/stirling-pdf:latest"
+stirlingpdf_port: 8073

@@ -6,3 +6,22 @@ tasks:
     dir: '{{.ROOT_DIR}}/docker/exe'
     cmds:
       - docker build -t homelab-exe .
+
+  ipxe-builder:
+    desc: Build custom iPXE ISO with embedded boot script
+    dir: '{{.ROOT_DIR}}/packer/scripts'
+    vars:
+      OUTPUT_DIR: '{{.ROOT_DIR}}/packer/iso'
+    cmds:
+      - mkdir -p {{.OUTPUT_DIR}}
+      - docker build -t homelab-ipxe-builder .
+      - docker run --rm -v "{{.OUTPUT_DIR}}:/output" homelab-ipxe-builder
+      - echo "iPXE ISO built at {{.OUTPUT_DIR}}/ipxe.iso"
+
+  yolo-builder:
+    desc: Build Frigate image with baked-in YOLO-NAS model
+    dir: '{{.ROOT_DIR}}/ansible/playbooks/apps/frigate/files'
+    vars:
+      FRIGATE_IMAGE: 'ghcr.io/blakeblackshear/frigate:0.16.4'
+    cmds:
+      - docker build --build-arg FRIGATE_IMAGE={{.FRIGATE_IMAGE}} -t frigate-yolo .

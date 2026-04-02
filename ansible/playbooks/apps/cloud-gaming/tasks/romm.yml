@@ -1,0 +1,44 @@
+---
+- name: Create romm directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0755"
+  loop:
+    - "{{ romm_deploy_path }}"
+    - "{{ romm_deploy_path }}/db"
+    - "{{ romm_deploy_path }}/resources"
+    - "{{ romm_deploy_path }}/redis"
+    - "{{ romm_deploy_path }}/config"
+
+- name: Deploy romm config.yml.
+  ansible.builtin.template:
+    src: templates/romm-config.yml.j2
+    dest: "{{ romm_deploy_path }}/config/config.yml"
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0644"
+  notify:
+    - Restart romm
+
+- name: Deploy romm compose.yaml.
+  ansible.builtin.template:
+    src: templates/romm-compose.yaml.j2
+    dest: "{{ romm_deploy_path }}/compose.yaml"
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0644"
+  notify:
+    - Restart romm
+
+- name: Ensure RomM is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ romm_deploy_path }}"
+    state: present
+  register: romm_output
+
+- name: Display RomM status.
+  ansible.builtin.debug:
+    var: romm_output

@@ -42,7 +42,7 @@ wil_services:
 
   # Apps
   - name: convert
-    backend_host: 10.2.0.5
+    backend_host: 10.2.20.60
     backend_port: 3100
     proxied: true
   - name: tools
@@ -76,10 +76,14 @@ wil_services:
     proxied: true
     forward_headers: true
   - name: bin
-    backend_host: 10.2.20.70
+    backend_host: 10.2.20.60
     backend_port: 8081
     proxied: true
   - name: roms
-    backend_host: 10.2.0.5
+    backend_host: 10.2.20.80
     backend_port: 8085
+    proxied: true
+  - name: wolf
+    backend_host: 10.2.20.80
+    backend_port: 47990
     proxied: true

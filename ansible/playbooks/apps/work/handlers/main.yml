@@ -1,0 +1,96 @@
+---
+- name: Restart bookstack
+  community.docker.docker_compose_v2:
+    project_src: "{{ bookstack_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop bookstack
+  community.docker.docker_compose_v2:
+    project_src: "{{ bookstack_deploy_path }}"
+    state: stopped
+
+- name: Start bookstack
+  community.docker.docker_compose_v2:
+    project_src: "{{ bookstack_deploy_path }}"
+    state: present
+
+- name: Restart convertx
+  community.docker.docker_compose_v2:
+    project_src: "{{ convertx_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop convertx
+  community.docker.docker_compose_v2:
+    project_src: "{{ convertx_deploy_path }}"
+    state: stopped
+
+- name: Start convertx
+  community.docker.docker_compose_v2:
+    project_src: "{{ convertx_deploy_path }}"
+    state: present
+
+- name: Restart cyberchef
+  community.docker.docker_compose_v2:
+    project_src: "{{ cyberchef_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop cyberchef
+  community.docker.docker_compose_v2:
+    project_src: "{{ cyberchef_deploy_path }}"
+    state: stopped
+
+- name: Start cyberchef
+  community.docker.docker_compose_v2:
+    project_src: "{{ cyberchef_deploy_path }}"
+    state: present
+
+- name: Restart ittools
+  community.docker.docker_compose_v2:
+    project_src: "{{ ittools_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop ittools
+  community.docker.docker_compose_v2:
+    project_src: "{{ ittools_deploy_path }}"
+    state: stopped
+
+- name: Start ittools
+  community.docker.docker_compose_v2:
+    project_src: "{{ ittools_deploy_path }}"
+    state: present
+
+- name: Restart microbin
+  community.docker.docker_compose_v2:
+    project_src: "{{ microbin_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop microbin
+  community.docker.docker_compose_v2:
+    project_src: "{{ microbin_deploy_path }}"
+    state: stopped
+
+- name: Start microbin
+  community.docker.docker_compose_v2:
+    project_src: "{{ microbin_deploy_path }}"
+    state: present
+
+- name: Restart stirlingpdf
+  community.docker.docker_compose_v2:
+    project_src: "{{ stirlingpdf_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop stirlingpdf
+  community.docker.docker_compose_v2:
+    project_src: "{{ stirlingpdf_deploy_path }}"
+    state: stopped
+
+- name: Start stirlingpdf
+  community.docker.docker_compose_v2:
+    project_src: "{{ stirlingpdf_deploy_path }}"
+    state: present

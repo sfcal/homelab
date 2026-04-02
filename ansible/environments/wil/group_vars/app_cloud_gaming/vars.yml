@@ -1,0 +1,42 @@
+---
+# Wolf configuration
+
+# User/group IDs
+wolf_render_gid: "993"
+wolf_user: root
+wolf_group: root
+
+# Deploy path
+wolf_deploy_path: "{{ deploy_path }}/wolf"
+
+# ROM path (NFS mounted)
+wolf_roms_path: "/mnt/data/roms"
+
+# Container images
+# renovate: datasource=docker
+wolf_image: "ghcr.io/games-on-whales/wolf:stable"
+# renovate: datasource=docker
+wolf_pegasus_image: "ghcr.io/games-on-whales/pegasus:edge"
+# renovate: datasource=docker
+wolf_retroarch_image: "ghcr.io/games-on-whales/retroarch:edge"
+# renovate: datasource=docker
+wolf_steam_image: "ghcr.io/games-on-whales/steam:edge"
+
+# Resource limits
+wolf_mem_limit: "4g"
+wolf_mem_reservation: "2g"
+
+# --- RomM configuration ---
+
+romm_deploy_path: "{{ deploy_path }}/romm"
+
+# Container images
+# renovate: datasource=docker
+romm_image: "rommapp/romm:latest"
+# renovate: datasource=docker
+romm_db_image: "mariadb:12.2"
+# renovate: datasource=docker
+romm_valkey_image: "valkey/valkey:latest"
+
+# Ports
+romm_port: 8085

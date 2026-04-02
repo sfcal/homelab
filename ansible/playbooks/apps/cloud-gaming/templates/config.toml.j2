@@ -1,0 +1,83 @@
+# Wolf configuration - managed by Ansible
+
+# --- Pegasus Frontend ---
+[[apps]]
+title = "Pegasus"
+start_virtual_compositor = true
+
+[apps.runner]
+type = "docker"
+name = "WolfPegasus"
+image = "{{ wolf_pegasus_image }}"
+mounts = [
+  "{{ wolf_roms_path }}/:/ROMs/:rw"
+]
+env = [
+  "RUN_SWAY=1",
+  "GOW_REQUIRED_DEVICES=/dev/input/event* /dev/dri/*",
+]
+devices = []
+ports = []
+base_create_json = """
+{
+  "HostConfig": {
+    "IpcMode": "host",
+    "CapAdd": ["NET_RAW", "MKNOD", "NET_ADMIN", "SYS_ADMIN", "SYS_NICE"],
+    "Privileged": false,
+    "DeviceCgroupRules": ["c 13:* rmw", "c 244:* rmw"]
+  }
+}"""
+
+# --- RetroArch ---
+[[apps]]
+title = "RetroArch"
+start_virtual_compositor = true
+
+[apps.runner]
+type = "docker"
+name = "WolfRetroArch"
+image = "{{ wolf_retroarch_image }}"
+mounts = [
+  "{{ wolf_roms_path }}/:/ROMs/:rw"
+]
+env = [
+  "RUN_SWAY=1",
+  "GOW_REQUIRED_DEVICES=/dev/input/event* /dev/dri/*",
+]
+devices = []
+ports = []
+base_create_json = """
+{
+  "HostConfig": {
+    "IpcMode": "host",
+    "CapAdd": ["NET_RAW", "MKNOD", "NET_ADMIN", "SYS_ADMIN", "SYS_NICE"],
+    "Privileged": false,
+    "DeviceCgroupRules": ["c 13:* rmw", "c 244:* rmw"]
+  }
+}"""
+
+# --- Steam ---
+[[apps]]
+title = "Steam"
+start_virtual_compositor = true
+
+[apps.runner]
+type = "docker"
+name = "WolfSteam"
+image = "{{ wolf_steam_image }}"
+mounts = []
+env = [
+  "RUN_SWAY=1",
+  "GOW_REQUIRED_DEVICES=/dev/input/event* /dev/dri/*",
+]
+devices = []
+ports = []
+base_create_json = """
+{
+  "HostConfig": {
+    "IpcMode": "host",
+    "CapAdd": ["NET_RAW", "MKNOD", "NET_ADMIN", "SYS_ADMIN", "SYS_NICE"],
+    "Privileged": false,
+    "DeviceCgroupRules": ["c 13:* rmw", "c 244:* rmw"]
+  }
+}"""

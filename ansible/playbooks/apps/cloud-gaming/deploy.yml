@@ -1,0 +1,24 @@
+---
+- name: Deploy Cloud Gaming
+  hosts: app_cloud_gaming
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure NFS mounts.
+      ansible.builtin.include_role:
+        name: nfs_mount
+
+    - name: Configure RomM.
+      ansible.builtin.include_tasks: tasks/romm.yml
+
+    - name: Configure Wolf.
+      ansible.builtin.include_tasks: tasks/wolf.yml

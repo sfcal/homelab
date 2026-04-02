@@ -1,0 +1,27 @@
+---
+- name: Create bookstack directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0755"
+  loop:
+    - "{{ bookstack_deploy_path }}"
+    - "{{ bookstack_deploy_path }}/config"
+    - "{{ bookstack_deploy_path }}/db"
+
+- name: Deploy bookstack compose.yaml.
+  ansible.builtin.template:
+    src: templates/bookstack-compose.yaml.j2
+    dest: "{{ bookstack_deploy_path }}/compose.yaml"
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0644"
+  notify:
+    - Restart bookstack
+
+- name: Ensure Bookstack is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ bookstack_deploy_path }}"
+    state: present

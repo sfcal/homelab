@@ -1,0 +1,26 @@
+---
+- name: Create convertx directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0755"
+  loop:
+    - "{{ convertx_deploy_path }}"
+    - "{{ convertx_deploy_path }}/data"
+
+- name: Deploy convertx compose.yaml.
+  ansible.builtin.template:
+    src: templates/convertx-compose.yaml.j2
+    dest: "{{ convertx_deploy_path }}/compose.yaml"
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0644"
+  notify:
+    - Restart convertx
+
+- name: Ensure ConvertX is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ convertx_deploy_path }}"
+    state: present

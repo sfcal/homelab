@@ -15,6 +15,7 @@ ansible/collections/
 packer/environments/*/credentials.*.pkrvars.hcl
 packer/downloaded_iso_path
 packer/packer.log
+packer/iso/
 
 # kubernetes
 kubernetes/infrastructure/cert-manager/issuers/cloudflare-token-secret.yaml

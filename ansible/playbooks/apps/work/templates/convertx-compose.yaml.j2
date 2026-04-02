@@ -1,16 +1,16 @@
 ---
 services:
   convertx:
-    image: {{ apps[app_name].image }}
+    image: {{ convertx_image }}
     container_name: convertx
     restart: unless-stopped
     mem_limit: 2g
     mem_reservation: 512m
     ports:
-      - "{{ apps[app_name].port }}:3000"
+      - "{{ convertx_port }}:3000"
     environment:
       - JWT_SECRET={{ convertx_jwt_secret }}
       - ALLOW_UNAUTHENTICATED=true
       - HTTP_ALLOWED=true
     volumes:
-      - {{ deploy_path }}/convertx/data:/app/data
+      - {{ convertx_deploy_path }}/data:/app/data

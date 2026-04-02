@@ -1,8 +1,8 @@
 ---
 services:
   cyberchef:
-    image: {{ apps[app_name].image }}
+    image: {{ cyberchef_image }}
     container_name: cyberchef
     restart: unless-stopped
     ports:
-      - "{{ apps[app_name].port }}:80"
+      - "{{ cyberchef_port }}:80"

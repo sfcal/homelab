@@ -45,6 +45,14 @@
 - import_playbook: apps/frigate/deploy.yml
   tags: ['frigate', 'applications']
 
+# 8. Cloud Gaming (Wolf & RomM)
+- import_playbook: apps/cloud-gaming/deploy.yml
+  tags: ['cloud-gaming', 'wolf', 'romm', 'applications']
+
+# 9. Work Apps
+- import_playbook: apps/work/deploy.yml
+  tags: ['work', 'bookstack', 'convertx', 'cyberchef', 'it-tools', 'microbin', 'stirling-pdf', 'applications']
+
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml
@@ -52,32 +60,12 @@
   tags: ['birdle', 'applications']
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: bookstack }
-  tags: ['bookstack', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: convertx }
-  tags: ['convertx', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: cyberchef }
-  tags: ['cyberchef', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: games-server }
   tags: ['games-server', 'applications']
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: it-tools }
-  tags: ['it-tools', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: kasm }
   tags: ['kasm', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: microbin }
-  tags: ['microbin', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: openbooks }
@@ -88,16 +76,8 @@
   tags: ['restreamer', 'applications']
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: romm }
-  tags: ['romm', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: seafile }
   tags: ['seafile', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: stirling-pdf }
-  tags: ['stirling-pdf', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: subsearch }

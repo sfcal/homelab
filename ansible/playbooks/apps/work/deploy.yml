@@ -1,0 +1,32 @@
+---
+- name: Deploy Work Apps
+  hosts: app_work
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure Bookstack.
+      ansible.builtin.include_tasks: tasks/bookstack.yml
+
+    - name: Configure ConvertX.
+      ansible.builtin.include_tasks: tasks/convertx.yml
+
+    - name: Configure CyberChef.
+      ansible.builtin.include_tasks: tasks/cyberchef.yml
+
+    - name: Configure IT Tools.
+      ansible.builtin.include_tasks: tasks/ittools.yml
+
+    - name: Configure Microbin.
+      ansible.builtin.include_tasks: tasks/microbin.yml
+
+    - name: Configure Stirling PDF.
+      ansible.builtin.include_tasks: tasks/stirlingpdf.yml

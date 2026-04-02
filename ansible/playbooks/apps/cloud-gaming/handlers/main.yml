@@ -1,0 +1,32 @@
+---
+- name: Restart wolf
+  community.docker.docker_compose_v2:
+    project_src: "{{ wolf_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop wolf
+  community.docker.docker_compose_v2:
+    project_src: "{{ wolf_deploy_path }}"
+    state: stopped
+
+- name: Start wolf
+  community.docker.docker_compose_v2:
+    project_src: "{{ wolf_deploy_path }}"
+    state: present
+
+- name: Restart romm
+  community.docker.docker_compose_v2:
+    project_src: "{{ romm_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop romm
+  community.docker.docker_compose_v2:
+    project_src: "{{ romm_deploy_path }}"
+    state: stopped
+
+- name: Start romm
+  community.docker.docker_compose_v2:
+    project_src: "{{ romm_deploy_path }}"
+    state: present

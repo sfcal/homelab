@@ -1,0 +1,26 @@
+---
+- name: Create microbin directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0755"
+  loop:
+    - "{{ microbin_deploy_path }}"
+    - "{{ microbin_deploy_path }}/data"
+
+- name: Deploy microbin compose.yaml.
+  ansible.builtin.template:
+    src: templates/microbin-compose.yaml.j2
+    dest: "{{ microbin_deploy_path }}/compose.yaml"
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0644"
+  notify:
+    - Restart microbin
+
+- name: Ensure Microbin is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ microbin_deploy_path }}"
+    state: present

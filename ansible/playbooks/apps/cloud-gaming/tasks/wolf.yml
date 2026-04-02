@@ -1,0 +1,54 @@
+---
+- name: Load uinput kernel module.
+  community.general.modprobe:
+    name: uinput
+    state: present
+
+- name: Persist uinput kernel module across reboots.
+  ansible.builtin.copy:
+    content: "uinput"
+    dest: /etc/modules-load.d/uinput.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create wolf directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0755"
+  loop:
+    - "{{ wolf_deploy_path }}"
+    - "{{ wolf_deploy_path }}/config"
+
+- name: Deploy compose.yaml.
+  ansible.builtin.template:
+    src: templates/compose.yaml.j2
+    dest: "{{ wolf_deploy_path }}/compose.yaml"
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0644"
+  notify:
+    - Restart wolf
+
+- name: Deploy Wolf config.toml.
+  ansible.builtin.template:
+    src: templates/config.toml.j2
+    dest: "{{ wolf_deploy_path }}/config/config.toml"
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0644"
+  notify:
+    - Restart wolf
+
+- name: Ensure Wolf is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ wolf_deploy_path }}"
+    state: present
+  register: wolf_output
+
+- name: Display Wolf status.
+  ansible.builtin.debug:
+    var: wolf_output

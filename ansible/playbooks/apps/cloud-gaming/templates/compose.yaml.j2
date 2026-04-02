@@ -1,0 +1,28 @@
+---
+services:
+  wolf:
+    image: {{ wolf_image }}
+    container_name: wolf
+    restart: unless-stopped
+    network_mode: host
+    mem_limit: {{ wolf_mem_limit }}
+    mem_reservation: {{ wolf_mem_reservation }}
+    environment:
+      - TZ={{ system_timezone }}
+      - XDG_RUNTIME_DIR=/tmp/sockets
+      - WOLF_LOG_LEVEL=INFO
+      - WOLF_CFG_FILE=/etc/wolf/config.toml
+    volumes:
+      - {{ wolf_deploy_path }}/config:/etc/wolf:rw
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /dev/:/dev/:rw
+      - /run/udev:/run/udev:rw
+      - /etc/localtime:/etc/localtime:ro
+    device_cgroup_rules:
+      - 'c 13:* rmw'
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/uinput:/dev/uinput
+      - /dev/uhid:/dev/uhid
+    group_add:
+      - '{{ wolf_render_gid }}'

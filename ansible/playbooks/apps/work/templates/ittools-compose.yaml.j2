@@ -1,8 +1,8 @@
 ---
 services:
   it-tools:
-    image: {{ apps[app_name].image }}
+    image: {{ ittools_image }}
     container_name: it-tools
     restart: unless-stopped
     ports:
-      - "{{ apps[app_name].port }}:80"
+      - "{{ ittools_port }}:80"

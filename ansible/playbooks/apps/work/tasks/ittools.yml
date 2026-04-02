@@ -1,0 +1,23 @@
+---
+- name: Create it-tools directory structure.
+  ansible.builtin.file:
+    path: "{{ ittools_deploy_path }}"
+    state: directory
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0755"
+
+- name: Deploy it-tools compose.yaml.
+  ansible.builtin.template:
+    src: templates/ittools-compose.yaml.j2
+    dest: "{{ ittools_deploy_path }}/compose.yaml"
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0644"
+  notify:
+    - Restart ittools
+
+- name: Ensure IT Tools is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ ittools_deploy_path }}"
+    state: present

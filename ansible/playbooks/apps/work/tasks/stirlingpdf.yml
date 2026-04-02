@@ -1,0 +1,28 @@
+---
+- name: Create stirling-pdf directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0755"
+  loop:
+    - "{{ stirlingpdf_deploy_path }}"
+    - "{{ stirlingpdf_deploy_path }}/configs"
+    - "{{ stirlingpdf_deploy_path }}/logs"
+    - "{{ stirlingpdf_deploy_path }}/data"
+
+- name: Deploy stirling-pdf compose.yaml.
+  ansible.builtin.template:
+    src: templates/stirlingpdf-compose.yaml.j2
+    dest: "{{ stirlingpdf_deploy_path }}/compose.yaml"
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0644"
+  notify:
+    - Restart stirlingpdf
+
+- name: Ensure Stirling PDF is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ stirlingpdf_deploy_path }}"
+    state: present

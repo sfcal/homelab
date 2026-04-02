@@ -1,0 +1,23 @@
+---
+- name: Create cyberchef directory structure.
+  ansible.builtin.file:
+    path: "{{ cyberchef_deploy_path }}"
+    state: directory
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0755"
+
+- name: Deploy cyberchef compose.yaml.
+  ansible.builtin.template:
+    src: templates/cyberchef-compose.yaml.j2
+    dest: "{{ cyberchef_deploy_path }}/compose.yaml"
+    owner: "{{ work_user }}"
+    group: "{{ work_group }}"
+    mode: "0644"
+  notify:
+    - Restart cyberchef
+
+- name: Ensure CyberChef is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ cyberchef_deploy_path }}"
+    state: present

@@ -63,8 +63,9 @@ tasks:
           VAR_FILE: 'environments/{{.ENV}}/ubuntu-gpu-variables.pkrvars.hcl'
 
   build-haivision:
-    desc: Build Haivision VF Kicker iPXE template
+    desc: Build Haivision VF Kicker iPXE template (builds custom iPXE ISO first)
     cmds:
+      - task: :docker:ipxe-builder
       - task: build
         vars:
           TEMPLATE_PREFIX: haivision-vfkicker

@@ -24,34 +24,6 @@ apps:
     images:
       - "ghcr.io/sfcal/new-birdle:latest"
 
-  bookstack:
-    host_group: app_bookstack
-    # renovate: datasource=docker
-    image: "lscr.io/linuxserver/bookstack:latest"
-    # renovate: datasource=docker
-    db_image: "lscr.io/linuxserver/mariadb:latest"
-    port: 8074
-    app_url: "https://bookstack.wil.5am.cloud"
-    images:
-      - "lscr.io/linuxserver/bookstack:latest"
-      - "lscr.io/linuxserver/mariadb:latest"
-
-  convertx:
-    host_group: app_convertx
-    # renovate: datasource=docker
-    image: "ghcr.io/c4illin/convertx:latest"
-    port: 3100
-    images:
-      - "ghcr.io/c4illin/convertx:latest"
-
-  cyberchef:
-    host_group: app_cyberchef
-    # renovate: datasource=docker
-    image: "ghcr.io/gchq/cyberchef:latest"
-    port: 8071
-    images:
-      - "ghcr.io/gchq/cyberchef:latest"
-
   games-server:
     host_group: app_gamesserver
     images: []
@@ -68,14 +40,6 @@ apps:
       npcstream: 60
       seed: ""
 
-  it-tools:
-    host_group: app_ittools
-    # renovate: datasource=docker
-    image: "corentinth/it-tools:latest"
-    port: 8070
-    images:
-      - "corentinth/it-tools:latest"
-
   kasm:
     host_group: app_kasm
     # renovate: datasource=docker
@@ -84,15 +48,6 @@ apps:
     wizard_port: 3001
     images:
       - "lscr.io/linuxserver/kasm:1.18.0"
-
-  microbin:
-    host_group: app_microbin
-    # renovate: datasource=docker
-    image: "danielszabo99/microbin:latest"
-    port: 8081
-    hostname: "bin.wil.5am.cloud"
-    images:
-      - "danielszabo99/microbin:latest"
 
   openbooks:
     host_group: app_openbooks
@@ -112,20 +67,6 @@ apps:
     images:
       - "datarhei/restreamer:latest"
 
-  romm:
-    host_group: app_romm
-    # renovate: datasource=docker
-    image: "rommapp/romm:latest"
-    # renovate: datasource=docker
-    db_image: "mariadb:12.2"
-    # renovate: datasource=docker
-    valkey_image: "valkey/valkey:latest"
-    port: 8085
-    images:
-      - "rommapp/romm:latest"
-      - "mariadb:12.2"
-      - "valkey/valkey:latest"
-
   seafile:
     host_group: app_seafile
     nfs: true
@@ -141,14 +82,6 @@ apps:
       - "seafileltd/seafile-mc:13.0-latest"
       - "mariadb:12.2"
       - "redis:7"
-
-  stirling-pdf:
-    host_group: app_stirlingpdf
-    # renovate: datasource=docker
-    image: "stirlingtools/stirling-pdf:latest"
-    port: 8073
-    images:
-      - "stirlingtools/stirling-pdf:latest"
 
   subsearch:
     host_group: app_subsearch
