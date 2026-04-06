@@ -9,7 +9,7 @@ monitoring_group: root
 
 # Container images
 # renovate: datasource=docker
-prometheus_image: "prom/prometheus:v3.10.0"
+prometheus_image: "prom/prometheus:v3.11.0"
 # renovate: datasource=docker
 grafana_image: "grafana/grafana:11.6.14"
 # renovate: datasource=docker
