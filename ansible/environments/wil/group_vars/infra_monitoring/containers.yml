@@ -9,11 +9,11 @@ monitoring_group: root
 
 # Container images
 # renovate: datasource=docker
-prometheus_image: "prom/prometheus:v3.10.0"
+prometheus_image: "prom/prometheus:v3.11.2"
 # renovate: datasource=docker
 grafana_image: "grafana/grafana:11.6.14"
 # renovate: datasource=docker
-node_exporter_image: "prom/node-exporter:v1.10.2"
+node_exporter_image: "prom/node-exporter:v1.11.1"
 # renovate: datasource=docker
 homepage_image: "ghcr.io/gethomepage/homepage:latest"
 homepage_allowed_hosts: "homepage.wil.5am.cloud"
