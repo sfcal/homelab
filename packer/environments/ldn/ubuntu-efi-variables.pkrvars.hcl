@@ -1,4 +1,5 @@
-// LDN environment GPU template variables
+// LDN environment EFI template variables
+// (UEFI/Q35 Ubuntu template; also carries GPU-passthrough prereqs)
 
 // Environment marker
 environment = "ldn"
@@ -7,7 +8,7 @@ environment = "ldn"
 proxmox_node = "pve-ldn"
 
 // VM Settings
-template_prefix      = "ubuntu-server-gpu"
+template_prefix      = "ubuntu-server"
 vm_id                = null
 cores                = 4
 memory               = 8192
@@ -18,7 +19,7 @@ network_bridge       = "vmbr0"
 qemu_agent           = true
 scsi_controller      = "virtio-scsi-pci"
 
-// GPU/UEFI Settings
+// UEFI / Q35 Settings
 cpu_type             = "host"
 machine              = "q35"
 bios                 = "ovmf"

@@ -18,18 +18,36 @@ resource "proxmox_vm_qemu" "vm" {
   full_clone = true
 
   # Boot settings
-  onboot           = var.onboot
-  automatic_reboot = true
+  start_at_node_boot = var.onboot
+  automatic_reboot   = true
 
   # Hardware settings
   qemu_os = "other"
-  bios    = "seabios"
+  bios    = var.bios
+  machine = var.machine != "" ? var.machine : null
   memory  = var.memory
 
   cpu {
     cores   = var.cores
     sockets = 1
     type    = "host"
+  }
+
+  # EFI disk is inherited from the cloned template (which packer builds with
+  # efi_config{}). Declaring it here causes telmate to create a fresh EFI disk
+  # on clone and orphan the cloned one as "Unused Disk 0".
+
+  # PCIe passthrough via Proxmox resource mapping -- only when mapping ID provided
+  dynamic "pcis" {
+    for_each = var.pci_mapping != "" ? [1] : []
+    content {
+      pci0 {
+        mapping {
+          mapping_id = var.pci_mapping
+          pcie       = true
+        }
+      }
+    }
   }
 
   # Network settings

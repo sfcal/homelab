@@ -54,13 +54,14 @@ tasks:
           TEMPLATE_PREFIX: netboot-vm
           VAR_FILE: 'environments/{{.ENV}}/netboot-variables.pkrvars.hcl'
 
-  build-ubuntu-gpu:
-    desc: Build Ubuntu GPU/UEFI template
+  build-ubuntu-efi:
+    desc: Build Ubuntu UEFI/Q35 template (also GPU-passthrough capable)
     cmds:
       - task: build
         vars:
-          TEMPLATE_PREFIX: ubuntu-server-gpu
-          VAR_FILE: 'environments/{{.ENV}}/ubuntu-gpu-variables.pkrvars.hcl'
+          TEMPLATE_PREFIX: ubuntu-server
+          TEMPLATE: base-efi
+          VAR_FILE: 'environments/{{.ENV}}/ubuntu-efi-variables.pkrvars.hcl'
 
   build-haivision:
     desc: Build Haivision VF Kicker iPXE template (builds custom iPXE ISO first)

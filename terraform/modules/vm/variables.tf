@@ -93,3 +93,23 @@ variable "ssh_public_key" {
   description = "SSH public key"
   type        = string
 }
+
+# -- UEFI / Q35 / PCIe passthrough (optional, for GPU VMs)
+
+variable "bios" {
+  description = "BIOS type: seabios or ovmf"
+  type        = string
+  default     = "seabios"
+}
+
+variable "machine" {
+  description = "Machine type: pc (default) or q35 (required for PCIe passthrough). Empty string leaves Proxmox default in place."
+  type        = string
+  default     = ""
+}
+
+variable "pci_mapping" {
+  description = "Proxmox PCI resource mapping ID for GPU passthrough (e.g. 'b50-vf2'). Empty string disables passthrough."
+  type        = string
+  default     = ""
+}

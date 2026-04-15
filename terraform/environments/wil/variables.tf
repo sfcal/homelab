@@ -47,5 +47,9 @@ variable "vms" {
     tags           = optional(string, "")
     onboot         = optional(bool, true)
     ssh_user       = string
+    # Optional UEFI / Q35 / PCIe passthrough fields (for GPU VMs)
+    bios        = optional(string, "seabios")
+    machine     = optional(string, "")
+    pci_mapping = optional(string, "")
   }))
 }

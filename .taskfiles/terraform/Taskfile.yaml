@@ -18,6 +18,20 @@ tasks:
       - cd {{.ENV_DIR}} && terraform init
       - cd {{.ENV_DIR}} && terraform apply -target='module.infrastructure.module.vms["{{.VM}}"]' -auto-approve
 
+  plan:
+    desc: Show Terraform plan for {{.ENV}} environment (no changes applied)
+    dir: '{{.ROOT_DIR}}/terraform'
+    cmds:
+      - cd {{.ENV_DIR}} && terraform init
+      - cd {{.ENV_DIR}} && terraform plan
+
+  plan-vm:
+    desc: Show Terraform plan for specific VM in {{.ENV}} environment (requires VM=vm-key)
+    dir: '{{.ROOT_DIR}}/terraform'
+    cmds:
+      - cd {{.ENV_DIR}} && terraform init
+      - cd {{.ENV_DIR}} && terraform plan -target='module.infrastructure.module.vms["{{.VM}}"]'
+
   destroy:
     desc: Destroy all VMs and infrastructure for {{.ENV}} environment
     dir: '{{.ROOT_DIR}}/terraform'

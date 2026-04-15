@@ -49,6 +49,9 @@ variable "vms" {
     tags           = optional(string, "")
     onboot         = optional(bool, true)
     ssh_user       = string
+    bios        = optional(string, "seabios")
+    machine     = optional(string, "")
+    pci_mapping = optional(string, "")
   }))
   default = {}
 }

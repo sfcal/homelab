@@ -38,4 +38,9 @@ module "vms" {
   # SSH Configuration
   ssh_user       = each.value.ssh_user
   ssh_public_key = var.ssh_public_key
+
+  # UEFI / Q35 / PCIe passthrough (all optional; defaults preserve SeaBIOS behavior)
+  bios        = lookup(each.value, "bios", "seabios")
+  machine     = lookup(each.value, "machine", "")
+  pci_mapping = lookup(each.value, "pci_mapping", "")
 }

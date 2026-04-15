@@ -1,6 +1,8 @@
-// Ubuntu Server GPU Base Template (UEFI/Q35/SR-IOV)
-// This template builds an Ubuntu 25.10 VM template with UEFI boot, Q35 machine type,
-// and kernel-level prerequisites for SR-IOV GPU passthrough.
+// Ubuntu Server EFI Base Template (UEFI/Q35)
+// General-purpose Ubuntu 25.10 template with UEFI boot and the Q35 machine type.
+// Also includes kernel-level prerequisites (IOMMU, VFIO, VA-API) so it can be
+// used for SR-IOV / PCIe GPU passthrough VMs, but UEFI boot alone is the
+// primary reason to pick this over the non-EFI base template.
 
 packer {
   required_plugins {
@@ -43,7 +45,7 @@ variable "environment" {
 
 variable "template_prefix" {
   type        = string
-  description = "Prefix for template names (e.g., ubuntu-server-gpu)"
+  description = "Prefix for template names (e.g., ubuntu-server)"
 }
 
 // VM Configuration (Expected from environment var file)
@@ -167,13 +169,13 @@ variable "cloud_init_storage_pool" {
 
 // --- Local Variables ---
 locals {
-  vm_name              = "${var.template_prefix}-${var.environment}-base"
-  template_description = "Ubuntu Server GPU/UEFI (${var.environment}) - Built by Packer on ${timestamp()}"
+  vm_name              = "${var.template_prefix}-${var.environment}-base-efi"
+  template_description = "Ubuntu Server EFI (${var.environment}) - Built by Packer on ${timestamp()}"
   use_iso_file         = var.iso_file != null && var.iso_file != ""
 }
 
 // --- Source Definition ---
-source "proxmox-iso" "ubuntu-server-gpu-base" {
+source "proxmox-iso" "ubuntu-server-base-efi" {
   // Proxmox Connection Settings
   proxmox_url              = var.proxmox_api_url
   username                 = var.proxmox_api_token_id
@@ -208,10 +210,13 @@ source "proxmox-iso" "ubuntu-server-gpu-base" {
   os       = "l26"
   qemu_agent = var.qemu_agent
 
-  // VM Hard Disk Settings (scsi required -- OVMF cannot boot from virtio-blk)
+  // VM Hard Disk Settings
+  // virtio0 matches the slot the terraform VM module declares, preventing an
+  // orphaned "unused0" disk when the template is cloned. Modern Proxmox OVMF
+  // includes the virtio-blk OpROM and boots from virtio-blk.
   scsi_controller = var.scsi_controller
   disks {
-    type         = "scsi"
+    type         = "virtio"
     disk_size    = var.disk_size
     storage_pool = var.storage_pool
     format       = "raw"
@@ -240,7 +245,7 @@ source "proxmox-iso" "ubuntu-server-gpu-base" {
     " autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
     "<f10>"
   ]
-  boot      = "order=scsi0;ide2"
+  boot      = "order=virtio0;ide2"
   boot_wait = "15s"
 
   // Packer Communication Settings
@@ -257,8 +262,8 @@ source "proxmox-iso" "ubuntu-server-gpu-base" {
 
 // --- Build Definition ---
 build {
-  name    = "ubuntu-gpu-${var.environment}"
-  sources = ["source.proxmox-iso.ubuntu-server-gpu-base"]
+  name    = "ubuntu-efi-${var.environment}"
+  sources = ["source.proxmox-iso.ubuntu-server-base-efi"]
 
   // Wait for cloud-init to complete
   provisioner "shell" {
