@@ -43,7 +43,7 @@ apps:
   kasm:
     host_group: app_kasm
     # renovate: datasource=docker
-    image: "lscr.io/linuxserver/kasm:1.18.0"
+    image: "lscr.io/linuxserver/kasm:1.18.1"
     port: 4443
     wizard_port: 3001
     images:
