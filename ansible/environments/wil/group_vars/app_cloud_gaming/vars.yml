@@ -34,7 +34,7 @@ romm_deploy_path: "{{ deploy_path }}/romm"
 # renovate: datasource=docker
 romm_image: "rommapp/romm:latest"
 # renovate: datasource=docker
-romm_db_image: "mariadb:12.2"
+romm_db_image: "mariadb:12.3"
 # renovate: datasource=docker
 romm_valkey_image: "valkey/valkey:latest"
 
