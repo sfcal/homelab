@@ -87,7 +87,7 @@ apps:
     host_group: app_subsearch
     nfs: true
     # renovate: datasource=docker
-    image: "getmeili/meilisearch:v1.47"
+    image: "getmeili/meilisearch:v1.48"
     # renovate: datasource=docker
     indexer_image: "ghcr.io/sfcal/subtitle-fts:latest"
     port: 7700
