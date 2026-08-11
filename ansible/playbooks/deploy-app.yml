@@ -1,6 +1,8 @@
 ---
+# hosts falls back to a nonexistent group so environments whose registry
+# lacks this app skip the play (site.yml imports every app unconditionally).
 - name: "Deploy {{ app_name }}"
-  hosts: "{{ apps[app_name].host_group }}"
+  hosts: "{{ apps[app_name].host_group | default('app_not_in_registry') }}"
   become: true
 
   pre_tasks:
@@ -22,4 +24,17 @@
         service_compose_template: "{{ playbook_dir }}/apps/{{ app_name }}/templates/compose.yaml.j2"
         service_user: "{{ apps[app_name].user | default('root') }}"
         service_group: "{{ apps[app_name].group | default('root') }}"
-        service_images: "{{ apps[app_name].images }}"
+        # Pre-pull list is derived from every registry key ending in `image`,
+        # top level and one nesting level down (e.g. work.convertx.image).
+        service_images: >-
+          {{ (
+               (apps[app_name] | dict2items
+                 | selectattr('key', 'search', 'image$')
+                 | map(attribute='value') | list)
+               +
+               (apps[app_name] | dict2items
+                 | selectattr('value', 'mapping')
+                 | map(attribute='value') | map('dict2items') | flatten
+                 | selectattr('key', 'search', 'image$')
+                 | map(attribute='value') | list)
+             ) | unique }}

@@ -77,3 +77,6 @@ ansible/environments/*/group_vars/infra_ca/*.crt
 ansible/environments/*/group_vars/infra_ca/*.key
 ansible/environments/*/group_vars/infra_ca/*.pem
 ansible/environments/*/group_vars/infra_ca/*.csr
+
+# obsidian
+docs/.obsidian

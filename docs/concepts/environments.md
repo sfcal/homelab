@@ -55,8 +55,7 @@ Each environment has its own configuration under both Ansible and Terraform:
     │   ├── providers.tf                 # Proxmox provider
     │   ├── vms.auto.tfvars              # VM definitions
     │   └── terraform.tfstate            # State file
-    ├── ldn/
-    └── nyc/
+    └── ldn/
     ```
 
 === "Packer"

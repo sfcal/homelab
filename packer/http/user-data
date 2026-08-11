@@ -20,7 +20,7 @@ autoinstall:
   user-data:
     package_update: true
     package_upgrade: true
-    timezone: America/New_York 
+    timezone: Europe/London 
     ssh_pwauth: true 
     users:
       - name: sfcal

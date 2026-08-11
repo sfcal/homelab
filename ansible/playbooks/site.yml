@@ -49,10 +49,6 @@
 - import_playbook: apps/cloud-gaming/deploy.yml
   tags: ['cloud-gaming', 'wolf', 'romm', 'applications']
 
-# 9. Work Apps
-- import_playbook: apps/work/deploy.yml
-  tags: ['work', 'bookstack', 'convertx', 'cyberchef', 'it-tools', 'microbin', 'stirling-pdf', 'applications']
-
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml
@@ -86,3 +82,7 @@
 - import_playbook: deploy-app.yml
   vars: { app_name: website }
   tags: ['website', 'applications']
+
+- import_playbook: deploy-app.yml
+  vars: { app_name: work }
+  tags: ['work', 'convertx', 'cyberchef', 'it-tools', 'microbin', 'stirling-pdf', 'applications']

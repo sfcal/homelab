@@ -4,7 +4,34 @@ Common DNS, proxy, and routing operations.
 
 ## Add a Service to DNS and Proxy
 
-Add an entry to the appropriate domain file in `ansible/environments/<env>/group_vars/all/proxy/`:
+### Registry apps
+
+For apps in the [app registry](../reference/config.md#app-registry), add a `proxy:` block to the app's entry in `ansible/environments/<env>/group_vars/all/apps.yml`:
+
+```yaml
+# apps.yml
+myapp:
+  host_group: app_myapp
+  # renovate: datasource=docker
+  image: "myimage:latest"
+  port: 8080
+  proxy:
+    name: myapp
+    domain: wil.5am.cloud
+    proxied: true
+```
+
+Then redeploy networking:
+
+```bash
+task ansible:deploy-networking ENV=wil
+```
+
+`backend_host` and `backend_port` are derived automatically: the first inventory host of the app's `host_group`, and the app's `port` (override with `backend_port` inside the `proxy:` block).
+
+### Non-catalog services
+
+For services outside the registry (third-party devices, media stack, monitoring), add an entry to the appropriate domain file in `ansible/environments/<env>/group_vars/all/proxy/`:
 
 ```yaml
 # wil.5am.cloud.yml
@@ -14,13 +41,9 @@ Add an entry to the appropriate domain file in `ansible/environments/<env>/group
   proxied: true
 ```
 
-Then redeploy networking:
+Then redeploy networking as above.
 
-```bash
-task ansible:deploy-networking ENV=wil
-```
-
-This creates both a DNS A record (`myapp.wil.5am.cloud → Caddy`) and a Caddy reverse proxy entry.
+Either path creates both a DNS A record (`myapp.wil.5am.cloud → Caddy`) and a Caddy reverse proxy entry.
 
 !!! tip
     Set `proxied: false` if the service handles its own TLS or doesn't need a reverse proxy. The DNS record will point directly to `backend_host`.
@@ -40,6 +63,8 @@ This creates both a DNS A record (`myapp.wil.5am.cloud → Caddy`) and a Caddy r
 | `host_header` | no | — | Overrides `Host` header to upstream |
 | `encode` | no | — | Response encoding (e.g., `gzip`) |
 | `read_buffer` | no | — | Read buffer size |
+
+For registry-generated entries, `backend_host` and `backend_port` are derived — the `proxy:` block only supplies `name`, `domain`, `proxied`, and any optional fields.
 
 ## Add a New Domain
 
@@ -78,7 +103,7 @@ This creates both a DNS A record (`myapp.wil.5am.cloud → Caddy`) and a Caddy r
 
 ## Add a PTR Record
 
-PTR records (reverse DNS) are generated automatically from the service definitions for non-proxied services. For infrastructure hosts, PTR records are defined in the BIND9 reverse zone template.
+PTR records (reverse DNS) are not generated from the `services` list — the reverse zone template (`reverse.zone.j2`) is rendered from the `dns_ptr_records` list in `group_vars/infra_networking/bind9.yml`. Add an entry there for any host that needs reverse DNS.
 
 See [DNS — Reverse DNS](../infrastructure/networking/dns.md#reverse-dns-ptr-records) for details.
 

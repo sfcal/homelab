@@ -58,20 +58,4 @@ video_services:
     backend_port: 5000
     proxied: true
 
-  # Subtitle Search
-  - name: subsearch
-    backend_host: 10.2.0.5
-    backend_port: 7700
-    proxied: true
-
-  # Haivision
-  - name: restreamer
-    backend_host: 10.2.0.5
-    backend_port: 8710
-    proxied: true
-
-  # Apps
-  - name: samuel
-    backend_host: 10.2.20.45
-    backend_port: 8090
-    proxied: true
+  # (subsearch, restreamer, samuel are registry apps in group_vars/all/apps.yml)

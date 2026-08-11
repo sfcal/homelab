@@ -83,12 +83,16 @@ Most applications use the shared `deploy-app.yml` playbook. Apps are defined in 
 ```yaml
 birdle:
   host_group: app_birdle
-  images:
-    - ghcr.io/sfcal/new-birdle:latest
+  # renovate: datasource=docker
+  image: "ghcr.io/sfcal/new-birdle:latest"
   port: 8091
+  proxy:
+    name: birdle
+    domain: sfc.al
+    proxied: true
 ```
 
-The `deploy-app.yml` playbook reads the app config, includes the `docker_service` role, and deploys the Docker Compose template from `ansible/playbooks/apps/<name>/templates/compose.yaml.j2`.
+The `deploy-app.yml` playbook reads the app config, includes the `docker_service` role, and deploys the Docker Compose template from `ansible/playbooks/apps/<name>/templates/compose.yaml.j2`. The image pre-pull list is derived from every registry key ending in `image` (top level and one nesting level down) — there is no manual `images:` list. See [Config Reference — App Registry](config.md#app-registry) for the full schema.
 
 ### Custom App Playbooks
 

@@ -1,19 +1,36 @@
 ---
-# --- App Registry ---
-# Central definition of all data-driven app deployments.
-# Each entry is consumed by the generic deploy-app.yml playbook.
-# Compose templates reference values via apps[app_name].<field>.
-# Secrets remain in per-app group_vars/<group>/secrets.sops.yml.
+# --- App Registry (service catalog) ---
+# Single source of truth for data-driven apps: images, ports, and proxy/DNS
+# metadata. Consumed by:
+#   - deploy-app.yml (host_group, nfs/user/group; pre-pull list is derived
+#     from all keys ending in `image`, top level and one nesting level down)
+#   - compose templates via apps[app_name].<field>
+#   - proxy/_services.yml, which generates DNS + Caddy entries from each
+#     `proxy:` block (backend_host = first host of host_group,
+#     backend_port = sibling `port` unless proxy.backend_port overrides)
+#
+# The Taskfile passes this file via `-e @` for deploy-app/deploy-all (needed
+# for the play-level `hosts:` lookup); APPS_FILE must keep pointing here or
+# extra-vars precedence will split-brain against the group_vars copy.
 #
 # Required fields:
-#   host_group: inventory group name (e.g., app_cyberchef)
-#   image: primary container image
-#   images: list of all images to pre-pull
+#   host_group: inventory group name (e.g., app_kasm); must have at least one
+#               host in this environment's inventory if any proxy block exists
+#   image: primary container image (all `*image` keys are pre-pulled)
 #
 # Optional fields:
+#   port: host port published by compose; default proxy backend_port
+#   proxy: proxy/DNS entry — name (subdomain), domain, proxied are required;
+#          tls_skip_verify / forward_headers / host_header / encode /
+#          read_buffer / dns / enabled / backend_port pass through.
+#          Omit the block for apps with no DNS/proxy entry.
 #   nfs: true — run nfs_mount role before deployment
 #   user: override service file owner (default: root)
 #   group: override service file group (default: root)
+#
+# Multi-service apps nest sub-services (see work); sub-keys must be
+# hyphen-free. Image keys must end in `image`, be double-quoted, and keep the
+# `# renovate: datasource=docker` comment directly above the key line.
 
 apps:
   birdle:
@@ -21,12 +38,13 @@ apps:
     # renovate: datasource=docker
     image: "ghcr.io/sfcal/new-birdle:latest"
     port: 8091
-    images:
-      - "ghcr.io/sfcal/new-birdle:latest"
+    proxy:
+      name: birdle
+      domain: sfc.al
+      proxied: true
 
   games-server:
     host_group: app_gamesserver
-    images: []
     terraria:
       # renovate: datasource=docker
       image: "ryshe/terraria:latest"
@@ -46,16 +64,18 @@ apps:
     image: "lscr.io/linuxserver/kasm:1.18.1"
     port: 4443
     wizard_port: 3001
-    images:
-      - "lscr.io/linuxserver/kasm:1.18.0"
+    proxy:
+      name: kasm
+      domain: wil.5am.cloud
+      proxied: true
+      tls_skip_verify: true
+      forward_headers: true
 
   openbooks:
     host_group: app_openbooks
     # renovate: datasource=docker
     image: "evanbuss/openbooks:latest"
     port: 8072
-    images:
-      - "evanbuss/openbooks:latest"
 
   restreamer:
     host_group: app_restreamer
@@ -64,8 +84,10 @@ apps:
     port: 8710
     rtmp_port: 1935
     srt_port: 6000
-    images:
-      - "datarhei/restreamer:latest"
+    proxy:
+      name: restreamer
+      domain: 5am.video
+      proxied: true
 
   seafile:
     host_group: app_seafile
@@ -77,11 +99,11 @@ apps:
     # renovate: datasource=docker
     redis_image: "redis:8"
     port: 8080
-    hostname: "files.wil.5am.cloud"
-    images:
-      - "seafileltd/seafile-mc:13.0-latest"
-      - "mariadb:12.2"
-      - "redis:7"
+    proxy:
+      name: files
+      domain: wil.5am.cloud
+      proxied: true
+      forward_headers: true
 
   subsearch:
     host_group: app_subsearch
@@ -92,14 +114,60 @@ apps:
     indexer_image: "ghcr.io/sfcal/subtitle-fts:latest"
     port: 7700
     index_interval: "21600"
-    images:
-      - "getmeili/meilisearch:v1.13"
-      - "ghcr.io/sfcal/subtitle-fts:latest"
+    proxy:
+      name: subsearch
+      domain: 5am.video
+      proxied: true
 
   website:
     host_group: app_website
     # renovate: datasource=docker
     image: "ghcr.io/sfcal/samuel.computer:latest"
     port: 8090
-    images:
-      - "ghcr.io/sfcal/samuel.computer:latest"
+    proxy:
+      name: samuel
+      domain: 5am.video
+      proxied: true
+
+  work:
+    host_group: app_work
+    convertx:
+      # renovate: datasource=docker
+      image: "ghcr.io/c4illin/convertx:latest"
+      port: 3100
+      proxy:
+        name: convert
+        domain: wil.5am.cloud
+        proxied: true
+    cyberchef:
+      # renovate: datasource=docker
+      image: "ghcr.io/gchq/cyberchef:latest"
+      port: 8071
+      proxy:
+        name: cyberchef
+        domain: wil.5am.cloud
+        proxied: true
+    ittools:
+      # renovate: datasource=docker
+      image: "corentinth/it-tools:latest"
+      port: 8070
+      proxy:
+        name: tools
+        domain: wil.5am.cloud
+        proxied: true
+    microbin:
+      # renovate: datasource=docker
+      image: "danielszabo99/microbin:latest"
+      port: 8081
+      proxy:
+        name: bin
+        domain: wil.5am.cloud
+        proxied: true
+    stirlingpdf:
+      # renovate: datasource=docker
+      image: "stirlingtools/stirling-pdf:latest"
+      port: 8073
+      proxy:
+        name: pdf
+        domain: wil.5am.cloud
+        proxied: true

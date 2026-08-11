@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ansible (configuration/deployment), Packer (VM templates), and go-task (task runner). Multiple environments: wil (dev), ldn, nyc (prod), external.
+Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ansible (configuration/deployment), Packer (VM templates), and go-task (task runner). Multiple environments: wil (dev), ldn (prod), external.
 
 ## Repository Structure
 
@@ -38,7 +38,7 @@ Auto-discovered from `ansible/environments/*/`. Each has:
 - `terraform/environments/<env>/vms.auto.tfvars` — VM definitions (HCL)
 - `terraform/environments/<env>/terraform.tfstate` — provisioning state
 
-Network ranges: wil=10.2.x.x, ldn=10.3.x.x, nyc=10.1.x.x
+Network ranges: wil=10.2.x.x, ldn=10.3.x.x
 
 ## Conventions
 
@@ -135,50 +135,52 @@ sops decrypt ansible/environments/wil/group_vars/all/secrets.sops.yml
 
 ## Proxy & DNS Service Definitions
 
-Services get DNS records and reverse proxy entries via `group_vars/all/proxy/`. One file per domain:
+The unified `services` list (consumed by both BIND9 and Caddy templates) is built from two sources in `group_vars/all/proxy/_services.yml`:
 
-```
-ansible/environments/<env>/group_vars/all/proxy/
-├── _services.yml          # Aggregates all domain lists into unified `services` variable
-├── 5am.video.yml          # video_services list
-├── wil.5am.cloud.yml      # wil_services list
-├── ext.5am.cloud.yml      # ext_services list
-└── sfc.al.yml             # sfc_services list
-```
+1. **Registry apps** — generated automatically from `proxy:` blocks in `group_vars/all/apps.yml` (`registry_services`). `backend_host` is derived from the first inventory host of the app's `host_group` (fails loudly if the group is empty); `backend_port` comes from the app's `port`. Add a registry app to DNS/proxy by adding a `proxy:` block:
+   ```yaml
+   apps:
+     myapp:
+       host_group: app_myapp
+       # renovate: datasource=docker
+       image: "example/myapp:latest"
+       port: 8080
+       proxy:
+         name: myapp             # Subdomain (myapp.wil.5am.cloud)
+         domain: wil.5am.cloud
+         proxied: true           # required; true=Caddy proxy, false=DNS direct
+         # Optional passthrough: tls_skip_verify, forward_headers,
+         # host_header, encode, read_buffer, dns, enabled, backend_port
+   ```
+   Multi-service apps nest sub-services with their own `proxy:` blocks (see `apps.work.*`). Apps without a `proxy:` block get no DNS/proxy entry.
 
-Each service entry:
-```yaml
-- name: myapp              # Subdomain (myapp.wil.5am.cloud)
-  backend_host: 10.2.20.60 # Backend IP
-  backend_port: 8080        # Backend port
-  proxied: true             # true=Caddy proxy, false=DNS direct to backend
-  # Optional:
-  # tls_skip_verify: true   # Backend uses self-signed HTTPS
-  # forward_headers: true   # Adds X-Real-IP, X-Forwarded-For
-  # host_header: upstream   # Overrides Host header
-  # encode: gzip            # Response encoding
-  # dns: external           # Skips internal A record generation
-  # enabled: false          # Disables both DNS and Caddy entries
-```
+2. **Manual per-domain files** (`group_vars/all/proxy/<domain>.yml`) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, cloud-gaming. Same fields, plus explicit `backend_host`/`backend_port`:
+   ```yaml
+   - name: vm                 # Subdomain
+     backend_host: 10.2.20.7  # Backend IP
+     backend_port: 8006       # Backend port
+     proxied: true
+   ```
 
-`_services.yml` aggregates all lists with domain injection:
+`_services.yml` aggregates the manual lists (with domain injection) and appends `registry_services`:
 ```yaml
 services: >-
   {{
     (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
     (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
-    ...
+    ... +
+    registry_services
   }}
 ```
 
-Both BIND9 (DNS) and Caddy (reverse proxy) templates consume the unified `services` list.
-
 ## Adding New Services
 
-1. Create playbook: `ansible/playbooks/apps/<service>/deploy.yml` (follow existing pattern)
-2. Create group_vars: `ansible/environments/<env>/group_vars/app_<service>/`
+For a data-driven (registry) app:
+1. Add the app to `ansible/environments/<env>/group_vars/all/apps.yml`: `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived)
+2. Create the compose template: `ansible/playbooks/apps/<service>/templates/compose.yaml.j2` referencing `apps[app_name].<field>`
 3. Add host group to `hosts.ini` under `[app_<service>]` and `[apps:children]`
-4. Add proxy/DNS entry to the appropriate domain file in `group_vars/all/proxy/<domain>.yml`
-5. Add task to `.taskfiles/ansible/Taskfile.yaml`
-6. Add import to `ansible/playbooks/site.yml`
-7. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`
+4. Add import to `ansible/playbooks/site.yml` (uses `deploy-app.yml` with `app_name`)
+5. Deploy: `task ansible:deploy-app APP=<service> ENV=<env>`, then `task ansible:deploy-networking ENV=<env>` for the DNS/proxy entry
+6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`
+
+Non-catalog services (third-party devices, dedicated-playbook stacks) get manual proxy entries in `group_vars/all/proxy/<domain>.yml` instead of a `proxy:` block.

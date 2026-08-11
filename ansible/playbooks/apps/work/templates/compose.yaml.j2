@@ -1,0 +1,57 @@
+---
+services:
+  convertx:
+    image: {{ apps.work.convertx.image }}
+    container_name: convertx
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 512m
+    ports:
+      - "{{ apps.work.convertx.port }}:3000"
+    environment:
+      - JWT_SECRET={{ convertx_jwt_secret }}
+      - ALLOW_UNAUTHENTICATED=true
+      - HTTP_ALLOWED=true
+    volumes:
+      - {{ deploy_path }}/convertx/data:/app/data
+
+  cyberchef:
+    image: {{ apps.work.cyberchef.image }}
+    container_name: cyberchef
+    restart: unless-stopped
+    ports:
+      - "{{ apps.work.cyberchef.port }}:8080"
+
+  it-tools:
+    image: {{ apps.work.ittools.image }}
+    container_name: it-tools
+    restart: unless-stopped
+    ports:
+      - "{{ apps.work.ittools.port }}:80"
+
+  microbin:
+    image: {{ apps.work.microbin.image }}
+    container_name: microbin
+    restart: unless-stopped
+    ports:
+      - "{{ apps.work.microbin.port }}:8080"
+    volumes:
+      - "{{ deploy_path }}/microbin/data:/app/microbin_data"
+    environment:
+      - MICROBIN_PORT=8080
+      - MICROBIN_PUBLIC_PATH=https://{{ apps.work.microbin.proxy.name }}.{{ apps.work.microbin.proxy.domain }}
+      - MICROBIN_EDITABLE=true
+      - MICROBIN_HIGHLIGHTSYNTAX=true
+      - MICROBIN_PRIVATE=true
+      - MICROBIN_HIDE_FOOTER=true
+
+  stirling-pdf:
+    image: {{ apps.work.stirlingpdf.image }}
+    container_name: stirling-pdf
+    restart: unless-stopped
+    ports:
+      - "{{ apps.work.stirlingpdf.port }}:8080"
+    volumes:
+      - {{ deploy_path }}/stirling-pdf/configs:/configs
+      - {{ deploy_path }}/stirling-pdf/logs:/logs
+      - {{ deploy_path }}/stirling-pdf/data:/usr/share/tessdata

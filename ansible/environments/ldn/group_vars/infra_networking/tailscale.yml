@@ -8,6 +8,19 @@ tailscale_mode: "subnet_router"
 # Routes to advertise to the Tailscale network
 tailscale_advertise_routes:
   - "10.3.0.0/16"
+  # --- Haivision corp subnets ---
+  # This VM holds the only OpenVPN session for the corp account (one session
+  # per account), so it re-advertises the corp ranges to the tailnet on behalf
+  # of wil. Keep in sync with vpn_clients[haivision].routed_subnets.
+  # Must be approved in the Tailscale admin console after the first run.
+  - "10.5.0.0/16"
+  - "10.17.0.0/16"
+  - "10.65.0.0/16"
+  - "10.66.0.0/16"
+  - "10.68.0.0/16"
+  - "10.129.0.0/16"
+  - "10.130.0.0/16"
+  - "10.131.0.0/16"
 
 # Accept routes from other subnet routers (enables cross-site routing)
 tailscale_accept_routes: true

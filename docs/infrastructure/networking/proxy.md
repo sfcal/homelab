@@ -10,8 +10,9 @@ Caddy serves as the reverse proxy for all web-facing services. It runs as a Dock
 | `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2` | Reverse proxy configuration |
 | `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2` | Docker Compose service definition |
 | `ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2` | Custom xcaddy build with Cloudflare plugin |
-| `ansible/environments/<env>/group_vars/all/proxy/*.yml` | Per-domain service definitions |
-| `ansible/environments/<env>/group_vars/all/proxy/_services.yml` | Service aggregation |
+| `ansible/environments/<env>/group_vars/all/proxy/*.yml` | Manual per-domain service definitions (non-catalog services) |
+| `ansible/environments/<env>/group_vars/all/proxy/_services.yml` | Registry entry generation and service aggregation |
+| `ansible/environments/<env>/group_vars/all/apps.yml` | App registry — `proxy:` blocks generate service entries |
 
 ## Architecture
 
@@ -60,7 +61,12 @@ The Caddy container exposes ports `80`, `443`, and `2019` (admin API), and mount
 
 ## Service Definition Reference
 
-Services are defined in per-domain YAML files under `ansible/environments/<env>/group_vars/all/proxy/`. Each file defines a list variable (e.g., `wil_services`, `video_services`) that is aggregated by `_services.yml`.
+Service entries come from two sources:
+
+1. **App registry** — apps in `group_vars/all/apps.yml` declare a `proxy:` block, and `_services.yml` generates their entries automatically. See [Registry-Generated Entries](#registry-generated-entries).
+2. **Manual per-domain files** — YAML files under `ansible/environments/<env>/group_vars/all/proxy/` for services outside the app registry: third-party devices (Proxmox, NAS, KVM, Haivision), the media stack, monitoring, Frigate, and cloud gaming. Each file defines a list variable (e.g., `wil_services`, `video_services`) that is aggregated by `_services.yml`.
+
+The fields below apply to entries from both sources.
 
 ### Required Fields
 
@@ -266,9 +272,35 @@ A service that gets a DNS record pointing directly to its IP, with no Caddy prox
   proxied: false
 ```
 
+## Registry-Generated Entries
+
+Apps in the app registry (`group_vars/all/apps.yml`) declare their DNS and proxy configuration inline via a `proxy:` block:
+
+```yaml
+kasm:
+  host_group: app_kasm
+  # renovate: datasource=docker
+  image: "lscr.io/linuxserver/kasm:1.18.1"
+  port: 4443
+  proxy:
+    name: kasm             # Subdomain → kasm.wil.5am.cloud
+    domain: wil.5am.cloud
+    proxied: true          # Required — no default in the zone template
+    tls_skip_verify: true
+```
+
+`_services.yml` builds a `registry_services` list from every `proxy:` block — on a top-level app or a one-level-nested sub-service (e.g., `apps.work.convertx.proxy`). For each block:
+
+- **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the environment's inventory, the render fails loudly rather than silently dropping the entry.
+- **`backend_port` defaults to the sibling `port`** — set `backend_port` inside the `proxy:` block to override it.
+- **`name`, `domain`, and `proxied` are required** — `proxied` has no default in the zone template.
+- **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `dns`, and `enabled` behave exactly as in manual entries.
+
+Apps without a `proxy:` block (e.g., openbooks, games-server) get no DNS record and no Caddy entry.
+
 ## Service Aggregation
 
-The `_services.yml` file in each environment aggregates all per-domain service lists and injects the `domain` field:
+The `_services.yml` file in each environment aggregates the manual per-domain service lists (injecting the `domain` field) and appends the registry-generated entries, which already carry their `domain` from the `proxy:` block. Manual lists come first to keep zone and Caddyfile ordering stable:
 
 === "WIL"
 
@@ -279,7 +311,8 @@ The `_services.yml` file in each environment aggregates all per-domain service l
         (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
         (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
         (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
-        (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list)
+        (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list) +
+        registry_services
       }}
     ```
 
@@ -288,9 +321,12 @@ The `_services.yml` file in each environment aggregates all per-domain service l
     ```yaml
     services: >-
       {{
-        (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list)
+        (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
+        registry_services
       }}
     ```
+
+A list may aggregate even when no domain file defines it — the `default([])` keeps unused lists (e.g., `sfc_services` in WIL, whose services all live in the registry) as extension points.
 
 Both BIND9 zone templates and the Caddyfile template consume the resulting `services` list.
 
@@ -311,23 +347,40 @@ Both BIND9 zone templates and the Caddyfile template consume the resulting `serv
 
 ### Add a new service to an existing domain
 
-1. Open the domain file, e.g., `ansible/environments/wil/group_vars/all/proxy/wil.5am.cloud.yml`
-2. Add a service entry:
+**Registry apps** — add a `proxy:` block to the app's entry in `ansible/environments/<env>/group_vars/all/apps.yml`:
 
-    ```yaml
-    - name: myapp
-      backend_host: 10.2.20.60
-      backend_port: 8080
-      proxied: true
-    ```
+```yaml
+myapp:
+  host_group: app_myapp
+  # renovate: datasource=docker
+  image: "myimage:latest"
+  port: 8080
+  proxy:
+    name: myapp
+    domain: wil.5am.cloud
+    proxied: true
+```
 
-3. Deploy:
+`backend_host` and `backend_port` are derived from the app's `host_group` and `port` — no manual entry is needed.
+
+**Non-catalog services** (third-party devices, media stack, monitoring) — add an entry to the domain file, e.g., `ansible/environments/wil/group_vars/all/proxy/wil.5am.cloud.yml`:
+
+```yaml
+- name: myapp
+  backend_host: 10.2.20.60
+  backend_port: 8080
+  proxied: true
+```
+
+Then, for either path:
+
+1. Deploy:
 
     ```bash
     task ansible:deploy-networking ENV=wil
     ```
 
-4. Verify:
+2. Verify:
 
     ```bash
     # Check DNS
@@ -378,7 +431,7 @@ Both BIND9 zone templates and the Caddyfile template consume the resulting `serv
 
 ### Disable a service temporarily
 
-Set `enabled: false` on the service entry. This removes both the DNS record and the Caddy proxy entry without deleting the configuration:
+Set `enabled: false` on the service entry (for registry apps, inside the `proxy:` block in `apps.yml`). This removes both the DNS record and the Caddy proxy entry without deleting the configuration:
 
 ```yaml
 - name: myapp
@@ -394,6 +447,6 @@ Set `enabled: false` on the service entry. This removes both the DNS record and 
 
 **Certificate not issuing** — Check Caddy logs: `ssh <networking-ip> docker logs caddy`. Common causes: Cloudflare API token expired, domain not on Cloudflare, or Let's Encrypt rate limit hit.
 
-**Service accessible via IP but not hostname** — The DNS record is missing or pointing to the wrong IP. Check with `dig <service>.<domain> @10.2.20.53` and verify the service entry in the domain file.
+**Service accessible via IP but not hostname** — The DNS record is missing or pointing to the wrong IP. Check with `dig <service>.<domain> @10.2.20.53` and verify the service entry in the domain file (or the app's `proxy:` block in `apps.yml` for registry apps).
 
 **Headers not forwarded** — Ensure `forward_headers: true` is set on the service entry and redeploy networking.

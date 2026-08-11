@@ -41,7 +41,7 @@ services:
       - SEAFILE_MYSQL_DB_CCNET_DB_NAME=ccnet_db
       - SEAFILE_MYSQL_DB_SEAFILE_DB_NAME=seafile_db
       - SEAFILE_MYSQL_DB_SEAHUB_DB_NAME=seahub_db
-      - "SEAFILE_SERVER_HOSTNAME={{ apps[app_name].hostname }}"
+      - "SEAFILE_SERVER_HOSTNAME={{ apps[app_name].proxy.name }}.{{ apps[app_name].proxy.domain }}"
       - SEAFILE_SERVER_PROTOCOL=https
       - "TIME_ZONE={{ system_timezone }}"
       - "JWT_PRIVATE_KEY={{ seafile_jwt_key }}"

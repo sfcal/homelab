@@ -13,22 +13,30 @@ dns_trusted_networks:
   - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
 # Secondary zones - replicated from remote primaries via AXFR
+# The wil primary's Tailscale IP is listed alongside its LAN IP because
+# cross-site NOTIFYs arrive SNATed to the Tailscale address and BIND
+# refuses notifies from IPs not in the masters list.
 dns_secondary_zones:
   - name: "5am.video"
     masters:
       - "10.2.20.53"
+      - "100.103.137.102"
   - name: "5am.cloud"
     masters:
       - "10.2.20.53"
+      - "100.103.137.102"
   - name: "wil.5am.cloud"
     masters:
       - "10.2.20.53"
+      - "100.103.137.102"
   - name: "ext.5am.cloud"
     masters:
       - "10.2.20.53"
+      - "100.103.137.102"
   - name: "sfc.al"
     masters:
       - "10.2.20.53"
+      - "100.103.137.102"
 
 # IPs allowed to pull zone transfers from this server
 dns_transfer_clients:

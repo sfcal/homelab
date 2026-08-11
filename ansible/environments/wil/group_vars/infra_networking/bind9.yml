@@ -12,11 +12,28 @@ dns_trusted_networks:
   - 10.3.0.0/16
   - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
+# --- Forward Zones ---
+# The haivision OpenVPN session lives on the ldn networking VM, so wil has no
+# direct path to Haivision internal DNS. Forward the zone to ldn's BIND9, which
+# forwards on to 10.65.0.10/10.66.0.10 through its tunnel.
+#
+# Set here explicitly rather than relying on vpn_clients aggregation: that only
+# collects dns_forward_zones from clients with `enabled: true`, so wil's
+# disabled client contributes nothing.
+dns_forward_zones:
+  - name: "haivision.com"
+    forwarders:
+      - "10.3.20.53"
+
 # Secondary zones - replicated from remote primaries via AXFR
+# The ldn primary's Tailscale IP is listed alongside its LAN IP because
+# cross-site NOTIFYs arrive SNATed to the Tailscale address and BIND
+# refuses notifies from IPs not in the masters list.
 dns_secondary_zones:
   - name: "ldn.5am.cloud"
     masters:
       - "10.3.20.53"
+      - "100.78.61.80"
 
 # IPs allowed to pull zone transfers from this server
 dns_transfer_clients:

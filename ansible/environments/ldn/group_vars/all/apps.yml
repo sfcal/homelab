@@ -1,0 +1,60 @@
+---
+# --- App Registry (service catalog) ---
+# See wil's apps.yml for full schema docs.
+
+apps:
+  kasm:
+    host_group: app_kasm
+    # renovate: datasource=docker
+    image: "lscr.io/linuxserver/kasm:1.18.1"
+    port: 4443
+    wizard_port: 3001
+    proxy:
+      name: kasm
+      domain: ldn.5am.cloud
+      proxied: true
+      tls_skip_verify: true
+      forward_headers: true
+
+  work:
+    host_group: app_work
+    convertx:
+      # renovate: datasource=docker
+      image: "ghcr.io/c4illin/convertx:latest"
+      port: 3100
+      proxy:
+        name: convert
+        domain: ldn.5am.cloud
+        proxied: true
+    cyberchef:
+      # renovate: datasource=docker
+      image: "ghcr.io/gchq/cyberchef:latest"
+      port: 8071
+      proxy:
+        name: cyberchef
+        domain: ldn.5am.cloud
+        proxied: true
+    ittools:
+      # renovate: datasource=docker
+      image: "corentinth/it-tools:latest"
+      port: 8070
+      proxy:
+        name: tools
+        domain: ldn.5am.cloud
+        proxied: true
+    microbin:
+      # renovate: datasource=docker
+      image: "danielszabo99/microbin:latest"
+      port: 8081
+      proxy:
+        name: bin
+        domain: ldn.5am.cloud
+        proxied: true
+    stirlingpdf:
+      # renovate: datasource=docker
+      image: "stirlingtools/stirling-pdf:latest"
+      port: 8073
+      proxy:
+        name: pdf
+        domain: ldn.5am.cloud
+        proxied: true

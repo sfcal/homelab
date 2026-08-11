@@ -29,6 +29,23 @@
            | flatten
            | list) }}
 
+# --- Teardown for disabled clients ---
+# `enabled: false` previously only skipped the deploy/start tasks, leaving any
+# already-running unit active. With a single-session corp VPN account that means
+# two sites silently fight over the tunnel. Stop and disable them explicitly.
+
+- name: Stop and disable OpenVPN clients marked disabled.
+  ansible.builtin.service:
+    name: "openvpn-client@{{ client.name }}"
+    state: stopped
+    enabled: false
+  loop: "{{ vpn_clients | rejectattr('enabled', 'equalto', true) | list }}"
+  loop_control:
+    loop_var: client
+    label: "{{ client.name }}"
+  # The unit may never have existed on this host; that is not an error.
+  failed_when: false
+
 # --- Per-client configuration ---
 
 - name: Deploy OpenVPN client config.

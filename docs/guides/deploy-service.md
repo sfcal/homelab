@@ -13,10 +13,16 @@ Add an entry to `ansible/environments/<env>/group_vars/all/apps.yml`:
 ```yaml
 myapp:
   host_group: app_myapp
-  images:
-    - myimage:latest
+  # renovate: datasource=docker
+  image: "myimage:latest"
   port: 8080
+  proxy:
+    name: myapp
+    domain: wil.5am.cloud
+    proxied: true
 ```
+
+There is no `images:` list — the pre-pull list is derived from every key ending in `image`. Keep the `# renovate: datasource=docker` comment directly above the image key and double-quote the value so Renovate can update it. Omit the `proxy:` block if the app needs no DNS or proxy entry.
 
 ### 2. Create the Compose Template
 
@@ -25,7 +31,7 @@ Create `ansible/playbooks/apps/myapp/templates/compose.yaml.j2`:
 ```yaml
 services:
   myapp:
-    image: myimage:latest
+    image: {{ apps.myapp.image }}
     container_name: myapp
     restart: unless-stopped
     ports:
@@ -58,30 +64,23 @@ Add the app to `ansible/playbooks/site.yml`:
     app_name: myapp
 ```
 
-### 5. Add a Task Command
+### 5. Task Command
 
-Add to `.taskfiles/ansible/Taskfile.yaml`:
+No new task is needed — the shared `deploy-app` task in `.taskfiles/ansible/Taskfile.yaml` deploys any registry app by name:
 
 ```yaml
-deploy-myapp:
-  desc: Deploy myapp
+deploy-app:
+  desc: "Deploy an app by name (APP=<name>)"
   cmds:
     - task: _deploy
-      vars:
-        PLAYBOOK: deploy-app.yml
-        EXTRA_ARGS: "-e app_name=myapp"
+      vars: { PLAYBOOK_PATH: deploy-app.yml, EXTRA_ARGS: '-e app_name={{.APP}} -e @{{.APPS_FILE}}' }
 ```
 
-### 6. Add DNS/Proxy Entry
+Dedicated tasks (e.g., `deploy-media`) exist only for apps with custom playbooks.
 
-Add to the appropriate domain file in `ansible/environments/<env>/group_vars/all/proxy/`:
+### 6. DNS/Proxy Entry
 
-```yaml
-- name: myapp
-  backend_host: 10.2.20.60
-  backend_port: 8080
-  proxied: true
-```
+The `proxy:` block from step 1 already covers this — `backend_host` and `backend_port` are derived from the app's `host_group` and `port`, and the entry is generated when networking is deployed. Manual entries in `group_vars/all/proxy/<domain>.yml` are only for services outside the app registry (third-party devices, media stack, monitoring).
 
 ### 7. Deploy
 
@@ -120,8 +119,8 @@ See [Add a New VM](add-vm.md) first, then come back here after the VM is provisi
 
 ## Troubleshooting
 
-**App not accessible** — Check the proxy entry has `proxied: true` and redeploy networking. Verify the container is running: `ssh <host> docker ps`.
+**App not accessible** — Check the app's `proxy:` block has `proxied: true` and redeploy networking. Verify the container is running: `ssh <host> docker ps`.
 
 **Container won't start** — Check logs: `ssh <host> docker logs myapp`. Common issues: port conflicts, missing environment variables, image pull failures.
 
-**DNS not resolving** — Ensure the service entry exists in the correct domain file and redeploy networking: `task ansible:deploy-networking ENV=wil`.
+**DNS not resolving** — Ensure the app has a `proxy:` block in `apps.yml` (or, for non-catalog services, an entry in the correct domain file) and redeploy networking: `task ansible:deploy-networking ENV=wil`.

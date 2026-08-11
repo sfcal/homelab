@@ -4,4 +4,5 @@
 # deploy_path: base deployment path (required)
 # service_user: owner of service files (default: root)
 # service_group: group of service files (default: root)
-# service_images: list of images to pull before starting (default: [])
+# service_images: list of images to pull before starting (default: []);
+#   deploy-app.yml derives this from registry keys ending in `image`

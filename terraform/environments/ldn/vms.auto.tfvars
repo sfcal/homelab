@@ -64,8 +64,8 @@ vms = {
     gateway        = "10.3.20.1"
     nameserver     = "10.3.20.53"
     cores          = 2
-    memory         = 4096
-    disk_size      = "50G"
+    memory         = 8196
+    disk_size      = "256G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
     tags           = "application"
@@ -75,22 +75,25 @@ vms = {
     pci_mapping = "b50-vf2"
   }
 
-  ntp_server = {
-    name           = "ntp"
-    description    = "NTP Time Server (Chrony)"
+  game_server = {
+    name           = "gaming"
+    description    = "Cloud Gaming"
     proxmox_node   = "pve-ldn"
     vmid           = 3005
-    template_name  = "ubuntu-server-ldn-base"
-    ip_address     = "10.3.20.123"
+    template_name  = "ubuntu-server-ldn-base-efi"
+    ip_address     = "10.3.20.55"
     gateway        = "10.3.20.1"
     nameserver     = "10.3.20.53"
-    cores          = 1
-    memory         = 1024
-    disk_size      = "20G"
+    cores          = 2
+    memory         = 8196
+    disk_size      = "256G"
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
-    tags           = "infrastructure"
+    tags           = "application"
     ssh_user       = "sfcal"
+    bios        = "ovmf"
+    machine     = "q35"
+    pci_mapping = "b50-vf1"
   }
 
 }

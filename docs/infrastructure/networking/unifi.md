@@ -25,17 +25,6 @@ Each environment uses the same VLAN layout with environment-specific IP ranges.
     | 1 | Infrastructure | `10.3.0.0/24` | Proxmox hosts, NAS, physical infrastructure |
     | 20 | Virtual Machines | `10.3.20.0/24` | All Ansible-managed VMs |
 
-=== "NYC"
-
-    | VLAN | Name | Subnet | Purpose |
-    |------|------|--------|---------|
-    | 1 | Infrastructure | `10.1.0.0/24` | Proxmox hosts, physical infrastructure |
-    | 10 | Storage | `10.1.10.0/24` | Dedicated storage traffic |
-    | 20 | Virtual Machines | `10.1.20.0/24` | All Ansible-managed VMs |
-    | 30 | PTP Devices | `10.1.50.0/24` | Point-to-point devices |
-    | 200 | Wired Devices | `10.1.200.0/24` | Wired client devices |
-    | 230 | Wireless Devices | `10.1.230.0/24` | Wi-Fi client devices |
-
 All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN.
 
 ## Static Routes

@@ -91,11 +91,12 @@ A unified YAML service model drives both DNS records and Caddy reverse proxy con
 ```mermaid
 graph LR
     A["Per-domain YAML\n(5am.video.yml, etc.)"] --> B["_services.yml\naggregation"]
+    R["App registry\n(apps.yml proxy: blocks)"] --> B
     B --> C["domain.zone.j2\n(DNS A records)"]
     B --> D["Caddyfile.j2\n(reverse proxy)"]
 ```
 
-Service definitions live in `ansible/environments/<env>/group_vars/all/proxy/` with one file per domain. The `_services.yml` file aggregates all domain lists and injects the `domain` field automatically.
+Service definitions come from two sources. Apps in the registry (`group_vars/all/apps.yml`) declare a `proxy:` block, from which `_services.yml` generates entries automatically. Manual per-domain files in `ansible/environments/<env>/group_vars/all/proxy/` cover services outside the catalog (third-party devices, media stack, monitoring). The `_services.yml` file aggregates the domain lists (injecting the `domain` field) and appends the registry-generated entries.
 
 See [Reverse Proxy — Service Definition Reference](proxy.md#service-definition-reference) for the full field specification.
 
@@ -131,7 +132,8 @@ Networking → Step-CA → NTP → Monitoring → Applications
 | `ansible/playbooks/infrastructure/networking/templates/` | Jinja2 config templates |
 | `ansible/playbooks/infrastructure/networking/handlers/main.yml` | Service restart handlers |
 | `ansible/environments/<env>/group_vars/infra_networking/` | Per-environment variables |
-| `ansible/environments/<env>/group_vars/all/proxy/` | Service definitions |
+| `ansible/environments/<env>/group_vars/all/proxy/` | Manual service definitions and aggregation |
+| `ansible/environments/<env>/group_vars/all/apps.yml` | App registry (`proxy:` blocks) |
 
 ## Cloudflare DDNS
 

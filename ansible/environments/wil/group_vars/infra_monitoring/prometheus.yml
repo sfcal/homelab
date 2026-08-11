@@ -5,7 +5,8 @@ prometheus_retention: "30d"
 # Prometheus scrape targets
 # Add hosts here to have node-exporter scraped from them
 prometheus_node_targets:
-  - "localhost:9100"   # local (monitoring VM)
+  # Prometheus runs on a bridge network, so use the VM IP, not localhost
+  - "10.2.20.30:9100"      # local (monitoring VM)
   - "10.2.0.5:9100"        # media-stack
   - "10.2.20.53:9100"      # networking
   - "10.2.20.45:9100"      # website

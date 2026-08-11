@@ -1,8 +1,16 @@
 ---
 # Proxy/DNS Service Definitions
-# Aggregated from per-domain files and shared between DNS (BIND9) and Reverse Proxy (Caddy)
+# The unified `services` list (consumed by domain.zone.j2 and Caddyfile.j2 on
+# the networking host) is built from two sources:
+#   1. Manual per-domain lists (proxy/<domain>.yml) — services OUTSIDE the app
+#      registry: Proxmox/KVM/Haivision devices, monitoring.
+#   2. registry_services — generated from group_vars/all/apps.yml. Every
+#      `proxy:` block (top-level app or one-level-nested sub-service, e.g.
+#      apps.work.convertx.proxy) emits one entry. backend_host is the first
+#      inventory host of the app's host_group; backend_port is the sibling
+#      `port` unless the proxy block sets backend_port.
 #
-# Each service entry supports the following fields:
+# Entry fields (manual or generated):
 #   name            (required) - subdomain name
 #   backend_host    (required) - IP of the backend service
 #   backend_port    (required) - port of the backend service
@@ -15,9 +23,36 @@
 #   host_header     (optional) - "upstream": adds Host header override
 #   encode          (optional) - encoding type, e.g. "gzip"
 #   read_buffer     (optional) - transport read buffer size in bytes
-#
-# Note: 'domain' is injected automatically from each file's aggregation line below.
+
+# --- Registry-derived entries ---
+# {% %} loops force string output, so emit JSON and parse it back.
+# An app whose host_group has no hosts in this inventory fails the render
+# loudly rather than silently dropping its DNS/Caddy entries.
+registry_services: "{{ registry_services_json | from_json }}"
+
+registry_services_json: >-
+  {%- set out = [] -%}
+  {%- for app_key, app in (apps | default({})).items() -%}
+  {%-   set proxied_svcs = ([app] if app.proxy is defined else [])
+          + (app.values() | selectattr('proxy', 'defined') | list) -%}
+  {%-   if proxied_svcs | length > 0 -%}
+  {%-     set backend_host = (groups[app.host_group] | default([]) | first)
+            | mandatory('apps.' ~ app_key ~ ': host_group "' ~ app.host_group
+                        ~ '" has no hosts in this inventory') -%}
+  {%-     for svc in proxied_svcs -%}
+  {%-       set _ = out.append(
+              {'backend_host': backend_host,
+               'backend_port': svc.proxy.backend_port | default(svc.port)}
+              | combine(svc.proxy)) -%}
+  {%-     endfor -%}
+  {%-   endif -%}
+  {%- endfor -%}
+  {{ out | to_json }}
+
+# --- Aggregation ---
+# Manual lists first (keeps zone/Caddyfile ordering stable), registry last.
 services: >-
   {{
-    (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list)
+    (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
+    registry_services
   }}

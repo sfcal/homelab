@@ -10,7 +10,7 @@ ldn_services:
     backend_host: 10.3.0.210
     backend_port: 80
     proxied: true
-    
+
   # Monitoring
   - name: grafana
     backend_host: 10.3.20.30
@@ -35,9 +35,4 @@ ldn_services:
     backend_port: 443
     proxied: false
 
-  # Apps
-  - name: homeassistant
-    backend_host: 10.3.20.50
-    backend_port: 8123
-    proxied: true
-    forward_headers: true
+  # Apps (registry apps live in group_vars/all/apps.yml)

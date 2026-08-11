@@ -68,7 +68,6 @@ Reserve a /24 range per environment on VLAN 20:
 |-------------|---------|---------|
 | WIL (dev) | 10.2.20.0/24 | 10.2.20.1 |
 | LDN (prod) | 10.3.20.0/24 | 10.3.20.1 |
-| NYC (prod) | 10.1.20.0/24 | 10.1.20.1 |
 
 ## Verification Checklist
 

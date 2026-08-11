@@ -59,7 +59,7 @@ graph TD
 
 ## Troubleshooting
 
-**Service not resolving internally** — Check that BIND9 is running on the networking VM and that the service has an entry in the appropriate domain file under `group_vars/all/proxy/`. Redeploy networking: `task ansible:deploy-networking ENV=wil`.
+**Service not resolving internally** — Check that BIND9 is running on the networking VM and that the service has an entry in the appropriate domain file under `group_vars/all/proxy/` (or a `proxy:` block on the app's entry in `apps.yml`). Redeploy networking: `task ansible:deploy-networking ENV=wil`.
 
 **External access not working** — Verify DDNS is updating Cloudflare with the correct public IP. Check that ports 80/443 are forwarded to Caddy on the UDM Pro.
 

@@ -17,13 +17,18 @@
                 encode {{ service.encode }}
 {% endif %}
                 reverse_proxy {{ service.backend_host }}:{{ service.backend_port }} {
+{% if service.host_header | default(false) %}
+                        header_up Host {upstream_hostport}
+{% else %}
+{#      Caddy >= 2.11 rewrites Host to the upstream IP for HTTPS upstreams;
+        pin the original client Host explicitly (no-op for HTTP upstreams). #}
+                        header_up Host {host}
+{% endif %}
 {% if service.forward_headers | default(false) %}
                         header_up X-Real-IP {remote_host}
                         header_up X-Forwarded-For {remote_host}
                         header_up X-Forwarded-Proto {scheme}
-{% endif %}
-{% if service.host_header | default(false) %}
-                        header_up Host {upstream_hostport}
+                        header_up X-Forwarded-Port 443
 {% endif %}
 {% if service.tls_skip_verify | default(false) or service.read_buffer | default(false) %}
                         transport http {

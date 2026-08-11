@@ -10,6 +10,10 @@ wil_services:
     backend_host: 10.2.0.100
     backend_port: 80
     proxied: true
+  - name: dfs
+    backend_host: 10.2.0.100
+    backend_port: 445
+    proxied: false
   - name: kvm
     backend_host: 10.2.0.78
     backend_port: 443
@@ -40,45 +44,7 @@ wil_services:
     backend_port: 443
     proxied: false
 
-  # Apps
-  - name: convert
-    backend_host: 10.2.20.60
-    backend_port: 3100
-    proxied: true
-  - name: tools
-    backend_host: 10.2.20.60
-    backend_port: 8070
-    proxied: true
-  - name: bookstack
-    backend_host: 10.2.20.60
-    backend_port: 8074
-    proxied: true
-  - name: cyberchef
-    backend_host: 10.2.20.60
-    backend_port: 8071
-    proxied: true
-  - name: openbooks
-    backend_host: 10.2.20.45
-    backend_port: 8072
-    proxied: true
-  - name: pdf
-    backend_host: 10.2.20.60
-    backend_port: 8073
-    proxied: true
-  - name: kasm
-    backend_host: 10.2.20.60
-    backend_port: 4443
-    proxied: true
-    tls_skip_verify: true
-  - name: files
-    backend_host: 10.2.20.70
-    backend_port: 8080
-    proxied: true
-    forward_headers: true
-  - name: bin
-    backend_host: 10.2.20.60
-    backend_port: 8081
-    proxied: true
+  # Apps (registry apps live in group_vars/all/apps.yml)
   - name: roms
     backend_host: 10.2.20.80
     backend_port: 8085

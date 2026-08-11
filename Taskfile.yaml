@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  ENV: '{{.ENV | default "dev"}}'
+  ENV: '{{.ENV | default "ldn"}}'
   ROOT_DIR: '{{.PWD}}'
 
 includes:
