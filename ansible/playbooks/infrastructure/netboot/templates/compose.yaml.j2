@@ -1,0 +1,17 @@
+---
+services:
+  netbootxyz:
+    image: {{ netbootxyz_image }}
+    container_name: netbootxyz
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ system_timezone }}
+    ports:
+      - "{{ netbootxyz_web_port }}:3000"
+      - "69:69/udp"
+      - "{{ netbootxyz_http_port }}:80"
+    volumes:
+      - {{ deploy_path }}/netbootxyz/config:/config
+      - {{ deploy_path }}/netbootxyz/assets:/assets

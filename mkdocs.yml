@@ -102,6 +102,7 @@ nav:
     - Add a New VM: guides/add-vm.md
     - Networking Changes: guides/networking-changes.md
     - Certificates: guides/certificates.md
+    - Re-image the Time Server: guides/reimage-time-server.md
   - Reference:
     - reference/index.md
     - Terraform: reference/terraform.md

@@ -24,8 +24,9 @@ Each environment uses the same VLAN layout with environment-specific IP ranges.
     |------|------|--------|---------|
     | 1 | Infrastructure | `10.3.0.0/24` | Proxmox hosts, NAS, physical infrastructure |
     | 20 | Virtual Machines | `10.3.20.0/24` | All Ansible-managed VMs |
+    | 30 | Servers Misc | `10.3.30.0/24` | Bare-metal lab devices (PTP time server and clients) |
 
-All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN.
+All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN. In LDN, the PTP time server (LattePanda MU) is a physical host on VLAN 30 at `10.3.30.64`, managed by the separate `ptp-experiments` repo.
 
 ## Static Routes
 
@@ -107,6 +108,30 @@ graph LR
 1. External client resolves `plex.5am.video` via Cloudflare DNS → public IP
 2. UDM Pro receives traffic on port 443, forwards to `10.2.20.53:443`
 3. Caddy terminates TLS, matches the hostname, and proxies to the backend
+
+## Network Boot (PXE)
+
+The LDN netboot VM (`10.3.20.60`) runs [netboot.xyz](https://netboot.xyz) for PXE re-imaging of bare-metal devices — currently the PTP time server on VLAN 30. See the [Re-image the Time Server](../../guides/reimage-time-server.md) runbook.
+
+In the UniFi controller: **Settings → Networks → (VLAN 30 network) → DHCP Service Management → Show Options → Network Boot**
+
+| Network | Server | Filename | Purpose |
+|---------|--------|----------|---------|
+| LDN VLAN 30 | `10.3.20.60` | `netboot.xyz.efi` | UEFI x86_64 PXE boot → netboot.xyz menu |
+
+Scoping the option to VLAN 30 keeps PXE away from every other network. If the controller version lacks a Network Boot toggle, set custom DHCP options 66 (TFTP server) and 67 (boot filename) instead.
+
+### DHCP Reservation
+
+The time server re-installs with DHCP networking; a fixed-IP reservation pins it to the address Ansible expects:
+
+| Device | Fixed IP | Notes |
+|--------|----------|-------|
+| LattePanda MU (PTP grandmaster) | `10.3.30.64` | Reserve against the NIC MAC shown in the UniFi client list |
+
+### Firewall Requirements
+
+PXE clients on VLAN 30 must reach the netboot VM on VLAN 20: **UDP 69** (TFTP) and **TCP 8080** (HTTP boot assets). Inter-VLAN routing is allowed by default; only restrictive custom LAN-to-LAN rules would break this (symptom: iPXE times out fetching the boot file).
 
 ## Inter-VLAN Routing
 

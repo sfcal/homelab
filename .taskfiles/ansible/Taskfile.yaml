@@ -68,6 +68,12 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/ntp/deploy.yml }
 
+  deploy-netboot:
+    desc: Deploy netboot.xyz PXE re-imaging service
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/netboot/deploy.yml }
+
   # --- Applications ---
 
   deploy-app:

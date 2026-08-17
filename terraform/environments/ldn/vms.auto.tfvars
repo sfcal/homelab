@@ -96,4 +96,22 @@ vms = {
     pci_mapping = "b50-vf1"
   }
 
+  netboot_server = {
+    name           = "netboot"
+    description    = "Netboot (netboot.xyz PXE re-imaging)"
+    proxmox_node   = "pve-ldn"
+    vmid           = 3006
+    template_name  = "ubuntu-server-ldn-base"
+    ip_address     = "10.3.20.60"
+    gateway        = "10.3.20.1"
+    nameserver     = "10.3.20.53"
+    cores          = 1
+    memory         = 2048
+    disk_size      = "32G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    tags           = "infrastructure"
+    ssh_user       = "sfcal"
+  }
+
 }

@@ -1,0 +1,6 @@
+---
+- name: Deploy custom iPXE menu.
+  ansible.builtin.template:
+    src: templates/custom.ipxe.j2
+    dest: "{{ deploy_path }}/netbootxyz/config/menus/custom.ipxe"
+    mode: "0644"

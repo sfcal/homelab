@@ -1,0 +1,24 @@
+---
+# --- netboot.xyz service ---
+
+# renovate: datasource=docker
+netbootxyz_image: "lscr.io/linuxserver/netbootxyz:0.7.6-ls222"
+
+netboot_server_ip: 10.3.20.60
+netbootxyz_web_port: 3000 # web config UI
+netbootxyz_http_port: 8080 # host port for asset server (container port 80)
+
+# --- Pinned Ubuntu release for the time-server autoinstall ---
+# MUST match the release currently on the MU — its DKMS drivers are built
+# against that kernel series. See docs/guides/reimage-time-server.md pre-flight.
+netboot_ubuntu_version: "26.04"
+netboot_ubuntu_iso_filename: "ubuntu-{{ netboot_ubuntu_version }}-live-server-amd64.iso"
+netboot_ubuntu_iso_url: "https://releases.ubuntu.com/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }}"
+netboot_ubuntu_iso_sha256: "dec49008a71f6098d0bcfc822021f4d042d5f2db279e4d75bdd981304f1ca5d9"
+
+# --- Time-server autoinstall seed ---
+timeserver_hostname: mu
+# Same public keys as the terraform ssh_public_key heredoc
+netboot_authorized_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrFbd2spFyWieD/6xEwGclwepRY0wdpJQA6gTTwxrwz git@samuelcalvert.com"
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHgGptQiv3h76DhHEYX1ioChVU42orKVQNpwpt7Z4D8q scalvert@haivision.com"

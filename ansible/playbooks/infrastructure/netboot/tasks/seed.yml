@@ -1,0 +1,12 @@
+---
+- name: Template autoinstall user-data.
+  ansible.builtin.template:
+    src: templates/user-data.j2
+    dest: "{{ deploy_path }}/netbootxyz/assets/timeserver/seed/user-data"
+    mode: "0644"
+
+- name: Create empty meta-data (required by NoCloud).
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ deploy_path }}/netbootxyz/assets/timeserver/seed/meta-data"
+    mode: "0644"

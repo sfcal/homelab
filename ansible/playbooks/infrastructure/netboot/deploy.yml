@@ -1,0 +1,27 @@
+---
+- name: Deploy Netboot (netboot.xyz)
+  hosts: infra_netboot
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Stage Ubuntu ISO and boot assets.
+      ansible.builtin.include_tasks: tasks/assets.yml
+
+    - name: Deploy time-server autoinstall seed.
+      ansible.builtin.include_tasks: tasks/seed.yml
+
+    - name: Deploy custom iPXE menu.
+      ansible.builtin.include_tasks: tasks/menu.yml
+
+    - name: Deploy netboot.xyz container.
+      ansible.builtin.include_role:
+        name: docker_service
+      vars:
+        service_name: netbootxyz
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_images: ["{{ netbootxyz_image }}"]

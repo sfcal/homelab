@@ -1,0 +1,19 @@
+#!ipxe
+:custom
+menu Custom user menu -- time server re-imaging
+item --gap -- DESTRUCTIVE: wipes the target disk after one confirmation
+item mu_reimage Re-image PTP time server (Ubuntu {{ netboot_ubuntu_version }} autoinstall)
+item return Return to main menu
+choose menu_option || goto custom_exit
+goto ${menu_option}
+
+:mu_reimage
+set base http://{{ netboot_server_ip }}:{{ netbootxyz_http_port }}
+imgfree
+kernel ${base}/ubuntu/{{ netboot_ubuntu_version }}/vmlinuz initrd=initrd ip=dhcp url=${base}/ubuntu/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }} ds=nocloud-net;s=${base}/timeserver/seed/
+initrd ${base}/ubuntu/{{ netboot_ubuntu_version }}/initrd
+boot || goto custom_exit
+
+:return
+:custom_exit
+chain menu.ipxe

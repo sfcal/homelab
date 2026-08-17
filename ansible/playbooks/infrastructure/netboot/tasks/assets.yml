@@ -1,0 +1,50 @@
+---
+- name: Create netboot directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/netbootxyz/config/menus"
+    - "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}"
+    - "{{ deploy_path }}/netbootxyz/assets/timeserver/seed"
+
+- name: Download Ubuntu live-server ISO.
+  ansible.builtin.get_url:
+    url: "{{ netboot_ubuntu_iso_url }}"
+    dest: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }}"
+    checksum: "sha256:{{ netboot_ubuntu_iso_sha256 }}"
+    mode: "0644"
+  register: netboot_iso
+
+- name: Check for extracted kernel.
+  ansible.builtin.stat:
+    path: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/vmlinuz"
+  register: netboot_vmlinuz
+
+- name: Extract kernel and initrd from ISO.
+  when: netboot_iso.changed or not netboot_vmlinuz.stat.exists
+  block:
+    - name: Mount ISO read-only.
+      ansible.posix.mount:
+        path: /mnt/netboot-iso
+        src: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }}"
+        fstype: iso9660
+        opts: loop,ro
+        state: ephemeral
+
+    - name: Copy casper kernel and initrd.
+      ansible.builtin.copy:
+        src: "/mnt/netboot-iso/casper/{{ item }}"
+        dest: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/{{ item }}"
+        remote_src: true
+        mode: "0644"
+      loop:
+        - vmlinuz
+        - initrd
+
+  always:
+    - name: Unmount ISO.
+      ansible.posix.mount:
+        path: /mnt/netboot-iso
+        state: unmounted

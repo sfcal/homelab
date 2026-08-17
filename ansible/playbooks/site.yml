@@ -11,7 +11,8 @@
           - "1. Networking - DNS, Reverse Proxy, Tailscale (foundational)"
           - "2. Step-CA (required for TLS)"
           - "3. Time Server"
-          - "4. Monitoring (depends on Step-CA)"
+          - "4. Netboot (PXE re-imaging)"
+          - "5. Monitoring (depends on Step-CA)"
 
 # --- Infrastructure ---
 
@@ -27,7 +28,11 @@
 - import_playbook: infrastructure/ntp/deploy.yml
   tags: ['time', 'ntp']
 
-# 4. Monitoring - Depends on Step-CA
+# 4. Netboot (PXE re-imaging)
+- import_playbook: infrastructure/netboot/deploy.yml
+  tags: ['netboot']
+
+# 5. Monitoring - Depends on Step-CA
 #- import_playbook: infrastructure/monitoring/deploy.yml
 #  tags: ['monitoring', 'observability']
 

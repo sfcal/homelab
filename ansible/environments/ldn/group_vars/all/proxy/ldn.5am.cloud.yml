@@ -10,6 +10,10 @@ ldn_services:
     backend_host: 10.3.0.210
     backend_port: 80
     proxied: true
+  - name: netboot
+    backend_host: 10.3.20.60
+    backend_port: 3000
+    proxied: true
 
   # Monitoring
   - name: grafana
