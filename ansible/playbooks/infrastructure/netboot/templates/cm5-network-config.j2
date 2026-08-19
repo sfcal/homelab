@@ -1,0 +1,17 @@
+# Managed by Ansible -- applied by cloud-init on first boot only. Static
+# address so the reimaged node lands deterministically (the DHCP reservation
+# is not relied on, mirroring the MU seed).
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      optional: false
+      addresses:
+        - "{{ cm5_host.ip }}/24"
+      nameservers:
+        addresses:
+          - "{{ cm5_host.nameserver }}"
+      routes:
+        - to: default
+          via: "{{ cm5_host.gateway }}"

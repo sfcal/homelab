@@ -1,0 +1,79 @@
+#!ipxe
+# Managed by Ansible -- netboot per-MAC boot script for time server
+# {{ ts_host.hostname }}.
+#
+# netboot.xyz's bootloader chains MAC-${mac:hexhyp}.ipxe from the TFTP root
+# before falling back to menu.ipxe, so only this host's PXE NIC
+# ({{ ts_mac }}) lands here -- every other VLAN 30 client still
+# gets the standard netboot.xyz menu.
+#
+# DESTRUCTIVE: boots the Ubuntu live installer against this host's
+# autoinstall seed. The `autoinstall` kernel argument is deliberately
+# omitted so the installer still asks for one confirmation at the console
+# before touching the disk.
+#
+# Every fetch is failure-handled: a bare `kernel`/`initrd` that fails aborts
+# the script silently and netboot.xyz just chains menu.ipxe, which is
+# indistinguishable from the script never having run. The seed args are held
+# in a variable so the `;` is expanded rather than parsed, matching the
+# convention in netboot.xyz's own ubuntu.ipxe.
+
+set base http://{{ netboot_server_ip }}:{{ netbootxyz_http_port }}
+set asset_dir ${base}/ubuntu/{{ netboot_ubuntu_asset_dir | basename }}
+set seed_dir ${base}/timeserver/{{ ts_mac }}
+# ds=nocloud (not nocloud-net): the http:// seedfrom scheme already selects
+# network mode, and nocloud-net is deprecated since cloud-init 24.1 (26.04
+# ships 26.1). The glued `;` is held in this variable so it expands into the
+# kernel line as one literal token rather than being parsed as a separator.
+set install_params ds=nocloud;s=${seed_dir}/
+
+# Probe: proves over the wire that this script is executing and that HTTP to
+# the asset server works, before anything large is fetched.
+echo Probing ${seed_dir}/user-data ...
+imgfetch --name probe ${seed_dir}/user-data || goto probe_failed
+imgfree
+
+# NOTE: no `prompt` here. An ESC-to-abort prompt returns success on any
+# buffered keystroke, which sends the script to the menu with no diagnostic
+# and is indistinguishable from the script never running. The installer's own
+# confirmation before it touches the disk is the safety gate.
+
+# cloud-config-url=/dev/null: cloud-init also interprets casper's url= as a
+# cloud-config URL and re-downloads the whole ISO into RAM before looking for
+# the seed (observed live: a second 2.9 GB fetch with UA Cloud-Init, ~4 min,
+# on a ~6 GiB box already holding the ISO in RAM — and the installer then ran
+# interactive). cloud-config-url takes precedence over url= in cloud-init's
+# kernel-cmdline handling, so pointing it at /dev/null skips that download.
+echo Fetching kernel: ${asset_dir}/vmlinuz
+kernel ${asset_dir}/vmlinuz initrd=initrd ip=dhcp url=${asset_dir}/{{ netboot_ubuntu_iso_url | basename }} cloud-config-url=/dev/null ${install_params} || goto kernel_failed
+
+echo Fetching initrd: ${asset_dir}/initrd
+initrd ${asset_dir}/initrd || goto initrd_failed
+
+echo Booting the Ubuntu installer ({{ netboot_ubuntu_iso_url | basename }}) ...
+boot || goto boot_failed
+
+:probe_failed
+echo FAILED probing ${seed_dir}/user-data
+echo Check TCP {{ netbootxyz_http_port }} reachability from this VLAN to {{ netboot_server_ip }}.
+goto pause
+
+:kernel_failed
+echo FAILED fetching kernel from ${asset_dir}/vmlinuz
+echo Check TCP {{ netbootxyz_http_port }} reachability from this VLAN to {{ netboot_server_ip }}.
+goto pause
+
+:initrd_failed
+echo FAILED fetching initrd from ${asset_dir}/initrd
+goto pause
+
+:boot_failed
+echo FAILED booting the installer image.
+goto pause
+
+:pause
+echo Returning to the netboot.xyz menu in 30s ...
+sleep 30
+
+:menu_out
+chain menu.ipxe

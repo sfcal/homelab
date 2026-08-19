@@ -1,0 +1,56 @@
+#cloud-config
+autoinstall:
+  version: 1
+  # Reboot into the fresh install. The per-MAC script is always staged, but a
+  # healthy node boots its local disk without touching PXE, so post-install
+  # the node comes straight back up; a node that still fails local boot lands
+  # back at the installer's confirmation prompt (safe self-retry).
+  shutdown: reboot
+  refresh-installer:
+    update: false
+  locale: en_US
+  keyboard:
+    layout: us
+  network:
+    version: 2
+    ethernets:
+      pxe-nic:
+        match:
+          macaddress: "{{ ts_mac | replace('-', ':') }}"
+        set-name: enp1s0
+        dhcp4: false
+        addresses:
+          - "{{ ts_host.ip }}/24"
+        routes:
+          - to: default
+            via: "{{ ts_host.gateway }}"
+        nameservers:
+          addresses:
+            - "{{ ts_host.nameserver }}"
+  ssh:
+    install-server: true
+    allow-pw: false
+  storage:
+    layout:
+      name: direct
+    swap:
+      size: 0
+  user-data:
+    hostname: {{ ts_host.hostname }}
+    timezone: {{ system_timezone }}
+    users:
+      - name: sfcal
+        groups: [adm, sudo]
+        lock_passwd: false
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        passwd: {{ netboot_user_password_hash }}
+        ssh_authorized_keys:
+{% for key in netboot_authorized_keys %}
+          - {{ key }}
+{% endfor %}
+  packages:
+    - sudo
+    - vim
+    - python3
+    - openssh-server

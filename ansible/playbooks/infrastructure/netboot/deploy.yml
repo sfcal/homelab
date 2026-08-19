@@ -3,6 +3,11 @@
   hosts: infra_netboot
   become: true
 
+  vars:
+    # Ubuntu assets are keyed by the ISO basename so the extracted kernel and
+    # initrd can never be served next to a different release's ISO.
+    netboot_ubuntu_asset_dir: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_iso_url | basename | splitext | first }}"
+
   pre_tasks:
     - name: Include common prerequisites.
       ansible.builtin.include_role:
@@ -12,11 +17,14 @@
     - name: Stage Ubuntu ISO and boot assets.
       ansible.builtin.include_tasks: tasks/assets.yml
 
-    - name: Deploy time-server autoinstall seed.
+    - name: Deploy per-time-server seed and boot trees.
       ansible.builtin.include_tasks: tasks/seed.yml
 
-    - name: Deploy custom iPXE menu.
+    - name: Deploy iPXE menu overrides.
       ansible.builtin.include_tasks: tasks/menu.yml
+
+    - name: Deploy CM5 provisioning tree.
+      ansible.builtin.include_tasks: tasks/cm5.yml
 
     - name: Deploy netboot.xyz container.
       ansible.builtin.include_role:

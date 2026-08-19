@@ -1,0 +1,1 @@
+modules=loop,squashfs ip=dhcp modloop=http://{{ netboot_server_ip }}:{{ netbootxyz_http_port }}/cm5/alpine/boot/modloop-rpi alpine_repo=http://{{ netboot_server_ip }}:{{ netbootxyz_http_port }}/cm5/alpine/apks apkovl=http://{{ netboot_server_ip }}:{{ netbootxyz_http_port }}/cm5/{{ cm5_serial }}/apkovl.tar.gz console=tty1 panic=10

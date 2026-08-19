@@ -1,0 +1,118 @@
+---
+# CM5 provisioning tree: Alpine flasher over TFTP + Ubuntu image/seed over HTTP.
+# The Pi bootloader probes <last-8-hex-of-serial>/config.txt on the TFTP root;
+# on a hit ALL boot files come from that directory. Never place a config.txt at
+# the TFTP root itself, and never place pieeprom.* anywhere in the TFTP tree —
+# ENABLE_SELF_UPDATE=1 would make netbooting Pis silently reflash their EEPROM.
+# A malformed key deploys green but the EEPROM bootloader probes the
+# lowercase last-8 directory and the flasher probes the lowercase serial, so
+# provisioning would be a silent no-op — fail loudly here.
+- name: Validate cm5_hosts keys are full lowercase 16-hex serials.
+  ansible.builtin.assert:
+    that: cm5_hosts.keys() | reject('match', '^[0-9a-f]{16}$') | list | length == 0
+    fail_msg: >-
+      cm5_hosts keys must be the full lowercase 16-hex serial
+      (cat /proc/device-tree/serial-number); offending:
+      {{ cm5_hosts.keys() | reject('match', '^[0-9a-f]{16}$') | list }}
+
+- name: Create CM5 asset directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+  loop:
+    - "{{ deploy_path }}/netbootxyz/assets/cm5"
+    - "{{ deploy_path }}/netbootxyz/assets/cm5/images"
+    - "{{ deploy_path }}/netbootxyz/assets/cm5/alpine"
+
+- name: Download Alpine rpi release tarball.
+  ansible.builtin.get_url:
+    url: "{{ cm5_alpine_url }}"
+    dest: "{{ deploy_path }}/netbootxyz/assets/cm5/{{ cm5_alpine_url | basename }}"
+    checksum: "sha256:{{ cm5_alpine_sha256 }}"
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+  register: cm5_alpine_download
+
+- name: Check for extracted Alpine boot files.
+  ansible.builtin.stat:
+    path: "{{ deploy_path }}/netbootxyz/assets/cm5/alpine/{{ item }}"
+  loop:
+    - boot/vmlinuz-rpi
+    - boot/initramfs-rpi
+    - boot/modloop-rpi
+    - bcm2712-rpi-cm5-cm5io.dtb
+  register: cm5_alpine_files
+
+- name: Extract Alpine tarball (kernel, initramfs, modloop, dtbs, offline apk repo).
+  ansible.builtin.unarchive:
+    src: "{{ deploy_path }}/netbootxyz/assets/cm5/{{ cm5_alpine_url | basename }}"
+    dest: "{{ deploy_path }}/netbootxyz/assets/cm5/alpine"
+    remote_src: true
+    owner: "1000"
+    group: "1000"
+  when: cm5_alpine_download.changed or cm5_alpine_files.results | rejectattr('stat.exists') | list | length > 0
+
+- name: Download Ubuntu preinstalled raspi image.
+  ansible.builtin.get_url:
+    url: "{{ cm5_ubuntu_image_url }}"
+    dest: "{{ deploy_path }}/netbootxyz/assets/cm5/images/{{ cm5_ubuntu_image_url | basename }}"
+    checksum: "sha256:{{ cm5_ubuntu_image_sha256 }}"
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+
+- name: Deploy per-CM5 boot and seed trees.
+  ansible.builtin.include_tasks: tasks/cm5_host.yml
+  loop: "{{ cm5_hosts | dict2items }}"
+  loop_control:
+    loop_var: cm5_entry
+    label: "{{ cm5_entry.value.hostname }}"
+  vars:
+    cm5_serial: "{{ cm5_entry.key }}"
+    cm5_host: "{{ cm5_entry.value }}"
+    cm5_tftp_dir: "{{ deploy_path }}/netbootxyz/config/menus/{{ cm5_entry.key[-8:] }}"
+    cm5_http_dir: "{{ deploy_path }}/netbootxyz/assets/cm5/{{ cm5_entry.key }}"
+    cm5_staging_dir: "{{ deploy_path }}/netbootxyz/assets/cm5/.staging/{{ cm5_entry.key }}"
+
+# Trees for hosts removed from cm5_hosts must not keep serving their seed
+# (user-data carries the login password hash) or TFTP boot files.
+- name: Find per-CM5 HTTP and staging directories.
+  ansible.builtin.find:
+    paths:
+      - "{{ deploy_path }}/netbootxyz/assets/cm5"
+      - "{{ deploy_path }}/netbootxyz/assets/cm5/.staging"
+    file_type: directory
+  register: cm5_serial_dirs
+
+- name: Remove HTTP and staging directories for retired CM5s.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ cm5_serial_dirs.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when:
+    - (item.path | basename) not in cm5_hosts
+    - (item.path | basename) not in ['images', 'alpine', '.staging']
+
+# Constrained to 8-hex names so netboot.xyz's own menu content is never touched.
+- name: Find per-serial TFTP directories.
+  ansible.builtin.find:
+    paths: "{{ deploy_path }}/netbootxyz/config/menus"
+    file_type: directory
+    use_regex: true
+    patterns: '^[0-9a-f]{8}$'
+  register: cm5_tftp_dirs
+
+- name: Remove TFTP directories for retired CM5s.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ cm5_tftp_dirs.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: (item.path | basename) not in (cm5_hosts.keys() | map('regex_search', '.{8}$') | list)

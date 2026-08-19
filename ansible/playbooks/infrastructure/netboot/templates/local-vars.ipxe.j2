@@ -1,0 +1,8 @@
+#!ipxe
+# Managed by Ansible. netboot.xyz's embedded bootloader chains this file from
+# the TFTP root before the menu, and boot.cfg only sets its 300s default when
+# boot_timeout is unset. Shrinking it means any client that reaches the menu
+# (one without a per-MAC script) falls through to local disk in seconds
+# instead of parking ~5 minutes. Long enough to still catch the menu
+# interactively.
+set boot_timeout 10000

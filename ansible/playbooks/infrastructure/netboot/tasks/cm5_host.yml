@@ -1,0 +1,126 @@
+---
+# Per-CM5 trees. Included from cm5.yml with cm5_serial / cm5_host /
+# cm5_tftp_dir / cm5_http_dir / cm5_staging_dir set.
+
+# --- TFTP boot directory (fetched by the Pi EEPROM bootloader) ---
+
+- name: "{{ cm5_host.hostname }}: create TFTP boot directory."
+  ansible.builtin.file:
+    path: "{{ cm5_tftp_dir }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+
+- name: "{{ cm5_host.hostname }}: template TFTP config.txt and cmdline.txt."
+  ansible.builtin.template:
+    src: "templates/{{ item.src }}"
+    dest: "{{ cm5_tftp_dir }}/{{ item.dest }}"
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+  loop:
+    - { src: cm5-config.txt.j2, dest: config.txt }
+    - { src: cm5-cmdline.txt.j2, dest: cmdline.txt }
+
+- name: "{{ cm5_host.hostname }}: create TFTP overlays directory."
+  ansible.builtin.file:
+    path: "{{ cm5_tftp_dir }}/overlays"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+
+# overlays/bcm2712d0.dtbo is REQUIRED on D0-stepping silicon (CM5 board rev
+# d04180): the firmware patches the device tree with it, and without the patch
+# the kernel pokes C1 pinctrl register addresses on D0 and panics with an
+# asynchronous SError. overlay_map.dtb is the firmware's overlay index.
+- name: "{{ cm5_host.hostname }}: copy Alpine kernel, initramfs, device tree and overlays."
+  ansible.builtin.copy:
+    src: "{{ deploy_path }}/netbootxyz/assets/cm5/alpine/{{ item.src }}"
+    dest: "{{ cm5_tftp_dir }}/{{ item.dest }}"
+    remote_src: true
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+  loop:
+    - { src: boot/vmlinuz-rpi, dest: vmlinuz-rpi }
+    - { src: boot/initramfs-rpi, dest: initramfs-rpi }
+    - { src: bcm2712-rpi-cm5-cm5io.dtb, dest: bcm2712-rpi-cm5-cm5io.dtb }
+    - { src: overlays/overlay_map.dtb, dest: overlays/overlay_map.dtb }
+    - { src: overlays/bcm2712d0.dtbo, dest: overlays/bcm2712d0.dtbo }
+
+# --- HTTP seed directory (fetched by the flasher and by cloud-init injection) ---
+
+- name: "{{ cm5_host.hostname }}: create HTTP seed directory."
+  ansible.builtin.file:
+    path: "{{ cm5_http_dir }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+
+- name: "{{ cm5_host.hostname }}: template cloud-init seed files."
+  ansible.builtin.template:
+    src: "templates/{{ item.src }}"
+    dest: "{{ cm5_http_dir }}/{{ item.dest }}"
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+  loop:
+    - { src: cm5-user-data.j2, dest: user-data }
+    - { src: cm5-meta-data.j2, dest: meta-data }
+    - { src: cm5-network-config.j2, dest: network-config }
+
+# --- apkovl overlay carrying the flash script ---
+
+- name: "{{ cm5_host.hostname }}: create apkovl staging tree."
+  ansible.builtin.file:
+    path: "{{ cm5_staging_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - etc/local.d
+    - etc/runlevels/default
+    - etc/apk
+
+- name: "{{ cm5_host.hostname }}: template flash script into staging."
+  ansible.builtin.template:
+    src: templates/cm5-flash.start.j2
+    dest: "{{ cm5_staging_dir }}/etc/local.d/flash.start"
+    mode: "0755"
+  register: cm5_flash_script
+
+- name: "{{ cm5_host.hostname }}: enable local service in default runlevel."
+  ansible.builtin.file:
+    src: /etc/init.d/local
+    dest: "{{ cm5_staging_dir }}/etc/runlevels/default/local"
+    state: link
+    force: true
+    follow: false
+  register: cm5_local_link
+
+- name: "{{ cm5_host.hostname }}: write apk world (packages installed from the offline repo)."
+  ansible.builtin.copy:
+    content: |
+      alpine-base
+    dest: "{{ cm5_staging_dir }}/etc/apk/world"
+    mode: "0644"
+  register: cm5_apk_world
+
+- name: "{{ cm5_host.hostname }}: check for existing apkovl."
+  ansible.builtin.stat:
+    path: "{{ cm5_http_dir }}/apkovl.tar.gz"
+  register: cm5_apkovl
+
+- name: "{{ cm5_host.hostname }}: build apkovl.tar.gz."
+  ansible.builtin.command:
+    cmd: tar -C {{ cm5_staging_dir }} --owner=0 --group=0 -czf {{ cm5_http_dir }}/apkovl.tar.gz etc
+  when: cm5_flash_script.changed or cm5_local_link.changed or cm5_apk_world.changed or not cm5_apkovl.stat.exists
+
+- name: "{{ cm5_host.hostname }}: set apkovl ownership."
+  ansible.builtin.file:
+    path: "{{ cm5_http_dir }}/apkovl.tar.gz"
+    owner: "1000"
+    group: "1000"
+    mode: "0644"

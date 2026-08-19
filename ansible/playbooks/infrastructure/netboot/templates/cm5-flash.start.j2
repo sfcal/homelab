@@ -1,0 +1,82 @@
+#!/bin/sh
+# Managed by Ansible -- CM5 eMMC flasher. Runs unattended in the netbooted
+# Alpine environment (OpenRC local service, via the apkovl overlay).
+#
+# DESTRUCTIVE: writes {{ cm5_ubuntu_image_url | basename }} over /dev/mmcblk0 and
+# injects this node's cloud-init seed. A CM5 only lands here when its eMMC is
+# not bootable (or was deliberately made so) -- BOOT_ORDER tries eMMC first.
+#
+# Partial-flash safety: the old MBR is zeroed first and the new MBR is written
+# LAST, so an interrupted flash always leaves the eMMC non-bootable and the
+# boot loop re-enters this flasher (safe self-retry). Only /dev/mmcblk0 is
+# touched -- never mmcblk0boot0/boot1/rpmb (hardware boot partitions).
+set -e -o pipefail
+
+BASE="http://{{ netboot_server_ip }}:{{ netbootxyz_http_port }}/cm5"
+IMAGE="$BASE/images/{{ cm5_ubuntu_image_url | basename }}"
+DISK=/dev/mmcblk0
+
+log() { echo "cm5-flash: $*" | tee /dev/console 2>/dev/null || echo "cm5-flash: $*"; }
+
+fail() {
+    log "FAILED: $*"
+    log "rebooting in 120s; the boot loop will retry the flasher"
+    sleep 120
+    reboot -f
+}
+
+SERIAL="$(tr -d '\0' < /proc/device-tree/serial-number)" || fail "cannot read serial"
+log "serial $SERIAL, target $DISK"
+
+# busybox provides xzcat/unxz, NOT an `xz` applet, and the offline apk repo
+# has no full xz package -- verify before anything destructive.
+for tool in xzcat wget dd blockdev; do
+    command -v "$tool" > /dev/null || fail "required tool missing: $tool"
+done
+
+[ -b "$DISK" ] || fail "no eMMC block device at $DISK"
+
+# Per-host kill-switch: an Ansible-placed 'disabled' file opts this serial out
+# without removing the payload (absent by default -- always armed).
+if wget -q --spider "$BASE/$SERIAL/disabled" 2>/dev/null; then
+    log "disabled flag set for $SERIAL -- not flashing; idling"
+    exit 0
+fi
+
+# The seed must exist before anything destructive happens.
+wget -q --spider "$BASE/$SERIAL/user-data" || fail "no seed published for serial $SERIAL"
+
+log "invalidating old partition table"
+dd if=/dev/zero of="$DISK" bs=1M count=1 conv=fsync 2>/dev/null || fail "MBR zero"
+
+log "streaming image (body first, MBR held back)"
+wget -qO- "$IMAGE" | xzcat | {
+    dd of=/tmp/mbr.bin bs=1M count=1 iflag=fullblock 2>/dev/null
+    dd of="$DISK" bs=1M seek=1 iflag=fullblock conv=fsync 2>/dev/null
+} || fail "image stream/write"
+
+[ "$(wc -c < /tmp/mbr.bin)" -eq 1048576 ] || fail "held-back MBR block is short"
+
+log "writing MBR"
+dd if=/tmp/mbr.bin of="$DISK" bs=1M count=1 conv=fsync 2>/dev/null || fail "MBR write"
+
+blockdev --rereadpt "$DISK" || true
+mdev -s 2>/dev/null || true
+i=0
+until [ -b "${DISK}p1" ]; do
+    i=$((i + 1))
+    [ "$i" -gt 30 ] && fail "partition ${DISK}p1 did not appear"
+    sleep 1
+done
+
+log "injecting cloud-init seed"
+mkdir -p /mnt/system-boot
+mount -t vfat "${DISK}p1" /mnt/system-boot || fail "mount system-boot"
+for f in user-data meta-data network-config; do
+    wget -qO "/mnt/system-boot/$f" "$BASE/$SERIAL/$f" || { umount /mnt/system-boot; fail "seed fetch $f"; }
+done
+umount /mnt/system-boot
+sync
+
+log "flash complete -- rebooting into eMMC"
+reboot -f

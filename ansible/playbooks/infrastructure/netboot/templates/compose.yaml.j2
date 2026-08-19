@@ -8,7 +8,11 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ={{ system_timezone }}
+      - MENU_VERSION={{ netbootxyz_menu_version }}
     ports:
+      # Web config UI, LAN-exposed and reverse-proxied at netboot.ldn.5am.cloud.
+      # Note: this UI edits the TFTP menu root the MU and CM5s boot from, so
+      # anyone who can reach it can change what those hosts boot next.
       - "{{ netbootxyz_web_port }}:3000"
       - "69:69/udp"
       - "{{ netbootxyz_http_port }}:80"

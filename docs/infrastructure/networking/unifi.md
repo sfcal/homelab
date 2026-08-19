@@ -123,7 +123,7 @@ Scoping the option to VLAN 30 keeps PXE away from every other network. If the co
 
 ### DHCP Reservation
 
-The time server re-installs with DHCP networking; a fixed-IP reservation pins it to the address Ansible expects:
+The installed OS pins the time server's address statically by its PXE NIC's MAC (see the `timeserver_hosts` entry in the netboot vars); the installer itself uses DHCP only transiently to fetch the ISO. A fixed-IP reservation is kept purely as a backstop:
 
 | Device | Fixed IP | Notes |
 |--------|----------|-------|
@@ -132,6 +132,8 @@ The time server re-installs with DHCP networking; a fixed-IP reservation pins it
 ### Firewall Requirements
 
 PXE clients on VLAN 30 must reach the netboot VM on VLAN 20: **UDP 69** (TFTP) and **TCP 8080** (HTTP boot assets). Inter-VLAN routing is allowed by default; only restrictive custom LAN-to-LAN rules would break this (symptom: iPXE times out fetching the boot file).
+
+Raspberry Pi CM5 clients on the same VLAN ignore the boot filename option (`netboot.xyz.efi` is x86-only and harmless to them) and pin the TFTP server via `TFTP_IP` in their EEPROM instead of relying on this DHCP option — no UniFi changes are needed for them. See [Provision a CM5](../../guides/provision-cm5.md).
 
 ## Inter-VLAN Routing
 

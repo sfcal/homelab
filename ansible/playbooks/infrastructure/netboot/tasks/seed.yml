@@ -1,12 +1,40 @@
 ---
-- name: Template autoinstall user-data.
-  ansible.builtin.template:
-    src: templates/user-data.j2
-    dest: "{{ deploy_path }}/netbootxyz/assets/timeserver/seed/user-data"
-    mode: "0644"
+# A malformed key deploys green but the bootloader only ever requests the
+# lowercase hexhyp name, so the reimage hook would be a silent no-op — fail
+# loudly here.
+- name: Validate timeserver_hosts keys are lowercase hexhyp MACs.
+  ansible.builtin.assert:
+    that: timeserver_hosts.keys() | reject('match', '^([0-9a-f]{2}-){5}[0-9a-f]{2}$') | list | length == 0
+    fail_msg: >-
+      timeserver_hosts keys must be lowercase hyphen-separated MACs (iPXE
+      hexhyp form); offending:
+      {{ timeserver_hosts.keys() | reject('match', '^([0-9a-f]{2}-){5}[0-9a-f]{2}$') | list }}
 
-- name: Create empty meta-data (required by NoCloud).
-  ansible.builtin.copy:
-    content: ""
-    dest: "{{ deploy_path }}/netbootxyz/assets/timeserver/seed/meta-data"
-    mode: "0644"
+- name: Deploy per-time-server seed and boot script.
+  ansible.builtin.include_tasks: tasks/timeserver_host.yml
+  loop: "{{ timeserver_hosts | dict2items }}"
+  loop_control:
+    loop_var: ts_entry
+    label: "{{ ts_entry.value.hostname }}"
+  vars:
+    ts_mac: "{{ ts_entry.key }}"
+    ts_host: "{{ ts_entry.value }}"
+    ts_seed_dir: "{{ deploy_path }}/netbootxyz/assets/timeserver/{{ ts_entry.key }}"
+
+# Seed dirs for hosts removed from timeserver_hosts must not keep serving
+# their user-data (it carries the login password hash) over HTTP. This also
+# clears the pre-refactor shared assets/timeserver/seed directory.
+- name: Find per-time-server seed directories.
+  ansible.builtin.find:
+    paths: "{{ deploy_path }}/netbootxyz/assets/timeserver"
+    file_type: directory
+  register: netboot_ts_seed_dirs
+
+- name: Remove seed directories for retired time servers.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ netboot_ts_seed_dirs.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: (item.path | basename) not in timeserver_hosts

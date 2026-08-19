@@ -1,0 +1,5 @@
+# Managed by Ansible. instance_id (underscore, matching the stock image) only
+# needs to change to re-run cloud-init WITHOUT a reflash; a fresh flash has no
+# cached state and always runs first-boot setup.
+dsmode: local
+instance_id: {{ cm5_host.hostname }}

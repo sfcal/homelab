@@ -1,0 +1,43 @@
+---
+# Per-time-server trees. Included from seed.yml with ts_mac / ts_host /
+# ts_seed_dir set.
+
+# --- HTTP seed directory (fetched by the installer's cloud-init) ---
+
+- name: "{{ ts_host.hostname }}: create seed directory."
+  ansible.builtin.file:
+    path: "{{ ts_seed_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: "{{ ts_host.hostname }}: template autoinstall user-data."
+  ansible.builtin.template:
+    src: templates/timeserver-user-data.j2
+    dest: "{{ ts_seed_dir }}/user-data"
+    mode: "0644"
+
+- name: "{{ ts_host.hostname }}: create empty NoCloud seed sidecar files."
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ ts_seed_dir }}/{{ item }}"
+    mode: "0644"
+  loop:
+    # meta-data is required by NoCloud. Since cloud-init 24.3 the seedfrom URL
+    # is also probed for network-config and vendor-data; without them every
+    # boot burns ~10s each on 404 retries. Empty files preserve prior behavior
+    # (install networking comes from the autoinstall user-data's netplan).
+    - meta-data
+    - network-config
+    - vendor-data
+
+# --- Per-MAC boot script ---
+
+# Always staged, mirroring the CM5 flasher: a healthy node boots its local
+# disk and never reaches PXE, so this only fires when local boot fails or PXE
+# is deliberately chosen — and the installer still asks one console
+# confirmation before touching the disk.
+- name: "{{ ts_host.hostname }}: deploy per-MAC reimage boot script."
+  ansible.builtin.template:
+    src: templates/timeserver-reimage.ipxe.j2
+    dest: "{{ deploy_path }}/netbootxyz/config/menus/MAC-{{ ts_mac }}.ipxe"
+    mode: "0644"

@@ -1,0 +1,18 @@
+#cloud-config
+# Managed by Ansible -- first-boot seed for {{ cm5_host.hostname }} (CM5).
+# Written to the system-boot FAT partition by the netboot flasher; applied by
+# cloud-init on the freshly imaged Ubuntu's first boot.
+hostname: {{ cm5_host.hostname }}
+timezone: {{ system_timezone }}
+ssh_pwauth: false
+users:
+  - name: sfcal
+    groups: [adm, sudo]
+    lock_passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    passwd: {{ netboot_user_password_hash }}
+    ssh_authorized_keys:
+{% for key in netboot_authorized_keys %}
+      - {{ key }}
+{% endfor %}

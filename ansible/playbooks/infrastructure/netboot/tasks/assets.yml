@@ -6,29 +6,57 @@
     mode: "0755"
   loop:
     - "{{ deploy_path }}/netbootxyz/config/menus"
-    - "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}"
-    - "{{ deploy_path }}/netbootxyz/assets/timeserver/seed"
+    - "{{ deploy_path }}/netbootxyz/assets/ubuntu"
+
+- name: Check for the legacy version-keyed asset directory.
+  ansible.builtin.stat:
+    path: "{{ deploy_path }}/netbootxyz/assets/ubuntu/26.04"
+  register: netboot_legacy_dir
+
+# One-shot rename from the old version-keyed layout (assets/ubuntu/26.04) to
+# the ISO-keyed one; the whole trio (ISO + extracted vmlinuz/initrd) moves
+# together, so nothing is re-downloaded. The destination is pinned to the
+# 26.04 ISO's own key — NOT netboot_ubuntu_asset_dir — so a URL already
+# bumped past 26.04 can never adopt stale boot files under the new release's
+# name. Safe to drop once redeployed.
+- name: Adopt the legacy asset directory under the ISO-keyed name.
+  ansible.builtin.command:
+    cmd: mv {{ deploy_path }}/netbootxyz/assets/ubuntu/26.04 {{ deploy_path }}/netbootxyz/assets/ubuntu/ubuntu-26.04-live-server-amd64
+    creates: "{{ deploy_path }}/netbootxyz/assets/ubuntu/ubuntu-26.04-live-server-amd64"
+  when: netboot_legacy_dir.stat.exists
+
+- name: Create release asset directory.
+  ansible.builtin.file:
+    path: "{{ netboot_ubuntu_asset_dir }}"
+    state: directory
+    mode: "0755"
 
 - name: Download Ubuntu live-server ISO.
   ansible.builtin.get_url:
     url: "{{ netboot_ubuntu_iso_url }}"
-    dest: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }}"
+    dest: "{{ netboot_ubuntu_asset_dir }}/{{ netboot_ubuntu_iso_url | basename }}"
     checksum: "sha256:{{ netboot_ubuntu_iso_sha256 }}"
     mode: "0644"
   register: netboot_iso
 
-- name: Check for extracted kernel.
+- name: Check for extracted kernel and initrd.
   ansible.builtin.stat:
-    path: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/vmlinuz"
-  register: netboot_vmlinuz
+    path: "{{ netboot_ubuntu_asset_dir }}/{{ item }}"
+  loop:
+    - vmlinuz
+    - initrd
+  register: netboot_boot_files
 
+# Re-extract if the ISO changed OR either file is missing, so a partial first
+# run (vmlinuz copied, initrd copy failed) self-heals instead of silently
+# 404ing at reimage time.
 - name: Extract kernel and initrd from ISO.
-  when: netboot_iso.changed or not netboot_vmlinuz.stat.exists
+  when: netboot_iso.changed or netboot_boot_files.results | rejectattr('stat.exists') | list | length > 0
   block:
     - name: Mount ISO read-only.
       ansible.posix.mount:
         path: /mnt/netboot-iso
-        src: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }}"
+        src: "{{ netboot_ubuntu_asset_dir }}/{{ netboot_ubuntu_iso_url | basename }}"
         fstype: iso9660
         opts: loop,ro
         state: ephemeral
@@ -36,7 +64,7 @@
     - name: Copy casper kernel and initrd.
       ansible.builtin.copy:
         src: "/mnt/netboot-iso/casper/{{ item }}"
-        dest: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_version }}/{{ item }}"
+        dest: "{{ netboot_ubuntu_asset_dir }}/{{ item }}"
         remote_src: true
         mode: "0644"
       loop:
@@ -48,3 +76,11 @@
       ansible.posix.mount:
         path: /mnt/netboot-iso
         state: unmounted
+
+# Only reachable once the ISO-keyed tree has been downloaded/validated above,
+# so this can never delete the last local copy. A no-op after the one-shot
+# rename; only fires if the legacy dir survived as a duplicate.
+- name: Remove the legacy version-keyed asset directory.
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/netbootxyz/assets/ubuntu/26.04"
+    state: absent

@@ -4,6 +4,13 @@
 # renovate: datasource=docker
 netbootxyz_image: "lscr.io/linuxserver/netbootxyz:0.7.6-ls222"
 
+# netboot.xyz menu/bootloader release. The image tag above does NOT pin this:
+# linuxserver fetches the menus + netboot.xyz.efi (which carries the per-MAC
+# boot hook this design depends on) at first container start. Pinning it makes
+# a rebuilt netboot VM reproduce the exact bootloader this was verified against.
+# Bumping requires re-testing the per-MAC boot hook.
+netbootxyz_menu_version: "3.0.2"
+
 netboot_server_ip: 10.3.20.60
 netbootxyz_web_port: 3000 # web config UI
 netbootxyz_http_port: 8080 # host port for asset server (container port 80)
@@ -11,13 +18,76 @@ netbootxyz_http_port: 8080 # host port for asset server (container port 80)
 # --- Pinned Ubuntu release for the time-server autoinstall ---
 # MUST match the release currently on the MU — its DKMS drivers are built
 # against that kernel series. See docs/guides/reimage-time-server.md pre-flight.
-netboot_ubuntu_version: "26.04"
-netboot_ubuntu_iso_filename: "ubuntu-{{ netboot_ubuntu_version }}-live-server-amd64.iso"
-netboot_ubuntu_iso_url: "https://releases.ubuntu.com/{{ netboot_ubuntu_version }}/{{ netboot_ubuntu_iso_filename }}"
+#
+# NOTE: point releases DISPLACE the base ISO in releases.ubuntu.com/<ver>/.
+# When 26.04.1 ships (~2026-08-27) this URL 404s for fresh downloads: point it
+# at the new filename and refresh the sha256 from that dir's SHA256SUMS, or use
+# old-releases.ubuntu.com for the exact base image. The already-downloaded ISO
+# on the netboot VM is unaffected.
+netboot_ubuntu_iso_url: "https://releases.ubuntu.com/26.04/ubuntu-26.04-live-server-amd64.iso"
 netboot_ubuntu_iso_sha256: "dec49008a71f6098d0bcfc822021f4d042d5f2db279e4d75bdd981304f1ca5d9"
 
-# --- Time-server autoinstall seed ---
-timeserver_hostname: mu
+# --- CM5 netboot provisioning ---
+# Raspberry Pi CM5 nodes are provisioned by a different mechanism than the MU:
+# the Pi EEPROM bootloader TFTP-fetches boot files from a directory named after
+# the LAST 8 hex digits of the device serial, boots a small Alpine flasher, and
+# the flasher streams the Ubuntu preinstalled image onto eMMC over HTTP, then
+# injects the per-host cloud-init seed. Always armed: the payload only takes
+# effect when a CM5 cannot boot its eMMC (BOOT_ORDER puts NETWORK last), so a
+# blank or broken module self-provisions. See docs/guides/provision-cm5.md.
+
+# Alpine release used as the flasher environment. dl-cdn keeps every point
+# release in the branch directory, so this URL does not churn like Ubuntu's.
+# Bump = update URL + sha256 (from the .tar.gz.sha256 next to the file).
+cm5_alpine_url: "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/aarch64/alpine-rpi-3.22.5-aarch64.tar.gz"
+cm5_alpine_sha256: "5d50ad035f028b254d29f21e890902f3d850da18a99d9157eddfb075b812239d"
+
+# Flash payload: Ubuntu preinstalled server image for Raspberry Pi.
+# NOTE: point releases DISPLACE this filename on cdimage.ubuntu.com (26.04.1
+# ~2026-08-27) — same churn as the MU ISO above; GA images move to
+# old-releases.ubuntu.com. The already-cached copy on the netboot VM is
+# unaffected.
+cm5_ubuntu_image_url: "https://cdimage.ubuntu.com/releases/26.04/release/ubuntu-26.04-preinstalled-server-arm64+raspi.img.xz"
+cm5_ubuntu_image_sha256: "10604098a0c4eeb7359e58e12b01badbce8c74b0d53b414e633ba0b047b512cd"
+
+# --- Netboot clients ---
+
+# CM5 nodes, keyed by FULL 16-hex serial (cat /proc/device-tree/serial-number).
+# Add a node = add an entry here and redeploy (task ansible:deploy-netboot).
+# The TFTP directory is derived as the last 8 hex digits — if two CM5s ever
+# share those, switch the fleet to TFTP_PREFIX=2 (MAC dirs) in EEPROM.
+# Each CM5 also needs a one-time EEPROM addition: TFTP_IP=10.3.20.60 (see the
+# guide's pre-flight; the UDM's DHCP boot option is not reliably honored by
+# the Pi bootloader).
+cm5_hosts:
+  "77dc4dfd89c03c1a":
+    hostname: time2
+    ip: 10.3.30.11
+    gateway: 10.3.30.1
+    nameserver: 10.3.20.53
+  "b2e5f47a53634a79":
+    hostname: time1
+    ip: 10.3.30.12
+    gateway: 10.3.30.1
+    nameserver: 10.3.20.53
+
+# Time servers (MUs), keyed by the PXE NIC's MAC in iPXE hexhyp form —
+# lowercase, hyphen-separated. On the MU, `ip a` shows the PXE NIC (enp1s0);
+# convert `:` separators to `-`. netboot.xyz's bootloader chains
+# MAC-${mac:hexhyp}.ipxe from the TFTP root before falling back to the menu,
+# so a listed host that PXE-boots goes straight to its installer. Always
+# staged, like the CM5 flasher: a healthy node boots from local disk and
+# never reaches PXE, and the installer still asks one console confirmation
+# before touching the disk. The installed OS pins `ip` statically by this
+# MAC, so the address is deterministic and does not depend on the UniFi DHCP
+# reservation.
+timeserver_hosts:
+  "40-a6-b7-81-7c-51":
+    hostname: mu
+    ip: 10.3.30.64
+    gateway: 10.3.30.1
+    nameserver: 10.3.20.53
+
 # Same public keys as the terraform ssh_public_key heredoc
 netboot_authorized_keys:
   - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrFbd2spFyWieD/6xEwGclwepRY0wdpJQA6gTTwxrwz git@samuelcalvert.com"

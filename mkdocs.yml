@@ -103,6 +103,7 @@ nav:
     - Networking Changes: guides/networking-changes.md
     - Certificates: guides/certificates.md
     - Re-image the Time Server: guides/reimage-time-server.md
+    - Provision a CM5: guides/provision-cm5.md
   - Reference:
     - reference/index.md
     - Terraform: reference/terraform.md

@@ -1,0 +1,9 @@
+# Managed by Ansible -- CM5 netboot flasher boot config for {{ cm5_host.hostname }}.
+# Fetched over TFTP from the per-serial directory ({{ cm5_serial[-8:] }}/) by the
+# Pi EEPROM bootloader; this file's presence IS the bootability probe. All other
+# boot files are fetched from the same directory, laid flat (no boot/ prefix).
+[all]
+kernel=vmlinuz-rpi
+initramfs initramfs-rpi
+arm_64bit=1
+enable_uart=1
