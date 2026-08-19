@@ -1,0 +1,49 @@
+---
+# SuperQ/chrony_exporter as a plain binary + systemd unit (same pattern as
+# the node exporter baked into the packer template). Talks to chronyd's
+# command port on localhost; scraped by the monitoring stack on :9123.
+
+- name: Check installed chrony_exporter version.
+  ansible.builtin.command:
+    cmd: /usr/local/bin/chrony_exporter --version
+  register: chrony_exporter_installed
+  changed_when: false
+  failed_when: false
+
+- name: Download and install chrony_exporter binary.
+  ansible.builtin.unarchive:
+    src: "https://github.com/SuperQ/chrony_exporter/releases/download/v{{ chrony_exporter_version }}/chrony_exporter-{{ chrony_exporter_version }}.linux-amd64.tar.gz"
+    remote_src: true
+    dest: /usr/local/bin
+    extra_opts:
+      - --strip-components=1
+      - --wildcards
+      - "*/chrony_exporter"
+    owner: root
+    group: root
+    mode: "0755"
+  when: chrony_exporter_version not in (chrony_exporter_installed.stdout | default('') + chrony_exporter_installed.stderr | default(''))
+  notify: Restart chrony-exporter
+
+- name: Create chrony_exporter user.
+  ansible.builtin.user:
+    name: chrony_exporter
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Deploy chrony-exporter systemd unit.
+  ansible.builtin.template:
+    src: templates/chrony-exporter.service.j2
+    dest: /etc/systemd/system/chrony-exporter.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony-exporter
+
+- name: Enable and start chrony-exporter.
+  ansible.builtin.systemd_service:
+    name: chrony-exporter
+    state: started
+    enabled: true
+    daemon_reload: true

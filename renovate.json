@@ -75,6 +75,18 @@
         "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\n\\s*\\w+:\\s*\"(?<depName>[^:]+):(?<currentValue>[^\"]+)\""
       ],
       "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Ansible group_vars GitHub release binary pins",
+      "managerFilePatterns": [
+        "/ansible/environments/.+/group_vars/.+\\.yml$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>github-releases) depName=(?<depName>[^\\s]+)\\n\\s*\\w+:\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "versioningTemplate": "semver"
     }
   ],
   "hostRules": [

@@ -15,3 +15,6 @@
   tasks:
     - name: Configure Chrony NTP server.
       ansible.builtin.include_tasks: tasks/chrony.yml
+
+    - name: Configure Chrony exporter.
+      ansible.builtin.include_tasks: tasks/chrony-exporter.yml
