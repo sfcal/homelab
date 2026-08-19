@@ -9,8 +9,3 @@ chrony_ntp_servers:
 
 chrony_allow:
   - 10.2.0.0/16
-
-# --- Chrony exporter (Prometheus metrics on :9123) ---
-
-# renovate: datasource=github-releases depName=SuperQ/chrony_exporter
-chrony_exporter_version: "0.14.0"

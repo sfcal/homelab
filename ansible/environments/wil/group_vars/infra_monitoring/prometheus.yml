@@ -11,8 +11,3 @@ prometheus_node_targets:
   - "10.2.20.53:9100"      # networking
   - "10.2.20.45:9100"      # website
   - "10.2.20.80:9100"      # wolf
-
-# Chrony exporter scrape targets (deployed by infrastructure/ntp)
-prometheus_chrony_targets:
-  - "10.2.20.123:9123"     # ntp
-

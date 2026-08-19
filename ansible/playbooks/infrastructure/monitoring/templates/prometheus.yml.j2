@@ -13,12 +13,3 @@ scrape_configs:
 {% for target in prometheus_node_targets %}
           - '{{ target }}'
 {% endfor %}
-{% if prometheus_chrony_targets | default([]) | length > 0 %}
-
-  - job_name: 'chrony'
-    static_configs:
-      - targets:
-{% for target in prometheus_chrony_targets %}
-          - '{{ target }}'
-{% endfor %}
-{% endif %}
