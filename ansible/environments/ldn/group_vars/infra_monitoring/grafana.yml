@@ -3,3 +3,12 @@
 grafana_admin_user: admin
 # grafana_admin_password — stored in monitoring/secrets.sops.yml
 grafana_url: "https://grafana.ldn.5am.cloud"
+
+# Extra provisioned datasources beyond the local stack Prometheus.
+# The PTP grandmaster (ptp-experiments repo) runs its own Prometheus that
+# scrapes the gpsd/chrony/ptp exporters; the GPSD dashboard binds to uid
+# "prometheus".
+grafana_extra_datasources:
+  - name: PTP Prometheus
+    uid: prometheus
+    url: "http://10.3.30.64:9090"

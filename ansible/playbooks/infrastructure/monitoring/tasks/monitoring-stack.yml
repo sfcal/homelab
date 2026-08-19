@@ -13,6 +13,8 @@
     - "{{ deploy_path }}/monitoring/grafana"
     - "{{ deploy_path }}/monitoring/grafana/provisioning"
     - "{{ deploy_path }}/monitoring/grafana/provisioning/datasources"
+    - "{{ deploy_path }}/monitoring/grafana/provisioning/dashboards"
+    - "{{ deploy_path }}/monitoring/grafana/dashboards"
     - "{{ deploy_path }}/monitoring/uptime-kuma"
     - "{{ deploy_path }}/monitoring/homepage"
 
@@ -51,6 +53,26 @@
     mode: "0644"
   notify:
     - Restart monitoring-stack
+
+- name: Deploy Grafana dashboard provisioning.
+  ansible.builtin.template:
+    src: templates/grafana-dashboards.yml.j2
+    dest: "{{ deploy_path }}/monitoring/grafana/provisioning/dashboards/dashboards.yml"
+    owner: "{{ monitoring_uid }}"
+    group: "{{ monitoring_gid }}"
+    mode: "0644"
+  notify:
+    - Restart monitoring-stack
+
+- name: Deploy Grafana dashboards.
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ deploy_path }}/monitoring/grafana/dashboards/"
+    owner: "{{ monitoring_uid }}"
+    group: "{{ monitoring_gid }}"
+    mode: "0644"
+  with_fileglob:
+    - files/dashboards/*.json
 
 - name: Deploy Homepage configuration files.
   ansible.builtin.template:

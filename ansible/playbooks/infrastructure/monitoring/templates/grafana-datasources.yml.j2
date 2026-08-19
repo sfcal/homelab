@@ -7,3 +7,12 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     editable: true
+{% for ds in grafana_extra_datasources | default([]) %}
+  - name: {{ ds.name }}
+    uid: {{ ds.uid }}
+    type: {{ ds.type | default('prometheus') }}
+    access: proxy
+    url: {{ ds.url }}
+    isDefault: false
+    editable: true
+{% endfor %}
