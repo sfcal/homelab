@@ -26,7 +26,7 @@ Each environment uses the same VLAN layout with environment-specific IP ranges.
     | 20 | Virtual Machines | `10.3.20.0/24` | All Ansible-managed VMs |
     | 30 | Servers Misc | `10.3.30.0/24` | Bare-metal lab devices (PTP time server and clients) |
 
-All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN. In LDN, the PTP time server (LattePanda MU) is a physical host on VLAN 30 at `10.3.30.64`, managed by the separate `ptp-experiments` repo.
+All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN. In LDN, the PTP time server (LattePanda MU) is a physical host on VLAN 30 at `10.3.30.123`, managed by the separate `ptp-experiments` repo.
 
 ## Static Routes
 
@@ -127,7 +127,7 @@ The installed OS pins the time server's address statically by its PXE NIC's MAC 
 
 | Device | Fixed IP | Notes |
 |--------|----------|-------|
-| LattePanda MU (PTP grandmaster) | `10.3.30.64` | Reserve against the NIC MAC shown in the UniFi client list |
+| LattePanda MU (PTP grandmaster) | `10.3.30.123` | Reserve against the PXE NIC MAC (`54:49:4d:45:00:22`), the same key as its `timeserver_hosts` entry |
 
 ### Firewall Requirements
 

@@ -3,8 +3,8 @@ autoinstall:
   version: 1
   # Reboot into the fresh install. The per-MAC script is always staged, but a
   # healthy node boots its local disk without touching PXE, so post-install
-  # the node comes straight back up; a node that still fails local boot lands
-  # back at the installer's confirmation prompt (safe self-retry).
+  # the node comes straight back up; a node that still fails local boot
+  # re-runs the unattended install (reimage loop until local boot succeeds).
   shutdown: reboot
   refresh-installer:
     update: false
@@ -54,3 +54,20 @@ autoinstall:
     - vim
     - python3
     - openssh-server
+{% if timeserver_blacklist_modules | default([]) %}
+  # First boot must not bind the stock drivers to the timecard (PTM firmware
+  # hang — see timeserver_blacklist_modules in group_vars). `blacklist` stops
+  # the udev modalias autoload; `install ... /bin/false` also blocks explicit
+  # modprobe until the driver playbook builds a compatible module, deletes
+  # this file, and re-runs update-initramfs. The initramfs rebuild here bakes
+  # the blacklist into the initrd, where udev coldplug would otherwise bind
+  # the module before the rootfs modprobe.d is ever read.
+  late-commands:
+    - >-
+      printf '%s\n'
+{% for module in timeserver_blacklist_modules %}
+      'blacklist {{ module }}' 'install {{ module }} /bin/false'
+{% endfor %}
+      > /target/etc/modprobe.d/blacklist-timecard.conf
+    - curtin in-target -- update-initramfs -u -k all
+{% endif %}

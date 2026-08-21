@@ -1,6 +1,6 @@
 # Provision a CM5 over the Network
 
-Netboot-provision (or re-image) a Raspberry Pi Compute Module 5 time-server node to a fresh Ubuntu install on its eMMC. Covered nodes and their identities live in `cm5_hosts` in `ansible/environments/ldn/group_vars/infra_netboot/vars.yml` (currently `time2`, `10.3.30.11`).
+Netboot-provision (or re-image) a Raspberry Pi Compute Module 5 time-server node to a fresh Ubuntu install on its eMMC. Covered nodes and their identities live in `cm5_hosts` in `ansible/environments/ldn/group_vars/infra_netboot/vars.yml` (currently `CM1`, `10.3.30.11` and `CM2`, `10.3.30.12`).
 
 ## How It Works
 
@@ -12,7 +12,7 @@ graph LR
     CM5 -->|"HTTP :8080\nmodloop / apkovl / img.xz / seed"| NB
 ```
 
-1. The bootloader TFTP-fetches boot files from a directory named after the **last 8 hex digits** of the module serial (`89c03c1a/` for time2). Other VLAN 30 clients are unaffected — the Pi ignores the UniFi boot filename option, and x86 clients never request Pi paths.
+1. The bootloader TFTP-fetches boot files from a directory named after the **last 8 hex digits** of the module serial (`89c03c1a/` for CM1). Other VLAN 30 clients are unaffected — the Pi ignores the UniFi boot filename option, and x86 clients never request Pi paths.
 2. It boots a tiny Alpine Linux flasher (kernel + initramfs over TFTP; module image and flash script over HTTP).
 3. The flasher streams `ubuntu-26.04-preinstalled-server-arm64+raspi.img.xz` from the netboot VM straight onto `/dev/mmcblk0`, then writes the node's cloud-init seed (hostname, static IP, SSH keys) onto the `system-boot` FAT partition, and reboots into the fresh OS.
 

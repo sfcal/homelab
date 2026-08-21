@@ -8,9 +8,10 @@
 # gets the standard netboot.xyz menu.
 #
 # DESTRUCTIVE: boots the Ubuntu live installer against this host's
-# autoinstall seed. The `autoinstall` kernel argument is deliberately
-# omitted so the installer still asks for one confirmation at the console
-# before touching the disk.
+# autoinstall seed. The `autoinstall` kernel argument makes the install
+# fully unattended -- any PXE boot of this NIC wipes the disk with no
+# confirmation. A healthy node boots its local disk first and never
+# reaches this script.
 #
 # Every fetch is failure-handled: a bare `kernel`/`initrd` that fails aborts
 # the script silently and netboot.xyz just chains menu.ipxe, which is
@@ -35,8 +36,9 @@ imgfree
 
 # NOTE: no `prompt` here. An ESC-to-abort prompt returns success on any
 # buffered keystroke, which sends the script to the menu with no diagnostic
-# and is indistinguishable from the script never running. The installer's own
-# confirmation before it touches the disk is the safety gate.
+# and is indistinguishable from the script never running. With `autoinstall`
+# on the kernel line there is no safety gate at all: reaching this script
+# means the disk gets wiped.
 
 # cloud-config-url=/dev/null: cloud-init also interprets casper's url= as a
 # cloud-config URL and re-downloads the whole ISO into RAM before looking for
@@ -44,8 +46,13 @@ imgfree
 # on a ~6 GiB box already holding the ISO in RAM — and the installer then ran
 # interactive). cloud-config-url takes precedence over url= in cloud-init's
 # kernel-cmdline handling, so pointing it at /dev/null skips that download.
+#
+# module_blacklist=: the installer kernel would otherwise udev-bind the listed
+# modules to the timecard and hang before the install starts (see
+# timeserver_blacklist_modules in group_vars). Kernel-level: blocks even
+# explicit loads for the lifetime of the installer environment.
 echo Fetching kernel: ${asset_dir}/vmlinuz
-kernel ${asset_dir}/vmlinuz initrd=initrd ip=dhcp url=${asset_dir}/{{ netboot_ubuntu_iso_url | basename }} cloud-config-url=/dev/null ${install_params} || goto kernel_failed
+kernel ${asset_dir}/vmlinuz initrd=initrd ip=dhcp url=${asset_dir}/{{ netboot_ubuntu_iso_url | basename }} autoinstall cloud-config-url=/dev/null{% if timeserver_blacklist_modules | default([]) %} module_blacklist={{ timeserver_blacklist_modules | join(',') }}{% endif %} ${install_params} || goto kernel_failed
 
 echo Fetching initrd: ${asset_dir}/initrd
 initrd ${asset_dir}/initrd || goto initrd_failed
