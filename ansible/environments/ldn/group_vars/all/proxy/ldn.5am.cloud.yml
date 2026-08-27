@@ -7,7 +7,7 @@ ldn_services:
     proxied: true
     tls_skip_verify: true
   - name: kvm
-    backend_host: 10.3.0.227
+    backend_host: 10.3.30.227
     backend_port: 80
     proxied: true
   - name: netboot

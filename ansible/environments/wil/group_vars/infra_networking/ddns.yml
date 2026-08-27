@@ -3,4 +3,3 @@
 ddns_domains:
   - "plex.5am.video"
   #- "*.ext.5am.cloud"
-  - "convert.wil.5am.cloud"

@@ -28,6 +28,31 @@ Each environment uses the same VLAN layout with environment-specific IP ranges.
 
 All Ansible-managed infrastructure and application VMs live on **VLAN 20** (Virtual Machines). The networking VM at `.53`, CA at `.9`, NTP at `.123`, and monitoring at `.30` are all on this VLAN. In LDN, the PTP time server (LattePanda MU) is a physical host on VLAN 30 at `10.3.30.123`, managed by the separate `ptp-experiments` repo.
 
+## DHCP DNS
+
+Every client VLAN's DHCP must hand out the local BIND9 server as DNS — never Auto (which forwards to the WAN resolver) or a public resolver. `wil.5am.cloud` and `ldn.5am.cloud` are [local-only zones](dns.md#local-only-zones) with no public records, so a client pointed at Cloudflare gets NXDOMAIN for them.
+
+In the UniFi controller: **Settings → Networks → (network) → DHCP Service Management → DNS Server → Manual**
+
+=== "WIL"
+
+    | Field | Value |
+    |-------|-------|
+    | DNS Server 1 | `10.2.20.53` (local BIND) |
+    | DNS Server 2 | `10.3.20.53` (LDN BIND, cross-site fallback) |
+
+=== "LDN"
+
+    | Field | Value |
+    |-------|-------|
+    | DNS Server 1 | `10.3.20.53` (local BIND) |
+    | DNS Server 2 | `10.2.20.53` (WIL BIND, cross-site fallback) |
+
+The cross-site secondary is a valid fallback because each BIND server slaves the other site's zones (so it answers all local names) and the [static routes](#static-routes) make it reachable through the Tailscale tunnel. Clients pick up the new servers on lease renewal or reconnect.
+
+!!! note
+    Devices with hardcoded DNS or browser DNS-over-HTTPS bypass DHCP entirely — those resolve local-only zones as NXDOMAIN regardless of this setting.
+
 ## Static Routes
 
 Static routes on the UDM Pro direct traffic for remote site subnets through the local Tailscale subnet router. Without these routes, traffic destined for other sites would be sent to the default gateway (the ISP) instead of through the Tailscale tunnel.

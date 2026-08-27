@@ -36,7 +36,11 @@ This logic lives in the `domain.zone.j2` template:
 {{ service.name }} IN A {{ reverse_proxy_ip if service.proxied else service.backend_host }}
 ```
 
-## Zone Configuration
+### Local-Only Zones
+
+`wil.5am.cloud` and `ldn.5am.cloud` are **local-only**: they have no records in the public Cloudflare zone and only resolve through BIND9. Public DNS records are created exclusively for the hostnames listed in `ddns_domains` (`group_vars/infra_networking/ddns.yml`) — currently just `plex.5am.video`. Everything else must reach the internal BIND servers (directly on the LAN, or via Tailscale split DNS when roaming); a query that leaks to a public resolver returns NXDOMAIN rather than a wrong answer.
+
+This works from either site because each BIND server holds every zone — master for its own site's zones and slave (via zone transfer) for the other's — so both `10.2.20.53` and `10.3.20.53` answer all local names. For this to hold, client VLANs must hand out the BIND servers via DHCP (see [Gateway — DHCP DNS](unifi.md#dhcp-dns)); never point clients at a public resolver.
 
 BIND9 generates zone files from two data sources:
 
