@@ -8,3 +8,13 @@ prometheus_node_targets:
   # Prometheus runs on a bridge network, so use the VM IP, not localhost
   - "10.3.20.30:9100"  # local (monitoring VM)
   - "10.3.20.53:9100"  # networking
+
+# PTP grandmaster exporters (ptp-experiments roles/monitoring, native
+# systemd units on the timeserver). The 'node' job is kept separate from
+# node-exporter for the Chrony dashboard -- see prometheus.yml.j2.
+prometheus_chrony_targets:
+  - "10.3.30.123:9123"
+prometheus_gpsd_targets:
+  - "10.3.30.123:9015"
+prometheus_ptp_node_targets:
+  - "10.3.30.123:9100"

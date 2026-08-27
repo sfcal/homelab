@@ -137,6 +137,8 @@ scrape_configs:
           # ... all node targets
 ```
 
+Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandmaster's exporters (deployed by the `ptp-experiments` repo's `monitoring` role). Each renders only when its per-environment target list is non-empty; currently only LDN defines them. The `node` job is kept separate from `node-exporter` because the Chrony dashboard's CPU-temperature panel selects `job="node"` unscoped.
+
 ### Container Configuration
 
 - **Memory:** 2GB limit, 1GB reservation
@@ -153,6 +155,9 @@ scrape_configs:
 | `prometheus_image` | `string` | Docker image for Prometheus | (per-env) |
 | `prometheus_retention` | `string` | Metrics data retention period | `"30d"` |
 | `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`) | (per-env) |
+| `prometheus_chrony_targets` | `list[string]` | chrony_exporter endpoints (PTP grandmaster, `:9123`) | `[]` |
+| `prometheus_gpsd_targets` | `list[string]` | gpsd exporter endpoints (PTP grandmaster, `:9015`) | `[]` |
+| `prometheus_ptp_node_targets` | `list[string]` | PTP grandmaster node_exporter endpoints (job `node`, `:9100`) | `[]` |
 | `node_exporter_image` | `string` | Docker image for Node Exporter sidecar | (per-env) |
 
 <small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/prometheus.yml` · `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml`</small>
@@ -171,12 +176,25 @@ Grafana auto-provisions a Prometheus datasource on startup via `grafana-datasour
 apiVersion: 1
 datasources:
   - name: Prometheus
+    uid: prometheus
     type: prometheus
     access: proxy
     url: http://prometheus:9090
     isDefault: true
     editable: true
 ```
+
+The datasource carries the fixed uid `prometheus` because the provisioned dashboards bind to it.
+
+### Dashboard Provisioning
+
+Dashboards are provisioned from files — any JSON dropped into `playbooks/infrastructure/monitoring/files/dashboards/` is deployed and picked up automatically (the file provider rescans every 30 s; UI edits to provisioned dashboards do not persist):
+
+| Dashboard | File | Data |
+|-----------|------|------|
+| Chrony Detail | `chrony_grafana_dashboard.json` | `chrony` + `node` jobs (PTP grandmaster) |
+| GPSD | `gpsd_grafana_dashboard.json` | `gpsd` job (PTP grandmaster) |
+| Node Exporter Full | `node_exporter_full.json` | All `node-exporter`/`node` targets ([grafana.com 1860](https://grafana.com/grafana/dashboards/1860)) |
 
 ### Container Configuration
 
