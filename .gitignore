@@ -47,8 +47,6 @@ terraform/environments/*/.terraform.tfstate.lock.info
 
 terraform/environments/*/.terraform.lock.hcl
 
-terraform/.DS_Store
-terraform/Thumbs.db
 
 # Environment-specific 
 terraform/environments/*/terraform.tfvars
@@ -80,3 +78,8 @@ ansible/environments/*/group_vars/infra_ca/*.csr
 
 # obsidian
 docs/.obsidian
+
+# macOS
+.DS_Store
+**/.DS_Store
+Thumbs.db
