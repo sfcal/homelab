@@ -16,7 +16,6 @@ task --list-all
 | `task ansible:deploy-ca ENV=wil` | Step-CA certificate authority |
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
 | `task ansible:deploy-monitoring ENV=wil` | Prometheus, Grafana, Homepage |
-| `task ansible:deploy-external-monitoring ENV=wil` | External Uptime Kuma |
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |
 | `task ansible:deploy-homeassistant ENV=wil` | Home Assistant |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |

@@ -55,7 +55,7 @@ Plex, Sonarr, Radarr, Prowlarr, Sabnzbd, Bazarr, Tunarr, Pulsarr, Cleanuparr, Td
 <details>
 <summary>📊 Monitoring</summary>
 
-Prometheus, Grafana, Homepage, Uptime Kuma (external VPS)
+Prometheus, Grafana, Homepage, Uptime Kuma
 
 </details>
 
@@ -275,7 +275,6 @@ hl task ansible:deploy-all ENV=dev
 # Infrastructure
 hl task ansible:deploy-networking ENV=dev   # DNS + reverse proxy + Tailscale
 hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana, Homepage
-hl task ansible:deploy-external-monitoring ENV=dev  # Uptime Kuma (external VPS)
 
 # Applications
 hl task ansible:deploy-media ENV=dev        # Full media stack

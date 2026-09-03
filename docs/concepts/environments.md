@@ -8,7 +8,6 @@ The homelab supports multiple deployment environments, each with isolated config
 |-------------|---------|---------------|--------------|
 | **WIL** | Development / Primary | 10.2.20.0/24 | `proxmox` |
 | **LDN** | Production (London) | 10.3.20.0/24 | `pve-lon` |
-| **External** | VPS (Uptime Kuma) | N/A | N/A |
 
 Every `task` command takes an `ENV=` variable that threads through to Terraform, Ansible, and Packer:
 

@@ -1,7 +1,0 @@
----
-# NFS Mounts
-nfs_default_opts: "defaults"
-nfs_mounts:
-  # NAS storage-VLAN interface (mgmt IP is 10.2.0.100)
-  - src: "10.2.10.100:/mnt/NAS-WIL/Media"
-    path: "/mnt/data"

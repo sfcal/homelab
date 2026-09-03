@@ -22,7 +22,7 @@ graph TD
         NE4[Node Exporter\nwebsite]
     end
 
-    subgraph External VPS
+    subgraph Monitoring VM
         UptimeKuma[Uptime Kuma]
     end
 
@@ -34,7 +34,7 @@ graph TD
 - **Prometheus** scrapes node exporters across all VMs for system metrics
 - **Grafana** visualizes metrics from Prometheus with dashboards
 - **Homepage** provides a service dashboard with status widgets and quick links
-- **Uptime Kuma** runs on an external VPS for independent uptime monitoring via [Tailscale](../networking/tailscale.md)
+- **Uptime Kuma** provides uptime monitoring for internal services
 
 ## Components
 
@@ -43,7 +43,7 @@ graph TD
 | Prometheus | `prom/prometheus` | 9090 | Metrics collection and storage |
 | Grafana | `grafana/grafana` | 3000 | Metrics visualization |
 | Homepage | `ghcr.io/gethomepage/homepage` | 3002 | Service dashboard |
-| Uptime Kuma | `louislam/uptime-kuma` | 3001 | External uptime monitoring |
+| Uptime Kuma | `louislam/uptime-kuma` | 3001 | Uptime monitoring |
 
 ## Hosts
 
@@ -71,22 +71,10 @@ graph TD
 | `playbooks/infrastructure/monitoring/handlers/main.yml` | Container lifecycle handlers |
 | `environments/<env>/group_vars/infra_monitoring/` | Per-environment variables |
 
-### External Monitoring
-
-| File | Purpose |
-|------|---------|
-| `playbooks/infrastructure/external-monitoring/deploy.yml` | Main playbook |
-| `playbooks/infrastructure/external-monitoring/templates/compose.yaml.j2` | Docker Compose definition |
-| `environments/external/group_vars/infra_externalmonitoring/vars.yml` | External monitoring variables |
-
 ## Deployment
 
 ```bash
-# Deploy internal monitoring stack
 task ansible:deploy-monitoring ENV=wil
-
-# Deploy external uptime monitoring
-task ansible:deploy-external-monitoring ENV=external
 ```
 
 ### Monitoring Stack Deployment
@@ -100,14 +88,6 @@ The task file:
 5. Deploys Homepage configuration files (services, bookmarks, settings, widgets)
 6. Deploys Docker Compose file
 7. Starts all containers
-
-### External Monitoring Deployment
-
-The external monitoring playbook:
-
-1. Runs the `common` role (timezone, apt cache)
-2. Installs and configures [Tailscale](../networking/tailscale.md) as a client (to reach internal services)
-3. Deploys Uptime Kuma via the `docker_service` role
 
 ---
 
@@ -245,33 +225,6 @@ Homepage is configured via four YAML template files:
 | `widgets.yaml.j2` | Global widgets (search bar, datetime) |
 
 <small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2)</small>
-
----
-
-## External Monitoring (Uptime Kuma)
-
-Uptime Kuma runs on an external VPS to provide independent uptime monitoring. It connects to the internal network via Tailscale to monitor services that are not publicly exposed.
-
-### Configuration Reference
-
-| Parameter | Type | Description | Default |
-|-----------|------|-------------|---------|
-| `uptime_kuma_image` | `string` | Docker image for Uptime Kuma | (per-env) |
-| `external_monitoring_uptime_kuma_listen` | `string` | Listen port for Uptime Kuma | `"3001"` |
-
-### Tailscale Integration
-
-The external VPS runs Tailscale as a client with route acceptance enabled:
-
-```yaml
-tailscale_mode: "client"
-tailscale_hostname: "external-monitor"
-tailscale_accept_routes: true
-```
-
-This allows Uptime Kuma to reach internal services (e.g., `10.2.20.53`) through the Tailscale mesh without exposing them publicly. See [VPN (Tailscale)](../networking/tailscale.md) for details.
-
-<small>**Sources:** [`ansible/environments/external/group_vars/infra_externalmonitoring/vars.yml`](https://github.com/sfcal/homelab/blob/main/ansible/environments/external/group_vars/infra_externalmonitoring/vars.yml) · [`ansible/playbooks/infrastructure/external-monitoring/templates/compose.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/external-monitoring/templates/compose.yaml.j2)</small>
 
 ---
 

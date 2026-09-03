@@ -114,8 +114,6 @@ vms = {
 | `monitoring_server` | monitoring | 1107 | 10.2.20.30 | 1 | 8GB | 50G | infrastructure |
 | `web_server` | web | 1109 | 10.2.20.45 | 2 | 4GB | 20G | application |
 | `games_server` | games | 1111 | 10.2.20.50 | 1 | 8GB | 50G | application |
-| `work_server` | work | 1112 | 10.2.20.60 | 4 | 8GB | 256G | application |
-| `seafile_server` | seafile | 1113 | 10.2.20.70 | 2 | 8GB | 50G | application |
 
 ## Implementation Details
 

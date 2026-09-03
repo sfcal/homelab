@@ -44,12 +44,6 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/networking/deploy.yml }
 
-  deploy-external-monitoring:
-    desc: Deploy external monitoring server
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: infrastructure/external-monitoring/deploy.yml }
-
   deploy-monitoring:
     desc: Deploy monitoring stack
     cmds:

@@ -58,4 +58,4 @@ video_services:
     backend_port: 5000
     proxied: true
 
-  # (subsearch, restreamer, samuel are registry apps in group_vars/all/apps.yml)
+  # (restreamer, samuel are registry apps in group_vars/all/apps.yml)

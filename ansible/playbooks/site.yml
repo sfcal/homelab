@@ -69,20 +69,8 @@
   tags: ['kasm', 'applications']
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: openbooks }
-  tags: ['openbooks', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: restreamer }
   tags: ['restreamer', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: seafile }
-  tags: ['seafile', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: subsearch }
-  tags: ['subsearch', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: website }

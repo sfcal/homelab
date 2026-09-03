@@ -1,0 +1,27 @@
+diff --git a/src/crypto/x509.c b/src/crypto/x509.c
+index 111c747..1a934d4 100644
+--- a/src/crypto/x509.c
++++ b/src/crypto/x509.c
+@@ -1585,6 +1585,22 @@ int x509_check_name ( struct x509_certificate *cert, const char *name ) {
+ 		}
+ 	}
+ 
++	/* Homelab patch: the Haivision kicker hard-codes https:// URLs by
++	 * raw IP address in its per-product release scripts, but the
++	 * server certificate only carries DNS names.  Accept the
++	 * certificate when the requested name is an IP literal; hostnames
++	 * are still matched strictly above.
++	 */
++	{
++		struct sockaddr sa;
++		if ( sock_aton ( name, &sa ) == 0 ) {
++			DBGC ( cert, "X509 %p \"%s\" accepting IP literal "
++			       "\"%s\" without name match\n",
++			       cert, x509_name ( cert ), name );
++			return 0;
++		}
++	}
++
+ 	DBGC ( cert, "X509 %p \"%s\" does not match name \"%s\"\n",
+ 	       cert, x509_name ( cert ), name );
+ 	return -EACCES_WRONG_NAME;

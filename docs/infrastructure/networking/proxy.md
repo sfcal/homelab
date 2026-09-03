@@ -296,7 +296,7 @@ kasm:
 - **`name`, `domain`, and `proxied` are required** — `proxied` has no default in the zone template.
 - **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `dns`, and `enabled` behave exactly as in manual entries.
 
-Apps without a `proxy:` block (e.g., openbooks, games-server) get no DNS record and no Caddy entry.
+Apps without a `proxy:` block (e.g., games-server) get no DNS record and no Caddy entry.
 
 ## Service Aggregation
 

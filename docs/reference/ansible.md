@@ -27,7 +27,6 @@ task ansible:ping ENV=wil
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
 | `deploy-monitoring` | Prometheus, Grafana, Homepage |
-| `deploy-external-monitoring` | External Uptime Kuma |
 | `deploy-media` | Plex and *arr stack |
 | `deploy-homeassistant` | Home Assistant |
 | `deploy-app APP=<name>` | Single data-driven app |

@@ -78,10 +78,8 @@ Taskfile.yaml               Root task runner entry point
 | IT-Tools | `app_ittools` | Developer utilities |
 | Kasm | `app_kasm` | Browser-based desktops |
 | MicroBin | `app_microbin` | Pastebin |
-| OpenBooks | `app_openbooks` | Book search |
 | Restreamer | `app_restreamer` | Video streaming relay |
 | RomM | `app_romm` | ROM manager |
-| Seafile | `app_seafile` | File sync and share |
 | Stirling PDF | `app_stirlingpdf` | PDF tools |
 | Website | `app_website` | Personal website |
 | Games Server | `app_gamesserver` | Terraria server |

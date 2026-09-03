@@ -14,7 +14,7 @@
 # extra-vars precedence will split-brain against the group_vars copy.
 #
 # Required fields:
-#   host_group: inventory group name (e.g., app_kasm); must have at least one
+#   host_group: inventory group name (e.g., app_website); must have at least one
 #               host in this environment's inventory if any proxy block exists
 #   image: primary container image (all `*image` keys are pre-pulled)
 #
@@ -28,7 +28,7 @@
 #   user: override service file owner (default: root)
 #   group: override service file group (default: root)
 #
-# Multi-service apps nest sub-services (see work); sub-keys must be
+# Multi-service apps nest sub-services (see apps.work in ldn); sub-keys must be
 # hyphen-free. Image keys must end in `image`, be double-quoted, and keep the
 # `# renovate: datasource=docker` comment directly above the key line.
 
@@ -58,25 +58,6 @@ apps:
       npcstream: 60
       seed: ""
 
-  kasm:
-    host_group: app_kasm
-    # renovate: datasource=docker
-    image: "lscr.io/linuxserver/kasm:1.18.1"
-    port: 4443
-    wizard_port: 3001
-    proxy:
-      name: kasm
-      domain: wil.5am.cloud
-      proxied: true
-      tls_skip_verify: true
-      forward_headers: true
-
-  openbooks:
-    host_group: app_openbooks
-    # renovate: datasource=docker
-    image: "evanbuss/openbooks:latest"
-    port: 8072
-
   restreamer:
     host_group: app_restreamer
     # renovate: datasource=docker
@@ -86,36 +67,6 @@ apps:
     srt_port: 6000
     proxy:
       name: restreamer
-      domain: 5am.video
-      proxied: true
-
-  seafile:
-    host_group: app_seafile
-    nfs: true
-    # renovate: datasource=docker
-    image: "seafileltd/seafile-mc:13.0-latest"
-    # renovate: datasource=docker
-    db_image: "mariadb:12.3"
-    # renovate: datasource=docker
-    redis_image: "redis:8"
-    port: 8080
-    proxy:
-      name: files
-      domain: wil.5am.cloud
-      proxied: true
-      forward_headers: true
-
-  subsearch:
-    host_group: app_subsearch
-    nfs: true
-    # renovate: datasource=docker
-    image: "getmeili/meilisearch:v1.53"
-    # renovate: datasource=docker
-    indexer_image: "ghcr.io/sfcal/subtitle-fts:latest"
-    port: 7700
-    index_interval: "21600"
-    proxy:
-      name: subsearch
       domain: 5am.video
       proxied: true
 
@@ -129,45 +80,3 @@ apps:
       domain: 5am.video
       proxied: true
 
-  work:
-    host_group: app_work
-    convertx:
-      # renovate: datasource=docker
-      image: "ghcr.io/c4illin/convertx:latest"
-      port: 3100
-      proxy:
-        name: convert
-        domain: wil.5am.cloud
-        proxied: true
-    cyberchef:
-      # renovate: datasource=docker
-      image: "ghcr.io/gchq/cyberchef:latest"
-      port: 8071
-      proxy:
-        name: cyberchef
-        domain: wil.5am.cloud
-        proxied: true
-    ittools:
-      # renovate: datasource=docker
-      image: "corentinth/it-tools:latest"
-      port: 8070
-      proxy:
-        name: tools
-        domain: wil.5am.cloud
-        proxied: true
-    microbin:
-      # renovate: datasource=docker
-      image: "danielszabo99/microbin:latest"
-      port: 8081
-      proxy:
-        name: bin
-        domain: wil.5am.cloud
-        proxied: true
-    stirlingpdf:
-      # renovate: datasource=docker
-      image: "stirlingtools/stirling-pdf:latest"
-      port: 8073
-      proxy:
-        name: pdf
-        domain: wil.5am.cloud
-        proxied: true

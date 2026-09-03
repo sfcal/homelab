@@ -39,10 +39,8 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in `a
 | IT-Tools | `corentinth/it-tools` | 8070 |
 | Kasm | `lscr.io/linuxserver/kasm` | 4443 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
-| OpenBooks | `evanbuss/openbooks` | 8072 |
 | Restreamer | `datarhei/restreamer` | 8710 |
 | RomM | `rommapp/romm` | 8085 |
-| Seafile | `seafileltd/seafile-mc` | 8080 |
 | Stirling PDF | `stirlingtools/stirling-pdf` | 8073 |
 | Website | `ghcr.io/sfcal/samuel.computer` | 8090 |
 
