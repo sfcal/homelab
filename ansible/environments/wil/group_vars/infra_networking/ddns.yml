@@ -2,4 +2,5 @@
 # Cloudflare DDNS records to keep updated with public IP
 ddns_domains:
   - "plex.5am.video"
+  - "kosync.5am.cloud"
   #- "*.ext.5am.cloud"

@@ -38,6 +38,7 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in `a
 | Games Server | Terraria | 7777 |
 | IT-Tools | `corentinth/it-tools` | 8070 |
 | Kasm | `lscr.io/linuxserver/kasm` | 4443 |
+| KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
 | RomM | `rommapp/romm` | 8085 |

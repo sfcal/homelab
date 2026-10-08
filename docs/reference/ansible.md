@@ -137,7 +137,7 @@ ansible/
 │   └── apps/
 │       ├── birdle/templates/compose.yaml.j2
 │       ├── media/deploy.yml
-│       └── ... (16 app directories)
+│       └── ... (one directory per app)
 ├── roles/
 │   ├── common/
 │   ├── docker_service/

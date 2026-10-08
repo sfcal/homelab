@@ -1,0 +1,19 @@
+---
+services:
+  kosync:
+    image: {{ apps[app_name].image }}
+    container_name: kosync
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 128m
+    ports:
+      # Container port 17200 is plain HTTP (7200 is self-signed HTTPS);
+      # TLS is terminated by Caddy on the networking host.
+      - "{{ apps[app_name].port }}:17200"
+    environment:
+      - ENABLE_USER_REGISTRATION={{ apps[app_name].user_registration | default(false) | ternary('true', 'false') }}
+    volumes:
+      # Redis (bundled in the image) holds all user + progress data.
+      - {{ deploy_path }}/kosync/data/redis:/var/lib/redis
+      - {{ deploy_path }}/kosync/logs/app:/app/koreader-sync-server/logs
+      - {{ deploy_path }}/kosync/logs/redis:/var/log/redis

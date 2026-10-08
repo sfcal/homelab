@@ -114,4 +114,21 @@ vms = {
     ssh_user       = "sfcal"
   }
 
+  web_server = {
+    name           = "web"
+    description    = "anything at all"
+    proxmox_node   = "pve-ldn"
+    vmid           = 3007
+    template_name  = "ubuntu-server-ldn-base"
+    ip_address     = "10.3.20.70"
+    gateway        = "10.3.20.1"
+    nameserver     = "10.3.20.53"
+    cores          = 1
+    memory         = 2048
+    disk_size      = "32G"
+    storage_pool   = "local-lvm"
+    network_bridge = "vmbr0"
+    tags           = "application"
+    ssh_user       = "sfcal"
+  }
 }

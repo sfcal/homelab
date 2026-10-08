@@ -77,6 +77,7 @@ Taskfile.yaml               Root task runner entry point
 | CyberChef | `app_cyberchef` | Data encoding/decoding |
 | IT-Tools | `app_ittools` | Developer utilities |
 | Kasm | `app_kasm` | Browser-based desktops |
+| KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
 | MicroBin | `app_microbin` | Pastebin |
 | Restreamer | `app_restreamer` | Video streaming relay |
 | RomM | `app_romm` | ROM manager |

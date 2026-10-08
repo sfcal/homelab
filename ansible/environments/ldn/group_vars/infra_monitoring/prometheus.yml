@@ -8,6 +8,7 @@ prometheus_node_targets:
   # Prometheus runs on a bridge network, so use the VM IP, not localhost
   - "10.3.20.30:9100"  # local (monitoring VM)
   - "10.3.20.53:9100"  # networking
+  - "10.3.20.70:9100"  # web (kosync)
 
 # PTP grandmaster exporters (ptp-experiments roles/monitoring, native
 # systemd units on the timeserver). The 'node' job is kept separate from

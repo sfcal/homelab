@@ -16,6 +16,20 @@ apps:
       tls_skip_verify: true
       forward_headers: true
 
+  kosync:
+    host_group: app_kosync
+    # renovate: datasource=docker
+    image: "koreader/kosync:v2.1.1"
+    # 17200 is the image's plain-HTTP listener (7200 is self-signed HTTPS);
+    # Caddy terminates TLS in front of it.
+    port: 17200
+    # Allows POST /users/create. Set false once your KOReader account exists.
+    user_registration: false
+    proxy:
+      name: kosync
+      domain: ldn.5am.cloud
+      proxied: true
+
   work:
     host_group: app_work
     convertx:

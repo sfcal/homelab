@@ -69,7 +69,7 @@ DNS (BIND9 with DDNS), Reverse Proxy (Caddy), Tailscale subnet router
 <details>
 <summary>🌐 Applications</summary>
 
-Personal website, Birdle (bird identification game), Terraria game server
+Personal website, Birdle (bird identification game), Terraria game server, KOReader sync server (kosync)
 
 </details>
 

@@ -10,3 +10,8 @@ cloud_services:
     backend_host: 185.199.108.153
     backend_port: 443
     proxied: false
+  # KOReader sync server on the ldn web VM, reached over Tailscale
+  - name: kosync
+    backend_host: 10.3.20.70
+    backend_port: 17200
+    proxied: true
