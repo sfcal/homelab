@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the Android TV controller bridge watchdog every {{ tv_bridge_check_interval }}
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec={{ tv_bridge_check_interval }}
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

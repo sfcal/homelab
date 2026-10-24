@@ -22,7 +22,7 @@ task packer:clean
 
 | Template | File | Description |
 |----------|------|-------------|
-| Ubuntu Server | `ubuntu-server-base.pkr.hcl` | Ubuntu Server with Docker, Node Exporter, Lazydocker |
+| Ubuntu Server | `ubuntu-server-base.pkr.hcl` | Ubuntu Server with Docker, Node Exporter, Lazydocker, mDNS (avahi) |
 | Debian Bookworm | `debian-bookworm-base.pkr.hcl` | Debian base with Docker |
 | Netboot | — | PXE boot template |
 
@@ -36,7 +36,8 @@ The Ubuntu Server template (primary) installs:
 2. Docker and Docker Compose
 3. Lazydocker (terminal UI for Docker)
 4. Node Exporter v1.9.1 (Prometheus metrics)
-5. Cleanup (remove SSH keys, machine ID, apt cache)
+5. avahi-daemon (mDNS, IPv4 only) — every clone answers to `<hostname>.local`; the gateway's [mDNS reflector](../infrastructure/networking/unifi.md#mdns) carries that to client VLANs
+6. Cleanup (remove SSH keys, machine ID, apt cache)
 
 ## File Structure
 

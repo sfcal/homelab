@@ -51,8 +51,13 @@ imgfree
 # modules to the timecard and hang before the install starts (see
 # timeserver_blacklist_modules in group_vars). Kernel-level: blocks even
 # explicit loads for the lifetime of the installer environment.
+#
+# rootfstype=ramfs: casper wgets the whole ISO into the initramfs root, which
+# the kernel makes a tmpfs capped at half of RAM; on the MU (~6 GiB usable)
+# the 2.7 GiB ISO hit "wget: short write: No space left on device" at 96%
+# (2026-10-13). ramfs has no size cap, so the ISO only has to fit in RAM.
 echo Fetching kernel: ${asset_dir}/vmlinuz
-kernel ${asset_dir}/vmlinuz initrd=initrd ip=dhcp url=${asset_dir}/{{ netboot_ubuntu_iso_url | basename }} autoinstall cloud-config-url=/dev/null{% if timeserver_blacklist_modules | default([]) %} module_blacklist={{ timeserver_blacklist_modules | join(',') }}{% endif %} ${install_params} || goto kernel_failed
+kernel ${asset_dir}/vmlinuz initrd=initrd ip=dhcp url=${asset_dir}/{{ netboot_ubuntu_iso_url | basename }} autoinstall cloud-config-url=/dev/null rootfstype=ramfs{% if timeserver_blacklist_modules | default([]) %} module_blacklist={{ timeserver_blacklist_modules | join(',') }}{% endif %} ${install_params} || goto kernel_failed
 
 echo Fetching initrd: ${asset_dir}/initrd
 initrd ${asset_dir}/initrd || goto initrd_failed

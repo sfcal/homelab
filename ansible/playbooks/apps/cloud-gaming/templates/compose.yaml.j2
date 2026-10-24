@@ -1,28 +1,27 @@
 ---
+# Matches the upstream quickstart compose (games-on-whales/wolf, stable).
+# Wolf runs as root in this container and spawns the app containers as
+# siblings through the Docker socket; it maps /etc/wolf and its runtime dir
+# back to host paths by introspecting its own container, so no host path is
+# passed in. State lives in {{ wolf_deploy_path }}/state on the host.
 services:
   wolf:
     image: {{ wolf_image }}
     container_name: wolf
     restart: unless-stopped
     network_mode: host
-    mem_limit: {{ wolf_mem_limit }}
-    mem_reservation: {{ wolf_mem_reservation }}
     environment:
       - TZ={{ system_timezone }}
-      - XDG_RUNTIME_DIR=/tmp/sockets
-      - WOLF_LOG_LEVEL=INFO
-      - WOLF_CFG_FILE=/etc/wolf/config.toml
+      - WOLF_LOG_LEVEL={{ wolf_log_level }}
+      - WOLF_RENDER_NODE={{ wolf_render_node }}
     volumes:
-      - {{ wolf_deploy_path }}/config:/etc/wolf:rw
+      - {{ wolf_deploy_path }}/state:/etc/wolf:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - /dev/:/dev/:rw
       - /run/udev:/run/udev:rw
-      - /etc/localtime:/etc/localtime:ro
     device_cgroup_rules:
       - 'c 13:* rmw'
     devices:
-      - /dev/dri:/dev/dri
-      - /dev/uinput:/dev/uinput
-      - /dev/uhid:/dev/uhid
-    group_add:
-      - '{{ wolf_render_gid }}'
+      - /dev/dri
+      - /dev/uinput
+      - /dev/uhid

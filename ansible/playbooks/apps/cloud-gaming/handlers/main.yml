@@ -1,4 +1,7 @@
 ---
+- name: Reload udev rules
+  ansible.builtin.shell: udevadm control --reload-rules && udevadm trigger
+
 - name: Restart wolf
   community.docker.docker_compose_v2:
     project_src: "{{ wolf_deploy_path }}"

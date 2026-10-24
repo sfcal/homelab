@@ -113,6 +113,7 @@ nav:
     - Config Reference: reference/config.md
   - Infrastructure:
     - infrastructure/index.md
+    - Proxmox Hosts (SR-IOV GPU): infrastructure/proxmox.md
     - Networking:
       - infrastructure/networking/index.md
       - DNS (BIND9): infrastructure/networking/dns.md
@@ -123,6 +124,7 @@ nav:
     - Time Server: infrastructure/ntp/index.md
     - Monitoring: infrastructure/monitoring/index.md
     - Docker Services: infrastructure/docker.md
+    - Cloud Gaming (Wolf, RomM): infrastructure/cloud-gaming.md
 
 validation:
   omitted_files: warn

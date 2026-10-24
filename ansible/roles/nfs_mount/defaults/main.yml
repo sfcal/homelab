@@ -1,0 +1,3 @@
+---
+# Mount options used when an nfs_mounts entry sets no `opts`.
+nfs_default_opts: "defaults"

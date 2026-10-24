@@ -8,10 +8,21 @@
     mode: "0755"
   loop:
     - "{{ romm_deploy_path }}"
-    - "{{ romm_deploy_path }}/db"
     - "{{ romm_deploy_path }}/resources"
     - "{{ romm_deploy_path }}/redis"
+    - "{{ romm_deploy_path }}/assets"
     - "{{ romm_deploy_path }}/config"
+    - "{{ romm_library_path }}/roms"   # roms/<platform>/<game>
+    - "{{ romm_library_path }}/roms/gc"   # GameCube (RomM alias of ngc): the folder Dolphin and Pegasus scan
+    - "{{ romm_library_path }}/roms/wii"  # Wii
+    - "{{ romm_library_path }}/bios"   # bios/<platform>
+
+# MariaDB chowns its datadir to its own user (999) on first start; enforcing
+# owner/mode here would hand the live datadir back to root on every run.
+- name: Create the romm database directory.
+  ansible.builtin.file:
+    path: "{{ romm_deploy_path }}/db"
+    state: directory
 
 - name: Deploy romm config.yml.
   ansible.builtin.template:

@@ -1,0 +1,15 @@
+# Managed by Ansible: ansible/playbooks/infrastructure/proxmox
+[Unit]
+Description=SR-IOV VFs for {{ item.pf }} ({{ item.name }})
+# pve-guests starts the on-boot VMs; those with hostpci mappings need the VFs first.
+Before=pve-guests.service
+ConditionPathExists=/sys/bus/pci/devices/{{ item.pf }}
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=120
+ExecStart=/usr/local/sbin/sriov-{{ item.name }}
+
+[Install]
+WantedBy=multi-user.target

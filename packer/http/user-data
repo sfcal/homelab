@@ -31,7 +31,8 @@ autoinstall:
         passwd: $6$UimDUCDabWu$e5B..jq/qmcuCtq.siSw8pJcIP7crMYQJA7MGR7NpCwsI0.zpSTUPWTsI0QH1Wmslu5j2eAtCm8wRebFd7ccH0
   packages:
     - qemu-guest-agent
-    - sudo                  
+    - avahi-daemon
+    - sudo
     - vim
     - zip
     - unzip

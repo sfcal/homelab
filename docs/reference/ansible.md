@@ -22,13 +22,17 @@ task ansible:ping ENV=wil
 
 | Command | Description |
 |---------|-------------|
-| `deploy-all` | Full infrastructure deployment (runs `site.yml`) |
+| `deploy-all` | Full infrastructure deployment (runs `site.yml`; on ldn the final Proxmox play needs root SSH to the PVE host) |
 | `deploy-networking` | BIND9, Caddy, DDNS, Tailscale |
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
 | `deploy-monitoring` | Prometheus, Grafana, Homepage |
+| `deploy-netboot` | netboot.xyz PXE re-imaging |
+| `deploy-proxmox` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
 | `deploy-homeassistant` | Home Assistant |
+| `deploy-frigate` | Frigate NVR |
+| `deploy-cloud-gaming` | Wolf (Moonlight streaming) and RomM |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts |
 | `backup-media` | Backup media stack configs |
@@ -74,6 +78,8 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 | `ca/deploy.yml` | `infra_ca` | Step-CA |
 | `ntp/deploy.yml` | `infra_ntp` | Chrony |
 | `monitoring/deploy.yml` | `infra_monitoring` | Prometheus, Grafana, Homepage |
+| `netboot/deploy.yml` | `infra_netboot` | netboot.xyz |
+| `proxmox/deploy.yml` | `infra_proxmox` | SR-IOV GPU VFs and PCI mappings on the hypervisor (no `common` role: it is not an Ubuntu VM) |
 
 ### Data-Driven Apps
 
@@ -101,6 +107,8 @@ Apps that need more than Docker Compose (e.g., media stack with backup/restore) 
 |-----|---------------------------|
 | Media stack | Backup/restore tasks, complex multi-container setup |
 | Home Assistant | Custom configuration management |
+| Frigate | NFS mount, dedicated compose/config tasks |
+| Cloud Gaming | Kernel modules and udev rules, GPU render-node check, Wolf config seeded once, separate RomM stack, optional NFS |
 
 ## Roles
 
@@ -133,7 +141,9 @@ ansible/
 │   │   ├── networking/deploy.yml
 │   │   ├── ca/deploy.yml
 │   │   ├── ntp/deploy.yml
-│   │   └── monitoring/deploy.yml
+│   │   ├── monitoring/deploy.yml
+│   │   ├── netboot/deploy.yml
+│   │   └── proxmox/deploy.yml       # Hypervisor: SR-IOV GPU VFs, PCI mappings
 │   └── apps/
 │       ├── birdle/templates/compose.yaml.j2
 │       ├── media/deploy.yml

@@ -53,6 +53,23 @@ The cross-site secondary is a valid fallback because each BIND server slaves the
 !!! note
     Devices with hardcoded DNS or browser DNS-over-HTTPS bypass DHCP entirely — those resolve local-only zones as NXDOMAIN regardless of this setting.
 
+## mDNS
+
+Ubuntu VMs cloned from the [Packer template](../../reference/packer.md#what-templates-include) run `avahi-daemon`, so each one answers to `<hostname>.local` (the Terraform `name`, e.g. `gaming.local`) with no DNS record and no per-VM configuration. mDNS is link-local multicast: it only reaches the VM's own VLAN unless the gateway reflects it, and it never crosses Tailscale.
+
+In the UniFi controller: **Settings → Networks → (network) → Advanced → Multicast DNS** — enable it on VLAN 20 and on every client VLAN that should resolve `.local` names. Older controllers have a single global toggle under **Settings → Services → mDNS** instead.
+
+With that on, `ssh gaming.local` works from a client VLAN as soon as a new clone has booted. To drop the suffix and type `ssh gaming`, let ssh try `.local` for bare names in `~/.ssh/config`:
+
+```
+Host *
+    CanonicalizeHostname yes
+    CanonicalDomains local
+```
+
+!!! note
+    Names are per site because each gateway reflects only its own VLANs: `networking.local` is the LDN VM when you are in LDN and the WIL VM when you are in WIL. Over Tailscale, mDNS does not work at all — reach VMs by IP through the subnet router instead.
+
 ## Static Routes
 
 Static routes on the UDM Pro direct traffic for remote site subnets through the local Tailscale subnet router. Without these routes, traffic destined for other sites would be sent to the default gateway (the ISP) instead of through the Tailscale tunnel.
@@ -152,7 +169,7 @@ The installed OS pins the time server's address statically by its PXE NIC's MAC 
 
 | Device | Fixed IP | Notes |
 |--------|----------|-------|
-| LattePanda MU (PTP grandmaster) | `10.3.30.123` | Reserve against the PXE NIC MAC (`54:49:4d:45:00:22`), the same key as its `timeserver_hosts` entry |
+| LattePanda MU (PTP grandmaster) | `10.3.30.123` | Reserve against the PXE NIC MAC (`40:a6:b7:81:7c:51`), the same key as its `timeserver_hosts` entry |
 
 ### Firewall Requirements
 

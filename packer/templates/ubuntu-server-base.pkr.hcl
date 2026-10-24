@@ -240,6 +240,20 @@ build {
     ]
   }
 
+  // Configure mDNS so every clone answers to <hostname>.local (avahi-daemon
+  // comes from the autoinstall package list in http/user-data). IPv4 only:
+  // avahi would otherwise advertise the VM's link-local IPv6 address, which
+  // clients on other VLANs prefer but cannot reach, so each ssh <name>.local
+  // would stall until that attempt times out.
+  provisioner "shell" {
+    inline = [
+      "echo 'Configuring mDNS...'",
+      "sudo sed -i 's/^use-ipv6=yes/use-ipv6=no/' /etc/avahi/avahi-daemon.conf",
+      "grep -q '^use-ipv6=no' /etc/avahi/avahi-daemon.conf",
+      "echo 'mDNS configuration complete!'"
+    ]
+  }
+
   // Install Docker
   provisioner "shell" {
     inline = [

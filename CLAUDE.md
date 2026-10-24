@@ -22,6 +22,7 @@ All operations go through `task`. Pattern: `task <namespace>:<operation> ENV=<en
 
 ```
 task ansible:deploy-<service> ENV=wil    # Deploy a service
+task ansible:deploy-proxmox ENV=ldn      # Proxmox host: SR-IOV GPU VFs + PCI mappings (group infra_proxmox)
 task terraform:deploy ENV=wil            # Deploy all VMs
 task terraform:deploy-vm ENV=wil VM=key  # Deploy specific VM
 task packer:build-ubuntu ENV=wil         # Build VM template
@@ -55,7 +56,7 @@ Network ranges: wil=10.2.x.x, ldn=10.3.x.x
 - Section comments: `# --- Section Name ---`
 
 ### Ansible Playbook Pattern
-Every playbook follows this structure:
+Every playbook follows this structure (exception: `infrastructure/proxmox/deploy.yml` targets the PVE host itself and skips the `common` role on purpose):
 ```yaml
 ---
 - name: Deploy <Service>

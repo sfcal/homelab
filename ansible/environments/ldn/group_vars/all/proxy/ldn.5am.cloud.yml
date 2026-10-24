@@ -40,3 +40,17 @@ ldn_services:
     proxied: false
 
   # Apps (registry apps live in group_vars/all/apps.yml)
+
+  # Cloud gaming (custom playbook: playbooks/apps/cloud-gaming)
+  - name: roms
+    backend_host: 10.3.20.55
+    backend_port: 8085
+    proxied: true
+    forward_headers: true
+  # Moonlight needs direct TCP/UDP access to Wolf (47984, 47989, 47999, 48010,
+  # 48100, 48200): plain A record, never through Caddy. Pairing page:
+  # http://wolf.ldn.5am.cloud:47989/pin/
+  - name: wolf
+    backend_host: 10.3.20.55
+    backend_port: 47989
+    proxied: false

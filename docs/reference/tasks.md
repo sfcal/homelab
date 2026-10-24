@@ -16,8 +16,12 @@ task --list-all
 | `task ansible:deploy-ca ENV=wil` | Step-CA certificate authority |
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
 | `task ansible:deploy-monitoring ENV=wil` | Prometheus, Grafana, Homepage |
+| `task ansible:deploy-netboot ENV=wil` | netboot.xyz PXE re-imaging |
+| `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |
 | `task ansible:deploy-homeassistant ENV=wil` | Home Assistant |
+| `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
+| `task ansible:deploy-cloud-gaming ENV=ldn` | Wolf (Moonlight streaming) and RomM |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
 | `task ansible:ping ENV=wil` | Test connectivity to all hosts |
 | `task ansible:backup-media ENV=wil` | Backup media stack configs |
@@ -29,6 +33,8 @@ task --list-all
 |---------|-------------|
 | `task terraform:deploy ENV=wil` | Provision all VMs |
 | `task terraform:deploy-vm ENV=wil VM=<key>` | Provision a specific VM |
+| `task terraform:plan ENV=wil` | Show the plan without applying |
+| `task terraform:plan-vm ENV=wil VM=<key>` | Show the plan for a specific VM |
 | `task terraform:destroy ENV=wil` | Destroy all VMs |
 | `task terraform:destroy-vm ENV=wil VM=<key>` | Destroy a specific VM |
 | `task terraform:clean ENV=wil` | Clean `.terraform`, state, and lock files |

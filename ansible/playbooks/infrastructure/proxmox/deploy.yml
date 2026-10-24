@@ -1,0 +1,48 @@
+---
+# Runs on the hypervisor itself (not an Ubuntu VM), so the common role is
+# skipped. Creates the SR-IOV GPU VFs now and at every boot, before
+# pve-guests starts the VMs that map them (hostpciN: mapping=<id>).
+- name: Configure Proxmox Hosts
+  hosts: infra_proxmox
+  become: true
+
+  tasks:
+    - name: Install the VF creation script.
+      ansible.builtin.template:
+        src: templates/sriov.sh.j2
+        dest: "/usr/local/sbin/sriov-{{ item.name }}"
+        mode: "0755"
+      loop: "{{ proxmox_sriov_devices }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Install the systemd unit.
+      ansible.builtin.template:
+        src: templates/sriov.service.j2
+        dest: "/etc/systemd/system/sriov-{{ item.name }}.service"
+        mode: "0644"
+      loop: "{{ proxmox_sriov_devices }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Enable and start the unit (creates the VFs now; no reboot needed).
+      ansible.builtin.systemd_service:
+        name: "sriov-{{ item.name }}.service"
+        enabled: true
+        state: started
+        daemon_reload: true
+      loop: "{{ proxmox_sriov_devices }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Run the check Proxmox performs on PCI mappings at VM start.
+      ansible.builtin.command: pvesh get /cluster/mapping/pci --check-node {{ ansible_facts['hostname'] }} --output-format json
+      register: pci_mapping_check
+      changed_when: false
+
+    - name: Fail if a mapping no longer matches the hardware.
+      ansible.builtin.assert:
+        that: pci_mapping_check.stdout | from_json | selectattr('checks', 'defined') | map(attribute='checks') | flatten | length == 0
+        fail_msg: >-
+          Fix these in Datacenter > Resource Mappings (or delete mappings the card can no longer provide):
+          {{ pci_mapping_check.stdout | from_json | selectattr('checks', 'defined') | map(attribute='id') | list }}

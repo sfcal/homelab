@@ -1,17 +1,43 @@
 ---
-- name: Load uinput kernel module.
+# --- Guest prerequisites ---
+- name: Load the uinput and uhid kernel modules (virtual gamepads, DualSense emulation).
   community.general.modprobe:
-    name: uinput
+    name: "{{ item }}"
     state: present
+  loop: [uinput, uhid]
 
-- name: Persist uinput kernel module across reboots.
+- name: Persist the kernel modules across reboots.
   ansible.builtin.copy:
-    content: "uinput"
-    dest: /etc/modules-load.d/uinput.conf
+    content: "uinput\nuhid\n"
+    dest: /etc/modules-load.d/wolf.conf
     owner: root
     group: root
     mode: "0644"
 
+- name: Install the Wolf udev rules (device permissions; keep virtual pads off the host seat).
+  ansible.builtin.copy:
+    src: files/85-wolf.rules
+    dest: /etc/udev/rules.d/85-wolf.rules
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload udev rules
+
+- name: Check the GPU render node exists.
+  ansible.builtin.stat:
+    path: "{{ wolf_render_node }}"
+  register: wolf_render_node_stat
+
+- name: Abort when the GPU render node is missing.
+  ansible.builtin.assert:
+    that: wolf_render_node_stat.stat.exists
+    fail_msg: >-
+      {{ wolf_render_node }} is missing: the GPU (SR-IOV VF) is not usable in this VM.
+      Check `lspci -nn | grep -i display` and `dmesg | grep -i xe` in the guest, and run
+      `task ansible:deploy-proxmox ENV=<env>` against the Proxmox host.
+
+# --- Wolf ---
 - name: Create wolf directory structure.
   ansible.builtin.file:
     path: "{{ item }}"
@@ -21,7 +47,27 @@
     mode: "0755"
   loop:
     - "{{ wolf_deploy_path }}"
-    - "{{ wolf_deploy_path }}/config"
+    - "{{ wolf_deploy_path }}/state"      # mounted at /etc/wolf (cfg/, profile_data/)
+    - "{{ wolf_deploy_path }}/state/cfg"
+    - "{{ wolf_dolphin_path }}"
+    - "{{ wolf_dolphin_path }}/cfg"
+
+# The Dolphin app bind-mounts these into the Pegasus image (see config.toml.j2).
+- name: Deploy the Dolphin start script.
+  ansible.builtin.copy:
+    src: files/dolphin/startup-app.sh
+    dest: "{{ wolf_dolphin_path }}/startup-app.sh"
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0755"
+
+- name: Deploy the Dolphin config seeds (copied into the app home on its first run).
+  ansible.builtin.copy:
+    src: files/dolphin/cfg/
+    dest: "{{ wolf_dolphin_path }}/cfg/"
+    owner: "{{ wolf_user }}"
+    group: "{{ wolf_group }}"
+    mode: "0644"
 
 - name: Deploy compose.yaml.
   ansible.builtin.template:
@@ -33,15 +79,16 @@
   notify:
     - Restart wolf
 
-- name: Deploy Wolf config.toml.
+# Wolf rewrites config.toml itself (paired clients, apps added through Wolf UI
+# or the API), so it is seeded once and never overwritten.
+- name: Seed Wolf config.toml (first deploy only).
   ansible.builtin.template:
     src: templates/config.toml.j2
-    dest: "{{ wolf_deploy_path }}/config/config.toml"
+    dest: "{{ wolf_deploy_path }}/state/cfg/config.toml"
     owner: "{{ wolf_user }}"
     group: "{{ wolf_group }}"
     mode: "0644"
-  notify:
-    - Restart wolf
+    force: false
 
 - name: Ensure Wolf is running.
   community.docker.docker_compose_v2:

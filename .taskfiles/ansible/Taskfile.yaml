@@ -68,6 +68,12 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/netboot/deploy.yml }
 
+  deploy-proxmox:
+    desc: Configure Proxmox hosts (SR-IOV GPU VFs at boot)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/proxmox/deploy.yml }
+
   # --- Applications ---
 
   deploy-app:
@@ -93,6 +99,12 @@ tasks:
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/frigate/deploy.yml }
+
+  deploy-cloud-gaming:
+    desc: Deploy cloud gaming stack (Wolf, RomM)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/cloud-gaming/deploy.yml }
 
   # --- Utility Tasks ---
 

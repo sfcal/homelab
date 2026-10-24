@@ -1,0 +1,9 @@
+[Unit]
+Description=Keep Shizuku and Steam Controller Bridge running on the Android TV ({{ tv_bridge_adb_host }})
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/tv-bridge-watchdog
+TimeoutStartSec=120

@@ -1,0 +1,34 @@
+---
+# --- Android TV controller bridge watchdog ---
+# The Moonlight client is an Android TV that only sees the Steam Controller as
+# a gamepad through Steam Controller Bridge + Shizuku. Shizuku stops on every
+# TV reboot, so this VM restarts it over network ADB (see docs/infrastructure/cloud-gaming.md).
+- name: Install adb.
+  ansible.builtin.apt:
+    name: adb
+    state: present
+
+- name: Install the TV bridge watchdog script.
+  ansible.builtin.template:
+    src: templates/tv-bridge-watchdog.sh.j2
+    dest: /usr/local/bin/tv-bridge-watchdog
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the TV bridge watchdog systemd units.
+  ansible.builtin.template:
+    src: "templates/tv-bridge-watchdog.{{ item }}.j2"
+    dest: "/etc/systemd/system/tv-bridge-watchdog.{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: [service, timer]
+  register: tv_bridge_units
+
+- name: Enable the TV bridge watchdog timer.
+  ansible.builtin.systemd:
+    name: tv-bridge-watchdog.timer
+    enabled: true
+    state: "{{ 'restarted' if tv_bridge_units.changed else 'started' }}"
+    daemon_reload: true

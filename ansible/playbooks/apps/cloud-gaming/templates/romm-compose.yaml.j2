@@ -1,4 +1,6 @@
 ---
+# Follows the upstream example compose (rommapp/romm). Valkey is embedded in
+# the romm image and persists to /redis-data; no separate cache service.
 services:
   romm-db:
     image: {{ romm_db_image }}
@@ -13,18 +15,10 @@ services:
       - "{{ romm_deploy_path }}/db:/var/lib/mysql"
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
       interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 10s
-    networks:
-      - romm-net
-
-  romm-valkey:
-    image: {{ romm_valkey_image }}
-    container_name: romm-valkey
-    restart: unless-stopped
-    networks:
-      - romm-net
 
   romm:
     image: {{ romm_image }}
@@ -33,28 +27,25 @@ services:
     ports:
       - "{{ romm_port }}:8080"
     environment:
+      - TZ={{ system_timezone }}
       - DB_HOST=romm-db
       - DB_NAME=romm
       - DB_USER=romm-user
       - DB_PASSWD={{ romm_db_password }}
       - ROMM_AUTH_SECRET_KEY={{ romm_auth_secret }}
+      # Behind Caddy TLS: public URL for invite links and QR codes, secure cookies.
+      - ROMM_BASE_URL={{ romm_base_url }}
+      - ROMM_SESSION_SECURE_COOKIE=true
+      # Metadata providers (Hasheous needs no key; IGDB credentials from SOPS).
+      - HASHEOUS_API_ENABLED=true
       - IGDB_CLIENT_ID={{ romm_igdb_client_id }}
       - IGDB_CLIENT_SECRET={{ romm_igdb_client_secret }}
-      - REDIS_HOST=romm-valkey
-      - REDIS_PORT=6379
     volumes:
-      - "{{ romm_deploy_path }}/resources:/romm/resources"
-      - "{{ romm_deploy_path }}/redis:/redis-data"
+      - "{{ romm_deploy_path }}/resources:/romm/resources"   # metadata cache (regenerable)
+      - "{{ romm_deploy_path }}/redis:/redis-data"           # embedded Valkey persistence
+      - "{{ romm_deploy_path }}/assets:/romm/assets"         # saves, states, screenshots
       - "{{ romm_deploy_path }}/config:/romm/config"
-      - {{ wolf_roms_path }}:/romm/library
+      - "{{ romm_library_path }}:/romm/library"              # roms/<platform>/<game>, bios/<platform>
     depends_on:
       romm-db:
         condition: service_healthy
-      romm-valkey:
-        condition: service_started
-    networks:
-      - romm-net
-
-networks:
-  romm-net:
-    driver: bridge

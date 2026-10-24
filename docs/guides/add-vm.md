@@ -63,8 +63,10 @@ app_myserver
 ## 4. Verify
 
 ```bash
-# Test SSH access
+# Test SSH access (by IP, or by mDNS name once the clone has booted —
+# see docs/infrastructure/networking/unifi.md#mdns for the gateway setting)
 ssh sfcal@10.2.20.80
+ssh myserver.local
 
 # Test via Ansible
 task ansible:ping ENV=wil

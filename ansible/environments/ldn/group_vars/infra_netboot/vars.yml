@@ -82,7 +82,10 @@ cm5_hosts:
 # MAC, so the address is deterministic and does not depend on the UniFi DHCP
 # reservation.
 timeserver_hosts:
-  "54-49-4d-45-00-22":
+  # iPXE requested MAC-40-a6-b7-81-7c-51.ipxe on 2026-08-28 and 2026-10-13
+  # (netboot VM nginx log), so this is the address the hook must be keyed by;
+  # the 54:49:4d:45:00:22 "TIME" address from ethtool -P is not what it sends.
+  "40-a6-b7-81-7c-51":
     hostname: timeserver
     ip: 10.3.30.123
     gateway: 10.3.30.1

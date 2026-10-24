@@ -1,4 +1,0 @@
----
-nfs_mounts:
-  - src: "10.2.10.100:/mnt/NAS-WIL/Media"
-    path: "/mnt/data"

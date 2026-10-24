@@ -1,0 +1,72 @@
+---
+# --- Wolf (Moonlight streaming host) ---
+# Runs as root inside its container; the app containers are spawned as
+# siblings through the Docker socket, so no render group is needed.
+wolf_user: root
+wolf_group: root
+wolf_deploy_path: "{{ deploy_path }}/wolf"
+
+# Name shown in Moonlight clients
+wolf_hostname: "Wolf"
+wolf_log_level: INFO
+# DRM render node of the passed-through GPU (Intel Arc Pro B50 SR-IOV VF). In
+# this VM the VF is the only render node; the Proxmox display device has none.
+wolf_render_node: /dev/dri/renderD128
+
+# Container images (upstream recommends wolf:stable and <app>:edge)
+# renovate: datasource=docker
+wolf_image: "ghcr.io/games-on-whales/wolf:stable"
+# renovate: datasource=docker
+wolf_ui_image: "ghcr.io/games-on-whales/wolf-ui:main"
+# renovate: datasource=docker
+wolf_pegasus_image: "ghcr.io/games-on-whales/pegasus:edge"
+# renovate: datasource=docker
+wolf_retroarch_image: "ghcr.io/games-on-whales/retroarch:edge"
+# renovate: datasource=docker
+wolf_steam_image: "ghcr.io/games-on-whales/steam:edge"
+
+# Dolphin runs from the Pegasus image (no upstream Dolphin image exists); its
+# start script and config seeds live here and are bind-mounted into the app.
+wolf_dolphin_path: "{{ wolf_deploy_path }}/dolphin"
+
+# --- Android TV Moonlight client: Steam Controller bridge watchdog ---
+# The TCL TV (Android 12, locked bootloader) only sees the Steam Controller as
+# a gamepad through Steam Controller Bridge, which needs Shizuku. Shizuku dies
+# on every TV reboot and cannot restart itself without root, so this VM
+# restarts it over network ADB (the TV keeps port 5555 open across reboots)
+# and presses the app's Start button. Remove tv_bridge_adb_host to disable.
+tv_bridge_adb_host: 10.3.0.189
+tv_bridge_adb_port: 5555
+tv_bridge_package: io.github.lluppi.steamcontrollerbridge
+tv_bridge_shizuku_package: moe.shizuku.privileged.api
+tv_bridge_check_interval: 20s
+# Manual mode: the VM only starts Shizuku and the bridge while the bridge app
+# is open on the TV (its "Connect controller" tile on the Projectivy home),
+# instead of on every boot or wake. Set false for always-on recovery.
+tv_bridge_manual: true
+# Projectivy Launcher (Home button override through its accessibility
+# service). The TV leaves the app force-stopped after a reboot and clears
+# accessibility_enabled; the watchdog starts the app and re-registers the
+# service. Remove tv_launcher_accessibility_service to disable that part.
+tv_launcher_package: com.spocky.projengmenu
+tv_launcher_label: "Projectivy Launcher"   # as shown by `dumpsys accessibility`
+tv_launcher_activity: com.spocky.projengmenu.ui.home.MainActivity
+tv_launcher_accessibility_service: com.spocky.projengmenu/com.spocky.projengmenu.services.ProjectivyAccessibilityService
+
+# --- ROM library (shared by RomM and the Wolf emulator apps) ---
+# Local to the VM's disk. To serve it from a NAS instead, add an nfs.yml with
+# `nfs_mounts` (see wil app_mediastack) and point this at the mount.
+romm_library_path: "{{ deploy_path }}/romm/library"  # RomM: roms/<platform>/<game>, bios/<platform>
+wolf_roms_path: "{{ romm_library_path }}/roms"       # mounted at /ROMs in Pegasus, RetroArch and Dolphin
+
+# --- RomM configuration ---
+romm_deploy_path: "{{ deploy_path }}/romm"
+romm_port: 8085
+# Public URL (behind Caddy TLS): invite links, QR codes, secure session cookies.
+romm_base_url: "https://roms.ldn.5am.cloud"
+
+# Container images
+# renovate: datasource=docker
+romm_image: "rommapp/romm:5.4.0"
+# renovate: datasource=docker
+romm_db_image: "mariadb:13.0"

@@ -13,12 +13,25 @@
         name: common
 
   tasks:
+    # The ROM library is local to the VM unless the environment defines
+    # nfs_mounts (group_vars/app_cloud_gaming/nfs.yml).
     - name: Configure NFS mounts.
       ansible.builtin.include_role:
         name: nfs_mount
+      when: nfs_mounts is defined
 
     - name: Configure RomM.
       ansible.builtin.include_tasks: tasks/romm.yml
 
     - name: Configure Wolf.
       ansible.builtin.include_tasks: tasks/wolf.yml
+
+    # Only for environments whose Moonlight client is an Android TV running
+    # Steam Controller Bridge (group_vars/app_cloud_gaming/vars.yml).
+    - name: Configure the Android TV controller bridge watchdog.
+      ansible.builtin.include_tasks:
+        file: tasks/tv-bridge.yml
+        apply:
+          tags: [tv_bridge]
+      tags: [tv_bridge]
+      when: tv_bridge_adb_host is defined

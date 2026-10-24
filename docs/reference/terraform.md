@@ -103,6 +103,9 @@ vms = {
 | `nameserver` | string | required | DNS server |
 | `ssh_user` | string | required | SSH username |
 | `ssh_public_key` | string | required | Passed from environment variables |
+| `bios` | string | `"seabios"` | `"ovmf"` for UEFI (required with `pci_mapping`) |
+| `machine` | string | `""` (Proxmox default) | `"q35"` for PCIe passthrough |
+| `pci_mapping` | string | `""` | Proxmox PCI resource mapping ID (e.g. `b50-vf1`); see [Proxmox Hosts](../infrastructure/proxmox.md) |
 
 ## WIL Environment VMs
 

@@ -1,0 +1,29 @@
+#!/bin/sh
+# Create the SR-IOV VFs of {{ item.pf }} ({{ item.name }}) and hand them to vfio-pci.
+# Run by sriov-{{ item.name }}.service before pve-guests starts the VMs.
+# Managed by Ansible: ansible/playbooks/infrastructure/proxmox
+set -eu
+pf=/sys/bus/pci/devices/{{ item.pf }}
+num_vfs={{ item.num_vfs }}
+
+# udev loads the GPU driver asynchronously; sriov_numvfs accepts writes only
+# once the driver owns the device.
+until [ -L "$pf/driver" ]; do sleep 1; done
+
+# A different count means going through 0 first. Only safe when no VM holds
+# a VF, i.e. at boot: with VMs running, change num_vfs and reboot.
+if [ "$(cat "$pf/sriov_numvfs")" != "$num_vfs" ]; then
+  echo 0 > "$pf/sriov_numvfs"
+  echo "$num_vfs" > "$pf/sriov_numvfs"
+fi
+
+# Bind the VFs to vfio-pci so the host GPU driver never claims them.
+# VFs already on vfio-pci (a running VM may hold them) are left alone.
+modprobe vfio-pci
+for vf in "$pf"/virtfn*; do
+  [ "$(readlink -f "$vf/driver")" != /sys/bus/pci/drivers/vfio-pci ] || continue
+  addr=$(basename "$(readlink "$vf")")
+  echo vfio-pci > "$vf/driver_override"
+  [ ! -L "$vf/driver" ] || echo "$addr" > "$vf/driver/unbind"
+  echo "$addr" > /sys/bus/pci/drivers_probe
+done

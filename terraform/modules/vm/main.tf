@@ -90,6 +90,11 @@ resource "proxmox_vm_qemu" "vm" {
   lifecycle {
     ignore_changes = [
       network,
+      # The template only matters at creation. Both are ForceNew in telmate and
+      # are never read back, so without this an imported VM (or a renamed
+      # template) plans as destroy + recreate.
+      clone,
+      full_clone,
     ]
   }
 }

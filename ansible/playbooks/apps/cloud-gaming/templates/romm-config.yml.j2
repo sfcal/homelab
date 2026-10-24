@@ -1,7 +1,10 @@
 ---
-romm:
-  auth:
-    enabled: true
-  igdb:
-    client_id: "{{ romm_igdb_client_id }}"
-    client_secret: "{{ romm_igdb_client_secret }}"
+# RomM config.yml -- https://docs.romm.app/latest/reference/configuration-file/
+# Only the library layout is declared here (these are RomM's defaults, written
+# out so the layout the Wolf emulator apps rely on is explicit). Metadata
+# provider credentials are environment variables in compose.yaml.
+filesystem:
+  structure:
+    # Relative to /romm/library ({{ romm_library_path }} on this host).
+    default: "roms/{platform}/{game}"
+    firmware: "bios/{platform}"

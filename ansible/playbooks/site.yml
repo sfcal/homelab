@@ -83,3 +83,7 @@
 - import_playbook: deploy-app.yml
   vars: { app_name: work }
   tags: ['work', 'convertx', 'cyberchef', 'it-tools', 'microbin', 'stirling-pdf', 'applications']
+
+# --- Hypervisor ---
+- import_playbook: infrastructure/proxmox/deploy.yml
+  tags: ['proxmox', 'sriov']
