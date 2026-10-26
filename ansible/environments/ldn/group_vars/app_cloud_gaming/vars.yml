@@ -67,6 +67,6 @@ romm_base_url: "https://roms.ldn.5am.cloud"
 
 # Container images
 # renovate: datasource=docker
-romm_image: "rommapp/romm:5.4.0"
+romm_image: "rommapp/romm:5.4.1"
 # renovate: datasource=docker
 romm_db_image: "mariadb:13.0"
