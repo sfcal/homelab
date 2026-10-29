@@ -63,6 +63,14 @@ tasks:
           TEMPLATE: base-efi
           VAR_FILE: 'environments/{{.ENV}}/ubuntu-efi-variables.pkrvars.hcl'
 
+  build-windows:
+    desc: Build Windows template (UEFI/Q35/TPM, unattended install; needs the Windows and virtio-win ISOs on Proxmox)
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_PREFIX: windows
+          VAR_FILE: 'environments/{{.ENV}}/windows-variables.pkrvars.hcl'
+
   build-haivision:
     desc: Build Haivision VF Kicker iPXE template (builds custom iPXE ISO first)
     cmds:
