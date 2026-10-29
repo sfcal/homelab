@@ -16,7 +16,10 @@ prometheus_node_targets:
 # node-exporter for the Chrony dashboard -- see prometheus.yml.j2.
 prometheus_chrony_targets:
   - "10.3.30.123:9123"
+  - "10.3.30.11:9123"   # CM1 GPS/PPS test server (temporary)
 prometheus_gpsd_targets:
   - "10.3.30.123:9015"
+  - "10.3.30.11:9015"   # CM1 (temporary)
 prometheus_ptp_node_targets:
   - "10.3.30.123:9100"
+  - "10.3.30.11:9100"   # CM1 (temporary)

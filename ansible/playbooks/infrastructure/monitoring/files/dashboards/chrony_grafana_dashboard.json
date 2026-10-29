@@ -1,7 +1,7 @@
 {
   "uid": "chrony-detail",
   "title": "Chrony Detail",
-  "description": "Deep chrony monitoring for the stratum-1 GM (Timecard PHC + NPL NTP). PHC-path and NTP-path panels are deliberately separate: they differ by ~3 orders of magnitude.",
+  "description": "Deep chrony monitoring for the stratum-1 time servers. The Time server variable defaults to All so hosts overlay for comparison; pick one to isolate it. Refclock-path and NTP-path panels are deliberately separate: they differ by ~3 orders of magnitude.",
   "tags": [
     "chrony",
     "time",
@@ -51,8 +51,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_stratum{job=\"chrony\"}",
-          "legendFormat": "",
+          "expr": "chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}}",
           "refId": "A",
           "instant": true,
           "range": false
@@ -118,8 +118,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "(chrony_tracking_stratum{job=\"chrony\"} > bool 0) * chrony_up{job=\"chrony\"}",
-          "legendFormat": "",
+          "expr": "(chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"} > bool 0) * chrony_up{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}}",
           "refId": "A",
           "instant": true,
           "range": false
@@ -191,8 +191,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_system_time_seconds{job=\"chrony\"}",
-          "legendFormat": "",
+          "expr": "chrony_tracking_system_time_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}}",
           "refId": "A",
           "instant": true,
           "range": false
@@ -259,8 +259,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_info{job=\"chrony\"}",
-          "legendFormat": "{{tracking_name}}",
+          "expr": "chrony_tracking_info{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} {{tracking_name}}",
           "refId": "A",
           "instant": true,
           "range": false
@@ -300,7 +300,7 @@
     {
       "id": 6,
       "type": "stat",
-      "title": "PHC Refclock Reach",
+      "title": "Refclock Reach",
       "description": "Fraction of the last 8 polls of the Timecard PHC that returned samples.",
       "datasource": {
         "type": "prometheus",
@@ -318,8 +318,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_sources_reachability_ratio{job=\"chrony\",source_name=\"AC\"}",
-          "legendFormat": "",
+          "expr": "chrony_sources_reachability_ratio{job=\"chrony\",instance=~\"$host:.*\",source_address!~\"[0-9.]+|.*:.*\"}",
+          "legendFormat": "{{instance}} {{source_name}}",
           "refId": "A",
           "instant": true,
           "range": false
@@ -367,7 +367,7 @@
     {
       "id": 7,
       "type": "row",
-      "title": "Offset \u2014 PHC path (ns scale)",
+      "title": "Offset \u2014 refclock path (ns scale)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
@@ -398,8 +398,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\"}",
-          "legendFormat": "last offset",
+          "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} last offset",
           "refId": "A"
         },
         {
@@ -407,8 +407,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_system_time_seconds{job=\"chrony\"}",
-          "legendFormat": "system time offset",
+          "expr": "chrony_tracking_system_time_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} system time offset",
           "refId": "B"
         }
       ],
@@ -476,8 +476,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_sources_last_sample_offset_seconds{job=\"chrony\",source_name=~\"AC|NIC\"}",
-          "legendFormat": "{{source_name}}",
+          "expr": "chrony_sources_last_sample_offset_seconds{job=\"chrony\",instance=~\"$host:.*\",source_address!~\"[0-9.]+|.*:.*\"}",
+          "legendFormat": "{{instance}} {{source_name}}",
           "refId": "A"
         },
         {
@@ -485,8 +485,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_sources_last_sample_error_margin_seconds{job=\"chrony\",source_name=\"AC\"}",
-          "legendFormat": "AC error margin",
+          "expr": "chrony_sources_last_sample_error_margin_seconds{job=\"chrony\",instance=~\"$host:.*\"} * on(instance, source_address) group_left chrony_sources_state_info{job=\"chrony\",instance=~\"$host:.*\",source_state=\"sync\"}",
+          "legendFormat": "{{instance}} {{source_name}} error margin (selected)",
           "refId": "B"
         }
       ],
@@ -554,8 +554,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_rms_offset_seconds{job=\"chrony\"}",
-          "legendFormat": "rms offset",
+          "expr": "chrony_tracking_rms_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} rms offset",
           "refId": "A"
         }
       ],
@@ -606,8 +606,8 @@
     {
       "id": 11,
       "type": "timeseries",
-      "title": "NTP Sources Offset (\u00b1100 \u00b5s bands)",
-      "description": "NPL + Cloudflare last-sample offsets vs the (PHC-disciplined) system clock \u2014 effectively each server's error as seen from here. Polls are 64\u2013512 s; 1 m query step, don't over-read fine structure.",
+      "title": "Sources (chronyc sources) \u2014 last sample",
+      "description": "Every source chrony knows about on each selected host, as in `chronyc sources`: last-sample offset of the source vs the host's system clock. Refclocks (GPS, PPS, NIC, TC) and NTP servers share the axis, so a locked PPS sits on zero while NTP servers wander in the \u00b1100 \u00b5s bands. Polls are 16 s for refclocks and 64\u20131024 s for servers; 1 m query step.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -624,8 +624,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_sources_last_sample_offset_seconds{job=\"chrony\",source_name!~\"AC|NIC\"}",
-          "legendFormat": "{{source_name}}",
+          "expr": "chrony_sources_last_sample_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} {{source_name}}",
           "refId": "A",
           "interval": "1m"
         }
@@ -718,8 +718,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_frequency_ppms{job=\"chrony\"}",
-          "legendFormat": "frequency (ppm)",
+          "expr": "chrony_tracking_frequency_ppms{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} frequency (ppm)",
           "refId": "A"
         },
         {
@@ -828,8 +828,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_residual_frequency_ppms{job=\"chrony\"}",
-          "legendFormat": "residual freq",
+          "expr": "chrony_tracking_residual_frequency_ppms{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} residual freq",
           "refId": "A"
         }
       ],
@@ -897,8 +897,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_skew_ppms{job=\"chrony\"}",
-          "legendFormat": "skew",
+          "expr": "chrony_tracking_skew_ppms{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} skew",
           "refId": "A"
         }
       ],
@@ -987,8 +987,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_root_delay_seconds{job=\"chrony\"}",
-          "legendFormat": "root delay",
+          "expr": "chrony_tracking_root_delay_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} root delay",
           "refId": "A",
           "interval": "15s"
         },
@@ -997,8 +997,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_root_dispersion_seconds{job=\"chrony\"}",
-          "legendFormat": "root dispersion",
+          "expr": "chrony_tracking_root_dispersion_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} root dispersion",
           "refId": "B",
           "interval": "15s"
         },
@@ -1007,8 +1007,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_root_delay_seconds{job=\"chrony\"} / 2 + chrony_tracking_root_dispersion_seconds{job=\"chrony\"}",
-          "legendFormat": "worst-case error (delay/2 + dispersion)",
+          "expr": "chrony_tracking_root_delay_seconds{job=\"chrony\",instance=~\"$host:.*\"} / 2 + chrony_tracking_root_dispersion_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} worst-case error (delay/2 + dispersion)",
           "refId": "C",
           "interval": "15s"
         }
@@ -1090,8 +1090,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_stratum{job=\"chrony\"}",
-          "legendFormat": "stratum",
+          "expr": "chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} stratum",
           "refId": "A"
         }
       ],
@@ -1173,8 +1173,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_info{job=\"chrony\"}",
-          "legendFormat": "{{tracking_name}}",
+          "expr": "chrony_tracking_info{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} {{tracking_name}}",
           "refId": "A"
         }
       ],
@@ -1244,8 +1244,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "(chrony_tracking_stratum{job=\"chrony\"} > bool 0) * chrony_up{job=\"chrony\"}",
-          "legendFormat": "sync",
+          "expr": "(chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"} > bool 0) * chrony_up{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} sync",
           "refId": "A"
         }
       ],
@@ -1332,8 +1332,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\"}",
-          "legendFormat": "offset",
+          "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} offset",
           "refId": "A"
         }
       ],
@@ -1376,8 +1376,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\"}",
-          "legendFormat": "offset",
+          "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
+          "legendFormat": "{{instance}} offset",
           "refId": "A"
         }
       ],
@@ -1419,7 +1419,39 @@
     }
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "host",
+        "label": "Time server",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(chrony_up{job=\"chrony\"}, instance)",
+        "query": {
+          "query": "label_values(chrony_up{job=\"chrony\"}, instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "regex": "/^(.*):\\d+$/",
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "hide": 0,
+        "skipUrlSync": false,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      }
+    ]
   },
   "annotations": {
     "list": []

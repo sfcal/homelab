@@ -2848,16 +2848,24 @@
   "templating": {
     "list": [
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
         "definition": "label_values(gpsd_version_info, instance)",
         "hide": 0,
-        "includeAll": false,
-        "label": "instance",
-        "multi": false,
+        "includeAll": true,
+        "label": "Time server",
+        "multi": true,
         "name": "instance",
         "options": [],
         "query": {

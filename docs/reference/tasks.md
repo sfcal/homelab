@@ -46,6 +46,7 @@ task --list-all
 | `task packer:build-ubuntu ENV=wil` | Build Ubuntu Server template |
 | `task packer:build-debian ENV=wil` | Build Debian Bookworm template |
 | `task packer:build-netboot ENV=wil` | Build Netboot VM template |
+| `task packer:build-windows ENV=ldn` | Build Windows template (UEFI/TPM, unattended install) |
 | `task packer:clean` | Clean packer logs and downloaded ISOs |
 
 ## CA
