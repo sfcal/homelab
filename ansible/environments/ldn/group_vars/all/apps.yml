@@ -60,6 +60,7 @@ apps:
       # renovate: datasource=docker
       image: "danielszabo99/microbin:latest"
       port: 8081
+      max_file_size_mb: 20480
       proxy:
         name: bin
         domain: ldn.5am.cloud

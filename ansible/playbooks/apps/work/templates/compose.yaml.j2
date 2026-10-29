@@ -44,6 +44,7 @@ services:
       - MICROBIN_HIGHLIGHTSYNTAX=true
       - MICROBIN_PRIVATE=true
       - MICROBIN_HIDE_FOOTER=true
+      - MICROBIN_MAX_FILE_SIZE_UNENCRYPTED_MB={{ apps.work.microbin.max_file_size_mb | default(2048) }}
 
   stirling-pdf:
     image: {{ apps.work.stirlingpdf.image }}
