@@ -47,7 +47,7 @@ Network ranges: wil=10.2.x.x, ldn=10.3.x.x
 - All variables: `snake_case`
 - Ansible groups: `infra_*` (infrastructure), `app_*` (applications)
 - Terraform VM keys: `snake_case` (e.g., `networking`, `ca_server`, `games_server`)
-- Files/directories: `snake_case` with hyphens for app names (e.g., `games-server`, `it-tools`)
+- Files/directories: `snake_case` with hyphens for app names (e.g., `games-server`, `cloud-gaming`)
 - Domains: lowercase dot-separated (5am.video, wil.5am.cloud)
 
 ### YAML
@@ -79,6 +79,13 @@ Every playbook follows this structure (exception: `infrastructure/proxmox/deploy
 - Fields: name, description, proxmox_node, vmid, template_name, ip_address, gateway, nameserver, cores, memory, disk_size, storage_pool, network_bridge, tags, ssh_user
 - Tags: "infrastructure" or "application"
 - Uses `python-hcl2` for parsing; custom writer for output (python-hcl2 can't write)
+
+### Host Filesystem Layout (FHS)
+Paths are hard-coded (no base-path variables); keep new templates on the same split:
+- `/opt/<project>` — compose.yaml, Dockerfiles, Ansible-rendered config
+- `/var/lib/<project>/<service>` — state containers write (databases, caches, uploads)
+- `/var/log/<project>` — logs mounted out of containers
+- `/srv/<project>` — files served to clients (netboot images, ROM library)
 
 ### Docker Compose Templates
 - Jinja2 templates at `playbooks/<service>/templates/compose.yaml.j2`

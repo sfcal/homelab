@@ -7,20 +7,23 @@
     group: "{{ monitoring_group }}"
     mode: "0755"
   loop:
-    - "{{ deploy_path }}/monitoring"
-    - "{{ deploy_path }}/monitoring/prometheus"
-    - "{{ deploy_path }}/monitoring/prometheus-data"
-    - "{{ deploy_path }}/monitoring/grafana"
-    - "{{ deploy_path }}/monitoring/grafana/provisioning"
-    - "{{ deploy_path }}/monitoring/grafana/provisioning/datasources"
-    - "{{ deploy_path }}/monitoring/grafana/provisioning/dashboards"
-    - "{{ deploy_path }}/monitoring/grafana/dashboards"
-    - "{{ deploy_path }}/monitoring/uptime-kuma"
-    - "{{ deploy_path }}/monitoring/homepage"
+    # Rendered config under /opt, container state under /var/lib.
+    - "/opt/monitoring"
+    - "/opt/monitoring/prometheus"
+    - "/opt/monitoring/grafana"
+    - "/opt/monitoring/grafana/provisioning"
+    - "/opt/monitoring/grafana/provisioning/datasources"
+    - "/opt/monitoring/grafana/provisioning/dashboards"
+    - "/opt/monitoring/grafana/dashboards"
+    - "/opt/monitoring/homepage"
+    - "/var/lib/monitoring"
+    - "/var/lib/monitoring/prometheus"
+    - "/var/lib/monitoring/grafana"
+    - "/var/lib/monitoring/uptime-kuma"
 
 - name: Set ownership on Grafana data directory.
   ansible.builtin.file:
-    path: "{{ deploy_path }}/monitoring/grafana"
+    path: "/var/lib/monitoring/grafana"
     state: directory
     owner: "{{ monitoring_uid }}"
     group: "{{ monitoring_gid }}"
@@ -28,7 +31,7 @@
 
 - name: Set ownership on Prometheus data directory.
   ansible.builtin.file:
-    path: "{{ deploy_path }}/monitoring/prometheus-data"
+    path: "/var/lib/monitoring/prometheus"
     state: directory
     owner: "{{ monitoring_uid }}"
     group: "{{ monitoring_gid }}"
@@ -37,7 +40,7 @@
 - name: Deploy Prometheus configuration.
   ansible.builtin.template:
     src: templates/prometheus.yml.j2
-    dest: "{{ deploy_path }}/monitoring/prometheus/prometheus.yml"
+    dest: "/opt/monitoring/prometheus/prometheus.yml"
     owner: "{{ monitoring_user }}"
     group: "{{ monitoring_group }}"
     mode: "0644"
@@ -47,7 +50,7 @@
 - name: Deploy Grafana datasource provisioning.
   ansible.builtin.template:
     src: templates/grafana-datasources.yml.j2
-    dest: "{{ deploy_path }}/monitoring/grafana/provisioning/datasources/datasources.yml"
+    dest: "/opt/monitoring/grafana/provisioning/datasources/datasources.yml"
     owner: "{{ monitoring_uid }}"
     group: "{{ monitoring_gid }}"
     mode: "0644"
@@ -57,7 +60,7 @@
 - name: Deploy Grafana dashboard provisioning.
   ansible.builtin.template:
     src: templates/grafana-dashboards.yml.j2
-    dest: "{{ deploy_path }}/monitoring/grafana/provisioning/dashboards/dashboards.yml"
+    dest: "/opt/monitoring/grafana/provisioning/dashboards/dashboards.yml"
     owner: "{{ monitoring_uid }}"
     group: "{{ monitoring_gid }}"
     mode: "0644"
@@ -67,7 +70,7 @@
 - name: Deploy Grafana dashboards.
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ deploy_path }}/monitoring/grafana/dashboards/"
+    dest: "/opt/monitoring/grafana/dashboards/"
     owner: "{{ monitoring_uid }}"
     group: "{{ monitoring_gid }}"
     mode: "0644"
@@ -77,7 +80,7 @@
 - name: Deploy Homepage configuration files.
   ansible.builtin.template:
     src: "templates/homepage/{{ item }}.j2"
-    dest: "{{ deploy_path }}/monitoring/homepage/{{ item }}"
+    dest: "/opt/monitoring/homepage/{{ item }}"
     owner: "{{ monitoring_uid }}"
     group: "{{ monitoring_gid }}"
     mode: "0644"
@@ -92,7 +95,7 @@
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: templates/compose.yaml.j2
-    dest: "{{ deploy_path }}/monitoring/compose.yaml"
+    dest: "/opt/monitoring/compose.yaml"
     owner: "{{ monitoring_user }}"
     group: "{{ monitoring_group }}"
     mode: "0644"
@@ -101,7 +104,7 @@
 
 - name: Ensure Monitoring Stack is running.
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}/monitoring"
+    project_src: "/opt/monitoring"
     state: present
   register: monitoring_stack_output
 

@@ -1,7 +1,8 @@
 ---
 # service_name: name of the service (required)
 # service_compose_template: path to the docker-compose template (required)
-# deploy_path: base deployment path (required)
+# Compose files live at /opt/<service_name>; container state belongs under
+#   /var/lib/<service_name> (FHS split, see group_vars/all/vars.yml)
 # service_user: owner of service files (default: root)
 # service_group: group of service files (default: root)
 # service_images: list of images to pull before starting (default: []);

@@ -49,7 +49,7 @@ task ansible:deploy-ca ENV=wil
 
 The task file performs these steps in order:
 
-1. Creates directory structure at `/opt/step-ca/` and `/opt/step-ca/data/`
+1. Creates `/opt/step-ca/` (compose, password file) and `/var/lib/step-ca/data/` (CA state)
 2. Deploys the provisioner password file (mode `0600`)
 3. Deploys `compose.yaml` from template
 4. Starts the Step-CA container

@@ -58,18 +58,6 @@ apps:
       npcstream: 60
       seed: ""
 
-  restreamer:
-    host_group: app_restreamer
-    # renovate: datasource=docker
-    image: "datarhei/restreamer:latest"
-    port: 8710
-    rtmp_port: 1935
-    srt_port: 6000
-    proxy:
-      name: restreamer
-      domain: 5am.video
-      proxied: true
-
   website:
     host_group: app_website
     # renovate: datasource=docker

@@ -6,5 +6,8 @@ domains:
   - name: "ldn.5am.cloud"
 system_timezone: Europe/London
 
-# Unified deploy path for all services
-deploy_path: /opt
+# Host filesystem layout follows the FHS and is hard-coded in the playbooks:
+#   /opt/<project>                compose files, Dockerfiles, Ansible-rendered config
+#   /var/lib/<project>/<service>  state the containers write (databases, caches, uploads)
+#   /var/log/<project>            log files
+#   /srv/<project>                files served to clients (boot images, ROM library)

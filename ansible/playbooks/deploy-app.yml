@@ -25,7 +25,7 @@
         service_user: "{{ apps[app_name].user | default('root') }}"
         service_group: "{{ apps[app_name].group | default('root') }}"
         # Pre-pull list is derived from every registry key ending in `image`,
-        # top level and one nesting level down (e.g. work.convertx.image).
+        # top level and one nesting level down (e.g. work.microbin.image).
         service_images: >-
           {{ (
                (apps[app_name] | dict2items

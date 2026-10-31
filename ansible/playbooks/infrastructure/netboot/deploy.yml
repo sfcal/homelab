@@ -4,9 +4,13 @@
   become: true
 
   vars:
+    # Config (netboot.xyz settings, TFTP menu root) is state; assets (ISOs,
+    # kernels, CM5 images) are files served to booting clients.
+    netboot_config_path: "/var/lib/netbootxyz/config"
+    netboot_assets_path: "/srv/netbootxyz/assets"
     # Ubuntu assets are keyed by the ISO basename so the extracted kernel and
     # initrd can never be served next to a different release's ISO.
-    netboot_ubuntu_asset_dir: "{{ deploy_path }}/netbootxyz/assets/ubuntu/{{ netboot_ubuntu_iso_url | basename | splitext | first }}"
+    netboot_ubuntu_asset_dir: "{{ netboot_assets_path }}/ubuntu/{{ netboot_ubuntu_iso_url | basename | splitext | first }}"
 
   pre_tasks:
     - name: Include common prerequisites.

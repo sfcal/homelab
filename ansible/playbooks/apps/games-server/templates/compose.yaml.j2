@@ -11,7 +11,7 @@ services:
     ports:
       - "{{ apps[app_name].terraria.port }}:7777"
     volumes:
-      - {{ deploy_path }}/games-server/terraria/worlds:/root/.local/share/Terraria/Worlds
+      - /var/lib/games-server/terraria/worlds:/root/.local/share/Terraria/Worlds
     stdin_open: true
     tty: true
     command:

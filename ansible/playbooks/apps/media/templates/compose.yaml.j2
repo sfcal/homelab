@@ -17,7 +17,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./sabnzbd:/config
+      - {{ media_stack_data_path }}/sabnzbd:/config
       - /mnt/data/downloads/usenet:/data/downloads/usenet
     networks:
       - media
@@ -35,7 +35,7 @@ services:
     ports:
       - "9696:9696"
     volumes:
-      - ./prowlarr:/config
+      - {{ media_stack_data_path }}/prowlarr:/config
     networks:
       - media
 
@@ -55,7 +55,7 @@ services:
     ports:
       - "8989:8989"
     volumes:
-      - ./sonarr:/config
+      - {{ media_stack_data_path }}/sonarr:/config
       - /mnt/data:/data
     networks:
       - media
@@ -76,7 +76,7 @@ services:
     ports:
       - "7878:7878"
     volumes:
-      - ./radarr:/config
+      - {{ media_stack_data_path }}/radarr:/config
       - /mnt/data:/data
     networks:
       - media
@@ -98,7 +98,7 @@ services:
     ports:
       - "6767:6767"
     volumes:
-      - ./bazarr:/config
+      - {{ media_stack_data_path }}/bazarr:/config
       - /mnt/data/media/movies:/movies
       - /mnt/data/media/tv:/tv
     networks:
@@ -127,7 +127,7 @@ services:
       - 32414:32414/udp
       - 32469:32469
     volumes:
-      - ./plex:/config
+      - {{ media_stack_data_path }}/plex:/config
       - /mnt/data/media:/data/media
       - /dev/shm/plex:/transcode
     devices:
@@ -149,7 +149,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./tunarr:/config
+      - {{ media_stack_data_path }}/tunarr:/config
       - /mnt/data/media:/media:ro
       - /dev/shm/tunarr:/cache
     devices:
@@ -181,8 +181,8 @@ services:
     ports:
       - "3003:3003"
     volumes:
-      - ./pulsarr/data:/app/data
-    #  - ./pulsarr/.env:/app/.env
+      - {{ media_stack_data_path }}/pulsarr/data:/app/data
+    #  - {{ media_stack_data_path }}/pulsarr/.env:/app/.env
     networks:
       - media
 
@@ -205,7 +205,7 @@ services:
     ports:
       - "11011:11011"
     volumes:
-      - ./cleanuparr:/config
+      - {{ media_stack_data_path }}/cleanuparr:/config
     networks:
       - media
 
@@ -231,10 +231,10 @@ services:
       - "8265:8265"
       - "8266:8266"
     volumes:
-      - ./tdarr/server:/app/server
-      - ./tdarr/configs:/app/configs
-      - ./tdarr/logs:/app/logs
-      - ./tdarr/data:/app/data
+      - {{ media_stack_data_path }}/tdarr/server:/app/server
+      - {{ media_stack_data_path }}/tdarr/configs:/app/configs
+      - {{ media_stack_data_path }}/tdarr/logs:/app/logs
+      - {{ media_stack_data_path }}/tdarr/data:/app/data
       - /mnt/data/media:/media
       - /dev/shm/tdarr:/temp
     devices:
@@ -257,7 +257,7 @@ services:
     ports:
       - "5690:5690"
     volumes:
-      - ./wizarr:/data
+      - {{ media_stack_data_path }}/wizarr:/data
     networks:
       - media
 
@@ -272,6 +272,6 @@ services:
     ports:
       - "9191:9191"
     volumes:
-      - ./dispatcharr:/data
+      - {{ media_stack_data_path }}/dispatcharr:/data
     networks:
       - media

@@ -6,7 +6,7 @@
 #      registry: Proxmox/KVM/Haivision devices, monitoring.
 #   2. registry_services — generated from group_vars/all/apps.yml. Every
 #      `proxy:` block (top-level app or one-level-nested sub-service, e.g.
-#      apps.work.convertx.proxy) emits one entry. backend_host is the first
+#      apps.work.microbin.proxy) emits one entry. backend_host is the first
 #      inventory host of the app's host_group; backend_port is the sibling
 #      `port` unless the proxy block sets backend_port.
 #

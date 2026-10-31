@@ -125,7 +125,6 @@ Apps that need more than Docker Compose (e.g., media stack with backup/restore) 
 |----------|---------|-------------|
 | `service_name` | required | Service name |
 | `service_compose_template` | required | Path to `compose.yaml.j2` |
-| `deploy_path` | required | Base deployment path |
 | `service_user` | `root` | File ownership user |
 | `service_group` | `root` | File ownership group |
 | `service_images` | `[]` | Images to pre-pull |

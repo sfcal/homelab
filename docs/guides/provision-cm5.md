@@ -16,7 +16,7 @@ graph LR
 2. It boots a tiny Alpine Linux flasher (kernel + initramfs over TFTP; module image and flash script over HTTP).
 3. The flasher streams `ubuntu-26.04-preinstalled-server-arm64+raspi.img.xz` from the netboot VM straight onto `/dev/mmcblk0`, then writes the node's cloud-init seed (hostname, static IP, SSH keys) onto the `system-boot` FAT partition, and reboots into the fresh OS.
 
-**Always armed, by design.** The per-serial payload is permanently served, but `BOOT_ORDER=0xf2461` tries eMMC → NVMe → USB → network, so a healthy node never netboots. Only a blank or unbootable module falls through — and then it provisions itself, zero-touch. The trade-off is deliberate: an eMMC that stops booting gets *reflashed*, not debugged. To exempt one node without removing its payload, drop a file named `disabled` in `/opt/netbootxyz/assets/cm5/<full-serial>/` on the netboot VM.
+**Always armed, by design.** The per-serial payload is permanently served, but `BOOT_ORDER=0xf2461` tries eMMC → NVMe → USB → network, so a healthy node never netboots. Only a blank or unbootable module falls through — and then it provisions itself, zero-touch. The trade-off is deliberate: an eMMC that stops booting gets *reflashed*, not debugged. To exempt one node without removing its payload, drop a file named `disabled` in `/srv/netbootxyz/assets/cm5/<full-serial>/` on the netboot VM.
 
 **Interrupted flashes are safe.** The flasher zeroes the partition table first and writes it back **last**, so a power cut mid-flash always leaves the eMMC non-bootable — the boot loop re-enters the flasher and retries.
 
@@ -70,4 +70,4 @@ After the reflash, re-run the ptp-experiments Ansible — the flash resets the t
 - **Alpine boots but nothing happens** — check `http://10.3.20.60:8080/cm5/<full-serial>/apkovl.tar.gz` and `user-data` return 200, and that no `disabled` file exists for the serial. Console messages are prefixed `cm5-flash:`.
 - **Flash is slow** — TFTP (kernel+initramfs, ~28 MB) is lockstep and slow by protocol; the big transfers ride HTTP. Total ~5–10 min is normal.
 - **Ubuntu image URL 404s** — point releases displace the filename on cdimage.ubuntu.com (26.04.1 ~Aug 2026); bump `cm5_ubuntu_image_url`/`cm5_ubuntu_image_sha256`, or fetch the GA image from `old-releases.ubuntu.com`. The cached copy on the netboot VM keeps working regardless.
-- **Never** place a `config.txt` or `pieeprom.*` at the TFTP root (`/opt/netbootxyz/config/menus/`) — the former would hijack every Pi on the VLAN, the latter would trigger silent EEPROM self-update on netbooting Pis.
+- **Never** place a `config.txt` or `pieeprom.*` at the TFTP root (`/var/lib/netbootxyz/config/menus/`) — the former would hijack every Pi on the VLAN, the latter would trigger silent EEPROM self-update on netbooting Pis.

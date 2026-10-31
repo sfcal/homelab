@@ -4,7 +4,7 @@
 # per-MAC hook is used instead -- see templates/timeserver-reimage.ipxe.j2.
 - name: Remove superseded custom iPXE menu.
   ansible.builtin.file:
-    path: "{{ deploy_path }}/netbootxyz/config/menus/custom.ipxe"
+    path: "{{ netboot_config_path }}/menus/custom.ipxe"
     state: absent
 
 # Sets only the menu timeout, so any client that reaches the netboot.xyz
@@ -13,7 +13,7 @@
 - name: Deploy iPXE local boot-timeout override.
   ansible.builtin.template:
     src: templates/local-vars.ipxe.j2
-    dest: "{{ deploy_path }}/netbootxyz/config/menus/local-vars.ipxe"
+    dest: "{{ netboot_config_path }}/menus/local-vars.ipxe"
     mode: "0644"
 
 # A per-MAC script whose host was removed from timeserver_hosts would
@@ -21,7 +21,7 @@
 # (find does not recurse, so the per-serial CM5 TFTP dirs are untouched.)
 - name: Find per-MAC boot scripts.
   ansible.builtin.find:
-    paths: "{{ deploy_path }}/netbootxyz/config/menus"
+    paths: "{{ netboot_config_path }}/menus"
     patterns: "MAC-*.ipxe"
   register: netboot_mac_scripts
 

@@ -5,12 +5,12 @@
     state: directory
     mode: "0755"
   loop:
-    - "{{ deploy_path }}/netbootxyz/config/menus"
-    - "{{ deploy_path }}/netbootxyz/assets/ubuntu"
+    - "{{ netboot_config_path }}/menus"
+    - "{{ netboot_assets_path }}/ubuntu"
 
 - name: Check for the legacy version-keyed asset directory.
   ansible.builtin.stat:
-    path: "{{ deploy_path }}/netbootxyz/assets/ubuntu/26.04"
+    path: "{{ netboot_assets_path }}/ubuntu/26.04"
   register: netboot_legacy_dir
 
 # One-shot rename from the old version-keyed layout (assets/ubuntu/26.04) to
@@ -21,8 +21,8 @@
 # name. Safe to drop once redeployed.
 - name: Adopt the legacy asset directory under the ISO-keyed name.
   ansible.builtin.command:
-    cmd: mv {{ deploy_path }}/netbootxyz/assets/ubuntu/26.04 {{ deploy_path }}/netbootxyz/assets/ubuntu/ubuntu-26.04-live-server-amd64
-    creates: "{{ deploy_path }}/netbootxyz/assets/ubuntu/ubuntu-26.04-live-server-amd64"
+    cmd: mv {{ netboot_assets_path }}/ubuntu/26.04 {{ netboot_assets_path }}/ubuntu/ubuntu-26.04-live-server-amd64
+    creates: "{{ netboot_assets_path }}/ubuntu/ubuntu-26.04-live-server-amd64"
   when: netboot_legacy_dir.stat.exists
 
 - name: Create release asset directory.
@@ -82,5 +82,5 @@
 # rename; only fires if the legacy dir survived as a duplicate.
 - name: Remove the legacy version-keyed asset directory.
   ansible.builtin.file:
-    path: "{{ deploy_path }}/netbootxyz/assets/ubuntu/26.04"
+    path: "{{ netboot_assets_path }}/ubuntu/26.04"
     state: absent

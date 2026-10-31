@@ -1,7 +1,7 @@
 ---
 - name: Create {{ service_name }} directory.
   ansible.builtin.file:
-    path: "{{ deploy_path }}/{{ service_name }}"
+    path: "/opt/{{ service_name }}"
     state: directory
     owner: "{{ service_user | default('root') }}"
     group: "{{ service_group | default('root') }}"
@@ -10,7 +10,7 @@
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: "{{ service_compose_template }}"
-    dest: "{{ deploy_path }}/{{ service_name }}/compose.yaml"
+    dest: "/opt/{{ service_name }}/compose.yaml"
     owner: "{{ service_user | default('root') }}"
     group: "{{ service_group | default('root') }}"
     mode: "0644"
@@ -27,5 +27,5 @@
 
 - name: Ensure {{ service_name }} is running.
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}/{{ service_name }}"
+    project_src: "/opt/{{ service_name }}"
     state: present

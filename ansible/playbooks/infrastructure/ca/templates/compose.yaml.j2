@@ -7,7 +7,7 @@ services:
     ports:
       - "{{ step_ca_port }}:9000"
     volumes:
-      - ./data:/home/step
+      - /var/lib/step-ca/data:/home/step
       - ./password.txt:/run/secrets/password:ro
     environment:
       - DOCKER_STEPCA_INIT_NAME={{ step_ca_name }}
@@ -15,3 +15,20 @@ services:
       - DOCKER_STEPCA_INIT_PROVISIONER_NAME={{ step_ca_provisioner_name }}
       - DOCKER_STEPCA_INIT_PASSWORD_FILE=/run/secrets/password
       - DOCKER_STEPCA_INIT_SSH={{ step_ca_init_ssh }}
+
+  certwarden:
+    image: {{ certwarden_image }}
+    container_name: certwarden
+    restart: unless-stopped
+    depends_on:
+      step-ca:
+        condition: service_healthy
+    ports:
+      - "{{ certwarden_port }}:4050"
+    volumes:
+      - /var/lib/step-ca/certwarden:/app/data
+      - /var/lib/step-ca/data/certs:/step-ca-certs:ro
+    environment:
+      # Go adds every file in SSL_CERT_DIR to the system bundle -> trusts step-ca root
+      - SSL_CERT_DIR=/step-ca-certs
+

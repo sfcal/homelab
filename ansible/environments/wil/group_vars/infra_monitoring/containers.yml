@@ -18,7 +18,7 @@ node_exporter_image: "prom/node-exporter:v1.12.1"
 homepage_image: "ghcr.io/gethomepage/homepage:latest"
 homepage_allowed_hosts: "homepage.wil.5am.cloud"
 
-# Directories to back up (relative to /opt)
+# Directories to back up (relative to /var/lib/monitoring)
 backup_targets:
   - prometheus
   - grafana

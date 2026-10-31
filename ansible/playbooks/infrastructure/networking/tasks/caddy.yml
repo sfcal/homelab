@@ -1,7 +1,7 @@
 ---
 - name: Create caddy directory.
   ansible.builtin.file:
-    path: /opt/caddy
+    path: "/opt/caddy"
     state: directory
     owner: root
     group: root
@@ -15,7 +15,7 @@
 - name: Deploy Dockerfile.
   ansible.builtin.template:
     src: templates/Dockerfile.j2
-    dest: /opt/caddy/Dockerfile
+    dest: "/opt/caddy/Dockerfile"
     owner: root
     group: root
     mode: "0644"
@@ -25,7 +25,7 @@
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: templates/compose.yaml.j2
-    dest: /opt/caddy/compose.yaml
+    dest: "/opt/caddy/compose.yaml"
     owner: root
     group: root
     mode: "0644"
@@ -35,7 +35,7 @@
 - name: Deploy Caddyfile.
   ansible.builtin.template:
     src: templates/Caddyfile.j2
-    dest: /opt/caddy/Caddyfile
+    dest: "/opt/caddy/Caddyfile"
     owner: root
     group: root
     mode: "0644"
@@ -44,5 +44,5 @@
 
 - name: Ensure Caddy is running.
   community.docker.docker_compose_v2:
-    project_src: /opt/caddy
+    project_src: "/opt/caddy"
     state: present

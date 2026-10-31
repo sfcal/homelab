@@ -9,3 +9,8 @@ step_ca_provisioner_name: "admin"
 step_ca_init_ssh: "false"
 step_ca_uid: "1000"
 step_ca_gid: "1000"
+
+# Cert Warden (central ACME client + web UI)
+# renovate: datasource=docker
+certwarden_image: "ghcr.io/gregtwallace/certwarden:v0.30.1"
+certwarden_port: 4050

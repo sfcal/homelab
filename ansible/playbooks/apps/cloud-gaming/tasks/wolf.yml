@@ -47,8 +47,8 @@
     mode: "0755"
   loop:
     - "{{ wolf_deploy_path }}"
-    - "{{ wolf_deploy_path }}/state"      # mounted at /etc/wolf (cfg/, profile_data/)
-    - "{{ wolf_deploy_path }}/state/cfg"
+    - "{{ wolf_data_path }}/state"        # mounted at /etc/wolf (cfg/, profile_data/)
+    - "{{ wolf_data_path }}/state/cfg"
     - "{{ wolf_dolphin_path }}"
     - "{{ wolf_dolphin_path }}/cfg"
 
@@ -84,7 +84,7 @@
 - name: Seed Wolf config.toml (first deploy only).
   ansible.builtin.template:
     src: templates/config.toml.j2
-    dest: "{{ wolf_deploy_path }}/state/cfg/config.toml"
+    dest: "{{ wolf_data_path }}/state/cfg/config.toml"
     owner: "{{ wolf_user }}"
     group: "{{ wolf_group }}"
     mode: "0644"

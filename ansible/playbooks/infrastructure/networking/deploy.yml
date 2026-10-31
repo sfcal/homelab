@@ -24,8 +24,11 @@
     - name: Configure BIND9.
       ansible.builtin.include_tasks: tasks/bind9.yml
 
+    # The updater exits immediately with an empty DOMAINS, so skip it in
+    # environments that set ddns_domains: [].
     - name: Configure Cloudflare DDNS.
       ansible.builtin.include_tasks: tasks/ddns.yml
+      when: ddns_domains | default([]) | length > 0
 
     - name: Configure Caddy.
       ansible.builtin.include_tasks: tasks/caddy.yml

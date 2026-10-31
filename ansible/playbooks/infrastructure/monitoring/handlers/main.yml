@@ -1,16 +1,16 @@
 ---
 - name: Restart monitoring-stack
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}/monitoring"
+    project_src: "/opt/monitoring"
     state: restarted
     recreate: always
 
 - name: Stop monitoring-stack
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}/monitoring"
+    project_src: "/opt/monitoring"
     state: stopped
 
 - name: Start monitoring-stack
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}/monitoring"
+    project_src: "/opt/monitoring"
     state: present

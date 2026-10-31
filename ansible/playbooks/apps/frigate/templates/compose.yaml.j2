@@ -23,7 +23,7 @@ services:
       - "8555:8555/tcp"
       - "8555:8555/udp"
     volumes:
-      - ./config:/config
+      - {{ frigate_data_path }}/config:/config
       - /mnt/data/frigate:/media/frigate
       - /dev/shm/frigate:/dev/shm
       - /etc/localtime:/etc/localtime:ro

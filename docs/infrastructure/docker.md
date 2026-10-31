@@ -33,16 +33,12 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in `a
 |-----|-------|------|
 | Birdle | `ghcr.io/sfcal/new-birdle` | 8091 |
 | Bookstack | `lscr.io/linuxserver/bookstack` | 8074 |
-| ConvertX | `ghcr.io/c4illin/convertx` | 3100 |
-| CyberChef | `ghcr.io/gchq/cyberchef` | 8071 |
 | Games Server | Terraria | 7777 |
-| IT-Tools | `corentinth/it-tools` | 8070 |
 | Kasm | `lscr.io/linuxserver/kasm` | 4443 |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
 | RomM | `rommapp/romm` | 8085 |
-| Stirling PDF | `stirlingtools/stirling-pdf` | 8073 |
 | Website | `ghcr.io/sfcal/samuel.computer` | 8090 |
 
 ## Infrastructure Services

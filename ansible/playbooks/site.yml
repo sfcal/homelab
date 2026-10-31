@@ -65,16 +65,8 @@
   tags: ['games-server', 'applications']
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: kasm }
-  tags: ['kasm', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: kosync }
   tags: ['kosync', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: restreamer }
-  tags: ['restreamer', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: website }
@@ -82,7 +74,7 @@
 
 - import_playbook: deploy-app.yml
   vars: { app_name: work }
-  tags: ['work', 'convertx', 'cyberchef', 'it-tools', 'microbin', 'stirling-pdf', 'applications']
+  tags: ['work', 'microbin', 'kasm', 'restreamer', 'applications']
 
 # --- Hypervisor ---
 - import_playbook: infrastructure/proxmox/deploy.yml

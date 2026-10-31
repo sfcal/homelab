@@ -1,6 +1,12 @@
 ---
 wil_services:
   # Infrastructure
+  # Step-CA: ACME clients and the container's own healthcheck use
+  # https://ca.wil.5am.cloud:9000 directly, so this is a plain A record.
+  - name: ca
+    backend_host: 10.2.20.9
+    backend_port: 9000
+    proxied: false
   - name: vm
     backend_host: 10.2.20.7
     backend_port: 8006

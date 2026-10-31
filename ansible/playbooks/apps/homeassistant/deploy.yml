@@ -22,7 +22,7 @@
 
     - name: Ensure Home Assistant config directory exists.
       ansible.builtin.file:
-        path: "{{ deploy_path }}/homeassistant/config"
+        path: "/var/lib/homeassistant/config"
         state: directory
         owner: "{{ homeassistant_user }}"
         group: "{{ homeassistant_group }}"
@@ -31,7 +31,7 @@
     - name: Deploy Home Assistant configuration for reverse proxy.
       ansible.builtin.template:
         src: "{{ playbook_dir }}/templates/configuration.yaml.j2"
-        dest: "{{ deploy_path }}/homeassistant/config/configuration.yaml"
+        dest: "/var/lib/homeassistant/config/configuration.yaml"
         owner: "{{ homeassistant_user }}"
         group: "{{ homeassistant_group }}"
         mode: "0644"

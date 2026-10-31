@@ -22,8 +22,8 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - {{ deploy_path }}/monitoring/prometheus:/etc/prometheus:ro
-      - {{ deploy_path }}/monitoring/prometheus-data:/prometheus
+      - /opt/monitoring/prometheus:/etc/prometheus:ro
+      - /var/lib/monitoring/prometheus:/prometheus
     user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
 
   grafana:
@@ -44,8 +44,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - {{ deploy_path }}/monitoring/grafana:/var/lib/grafana
-      - {{ deploy_path }}/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - /var/lib/monitoring/grafana:/var/lib/grafana
+      - /opt/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - /opt/monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
     user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
 
   homepage:
@@ -70,5 +71,5 @@ services:
     ports:
       - "3002:3000"
     volumes:
-      - {{ deploy_path }}/monitoring/homepage:/app/config
+      - /opt/monitoring/homepage:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro

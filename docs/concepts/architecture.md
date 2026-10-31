@@ -74,18 +74,14 @@ Taskfile.yaml               Root task runner entry point
 | Home Assistant | `app_homeassistant` | Home automation |
 | Birdle | `app_birdle` | Bird identification game |
 | Bookstack | `app_bookstack` | Wiki/documentation |
-| CyberChef | `app_cyberchef` | Data encoding/decoding |
-| IT-Tools | `app_ittools` | Developer utilities |
-| Kasm | `app_kasm` | Browser-based desktops |
+| Kasm | `app_work` | Browser-based desktops |
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
-| MicroBin | `app_microbin` | Pastebin |
-| Restreamer | `app_restreamer` | Video streaming relay |
+| MicroBin | `app_work` | Pastebin |
+| Restreamer | `app_work` | Video streaming relay |
 | Wolf | `app_cloud_gaming` | Moonlight game streaming (Intel Arc Pro B50 SR-IOV VF) |
 | RomM | `app_cloud_gaming` | ROM manager |
-| Stirling PDF | `app_stirlingpdf` | PDF tools |
 | Website | `app_website` | Personal website |
 | Games Server | `app_gamesserver` | Terraria server |
-| ConvertX | `app_convertx` | File converter |
 
 ## Key Design Decisions
 

@@ -14,6 +14,6 @@ services:
       - ENABLE_USER_REGISTRATION={{ apps[app_name].user_registration | default(false) | ternary('true', 'false') }}
     volumes:
       # Redis (bundled in the image) holds all user + progress data.
-      - {{ deploy_path }}/kosync/data/redis:/var/lib/redis
-      - {{ deploy_path }}/kosync/logs/app:/app/koreader-sync-server/logs
-      - {{ deploy_path }}/kosync/logs/redis:/var/log/redis
+      - /var/lib/kosync/redis:/var/lib/redis
+      - /var/log/kosync/app:/app/koreader-sync-server/logs
+      - /var/log/kosync/redis:/var/log/redis

@@ -289,7 +289,7 @@ kasm:
     tls_skip_verify: true
 ```
 
-`_services.yml` builds a `registry_services` list from every `proxy:` block — on a top-level app or a one-level-nested sub-service (e.g., `apps.work.convertx.proxy`). For each block:
+`_services.yml` builds a `registry_services` list from every `proxy:` block — on a top-level app or a one-level-nested sub-service (e.g., `apps.work.microbin.proxy`). For each block:
 
 - **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the environment's inventory, the render fails loudly rather than silently dropping the entry.
 - **`backend_port` defaults to the sibling `port`** — set `backend_port` inside the `proxy:` block to override it.

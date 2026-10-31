@@ -4,7 +4,8 @@
 # siblings through the Docker socket, so no render group is needed.
 wolf_user: root
 wolf_group: root
-wolf_deploy_path: "{{ deploy_path }}/wolf"
+wolf_deploy_path: "/opt/wolf"   # compose + Dolphin seeds
+wolf_data_path: "/var/lib/wolf"       # state/ (cfg, profile data)
 
 # Name shown in Moonlight clients
 wolf_hostname: "Wolf"
@@ -56,11 +57,12 @@ tv_launcher_accessibility_service: com.spocky.projengmenu/com.spocky.projengmenu
 # --- ROM library (shared by RomM and the Wolf emulator apps) ---
 # Local to the VM's disk. To serve it from a NAS instead, add an nfs.yml with
 # `nfs_mounts` (see wil app_mediastack) and point this at the mount.
-romm_library_path: "{{ deploy_path }}/romm/library"  # RomM: roms/<platform>/<game>, bios/<platform>
+romm_library_path: "/srv/romm/library"  # RomM: roms/<platform>/<game>, bios/<platform>
 wolf_roms_path: "{{ romm_library_path }}/roms"       # mounted at /ROMs in Pegasus, RetroArch and Dolphin
 
 # --- RomM configuration ---
-romm_deploy_path: "{{ deploy_path }}/romm"
+romm_deploy_path: "/opt/romm"   # compose + config.yml
+romm_data_path: "/var/lib/romm"       # db, resources, redis, assets
 romm_port: 8085
 # Public URL (behind Caddy TLS): invite links, QR codes, secure session cookies.
 romm_base_url: "https://roms.ldn.5am.cloud"

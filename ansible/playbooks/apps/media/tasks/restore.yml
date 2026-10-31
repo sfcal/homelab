@@ -46,21 +46,21 @@
 # --- Wipe existing config directories ---
 - name: Remove existing config directories for a clean restore.
   ansible.builtin.file:
-    path: "{{ media_stack_deploy_path }}/{{ item }}"
+    path: "{{ media_stack_data_path }}/{{ item }}"
     state: absent
   loop: "{{ backup_targets }}"
   loop_control:
     label: "{{ item }}"
 
 # --- Extract archive ---
-- name: Extract backup archive to media-stack directory.
+- name: Extract backup archive to the media-stack data directory.
   ansible.builtin.command:
     argv:
       - tar
       - xzf
       - "{{ resolved_backup }}"
       - -C
-      - "{{ media_stack_deploy_path }}"
+      - "{{ media_stack_data_path }}"
   changed_when: true
 
 # --- Restart containers ---

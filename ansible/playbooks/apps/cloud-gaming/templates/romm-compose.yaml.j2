@@ -12,7 +12,7 @@ services:
       - MARIADB_USER=romm-user
       - MARIADB_PASSWORD={{ romm_db_password }}
     volumes:
-      - "{{ romm_deploy_path }}/db:/var/lib/mysql"
+      - "{{ romm_data_path }}/db:/var/lib/mysql"
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 30s
@@ -41,9 +41,9 @@ services:
       - IGDB_CLIENT_ID={{ romm_igdb_client_id }}
       - IGDB_CLIENT_SECRET={{ romm_igdb_client_secret }}
     volumes:
-      - "{{ romm_deploy_path }}/resources:/romm/resources"   # metadata cache (regenerable)
-      - "{{ romm_deploy_path }}/redis:/redis-data"           # embedded Valkey persistence
-      - "{{ romm_deploy_path }}/assets:/romm/assets"         # saves, states, screenshots
+      - "{{ romm_data_path }}/resources:/romm/resources"   # metadata cache (regenerable)
+      - "{{ romm_data_path }}/redis:/redis-data"           # embedded Valkey persistence
+      - "{{ romm_data_path }}/assets:/romm/assets"         # saves, states, screenshots
       - "{{ romm_deploy_path }}/config:/romm/config"
       - "{{ romm_library_path }}:/romm/library"              # roms/<platform>/<game>, bios/<platform>
     depends_on:

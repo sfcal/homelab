@@ -7,7 +7,7 @@ services:
     mem_limit: 512m
     mem_reservation: 256m
     volumes:
-      - {{ deploy_path }}/birdle/postgres_data:/var/lib/postgresql/data
+      - /var/lib/birdle/postgres:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: birdle
       POSTGRES_USER: birdle

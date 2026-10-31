@@ -106,15 +106,15 @@ Apps that run several containers nest sub-services one level deep, each with its
 apps:
   work:
     host_group: app_work
-    convertx:
+    microbin:
       # renovate: datasource=docker
-      image: "ghcr.io/c4illin/convertx:latest"
-      port: 3100
+      image: "danielszabo99/microbin:latest"
+      port: 8081
       proxy:
-        name: convert
-        domain: wil.5am.cloud
+        name: bin
+        domain: ldn.5am.cloud
         proxied: true
-    cyberchef:
+    another_svc:
       # ...
 ```
 
@@ -154,5 +154,20 @@ domains:
   - sfc.al
 
 system_timezone: America/New_York
-deploy_path: /opt
 ```
+
+### Filesystem Layout
+
+Hosts follow the Filesystem Hierarchy Standard. The paths are hard-coded in
+the playbooks and templates; each stack is a *project* (`work`, `monitoring`,
+`media-stack`, ...):
+
+| Path | Holds |
+|------|-------|
+| `/opt/<project>/` | `compose.yaml`, Dockerfiles, config rendered by Ansible |
+| `/var/lib/<project>/<service>/` | State the containers write: databases, caches, uploads |
+| `/var/log/<project>/` | Log files mounted out of containers |
+| `/srv/<project>/` | Files served to clients: netboot images, the ROM library |
+
+Stacks with their own playbook define `<stack>_deploy_path` / `<stack>_data_path`
+in their group_vars so the tasks and templates share one definition.

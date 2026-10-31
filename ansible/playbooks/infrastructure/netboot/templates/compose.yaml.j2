@@ -17,5 +17,5 @@ services:
       - "69:69/udp"
       - "{{ netbootxyz_http_port }}:80"
     volumes:
-      - {{ deploy_path }}/netbootxyz/config:/config
-      - {{ deploy_path }}/netbootxyz/assets:/assets
+      - {{ netboot_config_path }}:/config
+      - {{ netboot_assets_path }}:/assets

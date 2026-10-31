@@ -8,8 +8,10 @@ frigate_render_gid: "993"
 frigate_user: root
 frigate_group: root
 
-# Deploy path
-frigate_deploy_path: "{{ deploy_path }}/frigate"
+# Paths: compose + build context under /opt; Frigate's config dir
+# (config.yml, its database, model cache) is state.
+frigate_deploy_path: "/opt/frigate"
+frigate_data_path: "/var/lib/frigate"
 
 # Container image (base image for multi-stage build)
 # renovate: datasource=docker

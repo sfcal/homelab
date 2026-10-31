@@ -25,7 +25,7 @@
     argv: >-
       {{ ['tar', 'czf', backup_dest_path + '/media-stack-' + backup_timestamp + '.tar.gz']
          + tar_exclude_args
-         + ['-C', media_stack_deploy_path]
+         + ['-C', media_stack_data_path]
          + backup_targets }}
   changed_when: true
 

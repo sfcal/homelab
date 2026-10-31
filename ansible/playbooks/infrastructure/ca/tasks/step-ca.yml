@@ -7,12 +7,13 @@
     group: root
     mode: "0755"
   loop:
-    - "{{ deploy_path }}/step-ca"
-    - "{{ deploy_path }}/step-ca/data"
+    - "/opt/step-ca"
+    - "/var/lib/step-ca"
+    - "/var/lib/step-ca/data"
 
 - name: Set ownership on step-ca data directory.
   ansible.builtin.file:
-    path: "{{ deploy_path }}/step-ca/data"
+    path: "/var/lib/step-ca/data"
     owner: "{{ step_ca_uid }}"
     group: "{{ step_ca_gid }}"
     recurse: true
@@ -20,7 +21,7 @@
 - name: Deploy provisioner password file.
   ansible.builtin.copy:
     content: "{{ step_ca_provisioner_password }}"
-    dest: "{{ deploy_path }}/step-ca/password.txt"
+    dest: "/opt/step-ca/password.txt"
     owner: "{{ step_ca_uid }}"
     group: "{{ step_ca_gid }}"
     mode: "0600"
@@ -29,7 +30,7 @@
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: templates/compose.yaml.j2
-    dest: "{{ deploy_path }}/step-ca/compose.yaml"
+    dest: "/opt/step-ca/compose.yaml"
     owner: root
     group: root
     mode: "0644"
@@ -37,7 +38,7 @@
 
 - name: Ensure step-ca is running.
   community.docker.docker_compose_v2:
-    project_src: "{{ deploy_path }}/step-ca"
+    project_src: "/opt/step-ca"
     state: present
   register: step_ca_output
 
@@ -62,11 +63,22 @@
         "minTLSCertDuration": "5m",
         "maxTLSCertDuration": "{{ step_ca_max_cert_duration | default('17520h') }}",
         "defaultTLSCertDuration": "{{ step_ca_default_cert_duration | default('720h') }}"
-      }' {{ deploy_path }}/step-ca/data/config/ca.json > {{ deploy_path }}/step-ca/data/config/ca.json.tmp
-      && mv {{ deploy_path }}/step-ca/data/config/ca.json.tmp {{ deploy_path }}/step-ca/data/config/ca.json
-      && chown {{ step_ca_uid }}:{{ step_ca_gid }} {{ deploy_path }}/step-ca/data/config/ca.json
+      }' /var/lib/step-ca/data/config/ca.json > /var/lib/step-ca/data/config/ca.json.tmp
+      && mv /var/lib/step-ca/data/config/ca.json.tmp /var/lib/step-ca/data/config/ca.json
+      && chown {{ step_ca_uid }}:{{ step_ca_gid }} /var/lib/step-ca/data/config/ca.json
   register: ca_claims_update
   changed_when: ca_claims_update.rc == 0
+  notify: Restart step-ca
+
+- name: Add ACME provisioner.
+  ansible.builtin.shell:
+    cmd: >
+      jq 'if any(.authority.provisioners[]?; .type == "ACME") then . else .authority.provisioners += [{"type": "ACME", "name": "acme"}] end'
+      /var/lib/step-ca/data/config/ca.json > /var/lib/step-ca/data/config/ca.json.tmp
+      && mv /var/lib/step-ca/data/config/ca.json.tmp /var/lib/step-ca/data/config/ca.json
+      && chown {{ step_ca_uid }}:{{ step_ca_gid }} /var/lib/step-ca/data/config/ca.json
+  register: ca_acme_update
+  changed_when: ca_acme_update.rc == 0
   notify: Restart step-ca
 
 - name: Flush handlers to apply config changes.
@@ -90,7 +102,7 @@
 - name: Save root CA certificate locally.
   ansible.builtin.copy:
     content: "{{ root_ca_cert.stdout }}"
-    dest: "{{ deploy_path }}/step-ca/root_ca.crt"
+    dest: "/opt/step-ca/root_ca.crt"
     owner: root
     group: root
     mode: "0644"
@@ -99,5 +111,7 @@
   ansible.builtin.debug:
     msg:
       - "Step-CA is running at https://{{ step_ca_dns_names.split(',') | first }}:{{ step_ca_port }}"
-      - "Root CA cert available at {{ deploy_path }}/step-ca/root_ca.crt"
+      - "Root CA cert available at /opt/step-ca/root_ca.crt"
+      - "ACME directory: https://{{ step_ca_dns_names.split(',') | first }}:{{ step_ca_port }}/acme/acme/directory"
+      - "Cert Warden UI: http://{{ step_ca_dns_names.split(',') | first }}:{{ certwarden_port }}"
       - "Health check: {{ step_ca_health.json }}"

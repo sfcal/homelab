@@ -37,7 +37,7 @@
 # asynchronous SError. overlay_map.dtb is the firmware's overlay index.
 - name: "{{ cm5_host.hostname }}: copy Alpine kernel, initramfs, device tree and overlays."
   ansible.builtin.copy:
-    src: "{{ deploy_path }}/netbootxyz/assets/cm5/alpine/{{ item.src }}"
+    src: "{{ netboot_assets_path }}/cm5/alpine/{{ item.src }}"
     dest: "{{ cm5_tftp_dir }}/{{ item.dest }}"
     remote_src: true
     owner: "1000"

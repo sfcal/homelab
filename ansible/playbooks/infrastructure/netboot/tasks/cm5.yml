@@ -23,14 +23,14 @@
     group: "1000"
     mode: "0755"
   loop:
-    - "{{ deploy_path }}/netbootxyz/assets/cm5"
-    - "{{ deploy_path }}/netbootxyz/assets/cm5/images"
-    - "{{ deploy_path }}/netbootxyz/assets/cm5/alpine"
+    - "{{ netboot_assets_path }}/cm5"
+    - "{{ netboot_assets_path }}/cm5/images"
+    - "{{ netboot_assets_path }}/cm5/alpine"
 
 - name: Download Alpine rpi release tarball.
   ansible.builtin.get_url:
     url: "{{ cm5_alpine_url }}"
-    dest: "{{ deploy_path }}/netbootxyz/assets/cm5/{{ cm5_alpine_url | basename }}"
+    dest: "{{ netboot_assets_path }}/cm5/{{ cm5_alpine_url | basename }}"
     checksum: "sha256:{{ cm5_alpine_sha256 }}"
     owner: "1000"
     group: "1000"
@@ -39,7 +39,7 @@
 
 - name: Check for extracted Alpine boot files.
   ansible.builtin.stat:
-    path: "{{ deploy_path }}/netbootxyz/assets/cm5/alpine/{{ item }}"
+    path: "{{ netboot_assets_path }}/cm5/alpine/{{ item }}"
   loop:
     - boot/vmlinuz-rpi
     - boot/initramfs-rpi
@@ -49,8 +49,8 @@
 
 - name: Extract Alpine tarball (kernel, initramfs, modloop, dtbs, offline apk repo).
   ansible.builtin.unarchive:
-    src: "{{ deploy_path }}/netbootxyz/assets/cm5/{{ cm5_alpine_url | basename }}"
-    dest: "{{ deploy_path }}/netbootxyz/assets/cm5/alpine"
+    src: "{{ netboot_assets_path }}/cm5/{{ cm5_alpine_url | basename }}"
+    dest: "{{ netboot_assets_path }}/cm5/alpine"
     remote_src: true
     owner: "1000"
     group: "1000"
@@ -59,7 +59,7 @@
 - name: Download Ubuntu preinstalled raspi image.
   ansible.builtin.get_url:
     url: "{{ cm5_ubuntu_image_url }}"
-    dest: "{{ deploy_path }}/netbootxyz/assets/cm5/images/{{ cm5_ubuntu_image_url | basename }}"
+    dest: "{{ netboot_assets_path }}/cm5/images/{{ cm5_ubuntu_image_url | basename }}"
     checksum: "sha256:{{ cm5_ubuntu_image_sha256 }}"
     owner: "1000"
     group: "1000"
@@ -74,17 +74,17 @@
   vars:
     cm5_serial: "{{ cm5_entry.key }}"
     cm5_host: "{{ cm5_entry.value }}"
-    cm5_tftp_dir: "{{ deploy_path }}/netbootxyz/config/menus/{{ cm5_entry.key[-8:] }}"
-    cm5_http_dir: "{{ deploy_path }}/netbootxyz/assets/cm5/{{ cm5_entry.key }}"
-    cm5_staging_dir: "{{ deploy_path }}/netbootxyz/assets/cm5/.staging/{{ cm5_entry.key }}"
+    cm5_tftp_dir: "{{ netboot_config_path }}/menus/{{ cm5_entry.key[-8:] }}"
+    cm5_http_dir: "{{ netboot_assets_path }}/cm5/{{ cm5_entry.key }}"
+    cm5_staging_dir: "{{ netboot_assets_path }}/cm5/.staging/{{ cm5_entry.key }}"
 
 # Trees for hosts removed from cm5_hosts must not keep serving their seed
 # (user-data carries the login password hash) or TFTP boot files.
 - name: Find per-CM5 HTTP and staging directories.
   ansible.builtin.find:
     paths:
-      - "{{ deploy_path }}/netbootxyz/assets/cm5"
-      - "{{ deploy_path }}/netbootxyz/assets/cm5/.staging"
+      - "{{ netboot_assets_path }}/cm5"
+      - "{{ netboot_assets_path }}/cm5/.staging"
     file_type: directory
   register: cm5_serial_dirs
 
@@ -102,7 +102,7 @@
 # Constrained to 8-hex names so netboot.xyz's own menu content is never touched.
 - name: Find per-serial TFTP directories.
   ansible.builtin.find:
-    paths: "{{ deploy_path }}/netbootxyz/config/menus"
+    paths: "{{ netboot_config_path }}/menus"
     file_type: directory
     use_regex: true
     patterns: '^[0-9a-f]{8}$'

@@ -1,34 +1,5 @@
 ---
 services:
-  convertx:
-    image: {{ apps.work.convertx.image }}
-    container_name: convertx
-    restart: unless-stopped
-    mem_limit: 2g
-    mem_reservation: 512m
-    ports:
-      - "{{ apps.work.convertx.port }}:3000"
-    environment:
-      - JWT_SECRET={{ convertx_jwt_secret }}
-      - ALLOW_UNAUTHENTICATED=true
-      - HTTP_ALLOWED=true
-    volumes:
-      - {{ deploy_path }}/convertx/data:/app/data
-
-  cyberchef:
-    image: {{ apps.work.cyberchef.image }}
-    container_name: cyberchef
-    restart: unless-stopped
-    ports:
-      - "{{ apps.work.cyberchef.port }}:8080"
-
-  it-tools:
-    image: {{ apps.work.ittools.image }}
-    container_name: it-tools
-    restart: unless-stopped
-    ports:
-      - "{{ apps.work.ittools.port }}:80"
-
   microbin:
     image: {{ apps.work.microbin.image }}
     container_name: microbin
@@ -36,7 +7,7 @@ services:
     ports:
       - "{{ apps.work.microbin.port }}:8080"
     volumes:
-      - "{{ deploy_path }}/microbin/data:/app/microbin_data"
+      - "/var/lib/work/microbin:/app/microbin_data"
     environment:
       - MICROBIN_PORT=8080
       - MICROBIN_PUBLIC_PATH=https://{{ apps.work.microbin.proxy.name }}.{{ apps.work.microbin.proxy.domain }}
@@ -46,13 +17,40 @@ services:
       - MICROBIN_HIDE_FOOTER=true
       - MICROBIN_MAX_FILE_SIZE_UNENCRYPTED_MB={{ apps.work.microbin.max_file_size_mb | default(2048) }}
 
-  stirling-pdf:
-    image: {{ apps.work.stirlingpdf.image }}
-    container_name: stirling-pdf
+  kasm:
+    image: {{ apps.work.kasm.image }}
+    container_name: kasm
+    privileged: true
     restart: unless-stopped
     ports:
-      - "{{ apps.work.stirlingpdf.port }}:8080"
+      - "{{ apps.work.kasm.port }}:{{ apps.work.kasm.port }}"
+      - "{{ apps.work.kasm.wizard_port }}:3000"
+    environment:
+      - KASM_PORT={{ apps.work.kasm.port }}
+      - DOCKER_MTU=1500
     volumes:
-      - {{ deploy_path }}/stirling-pdf/configs:/configs
-      - {{ deploy_path }}/stirling-pdf/logs:/logs
-      - {{ deploy_path }}/stirling-pdf/data:/usr/share/tessdata
+      - "/var/lib/work/kasm/data:/opt"
+      - "/var/lib/work/kasm/docker:/var/lib/docker"
+
+  restreamer:
+    image: {{ apps.work.restreamer.image }}
+    container_name: restreamer
+    restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 512m
+    ports:
+      - "{{ apps.work.restreamer.port }}:8080"
+      - "{{ apps.work.restreamer.rtmp_port }}:1935"
+      - "{{ apps.work.restreamer.srt_port }}:6000/udp"
+    volumes:
+      - /var/lib/work/restreamer/config:/core/config
+      - /var/lib/work/restreamer/data:/core/data
+
+# Kasm runs its own Docker daemon inside the container and uses
+# 172.17-172.19.0.0/16 internally. Pin this project's network outside
+# Docker's default pool so the outer and inner subnets never overlap.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.90.0.0/24

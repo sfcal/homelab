@@ -9,7 +9,7 @@
   loop:
     - "{{ frigate_deploy_path }}"
     - "{{ frigate_deploy_path }}/build"
-    - "{{ frigate_deploy_path }}/config"
+    - "{{ frigate_data_path }}/config"
 
 - name: Create tmpfs mount directory.
   ansible.builtin.file:

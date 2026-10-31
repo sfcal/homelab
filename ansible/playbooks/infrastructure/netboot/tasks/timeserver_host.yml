@@ -39,5 +39,5 @@
 - name: "{{ ts_host.hostname }}: deploy per-MAC reimage boot script."
   ansible.builtin.template:
     src: templates/timeserver-reimage.ipxe.j2
-    dest: "{{ deploy_path }}/netbootxyz/config/menus/MAC-{{ ts_mac }}.ipxe"
+    dest: "{{ netboot_config_path }}/menus/MAC-{{ ts_mac }}.ipxe"
     mode: "0644"

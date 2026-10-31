@@ -8,10 +8,11 @@
     mode: "0755"
   loop:
     - "{{ romm_deploy_path }}"
-    - "{{ romm_deploy_path }}/resources"
-    - "{{ romm_deploy_path }}/redis"
-    - "{{ romm_deploy_path }}/assets"
     - "{{ romm_deploy_path }}/config"
+    - "{{ romm_data_path }}"
+    - "{{ romm_data_path }}/resources"
+    - "{{ romm_data_path }}/redis"
+    - "{{ romm_data_path }}/assets"
     - "{{ romm_library_path }}/roms"   # roms/<platform>/<game>
     - "{{ romm_library_path }}/roms/gc"   # GameCube (RomM alias of ngc): the folder Dolphin and Pegasus scan
     - "{{ romm_library_path }}/roms/wii"  # Wii
@@ -21,7 +22,7 @@
 # owner/mode here would hand the live datadir back to root on every run.
 - name: Create the romm database directory.
   ansible.builtin.file:
-    path: "{{ romm_deploy_path }}/db"
+    path: "{{ romm_data_path }}/db"
     state: directory
 
 - name: Deploy romm config.yml.

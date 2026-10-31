@@ -19,14 +19,14 @@
   vars:
     ts_mac: "{{ ts_entry.key }}"
     ts_host: "{{ ts_entry.value }}"
-    ts_seed_dir: "{{ deploy_path }}/netbootxyz/assets/timeserver/{{ ts_entry.key }}"
+    ts_seed_dir: "{{ netboot_assets_path }}/timeserver/{{ ts_entry.key }}"
 
 # Seed dirs for hosts removed from timeserver_hosts must not keep serving
 # their user-data (it carries the login password hash) over HTTP. This also
 # clears the pre-refactor shared assets/timeserver/seed directory.
 - name: Find per-time-server seed directories.
   ansible.builtin.find:
-    paths: "{{ deploy_path }}/netbootxyz/assets/timeserver"
+    paths: "{{ netboot_assets_path }}/timeserver"
     file_type: directory
   register: netboot_ts_seed_dirs
 

@@ -81,7 +81,7 @@ task ansible:deploy-monitoring ENV=wil
 
 The task file:
 
-1. Creates directory structure under `/opt/monitoring/`
+1. Creates the directory structure: rendered config under `/opt/monitoring/`, Prometheus and Grafana state under `/var/lib/monitoring/`
 2. Sets ownership to `monitoring_uid:monitoring_gid`
 3. Deploys Prometheus configuration
 4. Deploys Grafana datasource provisioning
@@ -236,7 +236,7 @@ These variables apply to all monitoring containers:
 |-----------|------|-------------|---------|
 | `monitoring_uid` | `string` | Container file ownership UID | `"1000"` |
 | `monitoring_gid` | `string` | Container file ownership GID | `"1000"` |
-| `backup_targets` | `list[string]` | Service directories under `/opt/monitoring/` to back up | (per-env) |
+| `backup_targets` | `list[string]` | Service directories under `/var/lib/monitoring/` to back up | (per-env) |
 
 ## Common Tasks
 
