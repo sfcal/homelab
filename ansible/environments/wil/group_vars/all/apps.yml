@@ -43,21 +43,6 @@ apps:
       domain: sfc.al
       proxied: true
 
-  games-server:
-    host_group: app_gamesserver
-    terraria:
-      # renovate: datasource=docker
-      image: "ryshe/terraria:latest"
-      port: 7777
-      maxplayers: 8
-      worldname: "TerrariaWorld"
-      worldsize: 3
-      difficulty: 0
-      motd: "Welcome to the Terraria server!"
-      language: "en-US"
-      npcstream: 60
-      seed: ""
-
   website:
     host_group: app_website
     # renovate: datasource=docker

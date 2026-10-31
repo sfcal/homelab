@@ -1,0 +1,35 @@
+---
+- name: Deploy Gaming (Terraria, Wolf, RomM)
+  hosts: app_gaming
+  become: true
+
+  handlers:
+    - name: Include various service handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    # Game data (worlds, ROM library) is local to the VM unless the environment
+    # defines nfs_mounts (group_vars/app_gaming/nfs.yml).
+    - name: Configure NFS mounts.
+      ansible.builtin.include_role:
+        name: nfs_mount
+      when: nfs_mounts is defined
+
+    # Each stack is deployed only where group_vars/app_gaming/vars.yml defines
+    # its image: Terraria on wil, RomM and Wolf on ldn.
+    - name: Configure Terraria.
+      ansible.builtin.include_tasks: tasks/terraria.yml
+      when: terraria_image is defined
+
+    - name: Configure RomM.
+      ansible.builtin.include_tasks: tasks/romm.yml
+      when: romm_image is defined
+
+    - name: Configure Wolf.
+      ansible.builtin.include_tasks: tasks/wolf.yml
+      when: wolf_image is defined

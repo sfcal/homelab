@@ -32,7 +32,7 @@ task ansible:ping ENV=wil
 | `deploy-media` | Plex and *arr stack |
 | `deploy-homeassistant` | Home Assistant |
 | `deploy-frigate` | Frigate NVR |
-| `deploy-cloud-gaming` | Wolf (Moonlight streaming) and RomM |
+| `deploy-gaming` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts |
 | `backup-media` | Backup media stack configs |
@@ -108,7 +108,7 @@ Apps that need more than Docker Compose (e.g., media stack with backup/restore) 
 | Media stack | Backup/restore tasks, complex multi-container setup |
 | Home Assistant | Custom configuration management |
 | Frigate | NFS mount, dedicated compose/config tasks |
-| Cloud Gaming | Kernel modules and udev rules, GPU render-node check, Wolf config seeded once, separate RomM stack, optional NFS |
+| Gaming | Stacks selected per environment (Terraria; Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |
 
 ## Roles
 

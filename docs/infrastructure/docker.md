@@ -25,6 +25,10 @@ task ansible:backup-media ENV=wil
 task ansible:restore-media ENV=wil
 ```
 
+## Gaming
+
+Terraria (wil) and Wolf with RomM (ldn) share one playbook on the `app_gaming` host; each environment gets the stacks its group_vars define. Deploy with `task ansible:deploy-gaming ENV=<env>`; see [Gaming](gaming.md).
+
 ## Data-Driven Apps
 
 Most applications use the shared `deploy-app.yml` playbook and are defined in `ansible/environments/<env>/group_vars/all/apps.yml`. See [Deploy a Service](../guides/deploy-service.md) for the full workflow.
@@ -33,12 +37,10 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in `a
 |-----|-------|------|
 | Birdle | `ghcr.io/sfcal/new-birdle` | 8091 |
 | Bookstack | `lscr.io/linuxserver/bookstack` | 8074 |
-| Games Server | Terraria | 7777 |
 | Kasm | `lscr.io/linuxserver/kasm` | 4443 |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
-| RomM | `rommapp/romm` | 8085 |
 | Website | `ghcr.io/sfcal/samuel.computer` | 8090 |
 
 ## Infrastructure Services

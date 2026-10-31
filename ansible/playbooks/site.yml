@@ -50,19 +50,15 @@
 - import_playbook: apps/frigate/deploy.yml
   tags: ['frigate', 'applications']
 
-# 8. Cloud Gaming (Wolf & RomM)
-- import_playbook: apps/cloud-gaming/deploy.yml
-  tags: ['cloud-gaming', 'wolf', 'romm', 'applications']
+# 8. Gaming (Terraria, Wolf & RomM)
+- import_playbook: apps/gaming/deploy.yml
+  tags: ['gaming', 'terraria', 'wolf', 'romm', 'applications']
 
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml
   vars: { app_name: birdle }
   tags: ['birdle', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: games-server }
-  tags: ['games-server', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: kosync }

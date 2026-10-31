@@ -21,7 +21,7 @@ task --list-all
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |
 | `task ansible:deploy-homeassistant ENV=wil` | Home Assistant |
 | `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
-| `task ansible:deploy-cloud-gaming ENV=ldn` | Wolf (Moonlight streaming) and RomM |
+| `task ansible:deploy-gaming ENV=ldn` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
 | `task ansible:ping ENV=wil` | Test connectivity to all hosts |
 | `task ansible:backup-media ENV=wil` | Backup media stack configs |

@@ -49,29 +49,10 @@
     - "{{ wolf_deploy_path }}"
     - "{{ wolf_data_path }}/state"        # mounted at /etc/wolf (cfg/, profile_data/)
     - "{{ wolf_data_path }}/state/cfg"
-    - "{{ wolf_dolphin_path }}"
-    - "{{ wolf_dolphin_path }}/cfg"
 
-# The Dolphin app bind-mounts these into the Pegasus image (see config.toml.j2).
-- name: Deploy the Dolphin start script.
-  ansible.builtin.copy:
-    src: files/dolphin/startup-app.sh
-    dest: "{{ wolf_dolphin_path }}/startup-app.sh"
-    owner: "{{ wolf_user }}"
-    group: "{{ wolf_group }}"
-    mode: "0755"
-
-- name: Deploy the Dolphin config seeds (copied into the app home on its first run).
-  ansible.builtin.copy:
-    src: files/dolphin/cfg/
-    dest: "{{ wolf_dolphin_path }}/cfg/"
-    owner: "{{ wolf_user }}"
-    group: "{{ wolf_group }}"
-    mode: "0644"
-
-- name: Deploy compose.yaml.
+- name: Deploy wolf compose.yaml.
   ansible.builtin.template:
-    src: templates/compose.yaml.j2
+    src: templates/wolf-compose.yaml.j2
     dest: "{{ wolf_deploy_path }}/compose.yaml"
     owner: "{{ wolf_user }}"
     group: "{{ wolf_group }}"
@@ -83,7 +64,7 @@
 # or the API), so it is seeded once and never overwritten.
 - name: Seed Wolf config.toml (first deploy only).
   ansible.builtin.template:
-    src: templates/config.toml.j2
+    src: templates/wolf-config.toml.j2
     dest: "{{ wolf_data_path }}/state/cfg/config.toml"
     owner: "{{ wolf_user }}"
     group: "{{ wolf_group }}"

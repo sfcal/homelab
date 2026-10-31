@@ -4,7 +4,7 @@
 # the networking host) is built from two sources:
 #   1. Manual per-domain lists (proxy/<domain>.yml) — services OUTSIDE the app
 #      registry: Proxmox/NAS/KVM/Haivision devices, media stack, monitoring,
-#      frigate, cloud-gaming, GitHub Pages.
+#      frigate, GitHub Pages.
 #   2. registry_services — generated from group_vars/all/apps.yml. Every
 #      `proxy:` block (top-level app or one-level-nested sub-service, e.g.
 #      apps.work.microbin.proxy) emits one entry. backend_host is the first

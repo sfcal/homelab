@@ -124,7 +124,7 @@ nav:
     - Time Server: infrastructure/ntp/index.md
     - Monitoring: infrastructure/monitoring/index.md
     - Docker Services: infrastructure/docker.md
-    - Cloud Gaming (Wolf, RomM): infrastructure/cloud-gaming.md
+    - Gaming (Terraria, Wolf, RomM): infrastructure/gaming.md
 
 validation:
   omitted_files: warn

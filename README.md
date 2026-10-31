@@ -280,7 +280,7 @@ hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana, Homepage
 hl task ansible:deploy-media ENV=dev        # Full media stack
 hl task ansible:deploy-website ENV=dev      # Personal website
 hl task ansible:deploy-birdle ENV=dev       # Birdle game
-hl task ansible:deploy-games ENV=dev        # Terraria server
+hl task ansible:deploy-gaming ENV=dev       # Terraria, Wolf, RomM
 
 # Utilities
 hl task ansible:ping ENV=dev               # Test connectivity

@@ -100,11 +100,11 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/frigate/deploy.yml }
 
-  deploy-cloud-gaming:
-    desc: Deploy cloud gaming stack (Wolf, RomM)
+  deploy-gaming:
+    desc: Deploy gaming stacks (Terraria, Wolf, RomM)
     cmds:
       - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/cloud-gaming/deploy.yml }
+        vars: { PLAYBOOK_PATH: apps/gaming/deploy.yml }
 
   # --- Utility Tasks ---
 

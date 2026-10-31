@@ -33,3 +33,19 @@
   community.docker.docker_compose_v2:
     project_src: "{{ romm_deploy_path }}"
     state: present
+
+- name: Restart terraria
+  community.docker.docker_compose_v2:
+    project_src: "{{ terraria_deploy_path }}"
+    state: restarted
+    recreate: always
+
+- name: Stop terraria
+  community.docker.docker_compose_v2:
+    project_src: "{{ terraria_deploy_path }}"
+    state: stopped
+
+- name: Start terraria
+  community.docker.docker_compose_v2:
+    project_src: "{{ terraria_deploy_path }}"
+    state: present

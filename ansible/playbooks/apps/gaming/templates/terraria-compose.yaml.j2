@@ -1,0 +1,41 @@
+---
+services:
+  terraria:
+    image: {{ terraria_image }}
+    container_name: terraria
+    restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    environment:
+      - WORLD_FILENAME={{ terraria_worldname }}.wld
+    ports:
+      - "{{ terraria_port }}:7777"
+    volumes:
+      - {{ terraria_data_path }}/worlds:/root/.local/share/Terraria/Worlds
+    stdin_open: true
+    tty: true
+    command:
+      - -autocreate
+      - "{{ terraria_worldsize }}"
+      - -worldname
+      - {{ terraria_worldname }}
+      - -difficulty
+      - "{{ terraria_difficulty }}"
+      - -maxplayers
+      - "{{ terraria_maxplayers }}"
+{% if terraria_server_password %}
+      - -password
+      - "{{ terraria_server_password }}"
+{% endif %}
+      - -motd
+      - "{{ terraria_motd }}"
+      - -lang
+      - "{{ terraria_language }}"
+      - -npcstream
+      - "{{ terraria_npcstream }}"
+{% if terraria_seed %}
+      - -seed
+      - "{{ terraria_seed }}"
+{% endif %}
+      - -secure
+      - "1"

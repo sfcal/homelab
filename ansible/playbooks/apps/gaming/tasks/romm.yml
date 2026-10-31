@@ -3,8 +3,8 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ wolf_user }}"
-    group: "{{ wolf_group }}"
+    owner: "{{ romm_user }}"
+    group: "{{ romm_group }}"
     mode: "0755"
   loop:
     - "{{ romm_deploy_path }}"
@@ -14,7 +14,7 @@
     - "{{ romm_data_path }}/redis"
     - "{{ romm_data_path }}/assets"
     - "{{ romm_library_path }}/roms"   # roms/<platform>/<game>
-    - "{{ romm_library_path }}/roms/gc"   # GameCube (RomM alias of ngc): the folder Dolphin and Pegasus scan
+    - "{{ romm_library_path }}/roms/gc"   # GameCube (RomM alias of ngc): the folder Pegasus scans
     - "{{ romm_library_path }}/roms/wii"  # Wii
     - "{{ romm_library_path }}/bios"   # bios/<platform>
 
@@ -29,8 +29,8 @@
   ansible.builtin.template:
     src: templates/romm-config.yml.j2
     dest: "{{ romm_deploy_path }}/config/config.yml"
-    owner: "{{ wolf_user }}"
-    group: "{{ wolf_group }}"
+    owner: "{{ romm_user }}"
+    group: "{{ romm_group }}"
     mode: "0644"
   notify:
     - Restart romm
@@ -39,8 +39,8 @@
   ansible.builtin.template:
     src: templates/romm-compose.yaml.j2
     dest: "{{ romm_deploy_path }}/compose.yaml"
-    owner: "{{ wolf_user }}"
-    group: "{{ wolf_group }}"
+    owner: "{{ romm_user }}"
+    group: "{{ romm_group }}"
     mode: "0644"
   notify:
     - Restart romm

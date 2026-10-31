@@ -132,43 +132,6 @@ base_create_json = """
 """
 
 [[profiles.apps]]
-title = "Dolphin"
-icon_png_path = "https://raw.githubusercontent.com/dolphin-emu/dolphin/master/Data/dolphin-emu.png"
-start_virtual_compositor = true
-
-[profiles.apps.runner]
-type = "docker"
-name = "WolfDolphin"
-# games-on-whales publishes no Dolphin image, but its Pegasus image is built on
-# base-emu, which bundles the upstream Dolphin AppImage. The two extra mounts
-# replace Pegasus's start script with one that launches Dolphin directly and
-# seed its config (ROM paths, fullscreen, Wolf pad mapping) on the first run.
-# DISABLE_AUTO_UPDATES stops the AppImage's self-updater prompting in-session.
-image = "{{ wolf_pegasus_image }}"
-mounts = [
-  "{{ wolf_roms_path }}/:/ROMs/:rw",
-  "{{ wolf_dolphin_path }}/startup-app.sh:/opt/gow/startup-app.sh:ro",
-  "{{ wolf_dolphin_path }}/cfg/:/cfg/dolphin/:ro",
-]
-env = [
-  "RUN_SWAY=true",
-  "GOW_REQUIRED_DEVICES=/dev/input/* /dev/dri/* /dev/nvidia*",
-  "DISABLE_AUTO_UPDATES=1",
-]
-devices = []
-ports = []
-base_create_json = """
-{
-  "HostConfig": {
-    "IpcMode": "host",
-    "CapAdd": ["NET_RAW", "MKNOD", "NET_ADMIN", "SYS_ADMIN", "SYS_NICE"],
-    "Privileged": false,
-    "DeviceCgroupRules": ["c 13:* rmw", "c 244:* rmw"]
-  }
-}
-"""
-
-[[profiles.apps]]
 title = "Steam"
 icon_png_path = "https://games-on-whales.github.io/wildlife/apps/steam/assets/icon.png"
 start_virtual_compositor = true

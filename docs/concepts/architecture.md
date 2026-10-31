@@ -78,10 +78,10 @@ Taskfile.yaml               Root task runner entry point
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
 | MicroBin | `app_work` | Pastebin |
 | Restreamer | `app_work` | Video streaming relay |
-| Wolf | `app_cloud_gaming` | Moonlight game streaming (Intel Arc Pro B50 SR-IOV VF) |
-| RomM | `app_cloud_gaming` | ROM manager |
+| Wolf | `app_gaming` | Moonlight game streaming (Intel Arc Pro B50 SR-IOV VF) |
+| RomM | `app_gaming` | ROM manager |
 | Website | `app_website` | Personal website |
-| Games Server | `app_gamesserver` | Terraria server |
+| Terraria | `app_gaming` | Game server |
 
 ## Key Design Decisions
 

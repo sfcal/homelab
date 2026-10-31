@@ -1,0 +1,24 @@
+---
+# Stacks of the gaming playbook (playbooks/apps/gaming) on this host: each one
+# is deployed only when its image is defined below. wil runs Terraria.
+
+# --- Terraria (dedicated server) ---
+# Paths keep the project name from when this was the games-server registry
+# app, so the live world stays where it is.
+terraria_deploy_path: "/opt/games-server"              # compose
+terraria_data_path: "/var/lib/games-server/terraria"   # worlds/
+terraria_port: 7777
+terraria_maxplayers: 8
+terraria_worldname: "TerrariaWorld"
+terraria_worldsize: 3
+terraria_difficulty: 0
+terraria_motd: "Welcome to the Terraria server!"
+terraria_language: "en-US"
+terraria_npcstream: 60
+terraria_seed: ""
+# Join password: terraria_server_password in group_vars/all/app.secrets.sops.yml
+# (empty for an open server).
+
+# Container image
+# renovate: datasource=docker
+terraria_image: "ryshe/terraria:latest"

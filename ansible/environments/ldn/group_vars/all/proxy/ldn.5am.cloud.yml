@@ -47,7 +47,7 @@ ldn_services:
 
   # Apps (registry apps live in group_vars/all/apps.yml)
 
-  # Cloud gaming (custom playbook: playbooks/apps/cloud-gaming)
+  # Cloud gaming (custom playbook: playbooks/apps/gaming)
   - name: roms
     backend_host: 10.3.20.55
     backend_port: 8085

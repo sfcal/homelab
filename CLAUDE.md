@@ -47,7 +47,7 @@ Network ranges: wil=10.2.x.x, ldn=10.3.x.x
 - All variables: `snake_case`
 - Ansible groups: `infra_*` (infrastructure), `app_*` (applications)
 - Terraform VM keys: `snake_case` (e.g., `networking`, `ca_server`, `games_server`)
-- Files/directories: `snake_case` with hyphens for app names (e.g., `games-server`, `cloud-gaming`)
+- Files/directories: `snake_case` with hyphens for app names (e.g., `media-stack`)
 - Domains: lowercase dot-separated (5am.video, wil.5am.cloud)
 
 ### YAML
@@ -162,7 +162,7 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
    ```
    Multi-service apps nest sub-services with their own `proxy:` blocks (see `apps.work.*`). Apps without a `proxy:` block get no DNS/proxy entry.
 
-2. **Manual per-domain files** (`group_vars/all/proxy/<domain>.yml`) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, cloud-gaming. Same fields, plus explicit `backend_host`/`backend_port`:
+2. **Manual per-domain files** (`group_vars/all/proxy/<domain>.yml`) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (Wolf, RomM). Same fields, plus explicit `backend_host`/`backend_port`:
    ```yaml
    - name: vm                 # Subdomain
      backend_host: 10.2.20.7  # Backend IP

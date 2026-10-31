@@ -1,0 +1,41 @@
+---
+- name: Create terraria directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ terraria_deploy_path }}"
+    - "{{ terraria_data_path }}/worlds"
+
+- name: Deploy terraria compose.yaml.
+  ansible.builtin.template:
+    src: templates/terraria-compose.yaml.j2
+    dest: "{{ terraria_deploy_path }}/compose.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart terraria
+
+# The image tag floats (latest), so pull it on every run and recreate the
+# container when a newer image arrives.
+- name: Pull the Terraria image.
+  community.docker.docker_image:
+    name: "{{ terraria_image }}"
+    source: pull
+    force_source: true
+  notify:
+    - Restart terraria
+
+- name: Ensure Terraria is running.
+  community.docker.docker_compose_v2:
+    project_src: "{{ terraria_deploy_path }}"
+    state: present
+  register: terraria_output
+
+- name: Display Terraria status.
+  ansible.builtin.debug:
+    var: terraria_output

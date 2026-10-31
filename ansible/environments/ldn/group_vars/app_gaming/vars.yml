@@ -1,0 +1,51 @@
+---
+# Stacks of the gaming playbook (playbooks/apps/gaming) on this host: each one
+# is deployed only when its image is defined below. ldn runs RomM and Wolf.
+
+# --- Wolf (Moonlight streaming host) ---
+# Runs as root inside its container; the app containers are spawned as
+# siblings through the Docker socket, so no render group is needed.
+wolf_user: root
+wolf_group: root
+wolf_deploy_path: "/opt/wolf"   # compose
+wolf_data_path: "/var/lib/wolf"       # state/ (cfg, profile data)
+
+# Name shown in Moonlight clients
+wolf_hostname: "Wolf"
+wolf_log_level: INFO
+# DRM render node of the passed-through GPU (Intel Arc Pro B50 SR-IOV VF). In
+# this VM the VF is the only render node; the Proxmox display device has none.
+wolf_render_node: /dev/dri/renderD128
+
+# Container images (upstream recommends wolf:stable and <app>:edge)
+# renovate: datasource=docker
+wolf_image: "ghcr.io/games-on-whales/wolf:stable"
+# renovate: datasource=docker
+wolf_ui_image: "ghcr.io/games-on-whales/wolf-ui:main"
+# renovate: datasource=docker
+wolf_pegasus_image: "ghcr.io/games-on-whales/pegasus:edge"
+# renovate: datasource=docker
+wolf_retroarch_image: "ghcr.io/games-on-whales/retroarch:edge"
+# renovate: datasource=docker
+wolf_steam_image: "ghcr.io/games-on-whales/steam:edge"
+
+# --- ROM library (shared by RomM and the Wolf emulator apps) ---
+# Local to the VM's disk. To serve it from a NAS instead, add an nfs.yml with
+# `nfs_mounts` (see wil app_mediastack) and point this at the mount.
+romm_library_path: "/srv/romm/library"  # RomM: roms/<platform>/<game>, bios/<platform>
+wolf_roms_path: "{{ romm_library_path }}/roms"       # mounted at /ROMs in Pegasus and RetroArch
+
+# --- RomM configuration ---
+romm_user: root
+romm_group: root
+romm_deploy_path: "/opt/romm"   # compose + config.yml
+romm_data_path: "/var/lib/romm"       # db, resources, redis, assets
+romm_port: 8085
+# Public URL (behind Caddy TLS): invite links, QR codes, secure session cookies.
+romm_base_url: "https://roms.ldn.5am.cloud"
+
+# Container images
+# renovate: datasource=docker
+romm_image: "rommapp/romm:5.4.1"
+# renovate: datasource=docker
+romm_db_image: "mariadb:13.0"
