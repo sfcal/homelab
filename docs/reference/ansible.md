@@ -35,8 +35,6 @@ task ansible:ping ENV=wil
 | `deploy-gaming` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts |
-| `backup-media` | Backup media stack configs |
-| `restore-media` | Restore media stack from backup |
 
 All commands require `ENV=<env>` and are prefixed with `task ansible:`.
 
@@ -101,11 +99,11 @@ The `deploy-app.yml` playbook reads the app config, includes the `docker_service
 
 ### Custom App Playbooks
 
-Apps that need more than Docker Compose (e.g., media stack with backup/restore) have custom playbooks at `ansible/playbooks/apps/<name>/deploy.yml`.
+Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have custom playbooks at `ansible/playbooks/apps/<name>/deploy.yml`.
 
 | App | Reason for Custom Playbook |
 |-----|---------------------------|
-| Media stack | Backup/restore tasks, complex multi-container setup |
+| Media stack | NFS mount, complex multi-container setup |
 | Home Assistant | Custom configuration management |
 | Frigate | NFS mount, dedicated compose/config tasks |
 | Gaming | Stacks selected per environment (Terraria; Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |

@@ -18,12 +18,7 @@ The media stack provides automated media management and streaming on a dedicated
 | Pulsarr | Request management |
 | Frigate | Camera/NVR integration |
 
-Deploy with `task ansible:deploy-media ENV=wil`. Supports backup and restore:
-
-```bash
-task ansible:backup-media ENV=wil
-task ansible:restore-media ENV=wil
-```
+Deploy with `task ansible:deploy-media ENV=wil`.
 
 ## Gaming
 

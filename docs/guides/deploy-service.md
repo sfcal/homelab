@@ -91,7 +91,7 @@ task ansible:deploy-networking ENV=wil  # Updates DNS and proxy
 
 ## Custom Playbooks
 
-For apps that need more than Docker Compose (e.g., media stack with backup/restore), create a full playbook at `ansible/playbooks/apps/<service>/deploy.yml`:
+For apps that need more than Docker Compose (e.g., media stack with NFS mounts), create a full playbook at `ansible/playbooks/apps/<service>/deploy.yml`:
 
 ```yaml
 ---

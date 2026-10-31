@@ -284,8 +284,6 @@ hl task ansible:deploy-gaming ENV=dev       # Terraria, Wolf, RomM
 
 # Utilities
 hl task ansible:ping ENV=dev               # Test connectivity
-hl task ansible:backup-media ENV=dev       # Backup media configs
-hl task ansible:restore-media ENV=dev      # Restore from backup
 ```
 
 #### Verify Deployment

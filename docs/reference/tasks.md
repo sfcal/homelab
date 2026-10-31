@@ -24,8 +24,6 @@ task --list-all
 | `task ansible:deploy-gaming ENV=ldn` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
 | `task ansible:ping ENV=wil` | Test connectivity to all hosts |
-| `task ansible:backup-media ENV=wil` | Backup media stack configs |
-| `task ansible:restore-media ENV=wil` | Restore media stack from backup |
 
 ## Terraform
 

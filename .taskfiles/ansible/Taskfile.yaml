@@ -14,20 +14,6 @@ tasks:
     cmds:
       - ansible-playbook -i {{.HOSTS_FILE}} playbooks/{{.PLAYBOOK_PATH}} {{.EXTRA_ARGS | default ""}}
 
-  # --- Media Operations ---
-
-  restore-media:
-    desc: Restore media stack backup
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/media/restore.yml }
-
-  backup-media:
-    desc: backup media stack
-    cmds:
-      - task: _deploy
-        vars: { PLAYBOOK_PATH: apps/media/backup.yml }
-
   # --- Full Deployment ---
 
   deploy-all:
