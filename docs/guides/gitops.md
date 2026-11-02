@@ -27,7 +27,7 @@ graph LR
 - **Trigger** — `push` to `main` touching `group_vars`, *and* the head commit is authored by `renovate[bot]`. Your own commits are never auto-deployed; use `task ansible:deploy-*` or **Run workflow**.
 - **Plan** — diffs `group_vars` between the environment's tag `deploy/<env>` (last successful deploy) and the pushed commit. Because the base is the last *successful* deploy, a run that was cancelled, superseded or failed is picked up by the next one.
 - **Targets** — only the allowlist below is ever auto-deployed. Anything else that changed is listed in the run summary as "deploy manually".
-- **Order** — wil first, ldn only if wil didn't fail. One target at a time per environment; runs queue per environment.
+- **Order** — wil first, ldn only if wil didn't fail (no manual approval). One target at a time per environment; runs queue per environment.
 - **Compose** — playbooks apply image bumps with `compose up` (`state: present`), which recreates only the services whose image or definition changed.
 - **Note** — a playbook always deploys the whole current state of `main` for its stack. Anything you pushed but didn't deploy for that stack goes out too.
 
@@ -155,10 +155,9 @@ Optional variables (repo- or environment-level):
 
 ### 5. Enable ldn
 
-Repeat steps 2–3 with `ENV=ldn`. Add yourself as a **required reviewer** on the `ldn` environment, then set `DEPLOY_ENVS` to `wil ldn`. Each ldn deploy then waits for your approval after wil succeeds.
+Repeat steps 2–3 with `ENV=ldn` (federated identity subject `repo:sfcal/homelab:environment:ldn`), test with `app:kosync`, then set `DEPLOY_ENVS` to `wil ldn`. ldn then deploys unattended once wil has succeeded — no approval step.
 
-!!! note
-    Environments, environment secrets and required reviewers are free on public repositories. On a private repository they need a paid plan (required reviewers need Enterprise).
+Images that only exist in ldn (kosync, the `work` apps, RomM, Wolf) have no wil canary; Renovate's `minimumReleaseAge` (1 day minor, 3 days major) is their buffer. If you ever want a pause before prod without having to approve anything, give the `ldn` environment a **wait timer** (free on public repos) — the run waits, and you can cancel it in that window.
 
 ## Day to day
 
