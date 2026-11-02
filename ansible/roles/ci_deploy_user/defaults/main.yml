@@ -1,0 +1,13 @@
+---
+# --- CI deploy user ---
+# Account the GitHub Actions deploy workflow logs in as (docs/guides/gitops.md).
+ci_deploy_user: deploy
+
+# Public half of this environment's CI SSH key, set in
+# environments/<env>/group_vars/all/ci.yml by `task ci:keys ENV=<env>`.
+ci_deploy_ssh_pubkey: ""
+
+# Addresses the key is accepted from. CI reaches the VMs through the site's
+# Tailscale subnet router, which SNATs tailnet traffic to its own LAN address,
+# so the key only works when it arrives through the tailnet.
+ci_deploy_ssh_from: "{{ groups['infra_networking'] | default([]) | join(',') }}"

@@ -6,7 +6,6 @@
   community.docker.docker_compose_v2:
     project_src: "{{ wolf_deploy_path }}"
     state: restarted
-    recreate: always
 
 - name: Stop wolf
   community.docker.docker_compose_v2:
@@ -22,7 +21,14 @@
   community.docker.docker_compose_v2:
     project_src: "{{ romm_deploy_path }}"
     state: restarted
-    recreate: always
+
+# Only the romm service bind-mounts config.yml; leave romm-db running.
+- name: Restart romm app
+  community.docker.docker_compose_v2:
+    project_src: "{{ romm_deploy_path }}"
+    state: restarted
+    services:
+      - romm
 
 - name: Stop romm
   community.docker.docker_compose_v2:
@@ -38,7 +44,6 @@
   community.docker.docker_compose_v2:
     project_src: "{{ terraria_deploy_path }}"
     state: restarted
-    recreate: always
 
 - name: Stop terraria
   community.docker.docker_compose_v2:

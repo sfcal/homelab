@@ -1,0 +1,57 @@
+version: '3'
+
+# Bootstrap for the GitHub Actions deploy workflow (docs/guides/gitops.md).
+# Keys live outside the repo in ~/.config/homelab-ci/<env>/.
+
+vars:
+  CI_DIR: '{{.HOME}}/.config/homelab-ci/{{.ENV}}'
+  GH_REPO: sfcal/homelab
+  # Hosts CI deploys to; keep in sync with ansible/playbooks/ci-access.yml.
+  TARGET_PATTERN: 'apps:infra_monitoring:infra_netboot'
+
+tasks:
+  keys:
+    desc: Generate the env's CI SSH + age keys, wire them in, re-encrypt its secrets (ENV=<env>)
+    dir: '{{.ROOT_DIR}}'
+    preconditions:
+      - sh: command -v ssh-keygen && command -v age-keygen && command -v sops
+        msg: needs ssh-keygen, age-keygen and sops on PATH
+    cmds:
+      - mkdir -p '{{.CI_DIR}}' && chmod 700 '{{.CI_DIR}}'
+      - test -f '{{.CI_DIR}}/id_ed25519' || ssh-keygen -q -t ed25519 -N '' -C 'homelab-ci-{{.ENV}}' -f '{{.CI_DIR}}/id_ed25519'
+      - test -f '{{.CI_DIR}}/age.txt' || age-keygen -o '{{.CI_DIR}}/age.txt' 2>/dev/null
+      - python3 .taskfiles/ci/wire-keys.py '{{.ENV}}' '{{.CI_DIR}}'
+      - find 'ansible/environments/{{.ENV}}' -name '*.sops.yml' -exec sops updatekeys --yes {} \;
+      - echo "Next - commit .sops.yaml + ansible/environments/{{.ENV}}, then task ansible:deploy-ci-access ENV={{.ENV}}"
+
+  known-hosts:
+    desc: Record host keys of the hosts CI deploys to (ENV=<env>; run from the LAN or tailnet)
+    dir: '{{.ROOT_DIR}}/ansible'
+    cmds:
+      - >-
+        ansible '{{.TARGET_PATTERN}}' -i 'environments/{{.ENV}}/hosts.ini' --list-hosts 2>/dev/null
+        | awk 'NR > 1 {print $1}' | sort -u
+        | xargs ssh-keyscan -T 5 -t ed25519 2>/dev/null | sort > 'environments/{{.ENV}}/known_hosts'
+      - test -s 'environments/{{.ENV}}/known_hosts'
+      - cat 'environments/{{.ENV}}/known_hosts'
+
+  secrets:
+    desc: Create the GitHub environment and upload its SSH + age secrets with gh (ENV=<env>)
+    dir: '{{.ROOT_DIR}}'
+    preconditions:
+      - sh: command -v gh
+        msg: needs the GitHub CLI (gh), logged in with admin on {{.GH_REPO}}
+      - sh: test -f '{{.CI_DIR}}/id_ed25519' && test -f '{{.CI_DIR}}/age.txt'
+        msg: run task ci:keys ENV={{.ENV}} first
+    cmds:
+      # Environment secrets are only released to jobs running from main.
+      - >-
+        gh api --silent -X PUT 'repos/{{.GH_REPO}}/environments/{{.ENV}}'
+        -F 'deployment_branch_policy[protected_branches]=false'
+        -F 'deployment_branch_policy[custom_branch_policies]=true'
+      - >-
+        gh api 'repos/{{.GH_REPO}}/environments/{{.ENV}}/deployment-branch-policies' --jq '.branch_policies[].name' | grep -qx main
+        || gh api --silent -X POST 'repos/{{.GH_REPO}}/environments/{{.ENV}}/deployment-branch-policies' -f name=main
+      - gh secret set SSH_DEPLOY_KEY --repo '{{.GH_REPO}}' --env '{{.ENV}}' < '{{.CI_DIR}}/id_ed25519'
+      - grep '^AGE-SECRET-KEY-' '{{.CI_DIR}}/age.txt' | gh secret set SOPS_AGE_KEY --repo '{{.GH_REPO}}' --env '{{.ENV}}'
+      - echo "Still to set from the Tailscale admin console - gh secret set TS_OAUTH_CLIENT_ID --env {{.ENV}} ; gh secret set TS_AUDIENCE --env {{.ENV}}"

@@ -1,0 +1,6 @@
+---
+# --- CI deploy access ---
+# Public half of this environment's CI deploy key. The private half lives in
+# the GitHub environment secret SSH_DEPLOY_KEY. Filled in by
+# `task ci:keys ENV=<env>`; applied by `task ansible:deploy-ci-access`.
+ci_deploy_ssh_pubkey: ""

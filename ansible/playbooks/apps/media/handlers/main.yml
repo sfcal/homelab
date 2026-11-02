@@ -1,6 +1,7 @@
 ---
+# Unused by the playbook (compose changes are applied by `state: present`);
+# kept for notifying from future bind-mounted config tasks.
 - name: Restart media-stack
   community.docker.docker_compose_v2:
     project_src: "{{ media_stack_deploy_path }}"
     state: restarted
-    recreate: always

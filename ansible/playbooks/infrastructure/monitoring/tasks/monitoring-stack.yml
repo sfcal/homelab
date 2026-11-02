@@ -45,7 +45,7 @@
     group: "{{ monitoring_group }}"
     mode: "0644"
   notify:
-    - Restart monitoring-stack
+    - Restart prometheus
 
 - name: Deploy Grafana datasource provisioning.
   ansible.builtin.template:
@@ -55,7 +55,7 @@
     group: "{{ monitoring_gid }}"
     mode: "0644"
   notify:
-    - Restart monitoring-stack
+    - Restart grafana
 
 - name: Deploy Grafana dashboard provisioning.
   ansible.builtin.template:
@@ -65,7 +65,7 @@
     group: "{{ monitoring_gid }}"
     mode: "0644"
   notify:
-    - Restart monitoring-stack
+    - Restart grafana
 
 - name: Deploy Grafana dashboards.
   ansible.builtin.copy:
@@ -90,7 +90,7 @@
     - widgets.yaml
     - bookmarks.yaml
   notify:
-    - Restart monitoring-stack
+    - Restart homepage
 
 - name: Deploy compose.yaml.
   ansible.builtin.template:
@@ -99,9 +99,8 @@
     owner: "{{ monitoring_user }}"
     group: "{{ monitoring_group }}"
     mode: "0644"
-  notify:
-    - Restart monitoring-stack
 
+# `compose up` recreates only services whose definition/image changed.
 - name: Ensure Monitoring Stack is running.
   community.docker.docker_compose_v2:
     project_src: "/opt/monitoring"

@@ -33,7 +33,7 @@
     group: "{{ romm_group }}"
     mode: "0644"
   notify:
-    - Restart romm
+    - Restart romm app
 
 - name: Deploy romm compose.yaml.
   ansible.builtin.template:
@@ -42,8 +42,6 @@
     owner: "{{ romm_user }}"
     group: "{{ romm_group }}"
     mode: "0644"
-  notify:
-    - Restart romm
 
 - name: Ensure RomM is running.
   community.docker.docker_compose_v2:

@@ -9,6 +9,14 @@ creation_rules:
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: packer/.*\.pkrvars\.hcl
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
+  # Per-environment Ansible secrets: master key + that environment's CI key,
+  # so the deploy workflow can decrypt only its own environment. These must
+  # stay above the generic ansible rule (first match wins). `task ci:keys`
+  # appends the CI recipient to the line tagged # ci:<env>.
+  - path_regex: ansible/environments/wil/.*\.sops\.ya?ml
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8,age1u46hpfwu54vuk7845f82vxcrmhnwqztv37szqee2c0m9t60gmd7svajvj7  # ci:wil
+  - path_regex: ansible/environments/ldn/.*\.sops\.ya?ml
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8  # ci:ldn
   - path_regex: (docker|ansible)/.*/(.+\.sops\.ya?ml|cf-token)
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: (docker|ansible)/.*\.env$

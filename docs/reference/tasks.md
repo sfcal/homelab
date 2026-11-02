@@ -23,6 +23,7 @@ task --list-all
 | `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
 | `task ansible:deploy-gaming ENV=ldn` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
+| `task ansible:deploy-ci-access ENV=wil` | Create the CI deploy user on hosts the deploy workflow targets |
 | `task ansible:ping ENV=wil` | Test connectivity to all hosts |
 
 ## Terraform
@@ -54,6 +55,16 @@ task --list-all
 | `task ca:health ENV=wil` | Check Step-CA health endpoint |
 | `task ca:root ENV=wil` | Fetch root CA certificate |
 | `task ca:sign ENV=wil CSR=<path>` | Sign a CSR (optional: `DURATION=8760h`) |
+
+## CI
+
+Bootstrap for the GitHub Actions deploy workflow — see [GitOps Deploys](../guides/gitops.md).
+
+| Command | Description |
+|---------|-------------|
+| `task ci:keys ENV=wil` | Generate the environment's CI SSH + age keys, wire them into `ci.yml` / `.sops.yaml`, re-encrypt its secrets |
+| `task ci:known-hosts ENV=wil` | Record host keys of the hosts CI deploys to into `environments/<env>/known_hosts` |
+| `task ci:secrets ENV=wil` | Create the GitHub environment and upload `SSH_DEPLOY_KEY` / `SOPS_AGE_KEY` with `gh` |
 
 ## Docker
 

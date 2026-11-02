@@ -118,6 +118,8 @@ SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
 | VM module | `terraform/modules/vm/main.tf` |
 | Master playbook | `ansible/playbooks/site.yml` |
 | SOPS config | `.sops.yaml` |
+| Deploy workflow | `.github/workflows/deploy.yml` |
+| Deploy target planner | `.github/scripts/deploy-plan.sh` |
 
 ## Common Operations
 
@@ -140,6 +142,15 @@ task ansible:ping ENV=wil
 # Decrypt a sops file
 sops decrypt ansible/environments/wil/group_vars/all/secrets.sops.yml
 ```
+
+## GitOps Deploys (CI)
+
+Renovate merges that touch `ansible/environments/*/group_vars/` deploy automatically via `.github/workflows/deploy.yml` (GitHub-hosted runner → Tailscale `tag:ci` → `deploy` user). See `docs/guides/gitops.md`.
+- Auto-deploy allowlist lives in `.github/scripts/deploy-plan.sh` (`PLAYBOOK_FOR`); keep it in sync with the host pattern in `ansible/playbooks/ci-access.yml` and `TARGET_PATTERN` in `.taskfiles/ci/Taskfile.yaml`
+- Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
+- Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
+- Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
+- Each env's sops files are encrypted to master + that env's CI age key (`.sops.yaml`, `# ci:<env>` rules)
 
 ## Proxy & DNS Service Definitions
 

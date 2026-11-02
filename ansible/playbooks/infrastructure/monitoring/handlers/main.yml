@@ -1,9 +1,32 @@
 ---
+# Config files are bind-mounted, so compose can't see their changes: restart
+# just the service that reads them. Compose/image changes are applied by
+# `state: present` in the tasks.
+- name: Restart prometheus
+  community.docker.docker_compose_v2:
+    project_src: "/opt/monitoring"
+    state: restarted
+    services:
+      - prometheus
+
+- name: Restart grafana
+  community.docker.docker_compose_v2:
+    project_src: "/opt/monitoring"
+    state: restarted
+    services:
+      - grafana
+
+- name: Restart homepage
+  community.docker.docker_compose_v2:
+    project_src: "/opt/monitoring"
+    state: restarted
+    services:
+      - homepage
+
 - name: Restart monitoring-stack
   community.docker.docker_compose_v2:
     project_src: "/opt/monitoring"
     state: restarted
-    recreate: always
 
 - name: Stop monitoring-stack
   community.docker.docker_compose_v2:

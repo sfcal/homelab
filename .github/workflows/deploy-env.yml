@@ -1,0 +1,154 @@
+name: Deploy environment
+
+# Called by deploy.yml once per environment. Secrets come from the GitHub
+# environment of the same name (wil / ldn):
+#   TS_OAUTH_CLIENT_ID  Tailscale federated identity (or OAuth client) ID
+#   TS_AUDIENCE         federated identity audience  (or TS_OAUTH_SECRET)
+#   SSH_DEPLOY_KEY      private half of the CI deploy key (task ci:keys)
+#   SOPS_AGE_KEY        this environment's CI age identity (task ci:keys)
+# Optional environment/repo variables:
+#   TS_PING             tailnet peer to ping before deploying (e.g. the
+#                       site gateway's 100.x address)
+#   DEPLOY_NOTIFY_URL   ntfy-style URL that receives a POST per target
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+      targets:
+        description: JSON list of {kind, target} from deploy-plan.sh
+        type: string
+        required: true
+      mark:
+        description: Move deploy/<env> to this commit once every target succeeds
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  SOPS_VERSION: v3.13.3
+  # sha256 of sops-${SOPS_VERSION}.linux.amd64 (from the release's checksums.txt)
+  SOPS_SHA256: e5bec3346a873ae91d871550f3e698c1aad962aff462a080e40f25fde17fef6b
+
+jobs:
+  deploy:
+    name: ${{ inputs.env }} ${{ matrix.kind }}:${{ matrix.target }}
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.env }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      # One target at a time per environment; a failure doesn't stop the rest.
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.targets) }}
+    env:
+      ANSIBLE_FORCE_COLOR: "1"
+      ANSIBLE_REMOTE_USER: deploy
+      ANSIBLE_HOST_KEY_CHECKING: "True"
+      # Tailnet routes can take a few seconds to settle after `tailscale up`.
+      ANSIBLE_SSH_RETRIES: "5"
+      ANSIBLE_TIMEOUT: "30"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Ansible and sops
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet --disable-pip-version-check -r ansible/requirements.txt
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSLo "$RUNNER_TEMP/bin/sops" \
+            "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.amd64"
+          echo "${SOPS_SHA256}  $RUNNER_TEMP/bin/sops" | sha256sum --check --strict -
+          chmod 0755 "$RUNNER_TEMP/bin/sops"
+          { echo "$RUNNER_TEMP/venv/bin"; echo "$RUNNER_TEMP/bin"; } >>"$GITHUB_PATH"
+
+      - name: Install SSH key and known_hosts
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          KNOWN_HOSTS: ansible/environments/${{ inputs.env }}/known_hosts
+        run: |
+          test -s "$KNOWN_HOSTS" || { echo "::error::$KNOWN_HOSTS missing; run task ci:known-hosts"; exit 1; }
+          install -d -m 0700 ~/.ssh
+          install -m 0600 /dev/null ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_DEPLOY_KEY" >~/.ssh/id_ed25519
+          install -m 0644 "$KNOWN_HOSTS" ~/.ssh/known_hosts
+
+      - name: Join tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c # v4.4.0
+        with:
+          # Federated identity when TS_AUDIENCE is set, else OAuth client secret.
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          # Linux nodes ignore subnet routes unless asked; the VMs sit behind
+          # the wil-gateway / ldn-gateway subnet routers.
+          args: --accept-routes
+          ping: ${{ vars.TS_PING }}
+
+      - name: Deploy
+        working-directory: ansible
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+          ENV_NAME: ${{ inputs.env }}
+          KIND: ${{ matrix.kind }}
+          TARGET: ${{ matrix.target }}
+        # No --diff/-v: rendered templates contain decrypted secrets and the
+        # run logs may be public.
+        run: |
+          inventory="environments/$ENV_NAME/hosts.ini"
+          case "$KIND" in
+            app)
+              ansible-playbook -i "$inventory" playbooks/deploy-app.yml \
+                -e "app_name=$TARGET" -e "@environments/$ENV_NAME/group_vars/all/apps.yml" ;;
+            playbook)
+              ansible-playbook -i "$inventory" "playbooks/$TARGET" ;;
+            *)
+              echo "::error::unknown target kind '$KIND'"; exit 1 ;;
+          esac
+
+      - name: Notify
+        if: always() && vars.DEPLOY_NOTIFY_URL != ''
+        env:
+          URL: ${{ vars.DEPLOY_NOTIFY_URL }}
+          STATUS: ${{ job.status }}
+          WHAT: ${{ inputs.env }} ${{ matrix.kind }}:${{ matrix.target }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -fsS -m 10 -H "Title: deploy ${STATUS}: ${WHAT}" -H "Click: ${RUN}" \
+            -d "${WHAT} @ ${GITHUB_SHA::7}: ${STATUS}" "$URL" || true
+
+  mark:
+    needs: deploy
+    if: inputs.mark
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Move deploy/${{ inputs.env }}
+        env:
+          TAG: deploy/${{ inputs.env }}
+        run: |
+          if old=$(git rev-parse -q --verify "refs/tags/$TAG^{commit}"); then
+            if ! git merge-base --is-ancestor "$old" "$GITHUB_SHA"; then
+              echo "::notice::$TAG is already past ${GITHUB_SHA::7}; leaving it"
+              exit 0
+            fi
+          fi
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$TAG"

@@ -17,18 +17,14 @@
     owner: root
     group: root
     mode: "0644"
-  notify:
-    - Restart terraria
 
-# The image tag floats (latest), so pull it on every run and recreate the
-# container when a newer image arrives.
+# The image tag floats (latest), so pull it on every run; `compose up` below
+# recreates the container when the tag now points at a newer image.
 - name: Pull the Terraria image.
   community.docker.docker_image:
     name: "{{ terraria_image }}"
     source: pull
     force_source: true
-  notify:
-    - Restart terraria
 
 - name: Ensure Terraria is running.
   community.docker.docker_compose_v2:

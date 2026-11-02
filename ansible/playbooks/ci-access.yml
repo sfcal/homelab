@@ -1,0 +1,20 @@
+---
+# Creates the CI deploy user on every host the deploy workflow may target.
+# Run from your own machine (not CI): task ansible:deploy-ci-access ENV=<env>
+#
+# Keep the host pattern in sync with the allowlist in
+# .github/scripts/deploy-plan.sh. infra_ca, infra_networking, infra_ntp and
+# the Proxmox host are deliberately excluded: CI has no access to them.
+- name: Configure CI deploy access
+  hosts: apps:infra_monitoring:infra_netboot
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Configure the CI deploy user.
+      ansible.builtin.include_role:
+        name: ci_deploy_user

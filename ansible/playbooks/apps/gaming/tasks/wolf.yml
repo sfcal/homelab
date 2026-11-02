@@ -57,8 +57,6 @@
     owner: "{{ wolf_user }}"
     group: "{{ wolf_group }}"
     mode: "0644"
-  notify:
-    - Restart wolf
 
 # Wolf rewrites config.toml itself (paired clients, apps added through Wolf UI
 # or the API), so it is seeded once and never overwritten.

@@ -1,9 +1,10 @@
 ---
+# `docker compose restart` of the whole project. Notify only for bind-mounted
+# config changes; compose/image changes are applied by `state: present`.
 - name: "Restart {{ service_name }}"
   community.docker.docker_compose_v2:
     project_src: "/opt/{{ service_name }}"
     state: restarted
-    recreate: always
 
 - name: "Stop {{ service_name }}"
   community.docker.docker_compose_v2:

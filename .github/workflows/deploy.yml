@@ -1,0 +1,92 @@
+name: Deploy
+
+# Push-based GitOps for Renovate image bumps: a merge that changes
+# ansible/environments/*/group_vars runs the affected playbooks against that
+# environment over Tailscale. See docs/guides/gitops.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ansible/environments/*/group_vars/**"
+  workflow_dispatch:
+    inputs:
+      env:
+        description: Environment
+        type: choice
+        options: [wil, ldn]
+        required: true
+      target:
+        description: "app:<name> or playbook:<path under ansible/playbooks>; empty = everything changed since the last deploy"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    # Automatic deploys are for Renovate's merges only; deploy your own commits
+    # from your machine or with workflow_dispatch.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.head_commit.author.email == '29139614+renovate[bot]@users.noreply.github.com'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      wil: ${{ steps.plan.outputs.wil }}
+      ldn: ${{ steps.plan.outputs.ldn }}
+      mark: ${{ steps.plan.outputs.mark }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Plan targets
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          HEAD_SHA: ${{ github.sha }}
+          BEFORE: ${{ github.event.before }}
+          DEPLOY_ENVS: ${{ vars.DEPLOY_ENVS || 'wil' }}
+          INPUT_ENV: ${{ inputs.env }}
+          INPUT_TARGET: ${{ inputs.target }}
+        run: .github/scripts/deploy-plan.sh
+
+  # wil (dev) first; ldn (prod) only runs if wil didn't fail.
+  wil:
+    needs: plan
+    if: needs.plan.outputs.wil != '[]'
+    concurrency:
+      group: deploy-wil
+      cancel-in-progress: false
+    permissions:
+      contents: write # move the deploy/wil tag
+      id-token: write # Tailscale workload identity federation
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      env: wil
+      targets: ${{ needs.plan.outputs.wil }}
+      mark: ${{ needs.plan.outputs.mark == 'true' }}
+    secrets: inherit
+
+  ldn:
+    needs: [plan, wil]
+    if: >-
+      !cancelled() &&
+      needs.plan.result == 'success' &&
+      needs.plan.outputs.ldn != '[]' &&
+      needs.wil.result != 'failure'
+    concurrency:
+      group: deploy-ldn
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      env: ldn
+      targets: ${{ needs.plan.outputs.ldn }}
+      mark: ${{ needs.plan.outputs.mark == 'true' }}
+    secrets: inherit

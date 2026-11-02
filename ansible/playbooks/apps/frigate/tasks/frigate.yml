@@ -29,8 +29,6 @@
     - pyproject.toml
     - generate_model.py
     - coco-80.txt
-  notify:
-    - Restart frigate
 
 - name: Deploy compose.yaml.
   ansible.builtin.template:
@@ -39,8 +37,6 @@
     owner: "{{ frigate_user }}"
     group: "{{ frigate_group }}"
     mode: "0644"
-  notify:
-    - Restart frigate
 
 - name: Deploy Frigate config.yml.
   ansible.builtin.template:
@@ -53,6 +49,9 @@
   notify:
     - Restart frigate
 
+# build: always rebuilds from the (possibly changed) build context; compose
+# recreates the container when the image or definition changed. Only the
+# bind-mounted config.yml needs the restart handler.
 - name: Ensure Frigate is running.
   community.docker.docker_compose_v2:
     project_src: "{{ frigate_deploy_path }}"

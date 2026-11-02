@@ -7,3 +7,4 @@ Step-by-step procedures for common homelab operations.
 - [**Networking Changes**](networking-changes.md) — add DNS records, proxy entries, and domains
 - [**Certificates**](certificates.md) — manage TLS certificates (public and private CA)
 - [**Re-image the Time Server**](reimage-time-server.md) — PXE-reset the PTP time server to a fresh Ubuntu install
+- [**GitOps Deploys**](gitops.md) — how Renovate image bumps deploy themselves, and the one-time CI setup

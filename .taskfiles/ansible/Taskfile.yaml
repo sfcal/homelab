@@ -92,6 +92,14 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/gaming/deploy.yml }
 
+  # --- CI ---
+
+  deploy-ci-access:
+    desc: Create the CI deploy user on hosts the deploy workflow targets
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: ci-access.yml }
+
   # --- Utility Tasks ---
 
   ping:

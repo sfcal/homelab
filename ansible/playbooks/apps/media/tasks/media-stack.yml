@@ -43,9 +43,9 @@
     owner: "{{ media_stack_user }}"
     group: "{{ media_stack_group }}"
     mode: "0644"
-  notify:
-    - Restart media-stack
 
+# `compose up` recreates only the services whose definition (e.g. image tag)
+# changed, so one image bump no longer bounces the whole stack.
 - name: Ensure Media Stack is running.
   community.docker.docker_compose_v2:
     project_src: "{{ media_stack_deploy_path }}"
