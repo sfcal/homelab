@@ -44,9 +44,11 @@ tasks:
       - sh: test -f '{{.CI_DIR}}/id_ed25519' && test -f '{{.CI_DIR}}/age.txt'
         msg: run task ci:keys ENV={{.ENV}} first
     cmds:
-      # Environment secrets are only released to jobs running from main.
+      # Create the environment once (main-only secrets); never re-PUT an
+      # existing one, so reviewers added later are left alone.
       - >-
-        gh api --silent -X PUT 'repos/{{.GH_REPO}}/environments/{{.ENV}}'
+        gh api --silent 'repos/{{.GH_REPO}}/environments/{{.ENV}}' 2>/dev/null
+        || gh api --silent -X PUT 'repos/{{.GH_REPO}}/environments/{{.ENV}}'
         -F 'deployment_branch_policy[protected_branches]=false'
         -F 'deployment_branch_policy[custom_branch_policies]=true'
       - >-
