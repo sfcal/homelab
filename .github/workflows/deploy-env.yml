@@ -91,9 +91,9 @@ jobs:
           audience: ${{ secrets.TS_AUDIENCE }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-          # Linux nodes ignore subnet routes unless asked; the VMs sit behind
-          # the wil-gateway / ldn-gateway subnet routers.
-          args: --accept-routes
+          # The VMs sit behind the wil-gateway / ldn-gateway subnet routers.
+          # v4 already passes --accept-routes; don't add it to `args`
+          # (tailscale up exits 2 on a repeated boolean flag).
           ping: ${{ vars.TS_PING }}
 
       - name: Deploy
