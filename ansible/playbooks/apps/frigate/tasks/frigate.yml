@@ -42,6 +42,17 @@
   notify:
     - Restart frigate
 
+- name: Deploy Frigate config.yml.
+  ansible.builtin.template:
+    src: templates/config.yml.j2
+    dest: "{{ frigate_data_path }}/config/config.yml"
+    owner: "{{ frigate_user }}"
+    group: "{{ frigate_group }}"
+    mode: "0644"
+    backup: true
+  notify:
+    - Restart frigate
+
 - name: Ensure Frigate is running.
   community.docker.docker_compose_v2:
     project_src: "{{ frigate_deploy_path }}"

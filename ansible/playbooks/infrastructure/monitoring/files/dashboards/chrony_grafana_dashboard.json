@@ -365,13 +365,104 @@
       }
     },
     {
+      "id": 25,
+      "type": "row",
+      "title": "True time error \u2014 observer view (NTP Part 2)",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 26,
+      "type": "timeseries",
+      "title": "True Time Error (server \u2212 observer)",
+      "description": "Each server's clock minus the GPS-disciplined observer's clock, from the observer's noselect NTP sources (chronyc sources last sample, negated: chronyc reports local \u2212 source). This is the error a LAN client sees: one LAN hop and the server's own timestamping latency are included. Shows the servers picked in Time server; each must be a noselect source on the observer (ptp-experiments chrony_noselect_servers); unreachable sources are hidden rather than plotted as 0. Symlog axis, linear inside \u00b11 \u00b5s, so ms (VM over WAN) and \u00b5s (Pi + PPS) share one scale. Confirm the sign on the dry run.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(label_replace(label_replace((-chrony_sources_last_sample_offset_seconds{job=\"chrony\",instance=~\"$observer:.*\",source_address=~\"$host\"} and on(instance, source_address) chrony_sources_reachability_ratio{job=\"chrony\"} > 0), \"sut\", \"VM (stage 1)\", \"source_address\", \"10\\\\.3\\\\.20\\\\.157\"), \"sut\", \"Pi CM1 (stages 2-3)\", \"source_address\", \"10\\\\.3\\\\.30\\\\.11\"), \"sut\", \"Pi time1 (no GPS)\", \"source_address\", \"10\\\\.3\\\\.30\\\\.12\")",
+          "legendFormat": "{{sut}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "pointSize": 3,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisCenteredZero": true,
+            "axisLabel": "TE",
+            "scaleDistribution": {
+              "type": "symlog",
+              "log": 10,
+              "linearThreshold": 1e-06
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "stdDev",
+            "min",
+            "max",
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
       "id": 7,
       "type": "row",
       "title": "Offset \u2014 refclock path (ns scale)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 5,
+        "y": 15,
         "w": 24,
         "h": 1
       },
@@ -388,7 +479,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 6,
+        "y": 16,
         "w": 12,
         "h": 8
       },
@@ -466,7 +557,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 6,
+        "y": 16,
         "w": 12,
         "h": 8
       },
@@ -544,7 +635,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 14,
+        "y": 24,
         "w": 12,
         "h": 8
       },
@@ -614,7 +705,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 14,
+        "y": 24,
         "w": 12,
         "h": 8
       },
@@ -691,7 +782,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 22,
+        "y": 32,
         "w": 24,
         "h": 1
       },
@@ -708,7 +799,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 23,
+        "y": 33,
         "w": 12,
         "h": 8
       },
@@ -818,7 +909,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 23,
+        "y": 33,
         "w": 6,
         "h": 8
       },
@@ -887,7 +978,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 23,
+        "y": 33,
         "w": 6,
         "h": 8
       },
@@ -960,7 +1051,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 31,
+        "y": 41,
         "w": 24,
         "h": 1
       },
@@ -977,7 +1068,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 32,
+        "y": 42,
         "w": 24,
         "h": 8
       },
@@ -1063,7 +1154,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 40,
+        "y": 50,
         "w": 24,
         "h": 1
       },
@@ -1080,7 +1171,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 41,
+        "y": 51,
         "w": 24,
         "h": 4
       },
@@ -1163,7 +1254,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 45,
+        "y": 55,
         "w": 24,
         "h": 5
       },
@@ -1234,7 +1325,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 50,
+        "y": 60,
         "w": 24,
         "h": 3
       },
@@ -1305,7 +1396,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 53,
+        "y": 63,
         "w": 24,
         "h": 1
       },
@@ -1322,7 +1413,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 54,
+        "y": 64,
         "w": 12,
         "h": 9
       },
@@ -1366,7 +1457,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 54,
+        "y": 64,
         "w": 12,
         "h": 9
       },
@@ -1450,6 +1541,31 @@
           ]
         },
         "options": []
+      },
+      {
+        "name": "observer",
+        "label": "Observer",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": {
+          "query": "label_values(chrony_up{job=\"chrony\"}, instance)",
+          "refId": "observer"
+        },
+        "definition": "label_values(chrony_up{job=\"chrony\"}, instance)",
+        "regex": "/^(.*):\\d+$/",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "selected": true,
+          "text": "10.3.30.123",
+          "value": "10.3.30.123"
+        },
+        "description": "GPS-disciplined host that polls the servers under test as noselect sources. Its view of them is the true time error."
       }
     ]
   },

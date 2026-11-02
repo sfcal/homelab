@@ -1,0 +1,152 @@
+---
+# Managed by Ansible; edits made in the Frigate UI are overwritten on deploy.
+# {FRIGATE_RTSP_PASSWORD} is substituted by Frigate from the container env.
+
+mqtt:
+  enabled: false
+
+ffmpeg:
+  hwaccel_args: preset-intel-qsv-h264
+
+go2rtc:
+  streams:
+    # Amcrest camera streams
+    amcrest_main:
+      - rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.181:554/cam/realmonitor?channel=1&subtype=0
+    amcrest_sub:
+      - rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.181:554/cam/realmonitor?channel=1&subtype=1
+    # HIKVISION camera streams
+    hikvision_main:
+      - rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.101:554/Streaming/Channels/101
+    hikvision_sub:
+      - rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.101:554/Streaming/Channels/102
+
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  path: /models/yolo_nas_s.onnx
+  model_type: yolonas
+  width: 320
+  height: 320
+  input_tensor: nchw
+  input_pixel_format: bgr
+  labelmap_path: /models/coco-80.txt
+
+cameras:
+  # Amcrest camera configuration
+  amcrest_camera:
+    enabled: true
+    ffmpeg:
+      inputs:
+        # Use substream for detection (lower resolution, less CPU)
+        - path: rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.181:554/cam/realmonitor?channel=1&subtype=1
+          roles:
+            - detect
+        # Use mainstream for recording (high quality)
+        - path: rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.181:554/cam/realmonitor?channel=1&subtype=0
+          roles:
+            - record
+    detect:
+      width: 640
+      height: 480
+      fps: 5
+    zones: {}
+
+  # HIKVISION camera configuration
+  hikvision_camera:
+    enabled: true
+    ffmpeg:
+      inputs:
+        # Use substream for detection (1920x536 @ 8fps)
+        - path: rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.101:554/Streaming/Channels/102
+          roles:
+            - detect
+        # Use mainstream for recording (5120x1440 @ 15fps)
+        - path: rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.2.0.101:554/Streaming/Channels/101
+          roles:
+            - record
+    detect:
+      width: 960
+      height: 272
+      fps: 8
+    zones:
+      Driveway:
+        coordinates: 0.194,1,0.327,0.478,0.447,0.478,0.392,1
+        loitering_time: 0
+        objects: car
+    # Wide view: keep everything. Frigate has no "keep forever"; the storage
+    # maintainer still drops the oldest recordings if the disk is about to fill.
+    record:
+      retain:
+        days: {{ frigate_retain_days }}
+        mode: all
+      alerts:
+        retain:
+          days: {{ frigate_retain_days }}
+          mode: all
+      detections:
+        retain:
+          days: {{ frigate_retain_days }}
+          mode: all
+    snapshots:
+      retain:
+        default: {{ frigate_retain_days }}
+
+# --- Retention ---
+# Defaults for all other cameras: no continuous footage, events kept 10 days
+record:
+  enabled: true
+  retain:
+    days: 0
+    mode: all
+  alerts:
+    retain:
+      days: 10
+      mode: motion
+  detections:
+    retain:
+      days: 10
+      mode: motion
+
+snapshots:
+  enabled: true
+  clean_copy: true
+  timestamp: false
+  bounding_box: true
+  retain:
+    default: 14
+
+objects:
+  track:
+    - person
+    - dog
+    - cat
+    - car
+    - bicycle
+  filters:
+    person:
+      min_area: 5000
+      max_area: 100000
+      threshold: 0.7
+    car:
+      min_area: 10000
+      max_area: 150000
+
+ui:
+  timezone: {{ system_timezone }}
+  time_format: 12hour
+  date_style: short
+  time_style: medium
+  strftime_fmt: '%m/%d/%Y %I:%M %p'
+
+telemetry:
+  version_check: true
+
+detect:
+  enabled: true
+
+# Config schema version; stops Frigate re-running its migration
+version: 0.16-0

@@ -13,6 +13,10 @@ frigate_group: root
 frigate_deploy_path: "/opt/frigate"
 frigate_data_path: "/var/lib/frigate"
 
+# Hikvision (wide view) retention for recordings, alerts, detections and
+# snapshots (100 years); other cameras use the shorter defaults in config.yml
+frigate_retain_days: 36500
+
 # Container image (base image for multi-stage build)
 # renovate: datasource=docker
 frigate_image: "ghcr.io/blakeblackshear/frigate:0.16.4"

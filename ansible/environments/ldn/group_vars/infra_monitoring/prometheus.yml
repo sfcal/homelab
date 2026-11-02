@@ -17,9 +17,12 @@ prometheus_node_targets:
 prometheus_chrony_targets:
   - "10.3.30.123:9123"
   - "10.3.30.11:9123"   # CM1 GPS/PPS test server (temporary)
+  - "10.3.30.12:9123"   # time1 NTP-only Pi, no GPS (temporary)
+  - "10.3.20.157:9123"  # VM NTP server, stage 1 (temporary)
 prometheus_gpsd_targets:
   - "10.3.30.123:9015"
   - "10.3.30.11:9015"   # CM1 (temporary)
 prometheus_ptp_node_targets:
   - "10.3.30.123:9100"
   - "10.3.30.11:9100"   # CM1 (temporary)
+  - "10.3.30.12:9100"   # time1 (temporary)
