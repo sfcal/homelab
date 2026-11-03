@@ -20,7 +20,7 @@ VFs exist only after something writes to `sriov_numvfs`, and they vanish on rebo
 
 | Path on pve-ldn | Purpose |
 |-----------------|---------|
-| `/usr/local/sbin/sriov-b50` | Waits for the `xe` driver, writes `sriov_numvfs`, binds the VFs to `vfio-pci` |
+| `/usr/local/sbin/sriov-b50` | Finds the PF by PCI id (`lspci -d 8086:e212`), waits for the `xe` driver, writes `sriov_numvfs`, binds the VFs to `vfio-pci` |
 | `/etc/systemd/system/sriov-b50.service` | Oneshot, `Before=pve-guests.service`, runs the script |
 
 Then it runs `pvesh get /cluster/mapping/pci --check-node pve-ldn`, the same validation `qm start` performs, and fails if a mapping no longer matches the hardware.
@@ -28,19 +28,19 @@ Then it runs `pvesh get /cluster/mapping/pci --check-node pve-ldn`, the same val
 Configuration (`ansible/environments/ldn/group_vars/infra_proxmox/vars.yml`):
 
 ```yaml
-proxmox_sriov_devices:
-  - name: b50
-    pf: "0000:0b:00.0"
-    num_vfs: 2
+b50_num_vfs: 3
 ```
+
+The card itself (PCI id `8086:e212`, unit and mapping names) is hardcoded in the play and templates.
 
 ## Facts worth knowing
 
-- Kernel 6.17 (Proxmox VE 9.1) supports Battlemage SR-IOV out of the box: no module option, DKMS or `force_probe`.
-- Intel's current B50 firmware allows 2 VFs (`cat /sys/bus/pci/devices/0000:0b:00.0/sriov_totalvfs`); the Q3 2025 firmware allowed 12. Each VF gets `1/num_vfs` of the card's memory.
-- Mapping IDs are `b50-vf1` (VM 3005 gaming) and `b50-vf2` (VM 3004 work), paths `0000:0b:00.1` and `0000:0b:00.2`. If a kernel or BIOS change moves their IOMMU groups, the play fails and names the mapping; fix it in Datacenter > Resource Mappings.
+- Kernel 7.0 (Proxmox VE 9.2) supports Battlemage SR-IOV out of the box: no module option, DKMS or `force_probe`. 6.17 (PVE 9.1) did too; 7.0 adds per-VF debugfs quotas (`/sys/kernel/debug/dri/<PF>/sriov/vfN/tile0/vram_quota`) for an uneven VRAM split, unused here.
+- The card's firmware data (`igsc fw-data version -d /dev/mei0`) sets `sriov_totalvfs`: Intel's current image (203.41) allows 2 VFs, the launch image (203.31, from driver package 32.0.101.6979, flashed on 2026-11-03) allows 12. Each VF's BAR is 16 GB divided by the VF count, rounded up to a power of two (8 GB with 2 or 3 VFs, 4 GB with 4), and the VRAM is split evenly between the VFs (about 5.2 GiB each with 3).
+- Mapping IDs are `b50-vf1` (VM 3005 gaming), `b50-vf2` (VM 3004 work) and `b50-vf3` (unassigned). They are created once in Datacenter > Resource Mappings, or with `pvesh create /cluster/mapping/pci --id b50-vfN --map node=pve-ldn,path=<VF address>,id=8086:e212,subsystem-id=8086:1114,iommugroup=<group>`. If a kernel or BIOS change moves a VF's IOMMU group, the play fails and names the mapping; fix it in Datacenter > Resource Mappings.
 - Never add `options vfio-pci ids=8086:e212` or `blacklist xe`: vfio-pci would claim the physical function and no VF could exist.
-- To change `num_vfs`, edit the variable, re-run the play, and reboot the host (the count can only change while no VM holds a VF).
+- To change `b50_num_vfs`, edit the variable, re-run the play, and reboot the host: the count can only change while no VM holds a VF. With the GPU VMs stopped, `systemctl restart sriov-b50` does the same without a reboot.
+- Never run an Intel Windows installer against the bare PF, and never `fwupdmgr update` on the host: both re-flash the 2-VF firmware data. Guests holding a VF cannot flash anything. Both config-data images are kept in `/root` on pve-ldn (`b50fw-6979` is the 12-VF one, `b50fw` the 2-VF rollback).
 - A guest needs kernel 6.17 or newer for a Battlemage VF (Ubuntu 25.10 qualifies). VFs are render-only, no display outputs.
 
 ## Verify
@@ -49,7 +49,7 @@ proxmox_sriov_devices:
 ssh root@10.3.20.10 'systemctl status sriov-b50; lspci -nnks 0b:00; pvesh get /cluster/mapping/pci --check-node pve-ldn'
 ```
 
-Expect `0b:00.0` on `xe`, `0b:00.1` and `0b:00.2` on `vfio-pci`, and no `checks` on the mappings. After a reboot `qm status 3005` should be `running` without manual action.
+Expect `0b:00.0` on `xe`, `0b:00.1` to `0b:00.3` on `vfio-pci`, and no `checks` on the mappings. After a reboot `qm status 3005` should be `running` without manual action.
 
 ## Terraform notes
 

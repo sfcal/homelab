@@ -1,8 +1,6 @@
 ---
 # --- SR-IOV GPU virtual functions ---
-# One systemd unit per physical function. The VFs are created at boot before
+# VFs of the Intel Arc Pro B50, created at boot by sriov-b50.service before
 # pve-guests starts the VMs that map them (hostpciN: mapping=b50-vfN).
-proxmox_sriov_devices:
-  - name: b50            # Intel Arc Pro B50 -> sriov-b50.service
-    pf: "0000:0b:00.0"
-    num_vfs: 2           # sriov_totalvfs is 2 on current Intel firmware (12 on Q3'25 firmware)
+# Ceiling is sriov_totalvfs: 12 on the 6979 fw-data (203.31), 2 on Intel's current image.
+b50_num_vfs: 3

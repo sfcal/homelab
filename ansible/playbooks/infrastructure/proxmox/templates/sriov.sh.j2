@@ -1,10 +1,14 @@
 #!/bin/sh
-# Create the SR-IOV VFs of {{ item.pf }} ({{ item.name }}) and hand them to vfio-pci.
-# Run by sriov-{{ item.name }}.service before pve-guests starts the VMs.
+# Create the SR-IOV VFs of the Intel Arc Pro B50 and hand them to vfio-pci.
+# Run by sriov-b50.service before pve-guests starts the VMs.
 # Managed by Ansible: ansible/playbooks/infrastructure/proxmox
 set -eu
-pf=/sys/bus/pci/devices/{{ item.pf }}
-num_vfs={{ item.num_vfs }}
+num_vfs={{ b50_num_vfs }}
+
+# Find the PF by PCI id, not by address: another NVMe or another slot moves the BDF.
+addr=$(lspci -D -d 8086:e212 | awk 'NR==1{print $1}')
+[ -n "$addr" ] || { echo "no Arc Pro B50 (8086:e212) found" >&2; exit 1; }
+pf=/sys/bus/pci/devices/$addr
 
 # udev loads the GPU driver asynchronously; sriov_numvfs accepts writes only
 # once the driver owns the device.
@@ -22,8 +26,8 @@ fi
 modprobe vfio-pci
 for vf in "$pf"/virtfn*; do
   [ "$(readlink -f "$vf/driver")" != /sys/bus/pci/drivers/vfio-pci ] || continue
-  addr=$(basename "$(readlink "$vf")")
+  vf_addr=$(basename "$(readlink "$vf")")
   echo vfio-pci > "$vf/driver_override"
-  [ ! -L "$vf/driver" ] || echo "$addr" > "$vf/driver/unbind"
-  echo "$addr" > /sys/bus/pci/drivers_probe
+  [ ! -L "$vf/driver" ] || echo "$vf_addr" > "$vf/driver/unbind"
+  echo "$vf_addr" > /sys/bus/pci/drivers_probe
 done
