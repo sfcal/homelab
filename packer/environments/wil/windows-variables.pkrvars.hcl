@@ -40,10 +40,17 @@ virtio_driver_os   = "w11"
 // Local administrator (password comes from credentials.pkrvars.hcl as ssh_password)
 ssh_username = "sfcal"
 
+// NAS share, mapped as a persistent Z: drive for the local administrator on every clone (SMB).
+// Password goes in credentials.pkrvars.hcl as smb_password. Empty smb_server = no share.
+smb_server   = "dfs.wil.5am.cloud" // TrueNAS (smb://sfcal@dfs.wil.5am.cloud/Media)
+smb_share    = "Media"
+smb_username = "sfcal"
+
 /*
 Note: The following variables are expected to be in credentials.pkrvars.hcl:
 - proxmox_api_url
 - proxmox_api_token_id
 - proxmox_api_token_secret
 - ssh_password
+- smb_password (NAS password for the Z: drive)
 */

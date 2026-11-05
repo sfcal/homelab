@@ -134,6 +134,7 @@ Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandm
 |-----------|------|-------------|---------|
 | `prometheus_image` | `string` | Docker image for Prometheus | (per-env) |
 | `prometheus_retention` | `string` | Metrics data retention period | `"30d"` |
+| `prometheus_url` | `string` | Public URL, used for the Homepage link | (per-env) |
 | `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`) | (per-env) |
 | `prometheus_chrony_targets` | `list[string]` | chrony_exporter endpoints (PTP grandmaster, `:9123`) | `[]` |
 | `prometheus_gpsd_targets` | `list[string]` | gpsd exporter endpoints (PTP grandmaster, `:9015`) | `[]` |
@@ -175,6 +176,7 @@ Dashboards are provisioned from files — any JSON dropped into `playbooks/infra
 | Chrony Detail | `chrony_grafana_dashboard.json` | `chrony` + `node` jobs (PTP grandmaster) |
 | GPSD | `gpsd_grafana_dashboard.json` | `gpsd` job (PTP grandmaster) |
 | Node Exporter Full | `node_exporter_full.json` | All `node-exporter`/`node` targets ([grafana.com 1860](https://grafana.com/grafana/dashboards/1860)) |
+| System Activity | `system_activity.json` | CPU, memory, network and disk I/O per `node-exporter` target; Homepage embeds its four panels |
 
 ### Container Configuration
 
@@ -182,6 +184,7 @@ Dashboards are provisioned from files — any JSON dropped into `playbooks/infra
 - **Depends on:** Prometheus
 - **Provisioning:** mounted read-only at `/etc/grafana/provisioning`
 - **Sign-up:** disabled (`GF_USERS_ALLOW_SIGN_UP=false`)
+- **Embedding:** allowed, and anyone who is not signed in gets read-only access (`GF_SECURITY_ALLOW_EMBEDDING`, `GF_AUTH_ANONYMOUS_*`), so Homepage can show panels in iframes without a login
 
 ### Configuration Reference
 
@@ -219,10 +222,15 @@ Homepage is configured via four YAML template files:
 
 | Template | Purpose |
 |----------|---------|
-| `services.yaml.j2` | Service cards with status widgets (media, monitoring, node exporters) |
+| `services.yaml.j2` | Service cards with status widgets (Grafana graphs, media, monitoring, node exporters) |
 | `bookmarks.yaml.j2` | Quick links (TrueNAS, Proxmox) |
 | `settings.yaml.j2` | Theme (dark, slate), layout (row style, column counts) |
 | `widgets.yaml.j2` | Global widgets (search bar, datetime) |
+
+`services.yaml.j2` is plain Homepage YAML; edit it directly. Two parts are less obvious:
+
+- **System Activity** shows the four panels of the System Activity Grafana dashboard in iframes (`<grafana_url>/d-solo/system-activity?panelId=1` to `4`). The time range and refresh interval come from the dashboard JSON.
+- **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
 <small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2)</small>
 

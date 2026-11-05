@@ -1,6 +1,7 @@
 ---
 # Prometheus retention
 prometheus_retention: "30d"
+prometheus_url: "https://prometheus.wil.5am.cloud"
 
 # Prometheus scrape targets
 # Add hosts here to have node-exporter scraped from them

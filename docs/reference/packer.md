@@ -53,7 +53,8 @@ packer/
 │   └── windows-base.pkr.hcl            # Windows template definition
 ├── files/windows/
 │   ├── autounattend.xml.pkrtpl         # Windows answer file (rendered by the template)
-│   └── setup.ps1                       # First-logon bootstrap: WinRM, VirtIO drivers, guest agent
+│   ├── setup.ps1                       # First-logon bootstrap: WinRM, VirtIO drivers, guest agent
+│   └── smb-share.ps1                   # Optional: NAS share as a persistent Z: drive
 └── environments/
     ├── wil/
     │   ├── ubuntu-variables.pkrvars.hcl     # Ubuntu build variables
@@ -78,12 +79,15 @@ How the build works: Packer generates a small ISO with the answer file (`files/w
 
 Packer cannot set the display's clipboard option, so after a build enable it on the template by hand: Hardware → Display → Edit → Advanced → Clipboard: VNC (or `qm set <vmid> --vga std,clipboard=vnc` on the node). Clones inherit it, and together with the SPICE agent that `setup.ps1` installs it gives the noVNC console its clipboard panel.
 
+Secure Boot certificates: on a node with `pve-edk2-firmware` 4.2025.05-1 or newer, Proxmox fills a new EFI disk with both the 2011 and the 2023 Microsoft UEFI certificates and marks it `ms-cert=2023k` in the VM config (visible in `qm config <vmid>`), so a fresh build and its clones are correct from the start. The Packer Proxmox plugin (1.2.3) has no option for this and needs none. A template built before that firmware version, and every clone of it, lacks the marker and the node warns at VM start that the 2011 certificates expired in June 2026. Rebuild such a template, and fix an existing clone while it is shut down with `qm enroll-efi-keys <vmid>` (UI: Hardware → EFI Disk → Disk Action → Enroll Updated Certificates); if BitLocker protectors are active in the guest, suspend them first or Windows asks for the recovery key.
+
 Things to know:
 
 - `windows_image_name` selects the edition inside the ISO (`Windows 11 Pro` by default; `Windows 11 Enterprise Evaluation`, `Windows Server 2025 SERVERSTANDARD`, …). Set `virtio_driver_os` to the matching driver folder (`w11`, `2k25`, …) and `windows_language` to the ISO's language.
 - No sysprep: clones share hostname and SID. Fine for throwaway instances; the template is not meant for domain joins.
 - No cloud-init: Windows ignores the Proxmox cloud-init drive, so clones are not managed by the Terraform VM module (which is cloud-init shaped). Clone by hand.
 - `setup.ps1` leaves its logs at `C:\Windows\Temp\packer-setup.log` and `C:\Windows\Temp\virtio-win-guest-tools.log` on the template.
+- NAS share: set `smb_server`, `smb_share` and `smb_username` in `windows-variables.pkrvars.hcl` and `smb_password` in the credentials file, and every clone has `\\<server>\<share>` as a persistent `Z:` drive for the local administrator. `smb-share.ps1` stores the login in Credential Manager and runs `net use /persistent:yes`, so Windows reconnects the drive at logon on its own (SMB rather than NFS: no UID/GID mapping, no extra client). The NAS must be reachable from the build VM. Leave `smb_server` empty for no share.
 
 ## Key Variables
 
@@ -102,7 +106,7 @@ Things to know:
 
 ## Credentials
 
-Proxmox API credentials are stored in SOPS-encrypted files:
+Proxmox API credentials (and, for the Windows template, the `ssh_password` of the local administrator and the optional `smb_password` NAS password) are stored in SOPS-encrypted files:
 
 ```bash
 # Edit credentials

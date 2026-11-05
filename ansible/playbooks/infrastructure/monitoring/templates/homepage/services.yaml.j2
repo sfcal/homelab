@@ -1,4 +1,34 @@
 ---
+# Grafana panels from the "System Activity" dashboard (files/dashboards/system_activity.json)
+- System Activity:
+    - CPU:
+        href: {{ grafana_url }}/d/system-activity
+        widget:
+          type: iframe
+          name: cpu
+          src: {{ grafana_url }}/d-solo/system-activity?panelId=1&theme=dark&hideLogo=true
+
+    - Memory:
+        href: {{ grafana_url }}/d/system-activity
+        widget:
+          type: iframe
+          name: memory
+          src: {{ grafana_url }}/d-solo/system-activity?panelId=2&theme=dark&hideLogo=true
+
+    - Network:
+        href: {{ grafana_url }}/d/system-activity
+        widget:
+          type: iframe
+          name: network
+          src: {{ grafana_url }}/d-solo/system-activity?panelId=3&theme=dark&hideLogo=true
+
+    - Disk I/O:
+        href: {{ grafana_url }}/d/system-activity
+        widget:
+          type: iframe
+          name: disk
+          src: {{ grafana_url }}/d-solo/system-activity?panelId=4&theme=dark&hideLogo=true
+
 - Media Management:
     - Sonarr:
         icon: sonarr.png
@@ -41,10 +71,28 @@
         icon: sabnzbd.png
         href: https://sabnzbd.5am.video
         siteMonitor: http://10.2.0.5:8080
-        widget:
-          type: sabnzbd
-          url: http://10.2.0.5:8080
-          key: {% raw %}{{HOMEPAGE_VAR_SABNZBD_KEY}}{% endraw %}
+        widgets:
+          - type: sabnzbd
+            url: http://10.2.0.5:8080
+            key: {% raw %}{{HOMEPAGE_VAR_SABNZBD_KEY}}{% endraw %}
+
+          # Download totals from SABnzbd's statistics
+          - type: customapi
+            url: http://10.2.0.5:8080/api?mode=server_stats&apikey={% raw %}{{HOMEPAGE_VAR_SABNZBD_KEY}}{% endraw %}&output=json
+            refreshInterval: 60000  # once a minute; the 10 s default errors when SABnzbd closes the idle connection
+            mappings:
+              - field: day
+                label: Today
+                format: bytes
+              - field: week
+                label: Week
+                format: bytes
+              - field: month
+                label: Month
+                format: bytes
+              - field: total
+                label: Total
+                format: bytes
 
 - Media Processing:
     - Tdarr:
@@ -71,24 +119,25 @@
           type: frigate
           url: http://10.2.0.5:5000
 
+# grafana and prometheus are the containers next to Homepage in compose.yaml
 - Monitoring:
     - Grafana:
         icon: grafana.png
-        href: https://grafana.5am.video
-        siteMonitor: http://10.2.20.30:3000
+        href: {{ grafana_url }}
+        siteMonitor: http://grafana:3000
 
     - Prometheus:
         icon: prometheus.png
-        href: https://prometheus.5am.video
-        siteMonitor: http://10.2.20.30:9090
+        href: {{ prometheus_url }}
+        siteMonitor: http://prometheus:9090
         widget:
           type: prometheus
-          url: http://10.2.20.30:9090
+          url: http://prometheus:9090
 
     - Uptime Kuma:
         icon: uptime-kuma.png
-        href: https://uptime.5am.video
-        siteMonitor: http://10.2.20.30:3001
+        href: https://uptime.ext.5am.cloud
+        siteMonitor: http://178.156.190.134:3001
         widget:
           type: uptimekuma
           url: http://178.156.190.134:3001
@@ -96,19 +145,15 @@
 
 - Node Exporters:
 {% for target in prometheus_node_targets %}
-{% set host = target.split(':')[0] %}
-{% set port = target.split(':')[1] %}
-{% if host == 'localhost' %}
-{% set display_host = '10.2.20.30' %}
-{% else %}
-{% set display_host = host %}
-{% endif %}
-    - {{ display_host }}:
+    - {{ target.split(':')[0] }}:
         icon: prometheus.png
-        siteMonitor: http://{{ display_host }}:{{ port }}
+        siteMonitor: http://{{ target }}
         widget:
           type: prometheusmetric
-          url: http://10.2.20.30:9090
-          label: CPU Usage
-          query: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle", instance="{{ display_host }}:{{ port }}"}[5m])) * 100)
+          url: http://prometheus:9090
+          metrics:
+            - label: CPU Usage
+              query: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle", instance="{{ target }}"}[5m])) * 100)
+              format:
+                type: percent
 {% endfor %}

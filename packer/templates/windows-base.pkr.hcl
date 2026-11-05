@@ -24,6 +24,13 @@
 // No sysprep: clones share hostname and SID, which is fine for throwaway
 // instances and sidesteps the Windows 11 sysprep failures caused by Store app
 // updates during the first logon.
+//
+// Optional NAS share: with smb_server set, files/windows/smb-share.ps1 stores
+// the NAS login (smb_username from the environment var file, smb_password from
+// the credentials file) in the administrator's Credential Manager and maps
+// \\<server>\<share> as a
+// persistent Z: drive, so every clone has the share at logon. SMB, not NFS:
+// Windows reconnects it by itself and no UID/GID mapping is needed.
 
 packer {
   required_plugins {
@@ -193,6 +200,32 @@ variable "ssh_password" {
   description = "Password for the local administrator account (and WinRM)"
 }
 
+// NAS share mapped as Z: (optional; server, share and user from environment var file, password from credentials.pkrvars.hcl)
+variable "smb_server" {
+  type        = string
+  default     = ""
+  description = "NAS address or hostname serving the SMB share (e.g. 10.2.10.100). Empty = no share"
+}
+
+variable "smb_share" {
+  type        = string
+  default     = ""
+  description = "SMB share name on the NAS (e.g. Media)"
+}
+
+variable "smb_username" {
+  type        = string
+  default     = ""
+  description = "NAS user for the share"
+}
+
+variable "smb_password" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Password of the NAS user"
+}
+
 // --- Local Variables ---
 locals {
   vm_name              = "${var.template_prefix}-${var.environment}-base"
@@ -319,6 +352,22 @@ build {
   name    = "windows-base-${var.environment}"
   sources = ["source.proxmox-iso.windows-base"]
 
+  // NAS share as a persistent Z: drive for the administrator (skipped when smb_server is empty).
+  // Elevated = run as a scheduled task under the administrator's own logon: Credential
+  // Manager refuses to save from a plain WinRM session, and the mapping must land in
+  // that user's profile to come back at logon.
+  provisioner "powershell" {
+    script            = "${path.root}/../files/windows/smb-share.ps1"
+    elevated_user     = var.ssh_username
+    elevated_password = var.ssh_password
+    environment_vars = [
+      "SMB_SERVER=${var.smb_server}",
+      "SMB_SHARE=${var.smb_share}",
+      "SMB_USERNAME=${var.smb_username}",
+      "SMB_PASSWORD=${var.smb_password}",
+    ]
+  }
+
   // By the time Packer connects, setup.ps1 has done the real work. Confirm what
   // clones depend on and leave its log on the template for troubleshooting.
   provisioner "powershell" {
@@ -329,6 +378,8 @@ build {
       "Write-Host ('QEMU guest agent: ' + (Get-Service -Name QEMU-GA).Status)",
       "Write-Host ('SPICE agent: ' + (Get-Service -Name spice-agent).Status)",
       "Write-Host ('Remote Desktop enabled: ' + ((Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server').fDenyTSConnections -eq 0))",
+      "$z = (Get-ItemProperty 'HKCU:\\Network\\Z' -ErrorAction SilentlyContinue).RemotePath",
+      "Write-Host ('SMB drive Z: ' + $(if ($z) { $z } else { 'none' }))",
       "Write-Host 'setup.ps1 log: C:\\Windows\\Temp\\packer-setup.log'",
     ]
   }
