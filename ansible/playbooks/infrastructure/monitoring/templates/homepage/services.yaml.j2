@@ -66,6 +66,16 @@
           url: http://10.2.0.5:9696
           key: {% raw %}{{HOMEPAGE_VAR_PROWLARR_KEY}}{% endraw %}
 
+    - Pulsarr:
+        icon: pulsarr.png
+        href: https://pulsarr.5am.video
+        siteMonitor: http://10.2.0.5:3003/health
+
+    - Cleanuparr:
+        icon: cleanuparr.png
+        href: https://cleanuparr.5am.video
+        siteMonitor: http://10.2.0.5:11011
+
 - Downloads:
     - SABnzbd:
         icon: sabnzbd.png
@@ -118,6 +128,107 @@
         widget:
           type: frigate
           url: http://10.2.0.5:5000
+
+    - Tunarr:
+        icon: tunarr.png
+        href: https://tunarr.5am.video
+        siteMonitor: http://10.2.0.5:8000
+
+    - Dispatcharr:
+        icon: dispatcharr.png
+        href: https://dispatcharr.5am.video
+        siteMonitor: http://10.2.0.5:9191
+
+    - Wizarr:
+        icon: wizarr.png
+        href: https://wizarr.5am.video
+        siteMonitor: http://10.2.0.5:5690
+
+# Each site lists its own apps and infrastructure (the site is the inventory folder name)
+{% if inventory_dir | basename == 'ldn' %}
+- Apps:
+    - Kasm:
+        icon: kasm.png
+        href: https://kasm.ldn.5am.cloud
+        siteMonitor: https://10.3.20.50:4443
+
+    - MicroBin:
+        icon: microbin.png
+        href: https://bin.ldn.5am.cloud
+        siteMonitor: http://10.3.20.50:8081
+
+    - Restreamer:
+        icon: restreamer.png
+        href: https://restreamer.ldn.5am.cloud
+        siteMonitor: http://10.3.20.50:8710
+
+    - RomM:
+        icon: romm.png
+        href: https://roms.ldn.5am.cloud
+        siteMonitor: http://10.3.20.55:8085
+
+    # Wolf has no web page; the check is Moonlight's server-info endpoint
+    - Wolf:
+        icon: mdi-controller
+        siteMonitor: http://10.3.20.55:47989/serverinfo
+
+    # KOSync only answers requests that carry KOReader's Accept header
+    - KOSync:
+        icon: koreader.png
+        href: https://kosync.ldn.5am.cloud
+        widget:
+          type: customapi
+          url: http://10.3.20.70:17200/healthcheck
+          headers:
+            Accept: application/vnd.koreader.v1+json
+          refreshInterval: 60000
+          mappings:
+            - field: state
+              label: Health
+
+- Infrastructure:
+    - Proxmox:
+        icon: proxmox.png
+        href: https://vm.ldn.5am.cloud
+        siteMonitor: https://10.3.20.10:8006
+
+    - KVM:
+        icon: mdi-monitor-dashboard
+        href: https://kvm.ldn.5am.cloud
+        siteMonitor: http://10.3.30.227:80
+
+    - Netboot:
+        icon: netboot.png
+        href: https://netboot.ldn.5am.cloud
+        siteMonitor: http://10.3.20.60:3000
+{% else %}
+- Apps:
+    - Website:
+        icon: mdi-web
+        href: https://samuel.5am.video
+        siteMonitor: http://10.2.20.45:8090
+
+    - Birdle:
+        icon: mdi-bird
+        href: https://birdle.sfc.al
+        siteMonitor: http://10.2.20.45:8091
+
+- Infrastructure:
+    - Proxmox:
+        icon: proxmox.png
+        href: https://vm.wil.5am.cloud
+        siteMonitor: https://10.2.20.7:8006
+
+    - TrueNAS:
+        icon: truenas.png
+        href: https://nas.wil.5am.cloud
+        siteMonitor: http://10.2.0.100:80
+
+    - KVM:
+        icon: mdi-monitor-dashboard
+        href: https://kvm.wil.5am.cloud
+        siteMonitor: https://10.2.0.78:443
+{% endif %}
 
 # grafana and prometheus are the containers next to Homepage in compose.yaml
 - Monitoring:

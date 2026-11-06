@@ -222,13 +222,14 @@ Homepage is configured via four YAML template files:
 
 | Template | Purpose |
 |----------|---------|
-| `services.yaml.j2` | Service cards with status widgets (Grafana graphs, media, monitoring, node exporters) |
+| `services.yaml.j2` | Service cards with status widgets (Grafana graphs, media, apps, infrastructure, monitoring, node exporters) |
 | `bookmarks.yaml.j2` | Quick links (TrueNAS, Proxmox) |
 | `settings.yaml.j2` | Theme (dark, slate), layout (row style, column counts) |
 | `widgets.yaml.j2` | Global widgets (search bar, datetime) |
 
-`services.yaml.j2` is plain Homepage YAML; edit it directly. Two parts are less obvious:
+`services.yaml.j2` is plain Homepage YAML; edit it directly. Three parts are less obvious:
 
+- **Apps** and **Infrastructure** differ per site: one `if`/`else` block picks the ldn or wil cards by the inventory folder name. Everything else is shared by both sites.
 - **System Activity** shows the four panels of the System Activity Grafana dashboard in iframes (`<grafana_url>/d-solo/system-activity?panelId=1` to `4`). The time range and refresh interval come from the dashboard JSON.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
