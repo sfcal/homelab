@@ -9,7 +9,7 @@
 3. oauth2-proxy then sets a cookie for the service's domain, so the other flagged services on that domain open directly.
 4. The first visit to a flagged service on another domain passes through the login page without asking for the password again.
 
-Authelia is a gate in front of a service, not a replacement for its login: a service that has its own (Proxmox, the NAS) still asks for it. [Kasm](#kasm) is the exception: it logs in through Authelia itself.
+Authelia is a gate in front of a service, not a replacement for its login: a service that has its own (the NAS, for example) still asks for it. [Kasm](#kasm) and [Proxmox](#proxmox) are the exceptions: they log in through Authelia themselves.
 
 The login page is the service entry named `auth` in the site's proxy file:
 
@@ -124,6 +124,56 @@ The first login creates a new Kasm user named after the Authelia user, in the de
 
 With Auto Login on, Kasm's own login page is at `https://kasm.ldn.5am.cloud/#/staticlogin`, which is also the way in when Authelia is down.
 
+## Proxmox
+
+Each site's Proxmox logs in through that site's Authelia as a client of its own: the client is in `authelia-configuration.yml.j2`, and the realm's settings live in Proxmox, not in this repository. Unlike Kasm, `vm` keeps `auth: true`: WIL's Caddy answers from the internet, and the gate keeps Proxmox's login page off it. The first visit therefore passes through the login page twice, the second time without asking for the password.
+
+Generate a client secret per site, using the same command as for [Kasm](#kasm). Store both values, because Proxmox's realm needs the password itself, then deploy networking:
+
+```bash
+sops set ansible/environments/wil/group_vars/infra_networking/secrets.sops.yml '["authelia_oidc_proxmox_client_secret"]' '"<Random Password>"'
+```
+
+```bash
+sops set ansible/environments/wil/group_vars/infra_networking/secrets.sops.yml '["authelia_oidc_proxmox_client_secret_hash"]' '"$pbkdf2-sha512$..."'
+```
+
+Proxmox fetches Authelia's settings itself, so the host must resolve the login page, which is not in public DNS. Check from the host:
+
+```bash
+getent hosts auth.wil.5am.cloud
+```
+
+If that prints nothing, as on both sites' hosts when this was set up, point the name at the site's networking VM (WIL `10.2.20.53`, LDN `10.3.20.53`) in the host's `/etc/hosts`:
+
+```bash
+echo "10.2.20.53 auth.wil.5am.cloud" >> /etc/hosts
+```
+
+Add the realm under **Datacenter > Permissions > Realms > Add > OpenID Connect Server**:
+
+| Field | Value |
+|-------|-------|
+| Issuer URL | `https://auth.wil.5am.cloud` |
+| Realm | `authelia` |
+| Client ID | `proxmox` |
+| Client Key | `authelia_oidc_proxmox_client_secret` from the site's secrets |
+| Default | On, so the realm is preselected at login |
+| Autocreate Users | Off |
+| Username Claim | Type `preferred_username`. It cannot be changed later, and the default gives a user named after an opaque ID |
+
+Then, on the host, create the user and make it an admin:
+
+```bash
+pveum user add sfcal@authelia
+```
+
+```bash
+pveum acl modify / --users sfcal@authelia --roles Administrator
+```
+
+Keep `root@pam`. It is the way in through `https://<host-ip>:8006` when Authelia or Caddy is down, and a few settings stay root-only, such as raw `args` or PCI passthrough without a mapping. The `authelia` realm only works on the `vm` name, because that is its only registered redirect URL.
+
 ## Good to Know
 
 - A login lasts 12 hours, or a month if you tick **Remember me**. Each domain's cookie also lasts 12 hours and is renewed without asking while the login lasts.
@@ -138,6 +188,8 @@ With Auto Login on, Kasm's own login page is at `https://kasm.ldn.5am.cloud/#/st
 **Deploy stops with `'authelia_password_hash' is undefined`** — the password has not been set for that environment. See [Set the Password](#set-the-password).
 
 **Deploy stops with `'authelia_oidc_kasm_client_secret_hash' is undefined`** — the Kasm client secret has not been set for LDN. See [Kasm](#kasm).
+
+**Deploy stops with `'authelia_oidc_proxmox_client_secret_hash' is undefined`** — the Proxmox client secret has not been set for that environment. See [Proxmox](#proxmox).
 
 **Kasm's login ends in `Internal Error`** — Kasm's log has the reason: `ssh 10.3.20.50 'docker exec kasm docker logs --since 10m kasm_api 2>&1' | grep -E 'Failed to find|\(invalid_'`. `Failed to find groups attribute` means Groups Attribute is not empty. `invalid_client` means the Client Secret does not match. `The authorization code has already been used` means the error page was reloaded: start again from the login page.
 

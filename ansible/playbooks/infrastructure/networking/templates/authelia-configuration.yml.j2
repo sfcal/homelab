@@ -48,8 +48,9 @@ notifier:
     filename: /data/notification.txt
 
 # oauth2-proxy may send a browser back to any flagged service, so its list is
-# every service with `auth: true`. Kasm logs in through Authelia itself, so it is
-# a client of its own; its side is set in Kasm's admin UI (see the SSO docs).
+# every service with `auth: true`. Kasm and Proxmox log in through Authelia
+# themselves, so each is a client of its own; their side is set in their own admin
+# UIs (see the SSO docs).
 identity_providers:
   oidc:
     hmac_secret: "{{ authelia_oidc_hmac_secret }}"
@@ -80,4 +81,19 @@ identity_providers:
           - profile
         redirect_uris:
           - https://{{ service.name }}.{{ service.domain }}/api/oidc_callback
+{% endfor %}
+{% for service in services if service.name == 'vm' %}
+      - client_id: proxmox
+        client_name: Proxmox
+        client_secret: "{{ authelia_oidc_proxmox_client_secret_hash }}"
+        authorization_policy: one_factor
+        consent_mode: implicit
+        require_pkce: true
+        pkce_challenge_method: S256
+        scopes:
+          - openid
+          - profile
+          - email
+        redirect_uris:
+          - https://{{ service.name }}.{{ service.domain }}
 {% endfor %}

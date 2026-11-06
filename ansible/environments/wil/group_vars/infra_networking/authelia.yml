@@ -14,4 +14,5 @@ authelia_user: sfcal
 #   authelia_password_hash, authelia_storage_encryption_key,
 #   authelia_oidc_hmac_secret, authelia_oidc_private_key,
 #   authelia_oidc_client_secret, authelia_oidc_client_secret_hash,
+#   authelia_oidc_proxmox_client_secret, authelia_oidc_proxmox_client_secret_hash,
 #   oauth2_proxy_cookie_secret
