@@ -8,6 +8,9 @@ Packer builds cloud-init-enabled VM templates on Proxmox.
 # Build Ubuntu Server template
 task packer:build-ubuntu ENV=wil
 
+# Build Ubuntu Desktop template
+task packer:build-ubuntu-desktop ENV=wil
+
 # Build Debian Bookworm template
 task packer:build-debian ENV=wil
 
@@ -26,6 +29,7 @@ task packer:clean
 | Template | File | Description |
 |----------|------|-------------|
 | Ubuntu Server | `ubuntu-server-base.pkr.hcl` | Ubuntu Server with Docker, Node Exporter, Lazydocker, mDNS (avahi) |
+| Ubuntu Desktop | `ubuntu-desktop-base.pkr.hcl` | Ubuntu Server install with `ubuntu-desktop-minimal` on top (GNOME, Firefox), mDNS (avahi); no Docker or Node Exporter |
 | Debian Bookworm | `debian-bookworm-base.pkr.hcl` | Debian base with Docker |
 | Netboot | — | PXE boot template |
 | Windows | `windows-base.pkr.hcl` | Windows 11 (or Server) for one-off VMs: UEFI + TPM 2.0, unattended install, virtio-win guest tools (drivers, QEMU and SPICE agents), Remote Desktop on, console clipboard |
@@ -49,6 +53,7 @@ The Ubuntu Server template (primary) installs:
 packer/
 ├── templates/
 │   ├── ubuntu-server-base.pkr.hcl      # Ubuntu template definition
+│   ├── ubuntu-desktop-base.pkr.hcl     # Ubuntu Desktop template definition
 │   ├── debian-bookworm-base.pkr.hcl    # Debian template definition
 │   └── windows-base.pkr.hcl            # Windows template definition
 ├── files/windows/
@@ -58,11 +63,25 @@ packer/
 └── environments/
     ├── wil/
     │   ├── ubuntu-variables.pkrvars.hcl     # Ubuntu build variables
+    │   ├── ubuntu-desktop-variables.pkrvars.hcl  # Ubuntu Desktop build variables
     │   ├── debian-variables.pkrvars.hcl     # Debian build variables
     │   ├── windows-variables.pkrvars.hcl    # Windows build variables
     │   └── credentials.wil.pkrvars.hcl      # Proxmox API tokens (encrypted)
     └── ldn/
 ```
+
+## Ubuntu Desktop Template
+
+Built the same way as the Ubuntu Server template: same ISO, same autoinstall (`http/user-data`), same mDNS setup. Instead of Docker and Node Exporter the build then installs `ubuntu-desktop-minimal`, the default selection of the Ubuntu Desktop installer (GNOME, Firefox, basic utilities). No separate Desktop ISO is needed.
+
+It is still a cloud-init template, so clone it with the Terraform VM module (`template_name = "ubuntu-desktop-<env>-base"`, `memory` of 4096 or more, `disk_size` no smaller than the template's 32G) or by hand from the Proxmox UI. Clones boot to the GNOME login screen on the Proxmox console; log in with `ssh_username` / `ssh_password` from the environment and credentials var files.
+
+Two things differ from the server template on clones:
+
+- The password keeps working, at the console only. cloud-init normally locks its default user's password on a clone's first boot, which would leave no way to log in at the GNOME screen, so the template sets `lock_passwd: false` for that user. The same file (`/etc/cloud/cloud.cfg.d/99-default-user.cfg`) sets `ssh_pwauth: false`, so SSH takes keys only: Terraform clones get their key as usual, a clone made by hand needs one in its Cloud-Init tab.
+- NetworkManager runs the network instead of systemd-networkd (the desktop packages make it the netplan renderer). It is fed by the same Proxmox cloud-init settings, so `ip_address`, `gateway` and `nameserver` work as usual. The build disables `systemd-networkd-wait-online`, which would otherwise hold every boot for two minutes waiting for an interface systemd-networkd no longer has.
+
+The build also sets `MUTTER_DEBUG_KMS_THREAD_TYPE=user` in `/etc/environment`. Without it GNOME Shell is killed about two seconds after starting on Proxmox's default display whenever its display thread runs with realtime priority, and the login screen restarts six times on every boot before it stays up.
 
 ## Windows Template
 

@@ -72,7 +72,6 @@ vms = {
     ssh_user       = "sfcal"
     bios        = "ovmf"
     machine     = "q35"
-    pci_mapping = "b50-vf2"
   }
 
   game_server = {

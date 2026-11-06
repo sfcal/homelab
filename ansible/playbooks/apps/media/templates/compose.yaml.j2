@@ -275,3 +275,17 @@ services:
       - {{ media_stack_data_path }}/dispatcharr:/data
     networks:
       - media
+
+  # network_mode: host so it reports the host's NICs and hostname, not the container's
+  node-exporter:
+    image: {{ node_exporter_image }}
+    container_name: node-exporter
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+    network_mode: host
+    pid: host

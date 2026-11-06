@@ -43,6 +43,7 @@ task --list-all
 | Command | Description |
 |---------|-------------|
 | `task packer:build-ubuntu ENV=wil` | Build Ubuntu Server template |
+| `task packer:build-ubuntu-desktop ENV=wil` | Build Ubuntu Desktop template (Ubuntu Server install plus GNOME) |
 | `task packer:build-debian ENV=wil` | Build Debian Bookworm template |
 | `task packer:build-netboot ENV=wil` | Build Netboot VM template |
 | `task packer:build-windows ENV=ldn` | Build Windows template (UEFI/TPM, unattended install) |

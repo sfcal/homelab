@@ -63,6 +63,14 @@ tasks:
           TEMPLATE: base-efi
           VAR_FILE: 'environments/{{.ENV}}/ubuntu-efi-variables.pkrvars.hcl'
 
+  build-ubuntu-desktop:
+    desc: Build Ubuntu Desktop template (Ubuntu Server install plus ubuntu-desktop-minimal)
+    cmds:
+      - task: build
+        vars:
+          TEMPLATE_PREFIX: ubuntu-desktop
+          VAR_FILE: 'environments/{{.ENV}}/ubuntu-desktop-variables.pkrvars.hcl'
+
   build-windows:
     desc: Build Windows template (UEFI/Q35/TPM, unattended install; needs the Windows and virtio-win ISOs on Proxmox)
     cmds:
