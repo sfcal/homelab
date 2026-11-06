@@ -64,7 +64,7 @@ tasks:
           VAR_FILE: 'environments/{{.ENV}}/ubuntu-efi-variables.pkrvars.hcl'
 
   build-ubuntu-desktop:
-    desc: Build Ubuntu Desktop template (Ubuntu Server install plus ubuntu-desktop-minimal)
+    desc: Build Ubuntu Desktop template (Ubuntu Server install plus ubuntu-desktop-minimal and KasmVNC)
     cmds:
       - task: build
         vars:

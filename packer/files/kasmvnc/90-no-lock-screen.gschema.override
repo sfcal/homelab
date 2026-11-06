@@ -1,0 +1,10 @@
+# Clones sit behind Kasm and SSO, so GNOME's own lock screen only gets in the way.
+[org.gnome.desktop.lockdown]
+disable-lock-screen=true
+
+[org.gnome.desktop.screensaver]
+lock-enabled=false
+
+# Never go idle: GNOME shows its clock screen after idling even with the lock off.
+[org.gnome.desktop.session]
+idle-delay=uint32 0

@@ -27,10 +27,14 @@ ssh_username = "sfcal"
 // Cloud-Init Settings
 cloud_init_storage_pool = "local-lvm"
 
+// NAS share, mounted at /mnt/data on every clone (same export as the nfs_mount role in app_mediastack/nfs.yml)
+nfs_share = "10.2.10.100:/mnt/NAS-WIL/Media"
+
 /*
 Note: The following variables are expected to be in credentials.pkrvars.hcl:
 - proxmox_api_url
 - proxmox_api_token_id
 - proxmox_api_token_secret
 - ssh_password
+- kasmvnc_password
 */

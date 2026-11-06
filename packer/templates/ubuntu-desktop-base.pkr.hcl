@@ -4,8 +4,11 @@
 // instead of Docker and Node Exporter. Still a cloud-init template, so the
 // terraform VM module clones it like the server one.
 //
-// Clones boot to the GNOME login screen: log in as ssh_username / ssh_password
-// on the Proxmox console.
+// Clones start a GNOME desktop at boot and serve it through KasmVNC on https
+// port 8444 (ssh_username / kasmvnc_password), to be reached through Kasm and
+// SSO, so GNOME's lock screen is off. The NAS share is mounted at /mnt/data.
+// The Proxmox console still has the GNOME login screen (ssh_username /
+// ssh_password).
 
 packer {
   required_plugins {
@@ -117,8 +120,22 @@ variable "cloud_init_storage_pool" {
   description = "Storage pool for the Cloud-Init drive"
 }
 
+// KasmVNC login (password from credentials.pkrvars.hcl)
+variable "kasmvnc_password" {
+  type        = string
+  sensitive   = true
+  description = "Password for ssh_username on KasmVNC's port 8444 (6 to 128 characters). Not ssh_password: that port is open to the whole network"
+}
+
+// NAS share (Expected from environment var file)
+variable "nfs_share" {
+  type        = string
+  description = "NFS export mounted at /mnt/data on every clone (e.g., 10.2.10.100:/mnt/NAS-WIL/Media)"
+}
+
 // --- Local Variables ---
 locals {
+  kasmvnc_version      = "1.4.0"
   vm_name              = "${var.template_prefix}-${var.environment}-base"
   template_description = "Ubuntu Desktop Base (${var.environment}) - Built by Packer on ${timestamp()}"
 }
@@ -220,9 +237,26 @@ build {
     ]
   }
 
+  // Install KasmVNC. Above the desktop install because it downloads (see the DNS
+  // note there).
+  provisioner "shell" {
+    inline = [
+      "echo 'Installing KasmVNC...'",
+      "sudo apt-get update",
+      "curl -fsSL -o /tmp/kasmvnc.deb https://github.com/kasmtech/KasmVNC/releases/download/v${local.kasmvnc_version}/kasmvncserver_noble_${local.kasmvnc_version}_amd64.deb",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/kasmvnc.deb",
+      "rm /tmp/kasmvnc.deb",
+      "echo 'KasmVNC installation complete!'"
+    ]
+  }
+
   // Install the desktop. ubuntu-desktop-minimal is the default selection of the
-  // Ubuntu Desktop installer: GNOME, Firefox (snap) and the basic utilities.
-  // It also makes NetworkManager the netplan renderer (ubuntu-settings), so
+  // Ubuntu Desktop installer: GNOME and the basic utilities. The trailing "-"
+  // skips two of its recommends: Firefox, a deb that only downloads the snap and
+  // its GNOME runtime (well over an hour of the build), and the welcome wizard
+  // that would otherwise open on the first login of every clone.
+  // Prompt=never stops the popup offering an upgrade to the next Ubuntu release.
+  // The package also makes NetworkManager the netplan renderer (ubuntu-settings), so
   // clones come up under NetworkManager like a stock desktop. The server
   // install's systemd-networkd-wait-online is disabled to match: with no
   // interface left for networkd it would hold every clone boot for 2 minutes.
@@ -236,10 +270,49 @@ build {
     inline = [
       "echo 'Installing Ubuntu Desktop...'",
       "sudo apt-get update",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ubuntu-desktop-minimal",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ubuntu-desktop-minimal firefox- gnome-initial-setup-",
+      "sudo sed -i 's/^Prompt=.*/Prompt=never/' /etc/update-manager/release-upgrades",
       "sudo systemctl disable systemd-networkd-wait-online.service",
       "echo 'MUTTER_DEBUG_KMS_THREAD_TYPE=user' | sudo tee -a /etc/environment",
       "echo 'Ubuntu Desktop installation complete!'"
+    ]
+  }
+
+  // Set up the KasmVNC desktop: it starts at boot as ssh_username, who needs group
+  // ssl-cert to read the self-signed certificate. .de-was-selected skips
+  // vncserver's desktop chooser, xstartup already picks GNOME.
+  provisioner "file" {
+    source      = "files/kasmvnc"
+    destination = "/tmp"
+  }
+
+  provisioner "shell" {
+    environment_vars = ["KASMVNC_PASSWORD=${var.kasmvnc_password}"]
+    inline = [
+      "echo 'Configuring KasmVNC...'",
+      "sudo cp '/tmp/kasmvnc/kasmvnc@.service' /etc/systemd/system/",
+      "sudo systemctl enable kasmvnc@${var.ssh_username}.service",
+      "sudo usermod -aG ssl-cert ${var.ssh_username}",
+      "mkdir -m 700 /home/${var.ssh_username}/.vnc",
+      "cp /tmp/kasmvnc/kasmvnc.yaml /tmp/kasmvnc/xstartup /home/${var.ssh_username}/.vnc/",
+      "chmod 755 /home/${var.ssh_username}/.vnc/xstartup",
+      "touch /home/${var.ssh_username}/.vnc/.de-was-selected",
+      "printf '%s\\n%s\\n' \"$KASMVNC_PASSWORD\" \"$KASMVNC_PASSWORD\" | kasmvncpasswd -u ${var.ssh_username} -wo",
+      "echo 'Turning off the GNOME lock screen...'", // as the default for every user
+      "sudo cp /tmp/kasmvnc/90-no-lock-screen.gschema.override /usr/share/glib-2.0/schemas/",
+      "sudo glib-compile-schemas /usr/share/glib-2.0/schemas/",
+      "echo 'KasmVNC configuration complete!'"
+    ]
+  }
+
+  // Mount the NAS share at /mnt/data, the export and path the nfs_mount role gives
+  // wil's media VM (nfs-common comes with the autoinstall). nofail and automount:
+  // it mounts on first use, so a clone that cannot reach the NAS still boots.
+  // x-gvfs-show puts it in the Files sidebar.
+  provisioner "shell" {
+    inline = [
+      "sudo mkdir -p /mnt/data",
+      "echo '${var.nfs_share} /mnt/data nfs defaults,nofail,x-systemd.automount,x-gvfs-show 0 0' | sudo tee -a /etc/fstab"
     ]
   }
 

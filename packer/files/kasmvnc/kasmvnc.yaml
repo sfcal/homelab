@@ -1,0 +1,4 @@
+# Start without asking questions (the service has no terminal). Everything not set here is KasmVNC's default:
+# display :1 -> https on port 8444, self-signed certificate, logins from ~/.kasmpasswd.
+command_line:
+  prompt: false

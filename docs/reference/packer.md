@@ -29,7 +29,7 @@ task packer:clean
 | Template | File | Description |
 |----------|------|-------------|
 | Ubuntu Server | `ubuntu-server-base.pkr.hcl` | Ubuntu Server with Docker, Node Exporter, Lazydocker, mDNS (avahi) |
-| Ubuntu Desktop | `ubuntu-desktop-base.pkr.hcl` | Ubuntu Server install with `ubuntu-desktop-minimal` on top (GNOME, Firefox), mDNS (avahi); no Docker or Node Exporter |
+| Ubuntu Desktop | `ubuntu-desktop-base.pkr.hcl` | Ubuntu Server install with `ubuntu-desktop-minimal` on top (GNOME, no browser), KasmVNC, NAS share at `/mnt/data`, mDNS (avahi); no Docker or Node Exporter |
 | Debian Bookworm | `debian-bookworm-base.pkr.hcl` | Debian base with Docker |
 | Netboot | — | PXE boot template |
 | Windows | `windows-base.pkr.hcl` | Windows 11 (or Server) for one-off VMs: UEFI + TPM 2.0, unattended install, virtio-win guest tools (drivers, QEMU and SPICE agents), Remote Desktop on, console clipboard |
@@ -60,6 +60,7 @@ packer/
 │   ├── autounattend.xml.pkrtpl         # Windows answer file (rendered by the template)
 │   ├── setup.ps1                       # First-logon bootstrap: WinRM, VirtIO drivers, guest agent
 │   └── smb-share.ps1                   # Optional: NAS share as a persistent Z: drive
+├── files/kasmvnc/                      # Ubuntu Desktop: KasmVNC service and config, lock screen off
 └── environments/
     ├── wil/
     │   ├── ubuntu-variables.pkrvars.hcl     # Ubuntu build variables
@@ -72,9 +73,25 @@ packer/
 
 ## Ubuntu Desktop Template
 
-Built the same way as the Ubuntu Server template: same ISO, same autoinstall (`http/user-data`), same mDNS setup. Instead of Docker and Node Exporter the build then installs `ubuntu-desktop-minimal`, the default selection of the Ubuntu Desktop installer (GNOME, Firefox, basic utilities). No separate Desktop ISO is needed.
+Built the same way as the Ubuntu Server template: same ISO, same autoinstall (`http/user-data`), same mDNS setup. Instead of Docker and Node Exporter the build then installs `ubuntu-desktop-minimal`, the default selection of the Ubuntu Desktop installer (GNOME, basic utilities), and KasmVNC. It leaves out the Firefox snap, whose downloads took over an hour of the build, so clones have no browser, and the first-login welcome wizard. The prompt to upgrade to the next Ubuntu release is turned off. No separate Desktop ISO is needed.
 
-It is still a cloud-init template, so clone it with the Terraform VM module (`template_name = "ubuntu-desktop-<env>-base"`, `memory` of 4096 or more, `disk_size` no smaller than the template's 32G) or by hand from the Proxmox UI. Clones boot to the GNOME login screen on the Proxmox console; log in with `ssh_username` / `ssh_password` from the environment and credentials var files.
+It is still a cloud-init template, so clone it with the Terraform VM module (`template_name = "ubuntu-desktop-<env>-base"`, `memory` of 4096 or more, `disk_size` no smaller than the template's 32G) or by hand from the Proxmox UI. Clones start a GNOME desktop at boot and serve it through KasmVNC.
+
+### KasmVNC
+
+`kasmvnc@<ssh_username>.service` runs the desktop on `https://<clone>:8444` with a self-signed certificate, the same on every clone. The login is `ssh_username` / `kasmvnc_password` from the credentials file. It is not `ssh_password` because the port is open to the whole network and that user has passwordless sudo.
+
+To put a clone behind SSO, add it to Kasm as a KasmVNC server on port 8444 with that login. Kasm sends the password itself, so the user only sees the SSO login. GNOME's lock screen is off on every clone (`files/kasmvnc/90-no-lock-screen.gschema.override`), so there is no second login inside the desktop.
+
+The Proxmox console still has the GNOME login screen (`ssh_username` / `ssh_password`). GNOME runs one session per user and KasmVNC's is already running, so stop the service before logging in there.
+
+GPU rendering is per VM and not in the template. After mapping a VF to a clone, install `linux-generic-hwe-24.04` (the template's 6.8 kernel has no driver for the Arc Pro B50), add the user to group `render`, set `desktop.gpu.hw3d: true` in `~/.vnc/kasmvnc.yaml`, and reboot.
+
+### NAS share
+
+`nfs_share` in `ubuntu-desktop-variables.pkrvars.hcl` is mounted at `/mnt/data`: the same export and path the `nfs_mount` role gives WIL's media VM, and LDN clones reach it over the Tailscale tunnel. It mounts on first use and shows in the Files sidebar. A clone that cannot reach the NAS still boots. Files written from a clone end up owned by root on the share, and any user on the clone can write to all of it.
+
+### Other differences from the server template
 
 Two things differ from the server template on clones:
 

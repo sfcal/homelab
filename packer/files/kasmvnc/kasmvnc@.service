@@ -1,0 +1,19 @@
+# Instance name = the user whose desktop it is: kasmvnc@sfcal.service
+[Unit]
+Description=KasmVNC desktop for %i (display :1, https port 8444)
+After=network-online.target systemd-user-sessions.service
+Wants=network-online.target
+
+[Service]
+User=%i
+PAMName=login
+WorkingDirectory=/home/%i
+Environment=XDG_SESSION_TYPE=x11
+Environment=XDG_SESSION_CLASS=user
+ExecStart=/usr/bin/vncserver :1 -fg
+ExecStop=/usr/bin/vncserver -kill :1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
