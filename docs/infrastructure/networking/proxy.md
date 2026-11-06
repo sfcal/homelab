@@ -221,6 +221,20 @@ Transport read buffer size in bytes. Increase for services with large response h
 read_buffer: 8192
 ```
 
+---
+
+#### `auth`
+
+Require a login before proxying. Caddy checks for a session first and sends the browser to the site's [login page](sso.md) if there is none. Works for a service on any domain.
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+```yaml
+auth: true
+```
+
 ## Service Configuration Examples
 
 ### Minimal service
@@ -294,7 +308,7 @@ kasm:
 - **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the environment's inventory, the render fails loudly rather than silently dropping the entry.
 - **`backend_port` defaults to the sibling `port`** — set `backend_port` inside the `proxy:` block to override it.
 - **`name`, `domain`, and `proxied` are required** — `proxied` has no default in the zone template.
-- **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `dns`, and `enabled` behave exactly as in manual entries.
+- **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `auth`, `dns`, and `enabled` behave exactly as in manual entries.
 
 Apps without a `proxy:` block get no DNS record and no Caddy entry.
 
@@ -341,6 +355,7 @@ Both BIND9 zone templates and the Caddyfile template consume the resulting `serv
 | Bandwidth-heavy streaming service | Add `encode: gzip` |
 | Large response headers or websocket streams | Add `read_buffer: 8192` (or higher) |
 | Service only accessible externally via Cloudflare | Add `dns: external` |
+| Web UI that should sit behind the single sign-on login | Add `auth: true` |
 | Temporarily take a service offline | Set `enabled: false` |
 
 ## Common Tasks
@@ -443,7 +458,7 @@ Set `enabled: false` on the service entry (for registry apps, inside the `proxy:
 
 ## Troubleshooting
 
-**502 Bad Gateway** — Caddy can reach the backend but it's not responding. Check the backend container is running: `ssh <host> docker ps`. Verify `backend_port` matches the container's exposed port.
+**502 Bad Gateway** — Caddy can reach the backend but it's not responding. Check the backend container is running: `ssh <host> docker ps`. Verify `backend_port` matches the container's exposed port. A service with `auth: true` also answers 502 while Authelia is down: check `docker ps` on the networking VM.
 
 **Certificate not issuing** — Check Caddy logs: `ssh <networking-ip> docker logs caddy`. Common causes: Cloudflare API token expired, domain not on Cloudflare, or Let's Encrypt rate limit hit.
 

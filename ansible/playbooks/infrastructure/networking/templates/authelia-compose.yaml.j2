@@ -1,0 +1,30 @@
+services:
+  authelia:
+    image: {{ authelia_image }}
+    container_name: authelia
+    restart: unless-stopped
+    environment:
+      - TZ={{ system_timezone }}
+    volumes:
+      - /opt/authelia:/config
+      - /var/lib/authelia:/data
+    networks:
+      - caddy # no published port: only Caddy reaches it, as authelia:9091
+
+  oauth2-proxy:
+    image: {{ oauth2_proxy_image }}
+    container_name: oauth2-proxy
+    restart: unless-stopped
+    env_file: /opt/authelia/oauth2-proxy.env
+    # It talks to Authelia through the login page's public name, which the
+    # VM's own resolver does not know: point that name at Caddy.
+    extra_hosts:
+{% for service in services if service.name == 'auth' %}
+      - "auth.{{ service.domain }}:{{ reverse_proxy_ip }}"
+{% endfor %}
+    networks:
+      - caddy # no published port: only Caddy reaches it, as oauth2-proxy:4180
+
+networks:
+  caddy:
+    external: true

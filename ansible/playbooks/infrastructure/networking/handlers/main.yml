@@ -18,6 +18,11 @@
     project_src: "/opt/cloudflare-ddns"
     state: restarted
 
+- name: Restart authelia
+  community.docker.docker_compose_v2:
+    project_src: "/opt/authelia"
+    state: restarted
+
 - name: Rebuild caddy
   community.docker.docker_compose_v2:
     project_src: "/opt/caddy"

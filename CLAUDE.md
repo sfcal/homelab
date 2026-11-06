@@ -169,7 +169,7 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
          domain: wil.5am.cloud
          proxied: true           # required; true=Caddy proxy, false=DNS direct
          # Optional passthrough: tls_skip_verify, forward_headers,
-         # host_header, encode, read_buffer, dns, enabled, backend_port
+         # host_header, encode, read_buffer, auth, dns, enabled, backend_port
    ```
    Multi-service apps nest sub-services with their own `proxy:` blocks (see `apps.work.*`). Apps without a `proxy:` block get no DNS/proxy entry.
 
@@ -192,10 +192,19 @@ services: >-
   }}
 ```
 
+### Single Sign-On (Authelia)
+
+Authelia (login page) and oauth2-proxy (login check) run next to Caddy on each networking VM (`tasks/authelia.yml`, one compose project in `/opt/authelia`, state in `/var/lib/authelia`). See `docs/infrastructure/networking/sso.md`.
+- `auth: true` on a service entry (or inside a registry `proxy:` block) wraps it in the Caddyfile's `(login)` block: Caddy asks oauth2-proxy, which sends the browser to Authelia (OpenID Connect) and back. Works on any domain. Browser UIs only: leave it off anything apps, devices or scripts reach by hostname (Plex, KOSync, MicroBin) and off public sites
+- A service entry named `auth` (backend `authelia:9091`) is the site's login page; one per site: `auth.wil.5am.cloud`, `auth.ldn.5am.cloud`. Never add a login page on another domain
+- Authelia's client `redirect_uris` and oauth2-proxy's cookie domains are generated from the flagged services, so flagging a service needs only a networking deploy
+- Secrets per env in `group_vars/infra_networking/secrets.sops.yml` (names listed in `authelia.yml` there)
+- Kasm stays unflagged: it logs in through Authelia itself as a second OpenID Connect client (`kasm` in `authelia-configuration.yml.j2`; its side lives in Kasm's database, values in the SSO docs)
+
 ## Adding New Services
 
 For a data-driven (registry) app:
-1. Add the app to `ansible/environments/<env>/group_vars/all/apps.yml`: `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived)
+1. Add the app to `ansible/environments/<env>/group_vars/all/apps.yml`: `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived). For a browser UI on the site domain, add `auth: true` to the `proxy:` block to put it behind the login
 2. Create the compose template: `ansible/playbooks/apps/<service>/templates/compose.yaml.j2` referencing `apps[app_name].<field>`
 3. Add host group to `hosts.ini` under `[app_<service>]` and `[apps:children]`
 4. Add import to `ansible/playbooks/site.yml` (uses `deploy-app.yml` with `app_name`)

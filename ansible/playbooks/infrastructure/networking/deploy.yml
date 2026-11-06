@@ -30,5 +30,10 @@
       ansible.builtin.include_tasks: tasks/ddns.yml
       when: ddns_domains | default([]) | length > 0
 
+    # Before Caddy: a missing Authelia secret stops the play here, before the
+    # Caddyfile starts sending protected services to the login page.
+    - name: Configure Authelia.
+      ansible.builtin.include_tasks: tasks/authelia.yml
+
     - name: Configure Caddy.
       ansible.builtin.include_tasks: tasks/caddy.yml

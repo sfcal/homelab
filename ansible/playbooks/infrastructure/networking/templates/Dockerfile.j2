@@ -1,9 +1,10 @@
-# For prod you'd want to pin the version: e.g., 2.9.1-builder
-FROM caddy:builder AS builder
+# Pinned: forward_auth needs 2.11.6 or later. Earlier 2.11 builds can send the
+# login check to the wrong upstream (GHSA-6365-7ppr-5r92).
+FROM caddy:2.11.9-builder AS builder
 
 RUN xcaddy build \
     --with github.com/caddy-dns/cloudflare
 
-FROM caddy:latest
+FROM caddy:2.11.9
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy

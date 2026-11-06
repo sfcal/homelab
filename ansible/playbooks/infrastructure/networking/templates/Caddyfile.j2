@@ -2,6 +2,28 @@
         admin 0.0.0.0:2019
 }
 
+# Login check for services with `auth: true`. Caddy asks oauth2-proxy; a browser
+# without a session is sent to the Authelia login page and back to where it was.
+(login) {
+        handle /oauth2/* {
+                reverse_proxy oauth2-proxy:4180
+        }
+        handle {
+                forward_auth oauth2-proxy:4180 {
+                        uri /oauth2/auth
+                        @unauthorized status 401
+                        handle_response @unauthorized {
+                                rewrite * /oauth2/start
+                                reverse_proxy oauth2-proxy:4180 {
+                                        method GET
+                                        header_up X-Forwarded-Uri {http.request.orig_uri}
+                                }
+                        }
+                }
+                {block}
+        }
+}
+
 {% for domain in domains %}
 *.{{ domain.name }} {
         tls {
@@ -13,6 +35,9 @@
 {% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) %}
         @{{ service.name }} host {{ service.name }}.{{ domain.name }}
         handle @{{ service.name }} {
+{% if service.auth | default(false) %}
+                import login {
+{% endif %}
 {% if service.encode | default(false) %}
                 encode {{ service.encode }}
 {% endif %}
@@ -42,6 +67,9 @@
                         }
 {% endif %}
                 }
+{% if service.auth | default(false) %}
+                }
+{% endif %}
         }
 
 {% endfor %}

@@ -23,7 +23,7 @@ task ansible:ping ENV=wil
 | Command | Description |
 |---------|-------------|
 | `deploy-all` | Full infrastructure deployment (runs `site.yml`; on ldn the final Proxmox play needs root SSH to the PVE host) |
-| `deploy-networking` | BIND9, Caddy, DDNS, Tailscale |
+| `deploy-networking` | BIND9, Caddy, Authelia, DDNS, Tailscale |
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
 | `deploy-monitoring` | Prometheus, Grafana, Homepage |
@@ -72,7 +72,7 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 
 | Playbook | Hosts | Services |
 |----------|-------|----------|
-| `networking/deploy.yml` | `infra_networking` | BIND9, Caddy, DDNS, Tailscale |
+| `networking/deploy.yml` | `infra_networking` | BIND9, Caddy, Authelia, DDNS, Tailscale |
 | `ca/deploy.yml` | `infra_ca` | Step-CA |
 | `ntp/deploy.yml` | `infra_ntp` | Chrony |
 | `monitoring/deploy.yml` | `infra_monitoring` | Prometheus, Grafana, Homepage |

@@ -44,7 +44,7 @@ Infrastructure services have dedicated playbooks rather than using the data-driv
 
 | Service | Docs |
 |---------|------|
-| BIND9, Caddy, DDNS, Tailscale | [Networking](networking/index.md) |
+| BIND9, Caddy, Authelia, DDNS, Tailscale | [Networking](networking/index.md) |
 | Prometheus, Grafana, Homepage | [Monitoring](monitoring/index.md) |
 | Step-CA | [Certificate Authority](ca/index.md) |
 

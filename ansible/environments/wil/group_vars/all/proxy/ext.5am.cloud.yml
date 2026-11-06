@@ -5,3 +5,4 @@ ext_services:
     backend_port: 3001
     proxied: true
     forward_headers: true
+    auth: true

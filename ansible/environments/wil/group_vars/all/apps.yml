@@ -22,7 +22,7 @@
 #   port: host port published by compose; default proxy backend_port
 #   proxy: proxy/DNS entry — name (subdomain), domain, proxied are required;
 #          tls_skip_verify / forward_headers / host_header / encode /
-#          read_buffer / dns / enabled / backend_port pass through.
+#          read_buffer / auth / dns / enabled / backend_port pass through.
 #          Omit the block for apps with no DNS/proxy entry.
 #   nfs: true — run nfs_mount role before deployment
 #   user: override service file owner (default: root)

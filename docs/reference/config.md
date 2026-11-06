@@ -42,6 +42,7 @@ proxy/
 | `host_header` | no | — | Override `Host` header sent to upstream |
 | `encode` | no | — | Response encoding (e.g., `gzip`) |
 | `read_buffer` | no | — | Read buffer size |
+| `auth` | no | `false` | Require an [Authelia](../infrastructure/networking/sso.md) login |
 
 For registry-generated entries, `backend_host` is derived (first inventory host of the app's `host_group`) and `backend_port` defaults to the app's `port` — the `proxy:` block supplies `name`, `domain`, `proxied`, and any optional fields.
 
@@ -83,7 +84,7 @@ apps:
       domain: wil.5am.cloud
       proxied: true             # Required (no default in zone template)
       # Optional: tls_skip_verify, forward_headers, host_header, encode,
-      #           read_buffer, dns, enabled, backend_port (overrides port)
+      #           read_buffer, auth, dns, enabled, backend_port (overrides port)
     # Optional:
     # nfs: true                 # Mount NFS shares
     # user: "1000"              # Service user

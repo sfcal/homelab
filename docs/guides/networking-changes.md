@@ -63,6 +63,7 @@ Either path creates both a DNS A record (`myapp.wil.5am.cloud → Caddy`) and a 
 | `host_header` | no | — | Overrides `Host` header to upstream |
 | `encode` | no | — | Response encoding (e.g., `gzip`) |
 | `read_buffer` | no | — | Read buffer size |
+| `auth` | no | `false` | Require an [Authelia](../infrastructure/networking/sso.md) login |
 
 For registry-generated entries, `backend_host` and `backend_port` are derived — the `proxy:` block only supplies `name`, `domain`, `proxied`, and any optional fields.
 

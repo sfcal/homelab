@@ -49,3 +49,4 @@ apps:
         name: restreamer
         domain: ldn.5am.cloud
         proxied: true
+        auth: true

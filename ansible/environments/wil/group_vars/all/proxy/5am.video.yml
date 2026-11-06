@@ -13,38 +13,47 @@ video_services:
     backend_host: 10.2.0.5
     backend_port: 8080
     proxied: true
+    auth: true
   - name: prowlarr
     backend_host: 10.2.0.5
     backend_port: 9696
     proxied: true
+    auth: true
   - name: sonarr
     backend_host: 10.2.0.5
     backend_port: 8989
     proxied: true
+    auth: true
   - name: radarr
     backend_host: 10.2.0.5
     backend_port: 7878
     proxied: true
+    auth: true
   - name: bazarr
     backend_host: 10.2.0.5
     backend_port: 6767
     proxied: true
+    auth: true
   - name: tunarr
     backend_host: 10.2.0.5
     backend_port: 8000
     proxied: true
+    auth: true
   - name: pulsarr
     backend_host: 10.2.0.5
     backend_port: 3003
     proxied: true
+    auth: true
   - name: cleanuparr
     backend_host: 10.2.0.5
     backend_port: 11011
     proxied: true
+    auth: true
   - name: tdarr
     backend_host: 10.2.0.5
     backend_port: 8265
     proxied: true
+    auth: true
   - name: wizarr
     backend_host: 10.2.0.5
     backend_port: 5690
@@ -53,9 +62,11 @@ video_services:
     backend_host: 10.2.0.5
     backend_port: 9191
     proxied: true
+    auth: true
   - name: frigate
     backend_host: 10.2.0.5
     backend_port: 5000
     proxied: true
+    auth: true
 
   # (samuel is a registry app in group_vars/all/apps.yml)

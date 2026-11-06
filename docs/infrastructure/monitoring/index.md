@@ -184,7 +184,7 @@ Dashboards are provisioned from files — any JSON dropped into `playbooks/infra
 - **Depends on:** Prometheus
 - **Provisioning:** mounted read-only at `/etc/grafana/provisioning`
 - **Sign-up:** disabled (`GF_USERS_ALLOW_SIGN_UP=false`)
-- **Embedding:** allowed, and anyone who is not signed in gets read-only access (`GF_SECURITY_ALLOW_EMBEDDING`, `GF_AUTH_ANONYMOUS_*`), so Homepage can show panels in iframes without a login
+- **Embedding:** allowed, and anyone who is not signed in gets read-only access (`GF_SECURITY_ALLOW_EMBEDDING`, `GF_AUTH_ANONYMOUS_*`), so Homepage can show panels in iframes without a Grafana login
 
 ### Configuration Reference
 

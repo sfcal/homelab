@@ -61,7 +61,7 @@ Taskfile.yaml               Root task runner entry point
 
 | Service | Host Group | IP (WIL) | Purpose |
 |---------|-----------|----------|---------|
-| BIND9, Caddy, Tailscale, DDNS | `infra_networking` | 10.2.20.53 | DNS, reverse proxy, VPN |
+| BIND9, Caddy, Authelia, Tailscale, DDNS | `infra_networking` | 10.2.20.53 | DNS, reverse proxy, VPN |
 | Step-CA | `infra_ca` | 10.2.20.9 | Private certificate authority |
 | Chrony | `infra_ntp` | 10.2.20.123 | NTP time synchronization |
 | Prometheus, Grafana, Homepage | `infra_monitoring` | 10.2.20.30 | Metrics and dashboards |

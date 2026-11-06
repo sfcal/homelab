@@ -42,6 +42,7 @@ Internal clients query BIND9 for service hostnames. Proxied services resolve to 
 | [UniFi UDM Pro](unifi.md) | Gateway, VLANs, static routes, port forwarding | [Gateway](unifi.md) |
 | [BIND9](dns.md) | Internal authoritative DNS with split-horizon resolution | [DNS Services](dns.md) |
 | [Caddy](proxy.md) | Reverse proxy with automatic wildcard TLS via Cloudflare | [Reverse Proxy](proxy.md) |
+| [Authelia](sso.md) | Single sign-on login in front of proxied services | [Single Sign-On](sso.md) |
 | [Tailscale](tailscale.md) | Encrypted WireGuard VPN mesh between sites | [VPN](tailscale.md) |
 | Cloudflare DDNS | Updates public DNS records with current public IP | [Below](#cloudflare-ddns) |
 
@@ -108,12 +109,13 @@ Deploy the full networking stack:
 task ansible:deploy-networking ENV=wil
 ```
 
-The playbook targets the `infra_networking` host group and runs four components in order:
+The playbook targets the `infra_networking` host group and runs five components in order:
 
-1. **BIND9** — DNS server configuration and zone files
-2. **Cloudflare DDNS** — dynamic DNS updater container
-3. **Caddy** — reverse proxy with TLS
-4. **Tailscale** — VPN mesh (via role)
+1. **Tailscale** — VPN mesh (via role)
+2. **BIND9** — DNS server configuration and zone files
+3. **Cloudflare DDNS** — dynamic DNS updater container
+4. **Authelia** — single sign-on login
+5. **Caddy** — reverse proxy with TLS
 
 ### Deployment Order
 
