@@ -106,7 +106,7 @@ Run `task ansible:deploy-hermes ENV=ldn` to update everything:
 | `ansible/playbooks/apps/hermes/files/plex-fix/` | The `plex-fix` skill and its helper script |
 | `ansible/playbooks/apps/hermes/files/fastmail-triage/` | The `fastmail-triage` skill, its public defaults and design notes |
 | `ansible/playbooks/apps/hermes/tests/` | Offline tests for `fastmail-triage` |
-| `ansible/inventory/group_vars/app_hermes/vars.yml` | Hermes image and where the email report goes |
+| `ansible/inventory/group_vars/site_ldn/app_hermes/vars.yml` | Hermes image and where the email report goes |
 | `ansible/inventory/group_vars/site_ldn/app_hermes/secrets.sops.yml` | Radarr, Sonarr and Plex keys |
 | `ansible/inventory/group_vars/site_ldn/app_hermes/fastmail.sops.yml` | Your addresses and private protection lists for `fastmail-triage` |
 | `terraform/environments/ldn/vms.auto.tfvars` | VM definition (`hermes_server`) |

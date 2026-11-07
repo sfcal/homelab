@@ -253,14 +253,15 @@ cat inventory/hosts.ini
 
 2. **Configure environment settings:**
 ```bash
-# Global settings (domains, timezone, deploy path)
+# Global settings (domains, timezone, the services list shared by DNS and reverse proxy)
 cat inventory/group_vars/all/vars.yml
 
-# Unified services list (shared between DNS and reverse proxy)
-cat inventory/group_vars/all/proxy/_services.yml
+# A site's app registry and its DNS/proxy entries
+cat inventory/group_vars/site_wil/apps.yml
+ls inventory/group_vars/site_wil/proxy/
 ```
 
-The `_services.yml` file is the single source of truth — it defines every service's subdomain, backend host/port, and whether it's proxied through Caddy.
+Each site's `apps.yml` (`proxy:` blocks) and `proxy/<domain>.yml` files define every service's subdomain, backend host/port, and whether it's proxied through Caddy; `services` in `all/vars.yml` combines them for the site's DNS and reverse proxy.
 
 #### Deploy Everything
 
@@ -274,7 +275,7 @@ hl task ansible:deploy-all ENV=dev
 ```bash
 # Infrastructure
 hl task ansible:deploy-networking ENV=dev   # DNS + reverse proxy + Tailscale
-hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana, Homepage
+hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana
 
 # Applications
 hl task ansible:deploy-media ENV=dev        # Full media stack
@@ -297,7 +298,7 @@ hl task ansible:ping ENV=dev
 
 ## Troubleshooting
 
-Adding a new service? Update `ansible/inventory/group_vars/all/apps.yml` (or `all/proxy/<domain>.yml`) then run:
+Adding a new service? Update the site's `ansible/inventory/group_vars/site_<env>/apps.yml` (or `site_<env>/proxy/<domain>.yml`) then run:
 ```bash
 hl task ansible:deploy-networking ENV=dev
 ```

@@ -4,8 +4,9 @@
 # Push events: diff ansible/inventory/group_vars between the site's last
 # successful deploy (tag deploy/<env>) and HEAD, and map changed files to
 # playbooks: site_<env>/<group>/ and the folders of groups with hosts at the
-# site count for it; other sites' folders are skipped. Without that tag yet,
-# diff against the push's `before` commit.
+# site count for it, site_<env>/apps.yml deploys the apps whose entry changed;
+# other sites' folders are skipped. Without that tag yet, diff against the
+# push's `before` commit.
 # workflow_dispatch: an explicit target, or (target empty) the same diff.
 #
 # Writes `<env>=<json>` lines to $GITHUB_OUTPUT, where <json> is a list of
@@ -24,8 +25,8 @@ HEAD_SHA=${HEAD_SHA:-$(git rev-parse HEAD)}
 # --- Auto-deploy allowlist: group -> playbook ---
 # Keep in sync with the host pattern in ansible/playbooks/ci-access.yml.
 # Anything else under group_vars (app_hermes, infra_ca, infra_networking,
-# infra_ntp, infra_proxmox, all/ except apps.yml, site_<env>/ files outside a
-# group sub-folder) is reported but never auto-deployed.
+# infra_ntp, infra_proxmox, proxy/, all/, site_<env>/ files outside a group
+# sub-folder other than apps.yml) is reported but never auto-deployed.
 declare -A PLAYBOOK_FOR=(
   [app_mediastack]=apps/media/deploy.yml
   [app_frigate]=apps/frigate/deploy.yml
@@ -53,13 +54,16 @@ group_has_hosts() {
   [[ -n $(comm -12 <(group_hosts "site_$1") <(group_hosts "$2")) ]]
 }
 
-# Registry apps whose apps.yml entry differs between $2 and HEAD and that are
-# hosted at site $1. Before the single inventory each site had its own
-# registry under ansible/environments/<env>/; that copy is the base then.
+# Registry apps whose entry in the site's registry (site_<env>/apps.yml)
+# differs between $2 and HEAD and that are hosted at site $1. Older bases have
+# the registry elsewhere, and that copy is the base then: all/apps.yml (one
+# for both sites) before it was split, ansible/environments/<env>/ before the
+# single inventory.
 changed_apps() {
-  local env=$1 base=$2 f="$GROUP_VARS/all/apps.yml" old new
+  local env=$1 base=$2 f="$GROUP_VARS/site_$1/apps.yml" old new
   new=$(git show "$HEAD_SHA:$f" 2>/dev/null | yq -o=json '.apps // {}') || return 0
   old=$({ git show "$base:$f" 2>/dev/null ||
+          git show "$base:$GROUP_VARS/all/apps.yml" 2>/dev/null ||
           git show "$base:ansible/environments/$env/group_vars/all/apps.yml" 2>/dev/null; } |
         yq -o=json '.apps // {}') || old='{}'
   jq -rn --argjson a "$old" --argjson b "$new" \
@@ -88,7 +92,8 @@ plan_from_diff() {
     rel=${f#"$GROUP_VARS"/}
     group=${rel%%/*}
     case $rel in
-      all/apps.yml) changed_apps "$env" "$base"; continue ;;
+      all/apps.yml | site_"$env"/apps.yml)            # all/: before the split
+        changed_apps "$env" "$base"; continue ;;
       all/*) group= ;;
       site_"$env"/*/*) group=$(cut -d/ -f2 <<<"$rel") ;;
       site_"$env"/* | site_"$env".*) group= ;;

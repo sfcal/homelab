@@ -15,7 +15,6 @@
     - "/opt/monitoring/grafana/provisioning/datasources"
     - "/opt/monitoring/grafana/provisioning/dashboards"
     - "/opt/monitoring/grafana/dashboards"
-    - "/opt/monitoring/homepage"
     - "/var/lib/monitoring"
     - "/var/lib/monitoring/prometheus"
     - "/var/lib/monitoring/grafana"
@@ -77,21 +76,6 @@
   with_fileglob:
     - files/dashboards/*.json
 
-- name: Deploy Homepage configuration files.
-  ansible.builtin.template:
-    src: "templates/homepage/{{ item }}.j2"
-    dest: "/opt/monitoring/homepage/{{ item }}"
-    owner: "{{ monitoring_uid }}"
-    group: "{{ monitoring_gid }}"
-    mode: "0644"
-  loop:
-    - services.yaml
-    - settings.yaml
-    - widgets.yaml
-    - bookmarks.yaml
-  notify:
-    - Restart homepage
-
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: templates/compose.yaml.j2
@@ -100,11 +84,13 @@
     group: "{{ monitoring_group }}"
     mode: "0644"
 
-# `compose up` recreates only services whose definition/image changed.
+# `compose up` recreates only services whose definition/image changed, and
+# stops services no longer in compose.yaml (Homepage moved to the dashboard VPS).
 - name: Ensure Monitoring Stack is running.
   community.docker.docker_compose_v2:
     project_src: "/opt/monitoring"
     state: present
+    remove_orphans: true
   register: monitoring_stack_output
 
 - name: Display Monitoring Stack status.

@@ -41,11 +41,6 @@ ldn_services:
     backend_port: 9090
     proxied: true
     auth: true
-  - name: homepage
-    backend_host: 10.3.20.30
-    backend_port: 3002
-    proxied: true
-    auth: true
 
   # Haivision
   - name: hmg
@@ -57,7 +52,7 @@ ldn_services:
     backend_port: 443
     proxied: false
 
-  # Apps (registry apps live in group_vars/all/apps.yml)
+  # Apps (registry apps live in site_ldn/apps.yml)
 
   # Cloud gaming (custom playbook: playbooks/apps/gaming)
   - name: roms

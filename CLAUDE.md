@@ -35,8 +35,9 @@ Discover all tasks: `task --list-all --json`
 
 One Ansible inventory for both sites: `ansible/inventory/hosts.ini`. Every host is in its site group (`site_wil`, `site_ldn`) and in its role groups; the Taskfile turns `ENV=<env>` into `--limit site_<env>`. A host added to the inventory must also go under its `[site_<env>]` group.
 - `ansible/inventory/group_vars/all/sites.yml` — one row per site (`cidr`, `tz`, `dns`, `ts_router_ips`, `zones`). Cross-site values derive from it (BIND trusted networks, secondary zones, allow-transfer, also-notify) and so do `domains` and `system_timezone`; never hand-copy one site's addresses into the other's vars
-- `ansible/inventory/group_vars/site_<env>/` — that site's own values, in sub-folders named after the group that reads them (e.g. `site_wil/infra_networking/bind9.yml`; they apply to every host of the site), and all of the site's secrets
-- `ansible/inventory/group_vars/<group>/` — groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp`, `app_hermes`, `infra_proxmox`). Keep per-site values of a group that runs at both sites in `site_<env>/<group>/`, not in `<group>/`: a var defined in both is resolved by group depth, not by site
+- `ansible/inventory/group_vars/all/vars.yml` — values worked out for the host's site (`domains`, `system_timezone`, the DNS/proxy `services` list); `all/` holds only this file and `sites.yml`
+- `ansible/inventory/group_vars/site_<env>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (e.g. `site_wil/infra_networking/bind9.yml`; they apply to every host of the site), and all of the site's secrets
+- No `group_vars/<group>/` folders: a group that runs at one site only keeps its values in that site's folder too (`site_wil/app_mediastack/`, `site_ldn/infra_proxmox/`); if it starts running at the other site, copy the folder there. Site vars reach every host of the site, so never gate a task on `<var> is defined` when another group at the site sets that var (the gaming NFS step uses `gaming_nfs`, not `nfs_mounts`, for this reason)
 - `terraform/environments/<env>/vms.auto.tfvars` — VM definitions (HCL)
 - `terraform/environments/<env>/terraform.tfstate` — provisioning state
 
@@ -155,13 +156,13 @@ Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically 
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
 - Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
 - Each site's sops files (`group_vars/site_<env>/`) are encrypted to master + that site's CI age key (`.sops.yaml`, `# ci:<env>` rules), so every CI ansible run must keep `--limit site_<env>`: without it Ansible tries to decrypt the other site's files and fails
-- The planner maps a changed file to a site: `site_<env>/<group>/` and the folders of groups with hosts at the site count for it, `all/apps.yml` deploys only the changed apps hosted there; files moved unchanged don't count
+- The planner maps a changed file to a site: `site_<env>/<group>/` and the folders of groups with hosts at the site count for it, `site_<env>/apps.yml` deploys only the apps whose entry changed; files moved unchanged don't count
 
 ## Proxy & DNS Service Definitions
 
-The unified `services` list (consumed by both BIND9 and Caddy templates) is built from two sources in `group_vars/all/proxy/_services.yml`:
+The unified `services` list (consumed by both BIND9 and Caddy templates) is built in `group_vars/all/vars.yml` from two sources in the host's site folder:
 
-1. **Registry apps** — generated automatically from `proxy:` blocks in `group_vars/all/apps.yml` (`registry_services`). `backend_host` is derived from the first inventory host of the app's `host_group` (fails loudly if the group is empty); `backend_port` comes from the app's `port`. Add a registry app to DNS/proxy by adding a `proxy:` block:
+1. **Registry apps** — generated automatically from `proxy:` blocks in the site's registry `group_vars/site_<env>/apps.yml` (`registry_services`). A site's networking sees only its own registry, so a `proxy:` block must use one of its own site's zones. `backend_host` is derived from the first inventory host of the app's `host_group` (fails loudly if the group is empty); `backend_port` comes from the app's `port`. Add a registry app to DNS/proxy by adding a `proxy:` block:
    ```yaml
    apps:
      myapp:
@@ -178,7 +179,7 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
    ```
    Multi-service apps nest sub-services with their own `proxy:` blocks (see `apps.work.*`). Apps without a `proxy:` block get no DNS/proxy entry.
 
-2. **Manual per-domain files** (`group_vars/all/proxy/<domain>.yml`) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (Wolf, RomM). Same fields, plus explicit `backend_host`/`backend_port`:
+2. **Manual per-domain files** (`group_vars/site_<env>/proxy/<domain>.yml`, in the folder of the site that is primary for the domain) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (Wolf, RomM). Same fields, plus explicit `backend_host`/`backend_port`:
    ```yaml
    - name: vm                 # Subdomain
      backend_host: 10.2.20.7  # Backend IP
@@ -186,7 +187,7 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
      proxied: true
    ```
 
-`_services.yml` aggregates the manual lists (with domain injection), appends `registry_services`, and keeps only the zones of the host's site:
+`services` in `all/vars.yml` aggregates the manual lists (with domain injection), appends `registry_services`, and keeps only the zones of the host's site:
 ```yaml
 services: >-
   {{
@@ -198,7 +199,7 @@ services: >-
     ) | selectattr('domain', 'in', sites[site].zones) | list
   }}
 ```
-A manual entry that points at another site's registry app takes its address from the registry (`backend_host: "{{ groups['app_kosync'] | first }}"`, `backend_port: "{{ apps.kosync.port }}"`) rather than a copied IP; a change to that app then needs a networking deploy at that site too.
+A manual entry that points at another site's registry app can't read that site's registry: it takes the host from the inventory (`backend_host: "{{ groups['app_kosync'] | first }}"`, not a copied IP) and repeats the port, with a comment at both ends (`kosync` in `site_wil/proxy/5am.cloud.yml` and in `site_ldn/apps.yml`); a change to that app then needs a networking deploy at that site too.
 
 ### Single Sign-On (Authelia)
 
@@ -212,11 +213,11 @@ Authelia (login page) and oauth2-proxy (login check) run next to Caddy on each n
 ## Adding New Services
 
 For a data-driven (registry) app:
-1. Add the app to `ansible/inventory/group_vars/all/apps.yml` (one registry for both sites): `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived). For a browser UI on the site domain, add `auth: true` to the `proxy:` block to put it behind the login
+1. Add the app to the registry of the site that hosts it, `ansible/inventory/group_vars/site_<env>/apps.yml`: `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived). For a browser UI on the site domain, add `auth: true` to the `proxy:` block to put it behind the login
 2. Create the compose template: `ansible/playbooks/apps/<service>/templates/compose.yaml.j2` referencing `apps[app_name].<field>`
 3. Add host group to `ansible/inventory/hosts.ini` under `[app_<service>]` and `[apps:children]`, and the host under its `[site_<env>]` group
 4. Add import to `ansible/playbooks/site.yml` (uses `deploy-app.yml` with `app_name`)
 5. Deploy: `task ansible:deploy-app APP=<service> ENV=<env>`, then `task ansible:deploy-networking ENV=<env>` for the DNS/proxy entry
 6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`
 
-Non-catalog services (third-party devices, dedicated-playbook stacks) get manual proxy entries in `group_vars/all/proxy/<domain>.yml` instead of a `proxy:` block.
+Non-catalog services (third-party devices, dedicated-playbook stacks) get manual proxy entries in `group_vars/site_<env>/proxy/<domain>.yml` instead of a `proxy:` block.

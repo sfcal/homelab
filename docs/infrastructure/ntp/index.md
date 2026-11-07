@@ -31,7 +31,7 @@ The Chrony server synchronizes with multiple upstream NTP sources and acts as a 
 | `playbooks/infrastructure/ntp/templates/allow.conf.j2` | Client access allow list |
 | `playbooks/infrastructure/ntp/templates/server.conf.j2` | Server mode settings |
 | `playbooks/infrastructure/ntp/handlers/main.yml` | Service restart handler |
-| `inventory/group_vars/infra_ntp/chrony.yml` | NTP variables |
+| `inventory/group_vars/site_wil/infra_ntp/chrony.yml` | NTP variables |
 
 ## Hosts
 
@@ -74,14 +74,14 @@ hwtimestamp *
 
 ## Configuration Reference
 
-All variables are set in `ansible/inventory/group_vars/infra_ntp/chrony.yml`, which holds wil's values (NTP runs only at wil). An NTP host at another site needs its own values in `ansible/inventory/group_vars/site_<env>/infra_ntp/` instead.
+All variables are set in `ansible/inventory/group_vars/site_wil/infra_ntp/chrony.yml`, which holds wil's values (NTP runs only at wil). An NTP host at another site needs its own copy in `ansible/inventory/group_vars/site_<env>/infra_ntp/`.
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
 | `chrony_ntp_servers` | `list[string]` | Upstream NTP servers (uses geographically local servers per-env) | (per-env) |
 | `chrony_allow` | `list[string]` | Networks allowed to query this NTP server | (per-env) |
 
-<small>**Sources:** [`ansible/inventory/group_vars/infra_ntp/chrony.yml`](https://github.com/sfcal/homelab/blob/main/ansible/inventory/group_vars/infra_ntp/chrony.yml) · [`ansible/playbooks/infrastructure/ntp/templates/servers.conf.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/ntp/templates/servers.conf.j2) · [`ansible/playbooks/infrastructure/ntp/templates/allow.conf.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/ntp/templates/allow.conf.j2)</small>
+<small>**Sources:** [`ansible/inventory/group_vars/site_wil/infra_ntp/chrony.yml`](https://github.com/sfcal/homelab/blob/main/ansible/inventory/group_vars/site_wil/infra_ntp/chrony.yml) · [`ansible/playbooks/infrastructure/ntp/templates/servers.conf.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/ntp/templates/servers.conf.j2) · [`ansible/playbooks/infrastructure/ntp/templates/allow.conf.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/ntp/templates/allow.conf.j2)</small>
 
 ## Common Tasks
 
@@ -107,7 +107,7 @@ chronyc clients
 
 ### Add a new upstream NTP server
 
-1. Edit `ansible/inventory/group_vars/infra_ntp/chrony.yml`:
+1. Edit `ansible/inventory/group_vars/site_wil/infra_ntp/chrony.yml`:
 
     ```yaml
     chrony_ntp_servers:

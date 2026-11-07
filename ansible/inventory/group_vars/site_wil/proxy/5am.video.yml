@@ -69,4 +69,4 @@ video_services:
     proxied: true
     auth: true
 
-  # (samuel is a registry app in group_vars/all/apps.yml)
+  # (samuel is a registry app in site_wil/apps.yml)

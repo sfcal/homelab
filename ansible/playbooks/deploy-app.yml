@@ -1,7 +1,8 @@
 ---
-# site.yml imports every app unconditionally: under --limit site_<site>, apps
-# of other sites match no hosts and skip, and an app_name missing from the
-# registry falls back to a nonexistent group and skips too.
+# site.yml imports every app unconditionally. The play's hosts come from the
+# registry passed with -e @inventory/group_vars/site_<site>/apps.yml (group_vars
+# aren't visible at play level): apps of other sites, or a mistyped app_name,
+# aren't in it, fall back to a nonexistent group and skip.
 - name: "Deploy {{ app_name }}"
   hosts: "{{ apps[app_name].host_group | default('app_not_in_registry') }}"
   become: true

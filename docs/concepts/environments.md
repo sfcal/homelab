@@ -29,16 +29,16 @@ Terraform and Packer have a directory per environment. Ansible has one inventory
     └── group_vars/
         ├── all/                         # Every host
         │   ├── sites.yml                # One row per site
-        │   ├── vars.yml                 # Shared variables
-        │   ├── apps.yml                 # App registry
-        │   └── proxy/                   # Service definitions per domain
+        │   └── vars.yml                 # Shared variables, services list
         ├── site_wil/                    # wil's own values and secrets
         │   ├── vars.yml                 # site: wil
         │   ├── secrets.sops.yml         # Encrypted secrets
+        │   ├── apps.yml                 # wil's app registry
+        │   ├── proxy/                   # wil's DNS/proxy entries per domain
         │   ├── infra_networking/        # Networking-specific vars
-        │   └── infra_ca/                # CA-specific vars
-        ├── site_ldn/
-        └── app_mediastack/              # Media stack vars (wil only)
+        │   ├── infra_ca/                # CA-specific vars
+        │   └── app_mediastack/          # Media stack vars (wil only)
+        └── site_ldn/
     ```
 
 === "Terraform"
@@ -68,11 +68,10 @@ Terraform and Packer have a directory per environment. Ansible has one inventory
         └── ldn/
     ```
 
-Every host in `hosts.ini` is listed in its site group (`[site_wil]`, `[site_ldn]`) and in the role groups the playbooks target, so `[infra_networking]` lists both `.53` VMs. Group variables come from three kinds of folders:
+Every host in `hosts.ini` is listed in its site group (`[site_wil]`, `[site_ldn]`) and in the role groups the playbooks target, so `[infra_networking]` lists both `.53` VMs. Group variables come from two kinds of folders:
 
-- `all/` — every host. `sites.yml` has one row per site; `domains`, `system_timezone` and the cross-site BIND9 settings (trusted networks, secondary zones, zone transfers, notifies) are derived from it.
-- `site_<site>/` — that site's own values, in sub-folders named after the group that reads them (they apply to every host of the site), and all of the site's secrets.
-- `<group>/` — groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp`, `app_hermes`, `infra_proxmox`). Their secrets still go in the site's folder.
+- `all/` — every host. `sites.yml` has one row per site; `domains`, `system_timezone` and the cross-site BIND9 settings (trusted networks, secondary zones, zone transfers, notifies) are derived from it. `vars.yml` also combines the site's DNS/proxy lists into `services`.
+- `site_<site>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (they apply to every host of the site), and all of the site's secrets. Groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp`, `infra_dashboard` at wil; `app_hermes`, `infra_proxmox` at ldn) have their folder there too.
 
 ```yaml
 # ansible/inventory/group_vars/all/sites.yml
@@ -121,13 +120,13 @@ task ansible:ping ENV=ldn    # Pings LDN hosts
 
 - Ansible roles (`ansible/roles/`)
 - Playbook definitions (`ansible/playbooks/`)
-- Inventory (`hosts.ini`) and `group_vars/all/` (sites, app registry, proxy lists)
+- Inventory (`hosts.ini`) and `group_vars/all/` (sites table, derived variables)
 - Terraform modules (`terraform/modules/`)
 - Packer templates (`packer/templates/`)
 
 **Per-environment:**
 
-- Group variables (`group_vars/site_<env>/`)
+- Group variables (`group_vars/site_<env>/`, including the app registry and proxy lists)
 - VM definitions (`vms.auto.tfvars`)
 - Secrets (`secrets.sops.yml`, `credentials.*.pkrvars.hcl`)
 - Terraform state (`terraform.tfstate`)
@@ -136,6 +135,6 @@ task ansible:ping ENV=ldn    # Pings LDN hosts
 
 **Wrong environment deployed** — Double-check `ENV=` in your command. The default is `ldn` (production), not `wil`. Run `task ansible:ping ENV=<env>` to verify you're targeting the right hosts.
 
-**Missing environment directory** — Each new environment needs a `[site_<env>]` group in `ansible/inventory/hosts.ini`, a row in `group_vars/all/sites.yml`, a `group_vars/site_<env>/` folder (with `site: <env>` in its `vars.yml`), and a `terraform/environments/<env>/` directory with the required files.
+**Missing environment directory** — Each new environment needs a `[site_<env>]` group in `ansible/inventory/hosts.ini`, a row in `group_vars/all/sites.yml`, a `group_vars/site_<env>/` folder (with `site: <env>` in its `vars.yml`, and an `apps.yml`, at least `apps: {}`, which the Taskfile passes to `deploy-app` and `deploy-all`), and a `terraform/environments/<env>/` directory with the required files.
 
 **Cross-site access** — WIL and LDN communicate over Tailscale. Ensure the subnet router VM is deployed and advertising routes. See [Tailscale](../infrastructure/networking/tailscale.md).

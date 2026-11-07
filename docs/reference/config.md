@@ -6,16 +6,15 @@ Consolidated reference for configuration formats used across the homelab.
 
 Service definitions drive both DNS records and reverse proxy entries. They come from two sources:
 
-1. **App registry** — apps in `group_vars/all/apps.yml` declare a `proxy:` block; `_services.yml` generates a `registry_services` entry for each one (see [App Registry](#app-registry))
-2. **Manual per-domain files** — for services outside the catalog (third-party devices, media stack, monitoring, Frigate, cloud gaming), each domain has its own file in `ansible/inventory/group_vars/all/proxy/`:
+1. **App registry** — apps in the site's registry `group_vars/site_<env>/apps.yml` declare a `proxy:` block; `registry_services` (in `group_vars/all/vars.yml`) gets an entry for each one (see [App Registry](#app-registry))
+2. **Manual per-domain files** — for services outside the catalog (third-party devices, media stack, monitoring, Frigate, cloud gaming), each domain has its own file in the proxy folder of the site that is primary for it, `ansible/inventory/group_vars/site_<env>/proxy/`:
 
 ```
-proxy/
-├── _services.yml          # Generates registry entries, aggregates all lists
+site_wil/proxy/
 ├── 5am.video.yml          # video_services
 ├── 5am.cloud.yml          # cloud_services
-├── wil.5am.cloud.yml      # wil_services
-├── ext.5am.cloud.yml      # ext_services
+└── wil.5am.cloud.yml      # wil_services
+site_ldn/proxy/
 └── ldn.5am.cloud.yml      # ldn_services
 ```
 
@@ -49,7 +48,7 @@ For registry-generated entries, `backend_host` is derived (first inventory host 
 
 ### Service Aggregation
 
-`_services.yml` combines all manual domain lists (injecting the domain name), appends the registry-generated entries, and keeps only the zones of the host's site:
+`services` in `group_vars/all/vars.yml` combines the site's manual domain lists (injecting the domain name), appends the registry-generated entries, and keeps only the zones of the host's site:
 
 ```yaml
 services: >-
@@ -74,7 +73,7 @@ VMs are defined in HCL maps in `terraform/environments/<env>/vms.auto.tfvars`. S
 
 ## App Registry
 
-Data-driven apps are defined in `ansible/inventory/group_vars/all/apps.yml` — the single service catalog for images, ports, and proxy/DNS metadata:
+Data-driven apps are defined in the registry of the site that hosts them, `ansible/inventory/group_vars/site_<env>/apps.yml` — the service catalog for images, ports, and proxy/DNS metadata:
 
 ```yaml
 apps:

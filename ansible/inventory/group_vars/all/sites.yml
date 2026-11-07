@@ -20,7 +20,7 @@ sites:
     cidr: 10.3.0.0/16
     tz: Europe/London
     dns: ["10.3.20.53"]
-    ts_router_ips: ["100.78.61.80"]
+    ts_router_ips: ["100.73.47.81"]
     zones: [ldn.5am.cloud]
 
 # This host's site is `site`, set in group_vars/site_<site>/vars.yml.

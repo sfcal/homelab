@@ -8,7 +8,7 @@ Most applications follow this pattern. The shared `deploy-app.yml` playbook hand
 
 ### 1. Add the App to `apps.yml`
 
-Add an entry to `ansible/inventory/group_vars/all/apps.yml`:
+Add an entry to the registry of the site that hosts the app, `ansible/inventory/group_vars/site_<env>/apps.yml`:
 
 ```yaml
 myapp:
@@ -84,7 +84,7 @@ Dedicated tasks (e.g., `deploy-media`) exist only for apps with custom playbooks
 
 ### 6. DNS/Proxy Entry
 
-The `proxy:` block from step 1 already covers this — `backend_host` and `backend_port` are derived from the app's `host_group` and `port`, and the entry is generated when networking is deployed. Manual entries in `group_vars/all/proxy/<domain>.yml` are only for services outside the app registry (third-party devices, media stack, monitoring).
+The `proxy:` block from step 1 already covers this — `backend_host` and `backend_port` are derived from the app's `host_group` and `port`, and the entry is generated when networking is deployed. Manual entries in `group_vars/site_<env>/proxy/<domain>.yml` are only for services outside the app registry (third-party devices, media stack, monitoring).
 
 ### 7. Deploy
 

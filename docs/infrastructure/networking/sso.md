@@ -78,7 +78,7 @@ task ansible:deploy-networking ENV=wil
 
 Only browsers can log in. Leave `auth` off services that apps, devices or scripts talk to through the hostname (KOSync and MicroBin, for example). Anything else can still use a protected service's IP and port directly.
 
-Homepage shows Grafana panels in iframes, so keep `auth` the same on `homepage` and `grafana`.
+Homepage (on the dashboard VPS, tailnet only, no Authelia) loads its Grafana panels from each monitoring VM's IP and port, so `auth` on `grafana` doesn't affect it.
 
 ## Kasm
 

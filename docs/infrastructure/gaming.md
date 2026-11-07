@@ -86,7 +86,7 @@ RomM is proxied as `https://roms.ldn.5am.cloud` (container port 8080, host port 
 
 ## ROM library
 
-`romm_library_path` (`/srv/romm/library`) holds `roms/<platform>/<game>` and `bios/<platform>`, RomM's default layout. Pegasus and RetroArch mount `roms/` at `/ROMs`. The library is local to the VM; to use a NAS, add `nfs_mounts` in `ansible/inventory/group_vars/site_ldn/app_gaming/nfs.yml` and point `romm_library_path` at the mount.
+`romm_library_path` (`/srv/romm/library`) holds `roms/<platform>/<game>` and `bios/<platform>`, RomM's default layout. Pegasus and RetroArch mount `roms/` at `/ROMs`. The library is local to the VM; to use a NAS, set `gaming_nfs: true` in `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml`, put the mount in `nfs_mounts` in `ansible/inventory/group_vars/site_ldn/nfs.yml` and point `romm_library_path` at the mount.
 
 GameCube games go in `roms/gc/` and Wii games in `roms/wii/` (the play creates both). RomM maps `gc` to its `ngc` platform, and these are the folder names the Pegasus image scans; `roms/ngc/` would work for RomM but not Pegasus.
 

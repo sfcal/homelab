@@ -1,6 +1,6 @@
 # Monitoring
 
-The monitoring stack provides metrics collection, visualization, a service dashboard, and external uptime monitoring. It runs as Docker containers on a dedicated VM in each environment.
+The monitoring stack provides metrics collection, visualization, a service dashboard, and external uptime monitoring. It runs as Docker containers on a dedicated VM in each environment; Homepage, the service dashboard, runs once for both sites on an OVH VPS outside the lab (see [Homepage](#homepage)).
 
 !!! note "Deployment order"
     Monitoring deploys after [Networking](../networking/index.md), [Step-CA](../ca/index.md), and [NTP](../ntp/index.md). It is the last infrastructure service to deploy before applications.
@@ -12,6 +12,9 @@ graph TD
     subgraph Monitoring VM
         Prometheus[Prometheus]
         Grafana[Grafana]
+    end
+
+    subgraph Dashboard VPS
         Homepage[Homepage]
     end
 
@@ -29,6 +32,7 @@ graph TD
     NE1 & NE2 & NE3 & NE4 -->|metrics| Prometheus
     Prometheus -->|datasource| Grafana
     UptimeKuma -->|health checks| Prometheus
+    Homepage -->|widgets, over the tailnet| Prometheus
 ```
 
 - **Prometheus** scrapes node exporters across all VMs for system metrics
@@ -42,7 +46,7 @@ graph TD
 |-----------|-------|------|---------|
 | Prometheus | `prom/prometheus` | 9090 | Metrics collection and storage |
 | Grafana | `grafana/grafana` | 3000 | Metrics visualization |
-| Homepage | `ghcr.io/gethomepage/homepage` | 3002 | Service dashboard |
+| Homepage | `ghcr.io/gethomepage/homepage` | 3002 (127.0.0.1 on the dashboard VPS) | Service dashboard |
 | Uptime Kuma | `louislam/uptime-kuma` | 3001 | Uptime monitoring |
 
 ## Hosts
@@ -52,6 +56,7 @@ graph TD
 | WIL | Monitoring | `10.2.20.30` |
 | LDN | Monitoring | `10.3.20.30` |
 | External | VPS | `178.156.190.134` |
+| Dashboard | OVH VPS (Homepage) | `135.148.219.216`, tailnet `dashboard` |
 
 ## File Locations
 
@@ -64,17 +69,28 @@ graph TD
 | `playbooks/infrastructure/monitoring/templates/compose.yaml.j2` | Docker Compose definition |
 | `playbooks/infrastructure/monitoring/templates/prometheus.yml.j2` | Prometheus scrape config |
 | `playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2` | Grafana datasource provisioning |
-| `playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2` | Homepage services dashboard |
-| `playbooks/infrastructure/monitoring/templates/bookmarks.yaml.j2` | Homepage bookmarks |
-| `playbooks/infrastructure/monitoring/templates/settings.yaml.j2` | Homepage theme and layout |
-| `playbooks/infrastructure/monitoring/templates/widgets.yaml.j2` | Homepage widgets |
 | `playbooks/infrastructure/monitoring/handlers/main.yml` | Container lifecycle handlers |
 | `inventory/group_vars/site_<env>/infra_monitoring/` | Per-environment variables |
+
+### Dashboard (Homepage)
+
+| File | Purpose |
+|------|---------|
+| `playbooks/infrastructure/dashboard/deploy.yml` | Playbook: Tailscale, Docker, Homepage |
+| `playbooks/infrastructure/dashboard/tasks/homepage.yml` | Deployment task |
+| `playbooks/infrastructure/dashboard/templates/compose.yaml.j2` | Docker Compose definition |
+| `playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2` | Homepage services dashboard |
+| `playbooks/infrastructure/dashboard/templates/homepage/bookmarks.yaml.j2` | Homepage bookmarks |
+| `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme and layout |
+| `playbooks/infrastructure/dashboard/templates/homepage/widgets.yaml.j2` | Homepage widgets |
+| `inventory/group_vars/site_wil/infra_dashboard/vars.yml` | Image and allowed hosts |
+| `inventory/group_vars/site_wil/infra_dashboard/secrets.sops.yml` | Widget API keys |
 
 ## Deployment
 
 ```bash
 task ansible:deploy-monitoring ENV=wil
+task ansible:deploy-dashboard ENV=wil    # Homepage on the OVH VPS (the VPS is in site_wil)
 ```
 
 ### Monitoring Stack Deployment
@@ -85,9 +101,8 @@ The task file:
 2. Sets ownership to `monitoring_uid:monitoring_gid`
 3. Deploys Prometheus configuration
 4. Deploys Grafana datasource provisioning
-5. Deploys Homepage configuration files (services, bookmarks, settings, widgets)
-6. Deploys Docker Compose file
-7. Starts all containers
+5. Deploys Docker Compose file
+6. Starts all containers and removes any that are no longer in `compose.yaml`
 
 ---
 
@@ -134,7 +149,6 @@ Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandm
 |-----------|------|-------------|---------|
 | `prometheus_image` | `string` | Docker image for Prometheus | (per-env) |
 | `prometheus_retention` | `string` | Metrics data retention period | `"30d"` |
-| `prometheus_url` | `string` | Public URL, used for the Homepage link | (per-env) |
 | `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`) | (per-env) |
 | `prometheus_chrony_targets` | `list[string]` | chrony_exporter endpoints (PTP grandmaster, `:9123`) | `[]` |
 | `prometheus_gpsd_targets` | `list[string]` | gpsd exporter endpoints (PTP grandmaster, `:9015`) | `[]` |
@@ -201,20 +215,28 @@ Dashboards are provisioned from files — any JSON dropped into `playbooks/infra
 
 ## Homepage
 
-Homepage provides a service dashboard with status widgets, service health indicators, and quick links to all homelab services.
+Homepage provides a service dashboard with status widgets, service health indicators, and quick links to all homelab services. One instance covers both sites and runs on an OVH VPS (`135.148.219.216`, Virginia), so it stays up when a site is down; its cards then show what is unreachable.
+
+### Access
+
+Tailnet only: **http://dashboard/** (needs Tailscale's DNS on the device, which adds the tailnet's search domain). Homepage listens on `127.0.0.1:3002`, and `tailscale serve` puts it on the tailnet's port 80. The VPS has no other open port besides SSH. Plain HTTP, because the System Activity panels load from each monitoring VM's Grafana by IP over HTTP and an HTTPS page would block them; the tailnet encrypts the traffic anyway. Use the short name: for the full name `dashboard.tail1e494e.ts.net`, Chrome tries HTTPS first and warns or blocks, since the tailnet has HTTPS certificates off (single-label names are exempt).
+
+`tailscale serve` cannot proxy to the sites' subnets itself (tailscaled's own connections don't use the subnet routes), so anything the browser needs from a site must be reachable from the browser directly, like the Grafana panels.
+
+The VPS joins the tailnet as a client named `dashboard` that accepts the sites' subnet routes, which is how its widgets reach `10.2.x.x` and `10.3.x.x`. Its Tailscale values are set in `dashboard/deploy.yml`, not in group vars, because every wil host also inherits `site_wil/infra_networking/tailscale.yml` (wil-gateway's subnet router).
 
 ### Container Configuration
 
 - **Memory:** 512MB limit, 256MB reservation
-- **Docker socket:** mounted read-only for container status widgets
-- **Environment:** receives API keys for service widgets (Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Plex)
+- **Ports:** `127.0.0.1:3002` only
+- **Environment:** receives API keys for service widgets (Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Plex); `compose.yaml` is root-only (`0600`)
 
 ### Configuration Reference
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| `homepage_image` | `string` | Docker image for Homepage | (per-env) |
-| `homepage_allowed_hosts` | `string` | Comma-separated hostnames Homepage responds to | (per-env) |
+| `homepage_image` | `string` | Docker image for Homepage | `ghcr.io/gethomepage/homepage:latest` |
+| `homepage_allowed_hosts` | `string` | Comma-separated hostnames Homepage responds to | `dashboard.tail1e494e.ts.net,dashboard` |
 
 ### Dashboard Configuration
 
@@ -227,13 +249,14 @@ Homepage is configured via four YAML template files:
 | `settings.yaml.j2` | Theme (dark, slate), layout (row style, column counts) |
 | `widgets.yaml.j2` | Global widgets (search bar, datetime) |
 
-`services.yaml.j2` is plain Homepage YAML; edit it directly. Three parts are less obvious:
+`services.yaml.j2` is plain Homepage YAML; edit it directly. Four parts are less obvious:
 
-- **Apps** and **Infrastructure** differ per site: one `if`/`else` block picks the ldn or wil cards by the host's `site`. Everything else is shared by both sites.
-- **System Activity** shows the four panels of the System Activity Grafana dashboard in iframes (`<grafana_url>/d-solo/system-activity?panelId=1` to `4`). The time range and refresh interval come from the dashboard JSON.
+- **Per-site groups:** System Activity, Apps, Infrastructure, Monitoring and Node Exporters appear once per site, named `(wil)` and `(ldn)`. A new group needs a matching entry in the `layout` of `settings.yaml.j2`.
+- **System Activity** shows the four panels of each site's System Activity Grafana dashboard in iframes from `http://10.<site>.20.30:3000/d-solo/system-activity?panelId=1` to `4`. They use the IP because `grafana.<site>.5am.cloud` is behind Authelia, and a browser does not send that login cookie to a frame inside a page on another domain. Grafana allows anonymous viewing and embedding. The time range and refresh interval come from the dashboard JSON.
+- **Node Exporters** lists the targets of each site's `prometheus_node_targets` by hand; add a node there too.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
-<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_monitoring/containers.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2)</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_wil/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2)</small>
 
 ---
 
@@ -281,11 +304,11 @@ These variables apply to all monitoring containers:
 
 ### Add a Homepage service widget
 
-1. Edit `ansible/playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2`
+1. Edit `ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`
 2. Add a new service entry under the appropriate section
-3. If the service requires an API key, add the key to `secrets.sops.yml` and pass it through `compose.yaml.j2`
+3. If the service requires an API key, add the key to `group_vars/site_wil/infra_dashboard/secrets.sops.yml` and pass it through `dashboard/templates/compose.yaml.j2`
 4. Deploy:
 
     ```bash
-    task ansible:deploy-monitoring ENV=wil
+    task ansible:deploy-dashboard ENV=wil
     ```

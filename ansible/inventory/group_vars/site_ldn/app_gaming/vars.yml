@@ -30,8 +30,9 @@ wolf_retroarch_image: "ghcr.io/games-on-whales/retroarch:edge"
 wolf_steam_image: "ghcr.io/games-on-whales/steam:edge"
 
 # --- ROM library (shared by RomM and the Wolf emulator apps) ---
-# Local to the VM's disk. To serve it from a NAS instead, add an nfs.yml with
-# `nfs_mounts` (see wil app_mediastack) and point this at the mount.
+# Local to the VM's disk. To serve it from a NAS instead, set
+# `gaming_nfs: true` here, put the mount in site_ldn/nfs.yml (see
+# site_wil/nfs.yml) and point this at the mount.
 romm_library_path: "/srv/romm/library"  # RomM: roms/<platform>/<game>, bios/<platform>
 wolf_roms_path: "{{ romm_library_path }}/roms"       # mounted at /ROMs in Pegasus and RetroArch
 

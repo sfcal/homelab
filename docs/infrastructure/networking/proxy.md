@@ -10,9 +10,9 @@ Caddy serves as the reverse proxy for all web-facing services. It runs as a Dock
 | `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2` | Reverse proxy configuration |
 | `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2` | Docker Compose service definition |
 | `ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2` | Custom xcaddy build with Cloudflare plugin |
-| `ansible/inventory/group_vars/all/proxy/*.yml` | Manual per-domain service definitions (non-catalog services) |
-| `ansible/inventory/group_vars/all/proxy/_services.yml` | Registry entry generation and service aggregation |
-| `ansible/inventory/group_vars/all/apps.yml` | App registry — `proxy:` blocks generate service entries |
+| `ansible/inventory/group_vars/site_<env>/proxy/*.yml` | Manual per-domain service definitions (non-catalog services) |
+| `ansible/inventory/group_vars/all/vars.yml` | Registry entry generation and service aggregation |
+| `ansible/inventory/group_vars/site_<env>/apps.yml` | App registry — `proxy:` blocks generate service entries |
 
 ## Architecture
 
@@ -63,8 +63,8 @@ The Caddy container exposes ports `80`, `443`, and `2019` (admin API), and mount
 
 Service entries come from two sources:
 
-1. **App registry** — apps in `group_vars/all/apps.yml` declare a `proxy:` block, and `_services.yml` generates their entries automatically. See [Registry-Generated Entries](#registry-generated-entries).
-2. **Manual per-domain files** — YAML files under `ansible/inventory/group_vars/all/proxy/` for services outside the app registry: third-party devices (Proxmox, NAS, KVM, Haivision), the media stack, monitoring, Frigate, and cloud gaming. Each file defines a list variable (e.g., `wil_services`, `video_services`) that is aggregated by `_services.yml`.
+1. **App registry** — apps in the site's registry `group_vars/site_<env>/apps.yml` declare a `proxy:` block, and `registry_services` (in `group_vars/all/vars.yml`) generates their entries automatically. See [Registry-Generated Entries](#registry-generated-entries).
+2. **Manual per-domain files** — YAML files under `ansible/inventory/group_vars/site_<env>/proxy/` (the site that is primary for the domain) for services outside the app registry: third-party devices (Proxmox, NAS, KVM, Haivision), the media stack, monitoring, Frigate, and cloud gaming. Each file defines a list variable (e.g., `wil_services`, `video_services`) that is aggregated into `services`.
 
 The fields below apply to entries from both sources.
 
@@ -288,7 +288,7 @@ A service that gets a DNS record pointing directly to its IP, with no Caddy prox
 
 ## Registry-Generated Entries
 
-Apps in the app registry (`group_vars/all/apps.yml`) declare their DNS and proxy configuration inline via a `proxy:` block:
+Apps in a site's registry (`group_vars/site_<env>/apps.yml`) declare their DNS and proxy configuration inline via a `proxy:` block. A site's networking reads only its own registry, so the `domain` must be one of that site's zones:
 
 ```yaml
 kasm:
@@ -303,7 +303,7 @@ kasm:
     tls_skip_verify: true
 ```
 
-`_services.yml` builds a `registry_services` list from every `proxy:` block — on a top-level app or a one-level-nested sub-service (e.g., `apps.work.microbin.proxy`). For each block:
+`registry_services` (in `group_vars/all/vars.yml`) is built from every `proxy:` block in the site's registry — on a top-level app or a one-level-nested sub-service (e.g., `apps.work.microbin.proxy`). For each block:
 
 - **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the inventory, the render fails loudly rather than silently dropping the entry.
 - **`backend_port` defaults to the sibling `port`** — set `backend_port` inside the `proxy:` block to override it.
@@ -314,7 +314,7 @@ Apps without a `proxy:` block get no DNS record and no Caddy entry.
 
 ## Service Aggregation
 
-The `_services.yml` file aggregates the manual per-domain service lists (injecting the `domain` field) and appends the registry-generated entries, which already carry their `domain` from the `proxy:` block. Manual lists come first to keep zone and Caddyfile ordering stable. The result is then cut down to the zones of the host's site (its `zones` in `group_vars/all/sites.yml`):
+`services` in `group_vars/all/vars.yml` aggregates the site's manual per-domain service lists (injecting the `domain` field) and appends the registry-generated entries, which already carry their `domain` from the `proxy:` block. Manual lists come first to keep zone and Caddyfile ordering stable. The result is then cut down to the zones of the host's site (its `zones` in `group_vars/all/sites.yml`):
 
 ```yaml
 services: >-
@@ -353,7 +353,7 @@ Both BIND9 zone templates and the Caddyfile template consume the resulting `serv
 
 ### Add a new service to an existing domain
 
-**Registry apps** — add a `proxy:` block to the app's entry in `ansible/inventory/group_vars/all/apps.yml`:
+**Registry apps** — add a `proxy:` block to the app's entry in its site's registry, `ansible/inventory/group_vars/site_<env>/apps.yml`:
 
 ```yaml
 myapp:
@@ -369,7 +369,7 @@ myapp:
 
 `backend_host` and `backend_port` are derived from the app's `host_group` and `port` — no manual entry is needed.
 
-**Non-catalog services** (third-party devices, media stack, monitoring) — add an entry to the domain file, e.g., `ansible/inventory/group_vars/all/proxy/wil.5am.cloud.yml`:
+**Non-catalog services** (third-party devices, media stack, monitoring) — add an entry to the domain file, e.g., `ansible/inventory/group_vars/site_wil/proxy/wil.5am.cloud.yml`:
 
 ```yaml
 - name: myapp
@@ -407,7 +407,7 @@ Then, for either path:
         zones: [5am.video, 5am.cloud, wil.5am.cloud, ext.5am.cloud, sfc.al, new.5am.cloud]
     ```
 
-2. Create a service file at `ansible/inventory/group_vars/all/proxy/new.5am.cloud.yml`:
+2. Create a service file in that site's folder, `ansible/inventory/group_vars/site_wil/proxy/new.5am.cloud.yml`:
 
     ```yaml
     ---
@@ -418,7 +418,7 @@ Then, for either path:
         proxied: true
     ```
 
-3. Update `ansible/inventory/group_vars/all/proxy/_services.yml` to include the new list:
+3. Add the new list to `services` in `ansible/inventory/group_vars/all/vars.yml`:
 
     ```yaml
     services: >-

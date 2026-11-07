@@ -1,0 +1,57 @@
+---
+# --- App Registry (service catalog) ---
+# wil's data-driven apps: images, ports, and proxy/DNS metadata. ldn's are in
+# site_ldn/apps.yml, in the same format. Consumed by:
+#   - deploy-app.yml (host_group, nfs/user/group; pre-pull list is derived
+#     from all keys ending in `image`, top level and one nesting level down)
+#   - compose templates via apps[app_name].<field>
+#   - registry_services in group_vars/all/vars.yml, which generates DNS +
+#     Caddy entries from each `proxy:` block (backend_host = first host of
+#     host_group, backend_port = sibling `port` unless proxy.backend_port
+#     overrides)
+#
+# The Taskfile (ENV=<site>) and CI pass this file via `-e @` for
+# deploy-app/deploy-all (needed for the play-level `hosts:` lookup);
+# APPS_FILE must keep pointing at the site's file or extra-vars precedence
+# will split-brain against the group_vars copy.
+#
+# Required fields:
+#   host_group: inventory group name (e.g., app_website); must have at least one
+#               host in the inventory if any proxy block exists
+#   image: primary container image (all `*image` keys are pre-pulled)
+#
+# Optional fields:
+#   port: host port published by compose; default proxy backend_port
+#   proxy: proxy/DNS entry — name (subdomain), domain, proxied are required;
+#          tls_skip_verify / forward_headers / host_header / encode /
+#          read_buffer / auth / dns / enabled / backend_port pass through.
+#          Omit the block for apps with no DNS/proxy entry.
+#   nfs: true — run nfs_mount role before deployment
+#   user: override service file owner (default: root)
+#   group: override service file group (default: root)
+#
+# Multi-service apps nest sub-services (see apps.work in site_ldn/apps.yml);
+# sub-keys must be hyphen-free. Image keys must end in `image`, be
+# double-quoted, and keep the `# renovate: datasource=docker` comment
+# directly above the key line.
+
+apps:
+  birdle:
+    host_group: app_birdle
+    # renovate: datasource=docker
+    image: "ghcr.io/sfcal/new-birdle:latest"
+    port: 8091
+    proxy:
+      name: birdle
+      domain: sfc.al
+      proxied: true
+
+  website:
+    host_group: app_website
+    # renovate: datasource=docker
+    image: "ghcr.io/sfcal/samuel.computer:latest"
+    port: 8090
+    proxy:
+      name: samuel
+      domain: 5am.video
+      proxied: true

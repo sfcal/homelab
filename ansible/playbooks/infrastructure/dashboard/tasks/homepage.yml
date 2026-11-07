@@ -1,0 +1,60 @@
+---
+# Lab VMs get Docker from the Packer template; the VPS doesn't.
+- name: Install Docker.
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+    state: present
+
+- name: Create dashboard directories.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: "0755"
+  loop:
+    - { path: /opt/dashboard, owner: root }
+    - { path: /opt/dashboard/homepage, owner: "1000" }
+
+- name: Deploy Homepage configuration files.
+  ansible.builtin.template:
+    src: "templates/homepage/{{ item }}.j2"
+    dest: "/opt/dashboard/homepage/{{ item }}"
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+  loop:
+    - services.yaml
+    - settings.yaml
+    - widgets.yaml
+    - bookmarks.yaml
+  notify:
+    - Restart homepage
+
+# Holds the API keys, and the VPS is on the internet: root only.
+- name: Deploy compose.yaml.
+  ansible.builtin.template:
+    src: templates/compose.yaml.j2
+    dest: /opt/dashboard/compose.yaml
+    owner: root
+    group: root
+    mode: "0600"
+
+# `compose up` recreates only services whose definition/image changed.
+- name: Ensure Homepage is running.
+  community.docker.docker_compose_v2:
+    project_src: /opt/dashboard
+    state: present
+
+# Homepage listens on 127.0.0.1 only; this puts it on the tailnet at
+# http://dashboard/. tailscaled keeps it across reboots.
+- name: Read tailscale serve config.
+  ansible.builtin.command: tailscale serve status --json
+  register: dashboard_serve
+  changed_when: false
+
+- name: Serve Homepage on the tailnet.
+  ansible.builtin.command: tailscale serve --bg --http=80 http://127.0.0.1:3002
+  when: "'http://127.0.0.1:3002' not in dashboard_serve.stdout"

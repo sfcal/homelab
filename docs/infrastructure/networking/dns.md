@@ -45,7 +45,7 @@ This works from either site because each BIND server holds every zone — master
 BIND9 generates zone files from two data sources:
 
 1. **`domains`** — derived from the site's `zones` in `group_vars/all/sites.yml`, defines which zones this server is authoritative for
-2. **`services`** — aggregated service list provides A records within each zone. It is built from two sources: manual per-domain lists in `group_vars/all/proxy/<domain>.yml` (non-catalog services) plus registry-generated entries from `proxy:` blocks in `group_vars/all/apps.yml` (see [Reverse Proxy — Registry-Generated Entries](proxy.md#registry-generated-entries))
+2. **`services`** — aggregated service list provides A records within each zone. It is built (in `group_vars/all/vars.yml`) from two sources in the site's folder: manual per-domain lists in `group_vars/site_<env>/proxy/<domain>.yml` (non-catalog services) plus registry-generated entries from `proxy:` blocks in `group_vars/site_<env>/apps.yml` (see [Reverse Proxy — Registry-Generated Entries](proxy.md#registry-generated-entries))
 
 For each domain, the `domain.zone.j2` template generates:
 
@@ -106,7 +106,7 @@ Zone transfer configuration is derived from each site's row in `group_vars/all/s
       - name: "ldn.5am.cloud"
         masters:
           - "10.3.20.53"
-          - "100.78.61.80"
+          - "100.73.47.81"
 
     dns_transfer_clients:
       - "10.3.20.53"
@@ -284,7 +284,7 @@ dig AXFR 5am.video @10.2.20.53
 
 ## Troubleshooting
 
-**Service not resolving** — Check BIND9 is running: `ssh <networking-ip> docker logs bind9`. Verify the service has an entry in the correct domain file under `group_vars/all/proxy/` (or a `proxy:` block on the app's entry in `group_vars/all/apps.yml`) and redeploy: `task ansible:deploy-networking ENV=wil`.
+**Service not resolving** — Check BIND9 is running: `ssh <networking-ip> docker logs bind9`. Verify the service has an entry in the correct domain file under `group_vars/site_<env>/proxy/` (or a `proxy:` block on the app's entry in `group_vars/site_<env>/apps.yml`) and redeploy: `task ansible:deploy-networking ENV=wil`.
 
 **Wrong IP returned** — If a proxied service resolves to `backend_host` instead of `reverse_proxy_ip`, check that `proxied: true` is set. If a non-proxied service resolves to the Caddy IP, check that `proxied: false` is set.
 

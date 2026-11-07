@@ -1,0 +1,10 @@
+---
+# --- Homepage ---
+# One dashboard for both sites, on the OVH VPS. Tailnet only: http://dashboard/
+# (tailscale serve in front of 127.0.0.1:3002). Use the short name: Chrome tries
+# HTTPS first for full names, and the tailnet has HTTPS certificates off.
+# API keys: group_vars/site_wil/infra_dashboard/secrets.sops.yml
+
+# renovate: datasource=docker
+homepage_image: "ghcr.io/gethomepage/homepage:latest"
+homepage_allowed_hosts: "dashboard.tail1e494e.ts.net,dashboard"

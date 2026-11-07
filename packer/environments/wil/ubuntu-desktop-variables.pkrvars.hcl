@@ -27,7 +27,7 @@ ssh_username = "sfcal"
 // Cloud-Init Settings
 cloud_init_storage_pool = "local-lvm"
 
-// NAS share, mounted at /mnt/data on every clone (same export as the nfs_mount role in app_mediastack/nfs.yml)
+// NAS share, mounted at /mnt/data on every clone (same export as the nfs_mount role in site_wil/nfs.yml)
 nfs_share = "10.2.10.100:/mnt/NAS-WIL/Media"
 
 /*

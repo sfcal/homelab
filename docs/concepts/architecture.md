@@ -35,7 +35,7 @@ graph TD
 task ansible:deploy-networking ENV=wil   # 1. DNS, Caddy, Tailscale
 task ansible:deploy-ca ENV=wil           # 2. Step-CA
 task ansible:deploy-ntp ENV=wil          # 3. Chrony
-task ansible:deploy-monitoring ENV=wil   # 4. Prometheus, Grafana, Homepage
+task ansible:deploy-monitoring ENV=wil   # 4. Prometheus, Grafana
 task ansible:deploy-media ENV=wil        # 5. Applications
 ```
 
@@ -64,7 +64,8 @@ Taskfile.yaml               Root task runner entry point
 | BIND9, Caddy, Authelia, Tailscale, DDNS | `infra_networking` | 10.2.20.53 | DNS, reverse proxy, VPN |
 | Step-CA | `infra_ca` | 10.2.20.9 | Private certificate authority |
 | Chrony | `infra_ntp` | 10.2.20.123 | NTP time synchronization |
-| Prometheus, Grafana, Homepage | `infra_monitoring` | 10.2.20.30 | Metrics and dashboards |
+| Prometheus, Grafana | `infra_monitoring` | 10.2.20.30 | Metrics and dashboards |
+| Homepage | `infra_dashboard` | 135.148.219.216 (OVH VPS, tailnet only) | Service dashboard for both sites |
 
 ### Applications
 

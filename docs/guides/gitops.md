@@ -35,14 +35,14 @@ graph LR
 
 | Changed under `group_vars/` | Runs |
 |-----------------------------|------|
-| `all/apps.yml` | `deploy-app.yml` for each app whose entry changed and that is hosted in the environment |
-| `app_mediastack/` | `apps/media/deploy.yml` |
-| `app_frigate/`, `site_wil/app_frigate/` | `apps/frigate/deploy.yml` |
+| `site_<env>/apps.yml` | `deploy-app.yml` for each app whose entry changed |
+| `site_<env>/app_mediastack/` | `apps/media/deploy.yml` |
+| `site_<env>/app_frigate/` | `apps/frigate/deploy.yml` |
 | `site_<env>/app_gaming/` | `apps/gaming/deploy.yml` |
 | `site_<env>/infra_monitoring/` | `infrastructure/monitoring/deploy.yml` |
 | `site_<env>/infra_netboot/` | `infrastructure/netboot/deploy.yml` |
 
-Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/` other than `apps.yml`, and files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
+Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/`, `site_<env>/proxy/`, and other files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
 
 ## Security model
 

@@ -41,7 +41,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
       - GF_SERVER_ROOT_URL={{ grafana_url }}
       - GF_USERS_ALLOW_SIGN_UP=false
-      # Let Homepage show Grafana panels in iframes without a login
+      # Let Homepage (dashboard VPS) show Grafana panels in iframes without a login
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
@@ -52,28 +52,3 @@ services:
       - /opt/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - /opt/monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
     user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
-
-  homepage:
-    image: {{ homepage_image }}
-    container_name: homepage
-    restart: unless-stopped
-    mem_limit: 512m
-    mem_reservation: 256m
-    networks:
-      - monitoring
-    environment:
-      - TZ={{ system_timezone }}
-      - PUID={{ monitoring_uid }}
-      - PGID={{ monitoring_gid }}
-      - HOMEPAGE_ALLOWED_HOSTS={{ homepage_allowed_hosts }}
-      - HOMEPAGE_VAR_SONARR_KEY={{ homepage_sonarr_key }}
-      - HOMEPAGE_VAR_RADARR_KEY={{ homepage_radarr_key }}
-      - HOMEPAGE_VAR_BAZARR_KEY={{ homepage_bazarr_key }}
-      - HOMEPAGE_VAR_PROWLARR_KEY={{ homepage_prowlarr_key }}
-      - HOMEPAGE_VAR_SABNZBD_KEY={{ homepage_sabnzbd_key }}
-      - HOMEPAGE_VAR_PLEX_KEY={{ homepage_plex_key }}
-    ports:
-      - "3002:3000"
-    volumes:
-      - /opt/monitoring/homepage:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock:ro

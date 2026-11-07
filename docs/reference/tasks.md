@@ -15,7 +15,8 @@ task --list-all
 | `task ansible:deploy-networking ENV=wil` | DNS, reverse proxy, Tailscale |
 | `task ansible:deploy-ca ENV=wil` | Step-CA certificate authority |
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
-| `task ansible:deploy-monitoring ENV=wil` | Prometheus, Grafana, Homepage |
+| `task ansible:deploy-monitoring ENV=wil` | Prometheus, Grafana |
+| `task ansible:deploy-dashboard ENV=wil` | Homepage on the OVH VPS (tailnet only) |
 | `task ansible:deploy-netboot ENV=wil` | netboot.xyz PXE re-imaging |
 | `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |

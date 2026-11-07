@@ -30,7 +30,7 @@ Hermes Agent (ldn) has its own playbook, which also installs Claude Code and the
 
 ## Data-Driven Apps
 
-Most applications use the shared `deploy-app.yml` playbook and are defined in `ansible/inventory/group_vars/all/apps.yml`. See [Deploy a Service](../guides/deploy-service.md) for the full workflow.
+Most applications use the shared `deploy-app.yml` playbook and are defined in the registry of the site that hosts them, `ansible/inventory/group_vars/site_<env>/apps.yml`. See [Deploy a Service](../guides/deploy-service.md) for the full workflow.
 
 | App | Image | Port |
 |-----|-------|------|
@@ -49,7 +49,7 @@ Infrastructure services have dedicated playbooks rather than using the data-driv
 | Service | Docs |
 |---------|------|
 | BIND9, Caddy, Authelia, DDNS, Tailscale | [Networking](networking/index.md) |
-| Prometheus, Grafana, Homepage | [Monitoring](monitoring/index.md) |
+| Prometheus, Grafana, Homepage | [Monitoring](monitoring/index.md) (Homepage on the OVH VPS) |
 | Step-CA | [Certificate Authority](ca/index.md) |
 
 ## How It Works

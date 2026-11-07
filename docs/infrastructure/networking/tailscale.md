@@ -16,7 +16,7 @@ Tailscale supports two modes, controlled by `tailscale_mode`:
 
 ### Client
 
-Default mode. Joins the Tailscale mesh as a regular node. Accepts routes from subnet routers to reach other sites.
+Default mode. Joins the Tailscale mesh as a regular node. Accepts routes from subnet routers to reach other sites. Used by the dashboard VPS (`dashboard`, see [Homepage](../monitoring/index.md#homepage)).
 
 ### Subnet Router
 

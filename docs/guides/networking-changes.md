@@ -6,10 +6,10 @@ Common DNS, proxy, and routing operations.
 
 ### Registry apps
 
-For apps in the [app registry](../reference/config.md#app-registry), add a `proxy:` block to the app's entry in `ansible/inventory/group_vars/all/apps.yml`:
+For apps in the [app registry](../reference/config.md#app-registry), add a `proxy:` block to the app's entry in its site's registry, `ansible/inventory/group_vars/site_<env>/apps.yml`. Use a zone of that site: a site's networking reads only its own registry.
 
 ```yaml
-# apps.yml
+# site_wil/apps.yml
 myapp:
   host_group: app_myapp
   # renovate: datasource=docker
@@ -31,7 +31,7 @@ task ansible:deploy-networking ENV=wil
 
 ### Non-catalog services
 
-For services outside the registry (third-party devices, media stack, monitoring), add an entry to the appropriate domain file in `ansible/inventory/group_vars/all/proxy/`:
+For services outside the registry (third-party devices, media stack, monitoring), add an entry to the domain's file in the proxy folder of the site that is primary for it, `ansible/inventory/group_vars/site_<env>/proxy/`:
 
 ```yaml
 # wil.5am.cloud.yml
@@ -69,7 +69,7 @@ For registry-generated entries, `backend_host` and `backend_port` are derived â€
 
 ## Add a New Domain
 
-1. Create a domain file in `ansible/inventory/group_vars/all/proxy/`:
+1. Create a domain file in the proxy folder of the site that will be primary for it, `ansible/inventory/group_vars/site_<env>/proxy/`:
 
     ```yaml
     # mydomain.com.yml
@@ -89,7 +89,7 @@ For registry-generated entries, `backend_host` and `backend_port` are derived â€
         zones: [5am.video, 5am.cloud, wil.5am.cloud, ext.5am.cloud, sfc.al, mydomain.com]
     ```
 
-3. Add the list to `_services.yml` aggregation:
+3. Add the list to the `services` aggregation in `group_vars/all/vars.yml`:
 
     ```yaml
     services: >-

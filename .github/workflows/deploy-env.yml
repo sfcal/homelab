@@ -110,7 +110,7 @@ jobs:
           case "$KIND" in
             app)
               ansible-playbook -i inventory/hosts.ini --limit "site_$ENV_NAME" playbooks/deploy-app.yml \
-                -e "app_name=$TARGET" -e "@inventory/group_vars/all/apps.yml" ;;
+                -e "app_name=$TARGET" -e "@inventory/group_vars/site_$ENV_NAME/apps.yml" ;;
             playbook)
               ansible-playbook -i inventory/hosts.ini --limit "site_$ENV_NAME" "playbooks/$TARGET" ;;
             *)

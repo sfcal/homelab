@@ -46,11 +46,6 @@ wil_services:
     backend_port: 9090
     proxied: true
     auth: true
-  - name: homepage
-    backend_host: 10.2.20.30
-    backend_port: 3002
-    proxied: true
-    auth: true
 
   # Haivision
   - name: hmg
@@ -62,4 +57,4 @@ wil_services:
     backend_port: 443
     proxied: false
 
-  # Apps (registry apps live in group_vars/all/apps.yml)
+  # Apps (registry apps live in site_wil/apps.yml)

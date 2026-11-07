@@ -27,7 +27,7 @@ ssh_username = "sfcal"
 // Cloud-Init Settings
 cloud_init_storage_pool = "local-lvm"
 
-// NAS share, mounted at /mnt/data on every clone (the wil TrueNAS, reached over the Tailscale tunnel; same export as the nfs_mount role in wil app_mediastack/nfs.yml)
+// NAS share, mounted at /mnt/data on every clone (the wil TrueNAS, reached over the Tailscale tunnel; same export as the nfs_mount role in site_wil/nfs.yml)
 nfs_share = "10.2.10.100:/mnt/NAS-WIL/Media"
 
 /*

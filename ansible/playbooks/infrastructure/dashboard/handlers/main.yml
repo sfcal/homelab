@@ -1,0 +1,9 @@
+---
+# Config files are bind-mounted, so compose can't see their changes: restart
+# Homepage. Compose/image changes are applied by `state: present` in the tasks.
+- name: Restart homepage
+  community.docker.docker_compose_v2:
+    project_src: /opt/dashboard
+    state: restarted
+    services:
+      - homepage

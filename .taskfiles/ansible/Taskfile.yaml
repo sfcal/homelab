@@ -2,7 +2,8 @@ version: '3'
 
 vars:
   HOSTS_FILE: 'inventory/hosts.ini'
-  APPS_FILE: 'inventory/group_vars/all/apps.yml'
+  # The site's app registry, passed with -e @ for deploy-app's play-level hosts.
+  APPS_FILE: 'inventory/group_vars/site_{{.ENV}}/apps.yml'
   # One inventory holds every site; ENV picks the site to run against. To narrow
   # a run, pass a pattern inside the site, e.g. LIMIT='site_wil:&infra_networking'
   # (a --limit in EXTRA_ARGS would replace the site limit, not narrow it).
@@ -38,6 +39,12 @@ tasks:
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/monitoring/deploy.yml }
+
+  deploy-dashboard:
+    desc: Deploy Homepage dashboard on the OVH VPS (ENV=wil)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/dashboard/deploy.yml }
 
   deploy-ca:
     desc: Deploy Step-CA certificate authority

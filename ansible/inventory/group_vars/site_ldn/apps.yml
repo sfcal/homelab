@@ -1,17 +1,19 @@
 ---
 # --- App Registry (service catalog) ---
-# Single source of truth for data-driven apps: images, ports, and proxy/DNS
-# metadata. Consumed by:
+# ldn's data-driven apps: images, ports, and proxy/DNS metadata. wil's are in
+# site_wil/apps.yml, in the same format. Consumed by:
 #   - deploy-app.yml (host_group, nfs/user/group; pre-pull list is derived
 #     from all keys ending in `image`, top level and one nesting level down)
 #   - compose templates via apps[app_name].<field>
-#   - proxy/_services.yml, which generates DNS + Caddy entries from each
-#     `proxy:` block (backend_host = first host of host_group,
-#     backend_port = sibling `port` unless proxy.backend_port overrides)
+#   - registry_services in group_vars/all/vars.yml, which generates DNS +
+#     Caddy entries from each `proxy:` block (backend_host = first host of
+#     host_group, backend_port = sibling `port` unless proxy.backend_port
+#     overrides)
 #
-# The Taskfile passes this file via `-e @` for deploy-app/deploy-all (needed
-# for the play-level `hosts:` lookup); APPS_FILE must keep pointing here or
-# extra-vars precedence will split-brain against the group_vars copy.
+# The Taskfile (ENV=<site>) and CI pass this file via `-e @` for
+# deploy-app/deploy-all (needed for the play-level `hosts:` lookup);
+# APPS_FILE must keep pointing at the site's file or extra-vars precedence
+# will split-brain against the group_vars copy.
 #
 # Required fields:
 #   host_group: inventory group name (e.g., app_website); must have at least one
@@ -33,36 +35,13 @@
 # `# renovate: datasource=docker` comment directly above the key line.
 
 apps:
-  # --- wil ---
-
-  birdle:
-    host_group: app_birdle
-    # renovate: datasource=docker
-    image: "ghcr.io/sfcal/new-birdle:latest"
-    port: 8091
-    proxy:
-      name: birdle
-      domain: sfc.al
-      proxied: true
-
-  website:
-    host_group: app_website
-    # renovate: datasource=docker
-    image: "ghcr.io/sfcal/samuel.computer:latest"
-    port: 8090
-    proxy:
-      name: samuel
-      domain: 5am.video
-      proxied: true
-
-  # --- ldn ---
-
   kosync:
     host_group: app_kosync
     # renovate: datasource=docker
     image: "koreader/kosync:v2.1.1"
     # 17200 is the image's plain-HTTP listener (7200 is self-signed HTTPS);
-    # Caddy terminates TLS in front of it.
+    # Caddy terminates TLS in front of it. site_wil/proxy/5am.cloud.yml
+    # repeats this port for kosync.5am.cloud.
     port: 17200
     # Allows POST /users/create. Set false once your KOReader account exists.
     user_registration: false

@@ -26,7 +26,8 @@ task ansible:ping ENV=wil
 | `deploy-networking` | BIND9, Caddy, Authelia, DDNS, Tailscale |
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
-| `deploy-monitoring` | Prometheus, Grafana, Homepage |
+| `deploy-monitoring` | Prometheus, Grafana |
+| `deploy-dashboard` | Homepage on the OVH VPS (tailnet only) |
 | `deploy-netboot` | netboot.xyz PXE re-imaging |
 | `deploy-proxmox` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
@@ -76,13 +77,14 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 | `networking/deploy.yml` | `infra_networking` | BIND9, Caddy, Authelia, DDNS, Tailscale |
 | `ca/deploy.yml` | `infra_ca` | Step-CA |
 | `ntp/deploy.yml` | `infra_ntp` | Chrony |
-| `monitoring/deploy.yml` | `infra_monitoring` | Prometheus, Grafana, Homepage |
+| `monitoring/deploy.yml` | `infra_monitoring` | Prometheus, Grafana |
+| `dashboard/deploy.yml` | `infra_dashboard` | Tailscale, Homepage (OVH VPS) |
 | `netboot/deploy.yml` | `infra_netboot` | netboot.xyz |
 | `proxmox/deploy.yml` | `infra_proxmox` | SR-IOV GPU VFs and PCI mappings on the hypervisor (no `common` role: it is not an Ubuntu VM) |
 
 ### Data-Driven Apps
 
-Most applications use the shared `deploy-app.yml` playbook. Apps are defined in `ansible/inventory/group_vars/all/apps.yml`:
+Most applications use the shared `deploy-app.yml` playbook. Apps are defined in the registry of the site that hosts them, `ansible/inventory/group_vars/site_<env>/apps.yml`:
 
 ```yaml
 birdle:
