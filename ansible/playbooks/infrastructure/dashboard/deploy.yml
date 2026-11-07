@@ -17,5 +17,8 @@
       ansible.builtin.include_role:
         name: tailscale
 
+    - name: Configure Uptime Kuma.
+      ansible.builtin.include_tasks: tasks/uptime-kuma.yml
+
     - name: Configure Homepage.
       ansible.builtin.include_tasks: tasks/homepage.yml

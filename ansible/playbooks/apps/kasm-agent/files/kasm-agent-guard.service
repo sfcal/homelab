@@ -1,0 +1,15 @@
+# Managed by Ansible (apps/kasm-agent)
+[Unit]
+Description=Drop the Kasm agent port on the public interface
+Wants=network-pre.target
+After=network-pre.target
+Before=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/kasm-agent-guard.nft
+ExecStop=/usr/sbin/nft delete table inet kasm_agent_guard
+
+[Install]
+WantedBy=multi-user.target

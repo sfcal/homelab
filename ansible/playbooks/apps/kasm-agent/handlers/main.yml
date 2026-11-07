@@ -1,0 +1,6 @@
+---
+- name: Load kasm agent guard
+  ansible.builtin.systemd_service:
+    name: kasm-agent-guard
+    state: restarted
+    daemon_reload: true

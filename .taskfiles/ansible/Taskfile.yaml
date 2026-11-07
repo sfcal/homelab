@@ -41,7 +41,7 @@ tasks:
         vars: { PLAYBOOK_PATH: infrastructure/monitoring/deploy.yml }
 
   deploy-dashboard:
-    desc: Deploy Homepage dashboard on the OVH VPS (ENV=ovh)
+    desc: Deploy Homepage and Uptime Kuma on the OVH VPS (ENV=ovh)
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/dashboard/deploy.yml }
@@ -107,6 +107,12 @@ tasks:
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/hermes/deploy.yml }
+
+  deploy-kasm-agent:
+    desc: Deploy the Kasm agent on the OVH VPS (ENV=ovh)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/kasm-agent/deploy.yml }
 
   # --- CI ---
 

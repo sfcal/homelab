@@ -8,3 +8,14 @@
 # renovate: datasource=docker
 homepage_image: "ghcr.io/gethomepage/homepage:latest"
 homepage_allowed_hosts: "dashboard.tail1e494e.ts.net,dashboard"
+
+# --- Uptime Kuma ---
+# Admin page on the tailnet only: http://dashboard:3001. Caddy serves only its
+# badges to the internet, at https://uptime.ext.5am.cloud/api/badge/... (for
+# the README). That name has a DNS-only record in Cloudflare and an entry in
+# wil's BIND (site_wil/proxy/ext.5am.cloud.yml), both pointing at this VPS.
+
+# renovate: datasource=docker
+uptime_kuma_image: "louislam/uptime-kuma:2.5.9"
+# renovate: datasource=docker
+caddy_image: "caddy:2.11.9"

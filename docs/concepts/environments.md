@@ -72,7 +72,7 @@ Terraform and Packer have a directory per environment. Ansible has one inventory
 Every host in `hosts.ini` is listed in its site group (`[site_wil]`, `[site_ldn]`) and in the role groups the playbooks target, so `[infra_networking]` lists both `.53` VMs. Group variables come from two kinds of folders:
 
 - `all/` — every host. `sites.yml` has one row per site; `domains`, `system_timezone` and the cross-site BIND9 settings (trusted networks, secondary zones, zone transfers, notifies) are derived from it. `vars.yml` also combines the site's DNS/proxy lists into `services`.
-- `site_<site>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (they apply to every host of the site), and all of the site's secrets. Groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp` at wil; `app_hermes`, `infra_proxmox` at ldn; `infra_dashboard` at ovh) have their folder there too.
+- `site_<site>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (they apply to every host of the site), and all of the site's secrets. Groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp` at wil; `app_hermes`, `infra_proxmox` at ldn; `infra_dashboard`, `app_kasm_agent` at ovh) have their folder there too.
 
 ```yaml
 # ansible/inventory/group_vars/all/sites.yml

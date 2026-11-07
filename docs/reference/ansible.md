@@ -27,7 +27,7 @@ task ansible:ping ENV=wil
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
 | `deploy-monitoring` | Prometheus, Grafana |
-| `deploy-dashboard` | Homepage on the OVH VPS (tailnet only) |
+| `deploy-dashboard` | Homepage and Uptime Kuma on the OVH VPS |
 | `deploy-netboot` | netboot.xyz PXE re-imaging |
 | `deploy-proxmox` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
@@ -78,7 +78,8 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 | `ca/deploy.yml` | `infra_ca` | Step-CA |
 | `ntp/deploy.yml` | `infra_ntp` | Chrony |
 | `monitoring/deploy.yml` | `infra_monitoring` | Prometheus, Grafana |
-| `dashboard/deploy.yml` | `infra_dashboard` | Tailscale, Homepage (OVH VPS) |
+| `dashboard/deploy.yml` | `infra_dashboard` | Tailscale, Homepage, Uptime Kuma (OVH VPS) |
+| `apps/kasm-agent/deploy.yml` | `app_kasm_agent` | Second Kasm agent for Deluge (OVH VPS) |
 | `netboot/deploy.yml` | `infra_netboot` | netboot.xyz |
 | `proxmox/deploy.yml` | `infra_proxmox` | SR-IOV GPU VFs and PCI mappings on the hypervisor (no `common` role: it is not an Ubuntu VM) |
 

@@ -11,6 +11,10 @@
 </div>
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sfcal/homelab)
+[![wil](https://uptime.ext.5am.cloud/api/badge/1/status?label=wil)](https://homelab.samuel.computer/infrastructure/monitoring/#uptime-kuma)
+[![wil 30d](https://uptime.ext.5am.cloud/api/badge/1/uptime/30d?label=wil%2030d)](https://homelab.samuel.computer/infrastructure/monitoring/#uptime-kuma)
+[![ldn](https://uptime.ext.5am.cloud/api/badge/2/status?label=ldn)](https://homelab.samuel.computer/infrastructure/monitoring/#uptime-kuma)
+[![ldn 30d](https://uptime.ext.5am.cloud/api/badge/2/uptime/30d?label=ldn%2030d)](https://homelab.samuel.computer/infrastructure/monitoring/#uptime-kuma)
 
 [Deployment]: #get-started
 [Documentation]: https://homelab.samuel.computer

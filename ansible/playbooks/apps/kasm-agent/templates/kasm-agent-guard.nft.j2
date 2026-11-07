@@ -1,0 +1,13 @@
+#!/usr/sbin/nft -f
+# Managed by Ansible (apps/kasm-agent). Drops the Kasm agent's port on the
+# public interface before Docker's DNAT (priority -100), so only the tailnet
+# reaches it. Its own table only: Docker's and Tailscale's rules are untouched.
+table inet kasm_agent_guard
+delete table inet kasm_agent_guard
+
+table inet kasm_agent_guard {
+  chain prerouting {
+    type filter hook prerouting priority -150; policy accept;
+    iifname "{{ ansible_default_ipv4.interface }}" tcp dport {{ kasm_agent_port }} drop
+  }
+}

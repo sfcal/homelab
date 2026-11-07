@@ -62,6 +62,10 @@
 - import_playbook: apps/hermes/deploy.yml
   tags: ['hermes', 'applications']
 
+# 10. Kasm agent (Deluge, OVH VPS)
+- import_playbook: apps/kasm-agent/deploy.yml
+  tags: ['kasm-agent', 'applications']
+
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml

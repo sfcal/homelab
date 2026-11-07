@@ -278,13 +278,15 @@
           type: prometheus
           url: http://10.2.20.30:9090
 
+    # On this VPS, in Homepage's compose project; the widget reads the
+    # `default` status page
     - Uptime Kuma:
         icon: uptime-kuma.png
-        href: https://uptime.ext.5am.cloud
-        siteMonitor: http://178.156.190.134:3001
+        href: http://dashboard:3001
+        siteMonitor: http://uptime-kuma:3001
         widget:
           type: uptimekuma
-          url: http://178.156.190.134:3001
+          url: http://uptime-kuma:3001
           slug: default
 
 - Monitoring (ldn):

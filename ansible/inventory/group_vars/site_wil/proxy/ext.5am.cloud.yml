@@ -1,0 +1,8 @@
+---
+ext_services:
+  # Uptime Kuma's public badges on the OVH VPS (site ovh), served there by its
+  # own Caddy. DNS only, the same address as the Cloudflare record; see
+  # site_ovh/infra_dashboard/vars.yml.
+  - name: uptime
+    backend_host: "{{ groups['infra_dashboard'] | first }}"
+    proxied: false

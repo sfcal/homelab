@@ -1,0 +1,20 @@
+---
+# A second Docker agent for ldn's Kasm, on the OVH VPS. Kasm on the work VM
+# (10.3.20.50) reaches it over the tailnet: the ldn UDM needs a static route
+# for the VPS's tailnet address via ldn-gateway (10.3.20.53).
+- name: Deploy Kasm Agent
+  hosts: app_kasm_agent
+  become: true
+
+  handlers:
+    - name: Include handlers.
+      ansible.builtin.import_tasks: handlers/main.yml
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Install the Kasm agent.
+      ansible.builtin.include_tasks: tasks/agent.yml

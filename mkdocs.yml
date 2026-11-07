@@ -128,6 +128,7 @@ nav:
     - Docker Services: infrastructure/docker.md
     - Gaming (Terraria, Wolf, RomM): infrastructure/gaming.md
     - Hermes Agent: infrastructure/hermes.md
+    - Kasm Agent (OVH VPS): infrastructure/kasm-agent.md
 
 validation:
   omitted_files: warn

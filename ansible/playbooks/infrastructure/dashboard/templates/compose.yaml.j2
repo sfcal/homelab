@@ -22,3 +22,30 @@ services:
       - "127.0.0.1:3002:3000"
     volumes:
       - /opt/dashboard/homepage:/app/config
+
+  uptime-kuma:
+    image: {{ uptime_kuma_image }}
+    container_name: uptime-kuma
+    restart: unless-stopped
+    environment:
+      - TZ={{ system_timezone }}
+      # Skips the first-start database page (SQLite in /app/data)
+      - UPTIME_KUMA_DB_TYPE=sqlite
+    # Localhost only, like Homepage: `tailscale serve` puts it on :3001
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - /var/lib/dashboard/uptime-kuma:/app/data
+
+  # Public: Uptime Kuma's badges only (files/Caddyfile). Bound to the public
+  # address: `tailscale serve` already holds port 80 on the tailnet address.
+  caddy:
+    image: {{ caddy_image }}
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "{{ ansible_default_ipv4.address }}:80:80"
+      - "{{ ansible_default_ipv4.address }}:443:443"
+    volumes:
+      - /opt/dashboard/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /var/lib/dashboard/caddy:/data

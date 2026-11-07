@@ -1,0 +1,13 @@
+# Managed by Ansible (infrastructure/dashboard). The VPS's only public site:
+# Uptime Kuma's badges, for the README. Everything else in Uptime Kuma, its
+# login included, is on the tailnet only (http://dashboard:3001). Certificates
+# come from Let's Encrypt over port 80/443.
+uptime.ext.5am.cloud {
+	handle /api/badge/* {
+		reverse_proxy uptime-kuma:3001
+	}
+
+	handle {
+		respond 404
+	}
+}

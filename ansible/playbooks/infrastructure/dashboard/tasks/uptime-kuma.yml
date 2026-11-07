@@ -1,0 +1,36 @@
+---
+# Uptime Kuma and Caddy are in the dashboard's compose project, which
+# homepage.yml starts: run this first, so the mounts exist when it does.
+- name: Create Uptime Kuma and Caddy directories.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /opt/dashboard
+    - /var/lib/dashboard
+    - /var/lib/dashboard/uptime-kuma
+    - /var/lib/dashboard/caddy
+
+- name: Deploy the Caddyfile.
+  ansible.builtin.copy:
+    src: files/Caddyfile
+    dest: /opt/dashboard/Caddyfile
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart caddy
+
+# Uptime Kuma listens on 127.0.0.1 only; this puts it on the tailnet at
+# http://dashboard:3001. tailscaled keeps it across reboots.
+- name: Read tailscale serve config.
+  ansible.builtin.command: tailscale serve status --json
+  register: uptime_kuma_serve
+  changed_when: false
+
+- name: Serve Uptime Kuma on the tailnet.
+  ansible.builtin.command: tailscale serve --bg --http=3001 http://127.0.0.1:3001
+  when: "'http://127.0.0.1:3001' not in uptime_kuma_serve.stdout"

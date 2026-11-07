@@ -16,6 +16,8 @@ graph TD
 
     subgraph Dashboard VPS
         Homepage[Homepage]
+        UptimeKuma[Uptime Kuma]
+        Caddy[Caddy]
     end
 
     subgraph Targets
@@ -25,20 +27,18 @@ graph TD
         NE4[Node Exporter\nwebsite]
     end
 
-    subgraph Monitoring VM
-        UptimeKuma[Uptime Kuma]
-    end
-
     NE1 & NE2 & NE3 & NE4 -->|metrics| Prometheus
     Prometheus -->|datasource| Grafana
-    UptimeKuma -->|health checks| Prometheus
     Homepage -->|widgets, over the tailnet| Prometheus
+    Homepage -->|widget| UptimeKuma
+    Caddy -->|badges only| UptimeKuma
+    GitHub[GitHub README] -->|badge images| Caddy
 ```
 
 - **Prometheus** scrapes node exporters across all VMs for system metrics
 - **Grafana** visualizes metrics from Prometheus with dashboards
 - **Homepage** provides a service dashboard with status widgets and quick links
-- **Uptime Kuma** provides uptime monitoring for internal services
+- **Uptime Kuma** checks services from outside the lab and serves the README's status badges
 
 ## Components
 
@@ -47,7 +47,8 @@ graph TD
 | Prometheus | `prom/prometheus` | 9090 | Metrics collection and storage |
 | Grafana | `grafana/grafana` | 3000 | Metrics visualization |
 | Homepage | `ghcr.io/gethomepage/homepage` | 3002 (127.0.0.1 on the dashboard VPS) | Service dashboard |
-| Uptime Kuma | `louislam/uptime-kuma` | 3001 | Uptime monitoring |
+| Uptime Kuma | `louislam/uptime-kuma` | 3001 (127.0.0.1 on the dashboard VPS) | Uptime checks, README badges |
+| Caddy | `caddy` | 80, 443 (public, on the dashboard VPS) | Uptime Kuma's badges only |
 
 ## Hosts
 
@@ -56,7 +57,7 @@ graph TD
 | WIL | Monitoring | `10.2.20.30` |
 | LDN | Monitoring | `10.3.20.30` |
 | External | VPS | `178.156.190.134` |
-| Dashboard | OVH VPS (Homepage) | `135.148.219.216`, tailnet `dashboard` |
+| Dashboard | OVH VPS (Homepage, Uptime Kuma) | `135.148.219.216`, tailnet `dashboard` |
 
 ## File Locations
 
@@ -76,14 +77,17 @@ graph TD
 
 | File | Purpose |
 |------|---------|
-| `playbooks/infrastructure/dashboard/deploy.yml` | Playbook: Tailscale, Docker, Homepage |
-| `playbooks/infrastructure/dashboard/tasks/homepage.yml` | Deployment task |
-| `playbooks/infrastructure/dashboard/templates/compose.yaml.j2` | Docker Compose definition |
+| `playbooks/infrastructure/dashboard/deploy.yml` | Playbook: Tailscale, Docker, Uptime Kuma, Homepage |
+| `playbooks/infrastructure/dashboard/tasks/uptime-kuma.yml` | Uptime Kuma and Caddy directories, Caddyfile, tailnet port 3001 |
+| `playbooks/infrastructure/dashboard/tasks/homepage.yml` | Homepage config, starts the compose project |
+| `playbooks/infrastructure/dashboard/templates/compose.yaml.j2` | Docker Compose definition (Homepage, Uptime Kuma, Caddy) |
+| `playbooks/infrastructure/dashboard/files/Caddyfile` | Public site: Uptime Kuma's badges only |
 | `playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2` | Homepage services dashboard |
 | `playbooks/infrastructure/dashboard/templates/homepage/bookmarks.yaml.j2` | Homepage bookmarks |
 | `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme and layout |
 | `playbooks/infrastructure/dashboard/templates/homepage/widgets.yaml.j2` | Homepage widgets |
-| `inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | Image and allowed hosts |
+| `inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | Images and allowed hosts |
+| `inventory/group_vars/site_wil/proxy/ext.5am.cloud.yml` | wil's BIND record for `uptime.ext.5am.cloud` |
 | `inventory/group_vars/site_ovh/infra_dashboard/tailscale.yml` | Tailscale client settings |
 | `inventory/group_vars/site_ovh/secrets.sops.yml` | Widget API keys (section `infra_dashboard`) |
 
@@ -91,7 +95,7 @@ graph TD
 
 ```bash
 task ansible:deploy-monitoring ENV=wil
-task ansible:deploy-dashboard ENV=ovh    # Homepage on the OVH VPS (site ovh)
+task ansible:deploy-dashboard ENV=ovh    # Homepage and Uptime Kuma on the OVH VPS (site ovh)
 ```
 
 ### Monitoring Stack Deployment
@@ -220,7 +224,7 @@ Homepage provides a service dashboard with status widgets, service health indica
 
 ### Access
 
-Tailnet only: **http://dashboard/** (needs Tailscale's DNS on the device, which adds the tailnet's search domain). Homepage listens on `127.0.0.1:3002`, and `tailscale serve` puts it on the tailnet's port 80. The VPS has no other open port besides SSH. Plain HTTP, because the System Activity panels load from each monitoring VM's Grafana by IP over HTTP and an HTTPS page would block them; the tailnet encrypts the traffic anyway. Use the short name: for the full name `dashboard.tail1e494e.ts.net`, Chrome tries HTTPS first and warns or blocks, since the tailnet has HTTPS certificates off (single-label names are exempt).
+Tailnet only: **http://dashboard/** (needs Tailscale's DNS on the device, which adds the tailnet's search domain). Homepage listens on `127.0.0.1:3002`, and `tailscale serve` puts it on the tailnet's port 80. Besides SSH, the VPS's only public ports are 80 and 443, which serve Uptime Kuma's badges and nothing else (see [Uptime Kuma](#uptime-kuma)). Plain HTTP, because the System Activity panels load from each monitoring VM's Grafana by IP over HTTP and an HTTPS page would block them; the tailnet encrypts the traffic anyway. Use the short name: for the full name `dashboard.tail1e494e.ts.net`, Chrome tries HTTPS first and warns or blocks, since the tailnet has HTTPS certificates off (single-label names are exempt).
 
 `tailscale serve` cannot proxy to the sites' subnets itself (tailscaled's own connections don't use the subnet routes), so anything the browser needs from a site must be reachable from the browser directly, like the Grafana panels.
 
@@ -258,6 +262,42 @@ Homepage is configured via four YAML template files:
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
 <small>**Sources:** `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2)</small>
+
+---
+
+## Uptime Kuma
+
+Uptime Kuma runs next to Homepage on the OVH VPS, in the same compose project (`/opt/dashboard`, state in `/var/lib/dashboard/uptime-kuma`), so its checks keep running when a site is down. It reaches the sites over the tailnet like Homepage's widgets, and the internet directly. The status badges in the repository's README come from it.
+
+### Access
+
+- **Admin page:** tailnet only, **http://dashboard:3001**. Uptime Kuma listens on `127.0.0.1:3001` and `tailscale serve` puts it on the tailnet's port 3001. The first visit asks for the admin account. `UPTIME_KUMA_DB_TYPE=sqlite` skips the database question that Uptime Kuma 2 asks first.
+- **Badges:** public, **https://uptime.ext.5am.cloud/api/badge/...**. Caddy (`files/Caddyfile`) passes `/api/badge/*` to Uptime Kuma and answers 404 for everything else, the login and status pages included. It gets its certificate from Let's Encrypt, so ports 80 and 443 are open on the VPS's public address (only there: `tailscale serve` holds port 80 on the tailnet address).
+- **DNS:** `uptime.ext.5am.cloud` is a DNS-only A record in Cloudflare pointing at `135.148.219.216`, and wil's BIND serves the same address to the lab (`site_wil/proxy/ext.5am.cloud.yml`, applied by a wil networking deploy).
+
+Monitors and status pages live in Uptime Kuma's database, not in Ansible: add them on the admin page.
+
+### Badges
+
+Uptime Kuma only draws a badge for a monitor that is on a published status page; any other monitor ID returns a grey `N/A`. Every monitor with a badge goes on the status page with the slug `default`, which Homepage's Uptime Kuma widget reads too. The page itself isn't reachable from the internet; publishing it only lets the badges show.
+
+| Badge | URL |
+|-------|-----|
+| Up / Down | `https://uptime.ext.5am.cloud/api/badge/<id>/status?label=<name>` |
+| Uptime % | `https://uptime.ext.5am.cloud/api/badge/<id>/uptime/<duration>?label=<name>` (`24h`, `7d`, `30d`; set `label`, the default one reads `Uptime (30h)` for `30d`) |
+| Response time | `https://uptime.ext.5am.cloud/api/badge/<id>/ping/<duration>` |
+| Certificate expiry | `https://uptime.ext.5am.cloud/api/badge/<id>/cert-exp` |
+
+The monitor ID is the number at the end of its URL on the admin page (`/dashboard/<id>`). Badges are sent with `Cache-Control: no-store`, so GitHub's image proxy shows the current state (Uptime Kuma caches each badge for 5 minutes itself).
+
+### Configuration Reference
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `uptime_kuma_image` | `string` | Docker image for Uptime Kuma | `louislam/uptime-kuma:2.5.9` |
+| `caddy_image` | `string` | Docker image for the badge proxy | `caddy:2.11.9` |
+
+<small>**Sources:** `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/files/Caddyfile`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/files/Caddyfile)</small>
 
 ---
 
@@ -313,3 +353,15 @@ These variables apply to all monitoring containers:
     ```bash
     task ansible:deploy-dashboard ENV=ovh
     ```
+
+### Add a README badge
+
+1. On http://dashboard:3001, add the monitor and put it on the `default` status page (Edit Status Page → add the monitor → Save)
+2. Note its ID from the address bar (`/dashboard/<id>`)
+3. Add the badge to `README.md`:
+
+    ```markdown
+    ![wil](https://uptime.ext.5am.cloud/api/badge/<id>/status?label=wil)
+    ```
+
+No deploy needed: monitors live in Uptime Kuma's database.

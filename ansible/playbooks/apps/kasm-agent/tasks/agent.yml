@@ -1,0 +1,124 @@
+---
+# --- Firewall ---
+# Kasm's agent publishes {{ kasm_agent_port }} on every interface, and Docker
+# bypasses ufw. This nftables table drops it on the public interface before
+# Docker's port forwarding, so only the tailnet reaches the agent. It loads
+# before Docker starts and leaves every other table alone.
+- name: Install nftables.
+  ansible.builtin.apt:
+    name: nftables
+    state: present
+
+- name: Deploy the agent port guard.
+  ansible.builtin.template:
+    src: templates/kasm-agent-guard.nft.j2
+    dest: /etc/kasm-agent-guard.nft
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Load kasm agent guard
+
+- name: Deploy the agent port guard unit.
+  ansible.builtin.copy:
+    src: files/kasm-agent-guard.service
+    dest: /etc/systemd/system/kasm-agent-guard.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Load kasm agent guard
+
+- name: Enable the agent port guard.
+  ansible.builtin.systemd_service:
+    name: kasm-agent-guard
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# --- Agent ---
+# Lab VMs get Docker from the Packer template; the VPS doesn't.
+- name: Install Docker.
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+    state: present
+
+- name: Create the Kasm download directory.
+  ansible.builtin.file:
+    path: /var/cache/kasm
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download the Kasm release.
+  ansible.builtin.get_url:
+    url: "https://kasm-static-content.s3.amazonaws.com/kasm_release_{{ kasm_agent_version }}.tar.gz"
+    dest: "/var/cache/kasm/kasm_release_{{ kasm_agent_version }}.tar.gz"
+    checksum: "sha256:{{ kasm_agent_release_sha256 }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Unpack the Kasm release.
+  ansible.builtin.unarchive:
+    src: "/var/cache/kasm/kasm_release_{{ kasm_agent_version }}.tar.gz"
+    dest: /var/cache/kasm
+    remote_src: true
+    creates: /var/cache/kasm/kasm_release/install.sh
+
+# First run only (Kasm's upgrade.sh handles new versions). --proxy-port is
+# both the agent's port and the port it uses to reach Kasm. Leaves out what
+# a VPS agent doesn't use: webcam module, egress gateways, rclone plugin.
+# The disk check wants 50 GB for every default image; this agent only pulls
+# Deluge. The installer creates a 2 GB swap file at /mnt/Kasm.swap.
+- name: Install the Kasm agent.
+  ansible.builtin.command:
+    argv:
+      - bash
+      - /var/cache/kasm/kasm_release/install.sh
+      - --role
+      - agent
+      - --accept-eula
+      - --public-hostname
+      - "{{ kasm_agent_public_hostname }}"
+      - --manager-hostname
+      - "{{ kasm_agent_manager }}"
+      - --manager-token
+      - "{{ kasm_manager_token }}"
+      - --proxy-port
+      - "{{ kasm_agent_port }}"
+      - --swap-size
+      - "2048"
+      - --no-check-disk
+      - --skip-v4l2loopback
+      - --skip-egress
+      - --skip-custom-rclone
+    # Made at the end of a successful install (a failed one leaves only
+    # /opt/kasm/<version>, which the installer wipes on the next run)
+    creates: /opt/kasm/current
+  no_log: true
+
+# --- Deluge ---
+# Bind-mounted into the Deluge workspace by its Volume Mappings in Kasm's
+# admin (kasm-user is uid 1000): config -> ~/.config (all of it: a mount at
+# ~/.config/deluge makes Docker create ~/.config as root, and the image's
+# startup fails), downloads -> ~/Downloads. See docs/infrastructure/kasm-agent.md.
+- name: Create Deluge's directories.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+  loop:
+    - /var/lib/kasm-agent/deluge
+    - /var/lib/kasm-agent/deluge/downloads
+
+# No mode or group: each session start copies the image's default profile
+# with `cp -rp`, which sets ~/.config to 0777, group root.
+- name: Create Deluge's config directory.
+  ansible.builtin.file:
+    path: /var/lib/kasm-agent/deluge/config
+    state: directory
+    owner: "1000"

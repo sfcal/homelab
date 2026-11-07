@@ -43,7 +43,8 @@
     mode: "0600"
 
 # `compose up` recreates only services whose definition/image changed.
-- name: Ensure Homepage is running.
+# Starts Uptime Kuma and Caddy too (tasks/uptime-kuma.yml).
+- name: Ensure Homepage, Uptime Kuma and Caddy are running.
   community.docker.docker_compose_v2:
     project_src: /opt/dashboard
     state: present
