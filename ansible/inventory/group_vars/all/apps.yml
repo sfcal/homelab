@@ -15,7 +15,7 @@
 #
 # Required fields:
 #   host_group: inventory group name (e.g., app_website); must have at least one
-#               host in this environment's inventory if any proxy block exists
+#               host in the inventory if any proxy block exists
 #   image: primary container image (all `*image` keys are pre-pulled)
 #
 # Optional fields:
@@ -28,11 +28,13 @@
 #   user: override service file owner (default: root)
 #   group: override service file group (default: root)
 #
-# Multi-service apps nest sub-services (see apps.work in ldn); sub-keys must be
+# Multi-service apps nest sub-services (see apps.work); sub-keys must be
 # hyphen-free. Image keys must end in `image`, be double-quoted, and keep the
 # `# renovate: datasource=docker` comment directly above the key line.
 
 apps:
+  # --- wil ---
+
   birdle:
     host_group: app_birdle
     # renovate: datasource=docker
@@ -53,3 +55,52 @@ apps:
       domain: 5am.video
       proxied: true
 
+  # --- ldn ---
+
+  kosync:
+    host_group: app_kosync
+    # renovate: datasource=docker
+    image: "koreader/kosync:v2.1.1"
+    # 17200 is the image's plain-HTTP listener (7200 is self-signed HTTPS);
+    # Caddy terminates TLS in front of it.
+    port: 17200
+    # Allows POST /users/create. Set false once your KOReader account exists.
+    user_registration: false
+    proxy:
+      name: kosync
+      domain: ldn.5am.cloud
+      proxied: true
+
+  work:
+    host_group: app_work
+    microbin:
+      # renovate: datasource=docker
+      image: "danielszabo99/microbin:latest"
+      port: 8081
+      max_file_size_mb: 20480
+      proxy:
+        name: bin
+        domain: ldn.5am.cloud
+        proxied: true
+    kasm:
+      # renovate: datasource=docker
+      image: "lscr.io/linuxserver/kasm:1.18.1"
+      port: 4443
+      wizard_port: 3001
+      proxy:
+        name: kasm
+        domain: ldn.5am.cloud
+        proxied: true
+        tls_skip_verify: true
+        forward_headers: true
+    restreamer:
+      # renovate: datasource=docker
+      image: "datarhei/restreamer:latest"
+      port: 8710
+      rtmp_port: 1935
+      srt_port: 6000
+      proxy:
+        name: restreamer
+        domain: ldn.5am.cloud
+        proxied: true
+        auth: true

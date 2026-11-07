@@ -1,0 +1,23 @@
+---
+# DNS Server (BIND9) configuration
+# Trusted networks, secondary zones, zone transfers and notifies are derived
+# from all/sites.yml.
+
+dns_forwarders:
+  - "1.1.1.1"
+  - "1.0.0.1"
+
+# Reverse Proxy IP (used for DNS A records of proxied services)
+reverse_proxy_ip: "10.3.20.53"
+
+# Reverse DNS zone name (derived from subnet)
+dns_reverse_zone: "20.3.10.in-addr.arpa"
+
+# Reverse Zone PTR Records
+dns_ptr_records:
+  - octet: "9"
+    hostname: "ca.ldn.5am.cloud."
+  - octet: "53"
+    hostname: "dns.ldn.5am.cloud."
+  - octet: "123"
+    hostname: "time.ldn.5am.cloud."

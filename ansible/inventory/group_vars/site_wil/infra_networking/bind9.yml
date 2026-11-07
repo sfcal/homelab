@@ -1,16 +1,11 @@
 ---
 # DNS Server (BIND9) configuration
+# Trusted networks, secondary zones, zone transfers and notifies are derived
+# from all/sites.yml.
 
 dns_forwarders:
   - "1.1.1.1"
   - "1.0.0.1"
-
-dns_trusted_networks:
-  - localhost
-  - localnets
-  - 10.2.0.0/16
-  - 10.3.0.0/16
-  - 100.64.0.0/10  # Tailscale CGNAT (cross-site forwarding)
 
 # --- Forward Zones ---
 # The haivision OpenVPN session lives on the ldn networking VM, so wil has no
@@ -22,26 +17,7 @@ dns_trusted_networks:
 # disabled client contributes nothing.
 dns_forward_zones:
   - name: "haivision.com"
-    forwarders:
-      - "10.3.20.53"
-
-# Secondary zones - replicated from remote primaries via AXFR
-# The ldn primary's Tailscale IP is listed alongside its LAN IP because
-# cross-site NOTIFYs arrive SNATed to the Tailscale address and BIND
-# refuses notifies from IPs not in the masters list.
-dns_secondary_zones:
-  - name: "ldn.5am.cloud"
-    masters:
-      - "10.3.20.53"
-      - "100.78.61.80"
-
-# IPs allowed to pull zone transfers from this server
-dns_transfer_clients:
-  - "10.3.20.53"
-  - "100.64.0.0/10"
-# IPs to notify on zone changes (must be specific IPs, not CIDRs)
-dns_notify_targets:
-  - "10.3.20.53"
+    forwarders: "{{ sites.ldn.dns }}"
 
 # Reverse Proxy IP (used for DNS A records of proxied services)
 reverse_proxy_ip: "10.2.20.53"

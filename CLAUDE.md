@@ -7,7 +7,7 @@ Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ans
 ## Repository Structure
 
 ```
-ansible/                    Playbooks, roles, per-environment inventories and group_vars
+ansible/                    Playbooks, roles, one inventory for both sites (ansible/inventory)
 terraform/                  VM provisioning with per-environment tfvars and state
 packer/                     VM template building (Ubuntu, Debian)
 docker/                     Docker execution environment
@@ -33,9 +33,10 @@ Discover all tasks: `task --list-all --json`
 
 ## Environments
 
-Auto-discovered from `ansible/environments/*/`. Each has:
-- `ansible/environments/<env>/hosts.ini` — inventory
-- `ansible/environments/<env>/group_vars/` — per-group YAML vars
+One Ansible inventory for both sites: `ansible/inventory/hosts.ini`. Every host is in its site group (`site_wil`, `site_ldn`) and in its role groups; the Taskfile turns `ENV=<env>` into `--limit site_<env>`. A host added to the inventory must also go under its `[site_<env>]` group.
+- `ansible/inventory/group_vars/all/sites.yml` — one row per site (`cidr`, `tz`, `dns`, `ts_router_ips`, `zones`). Cross-site values derive from it (BIND trusted networks, secondary zones, allow-transfer, also-notify) and so do `domains` and `system_timezone`; never hand-copy one site's addresses into the other's vars
+- `ansible/inventory/group_vars/site_<env>/` — that site's own values, in sub-folders named after the group that reads them (e.g. `site_wil/infra_networking/bind9.yml`; they apply to every host of the site), and all of the site's secrets
+- `ansible/inventory/group_vars/<group>/` — groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp`, `app_hermes`, `infra_proxmox`). Keep per-site values of a group that runs at both sites in `site_<env>/<group>/`, not in `<group>/`: a var defined in both is resolved by group depth, not by site
 - `terraform/environments/<env>/vms.auto.tfvars` — VM definitions (HCL)
 - `terraform/environments/<env>/terraform.tfstate` — provisioning state
 
@@ -96,7 +97,7 @@ Paths are hard-coded (no base-path variables); keep new templates on the same sp
 ## Secrets
 
 SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
-- `*.sops.yml` — encrypted ansible vars
+- `*.sops.yml` — encrypted ansible vars; every one lives in its site's folder `ansible/inventory/group_vars/site_<env>/` (encrypted to master + that site's CI key)
 - `*.tfvars` — encrypted terraform vars (credentials)
 - `*.pkrvars.hcl` — encrypted packer vars
 - `.env` files — encrypted docker env files
@@ -113,6 +114,8 @@ SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
 | Purpose | Path |
 |---------|------|
 | Root taskfile | `Taskfile.yaml` |
+| Ansible inventory | `ansible/inventory/hosts.ini` |
+| Sites table | `ansible/inventory/group_vars/all/sites.yml` |
 | Ansible tasks | `.taskfiles/ansible/Taskfile.yaml` |
 | Terraform tasks | `.taskfiles/terraform/Taskfile.yaml` |
 | VM module | `terraform/modules/vm/main.tf` |
@@ -140,17 +143,18 @@ task ca:health ENV=wil
 task ansible:ping ENV=wil
 
 # Decrypt a sops file
-sops decrypt ansible/environments/wil/group_vars/all/secrets.sops.yml
+sops decrypt ansible/inventory/group_vars/site_wil/secrets.sops.yml
 ```
 
 ## GitOps Deploys (CI)
 
-Renovate merges that touch `ansible/environments/*/group_vars/` deploy automatically via `.github/workflows/deploy.yml` (GitHub-hosted runner → Tailscale `tag:ci` → `deploy` user). See `docs/guides/gitops.md`.
+Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically via `.github/workflows/deploy.yml` (GitHub-hosted runner → Tailscale `tag:ci` → `deploy` user). See `docs/guides/gitops.md`.
 - Auto-deploy allowlist lives in `.github/scripts/deploy-plan.sh` (`PLAYBOOK_FOR`); keep it in sync with the host pattern in `ansible/playbooks/ci-access.yml` and `TARGET_PATTERN` in `.taskfiles/ci/Taskfile.yaml`
 - Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
 - Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
-- Each env's sops files are encrypted to master + that env's CI age key (`.sops.yaml`, `# ci:<env>` rules)
+- Each site's sops files (`group_vars/site_<env>/`) are encrypted to master + that site's CI age key (`.sops.yaml`, `# ci:<env>` rules), so every CI ansible run must keep `--limit site_<env>`: without it Ansible tries to decrypt the other site's files and fails
+- The planner maps a changed file to a site: `site_<env>/<group>/` and the folders of groups with hosts at the site count for it, `all/apps.yml` deploys only the changed apps hosted there; files moved unchanged don't count
 
 ## Proxy & DNS Service Definitions
 
@@ -181,16 +185,19 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
      proxied: true
    ```
 
-`_services.yml` aggregates the manual lists (with domain injection) and appends `registry_services`:
+`_services.yml` aggregates the manual lists (with domain injection), appends `registry_services`, and keeps only the zones of the host's site:
 ```yaml
 services: >-
   {{
-    (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
-    (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
-    ... +
-    registry_services
+    (
+      (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
+      (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
+      ... +
+      registry_services
+    ) | selectattr('domain', 'in', sites[site].zones) | list
   }}
 ```
+A manual entry that points at another site's registry app takes its address from the registry (`backend_host: "{{ groups['app_kosync'] | first }}"`, `backend_port: "{{ apps.kosync.port }}"`) rather than a copied IP; a change to that app then needs a networking deploy at that site too.
 
 ### Single Sign-On (Authelia)
 
@@ -198,15 +205,15 @@ Authelia (login page) and oauth2-proxy (login check) run next to Caddy on each n
 - `auth: true` on a service entry (or inside a registry `proxy:` block) wraps it in the Caddyfile's `(login)` block: Caddy asks oauth2-proxy, which sends the browser to Authelia (OpenID Connect) and back. Works on any domain. Browser UIs only: leave it off anything apps, devices or scripts reach by hostname (Plex, KOSync, MicroBin) and off public sites
 - A service entry named `auth` (backend `authelia:9091`) is the site's login page; one per site: `auth.wil.5am.cloud`, `auth.ldn.5am.cloud`. Never add a login page on another domain
 - Authelia's client `redirect_uris` and oauth2-proxy's cookie domains are generated from the flagged services, so flagging a service needs only a networking deploy
-- Secrets per env in `group_vars/infra_networking/secrets.sops.yml` (names listed in `authelia.yml` there)
+- Secrets per site in `group_vars/site_<env>/infra_networking/secrets.sops.yml` (names listed in `authelia.yml` there)
 - Kasm stays unflagged: it logs in through Authelia itself as a second OpenID Connect client (`kasm` in `authelia-configuration.yml.j2`; its side lives in Kasm's database, values in the SSO docs)
 
 ## Adding New Services
 
 For a data-driven (registry) app:
-1. Add the app to `ansible/environments/<env>/group_vars/all/apps.yml`: `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived). For a browser UI on the site domain, add `auth: true` to the `proxy:` block to put it behind the login
+1. Add the app to `ansible/inventory/group_vars/all/apps.yml` (one registry for both sites): `host_group`, `image`, `port`, and a `proxy:` block for DNS/reverse-proxy (image keys end in `image`, double-quoted, `# renovate: datasource=docker` directly above; no separate `images:` list — the pre-pull list is derived). For a browser UI on the site domain, add `auth: true` to the `proxy:` block to put it behind the login
 2. Create the compose template: `ansible/playbooks/apps/<service>/templates/compose.yaml.j2` referencing `apps[app_name].<field>`
-3. Add host group to `hosts.ini` under `[app_<service>]` and `[apps:children]`
+3. Add host group to `ansible/inventory/hosts.ini` under `[app_<service>]` and `[apps:children]`, and the host under its `[site_<env>]` group
 4. Add import to `ansible/playbooks/site.yml` (uses `deploy-app.yml` with `app_name`)
 5. Deploy: `task ansible:deploy-app APP=<service> ENV=<env>`, then `task ansible:deploy-networking ENV=<env>` for the DNS/proxy entry
 6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`

@@ -10,9 +10,9 @@ Caddy serves as the reverse proxy for all web-facing services. It runs as a Dock
 | `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2` | Reverse proxy configuration |
 | `ansible/playbooks/infrastructure/networking/templates/compose.yaml.j2` | Docker Compose service definition |
 | `ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2` | Custom xcaddy build with Cloudflare plugin |
-| `ansible/environments/<env>/group_vars/all/proxy/*.yml` | Manual per-domain service definitions (non-catalog services) |
-| `ansible/environments/<env>/group_vars/all/proxy/_services.yml` | Registry entry generation and service aggregation |
-| `ansible/environments/<env>/group_vars/all/apps.yml` | App registry — `proxy:` blocks generate service entries |
+| `ansible/inventory/group_vars/all/proxy/*.yml` | Manual per-domain service definitions (non-catalog services) |
+| `ansible/inventory/group_vars/all/proxy/_services.yml` | Registry entry generation and service aggregation |
+| `ansible/inventory/group_vars/all/apps.yml` | App registry — `proxy:` blocks generate service entries |
 
 ## Architecture
 
@@ -64,7 +64,7 @@ The Caddy container exposes ports `80`, `443`, and `2019` (admin API), and mount
 Service entries come from two sources:
 
 1. **App registry** — apps in `group_vars/all/apps.yml` declare a `proxy:` block, and `_services.yml` generates their entries automatically. See [Registry-Generated Entries](#registry-generated-entries).
-2. **Manual per-domain files** — YAML files under `ansible/environments/<env>/group_vars/all/proxy/` for services outside the app registry: third-party devices (Proxmox, NAS, KVM, Haivision), the media stack, monitoring, Frigate, and cloud gaming. Each file defines a list variable (e.g., `wil_services`, `video_services`) that is aggregated by `_services.yml`.
+2. **Manual per-domain files** — YAML files under `ansible/inventory/group_vars/all/proxy/` for services outside the app registry: third-party devices (Proxmox, NAS, KVM, Haivision), the media stack, monitoring, Frigate, and cloud gaming. Each file defines a list variable (e.g., `wil_services`, `video_services`) that is aggregated by `_services.yml`.
 
 The fields below apply to entries from both sources.
 
@@ -305,7 +305,7 @@ kasm:
 
 `_services.yml` builds a `registry_services` list from every `proxy:` block — on a top-level app or a one-level-nested sub-service (e.g., `apps.work.microbin.proxy`). For each block:
 
-- **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the environment's inventory, the render fails loudly rather than silently dropping the entry.
+- **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the inventory, the render fails loudly rather than silently dropping the entry.
 - **`backend_port` defaults to the sibling `port`** — set `backend_port` inside the `proxy:` block to override it.
 - **`name`, `domain`, and `proxied` are required** — `proxied` has no default in the zone template.
 - **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `auth`, `dns`, and `enabled` behave exactly as in manual entries.
@@ -314,31 +314,22 @@ Apps without a `proxy:` block get no DNS record and no Caddy entry.
 
 ## Service Aggregation
 
-The `_services.yml` file in each environment aggregates the manual per-domain service lists (injecting the `domain` field) and appends the registry-generated entries, which already carry their `domain` from the `proxy:` block. Manual lists come first to keep zone and Caddyfile ordering stable:
+The `_services.yml` file aggregates the manual per-domain service lists (injecting the `domain` field) and appends the registry-generated entries, which already carry their `domain` from the `proxy:` block. Manual lists come first to keep zone and Caddyfile ordering stable. The result is then cut down to the zones of the host's site (its `zones` in `group_vars/all/sites.yml`):
 
-=== "WIL"
-
-    ```yaml
-    services: >-
-      {{
-        (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
-        (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
-        (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
-        (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
-        (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list) +
-        registry_services
-      }}
-    ```
-
-=== "LDN"
-
-    ```yaml
-    services: >-
-      {{
-        (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
-        registry_services
-      }}
-    ```
+```yaml
+services: >-
+  {{
+    (
+      (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
+      (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
+      (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
+      (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
+      (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list) +
+      (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
+      registry_services
+    ) | selectattr('domain', 'in', sites[site].zones) | list
+  }}
+```
 
 A list may aggregate even when no domain file defines it — the `default([])` keeps unused lists (e.g., `sfc_services` in WIL, whose services all live in the registry) as extension points.
 
@@ -362,7 +353,7 @@ Both BIND9 zone templates and the Caddyfile template consume the resulting `serv
 
 ### Add a new service to an existing domain
 
-**Registry apps** — add a `proxy:` block to the app's entry in `ansible/environments/<env>/group_vars/all/apps.yml`:
+**Registry apps** — add a `proxy:` block to the app's entry in `ansible/inventory/group_vars/all/apps.yml`:
 
 ```yaml
 myapp:
@@ -378,7 +369,7 @@ myapp:
 
 `backend_host` and `backend_port` are derived from the app's `host_group` and `port` — no manual entry is needed.
 
-**Non-catalog services** (third-party devices, media stack, monitoring) — add an entry to the domain file, e.g., `ansible/environments/wil/group_vars/all/proxy/wil.5am.cloud.yml`:
+**Non-catalog services** (third-party devices, media stack, monitoring) — add an entry to the domain file, e.g., `ansible/inventory/group_vars/all/proxy/wil.5am.cloud.yml`:
 
 ```yaml
 - name: myapp
@@ -407,15 +398,16 @@ Then, for either path:
 
 ### Add a new domain
 
-1. Add the domain to `ansible/environments/<env>/group_vars/all/vars.yml`:
+1. Add the domain to the site's `zones` in `ansible/inventory/group_vars/all/sites.yml`:
 
     ```yaml
-    domains:
-      # ... existing domains
-      - name: "new.5am.cloud"
+    sites:
+      wil:
+        # ...
+        zones: [5am.video, 5am.cloud, wil.5am.cloud, ext.5am.cloud, sfc.al, new.5am.cloud]
     ```
 
-2. Create a service file at `ansible/environments/<env>/group_vars/all/proxy/new.5am.cloud.yml`:
+2. Create a service file at `ansible/inventory/group_vars/all/proxy/new.5am.cloud.yml`:
 
     ```yaml
     ---
@@ -426,22 +418,26 @@ Then, for either path:
         proxied: true
     ```
 
-3. Update `ansible/environments/<env>/group_vars/all/proxy/_services.yml` to include the new list:
+3. Update `ansible/inventory/group_vars/all/proxy/_services.yml` to include the new list:
 
     ```yaml
     services: >-
       {{
-        ... +
-        (new_services | default([]) | map('combine', {'domain': 'new.5am.cloud'}) | list)
+        (
+          ... +
+          (new_services | default([]) | map('combine', {'domain': 'new.5am.cloud'}) | list) +
+          registry_services
+        ) | selectattr('domain', 'in', sites[site].zones) | list
       }}
     ```
 
 4. Ensure the domain is registered with Cloudflare (required for TLS certificates)
 
-5. Deploy:
+5. Deploy networking at every site (the other sites become secondaries for the new zone):
 
     ```bash
     task ansible:deploy-networking ENV=wil
+    task ansible:deploy-networking ENV=ldn
     ```
 
 ### Disable a service temporarily

@@ -37,8 +37,8 @@ Each site runs its own Authelia, so you log in once per site.
 | `ansible/playbooks/infrastructure/networking/templates/authelia-oauth2-proxy.env.j2` | oauth2-proxy settings |
 | `ansible/playbooks/infrastructure/networking/templates/authelia-compose.yaml.j2` | Docker Compose definition of both containers |
 | `ansible/playbooks/infrastructure/networking/templates/Caddyfile.j2` | The `(login)` block every flagged service uses |
-| `ansible/environments/<env>/group_vars/infra_networking/authelia.yml` | Images and user name |
-| `ansible/environments/<env>/group_vars/infra_networking/secrets.sops.yml` | Password hash and generated keys |
+| `ansible/inventory/group_vars/site_<env>/infra_networking/authelia.yml` | Images and user name |
+| `ansible/inventory/group_vars/site_<env>/infra_networking/secrets.sops.yml` | Password hash and generated keys |
 
 On the VM: config in `/opt/authelia`, database in `/var/lib/authelia`.
 
@@ -53,7 +53,7 @@ docker run --rm -it authelia/authelia:4.39.28 authelia crypto hash generate argo
 Store the digest in the environment's secrets, then deploy networking:
 
 ```bash
-sops set ansible/environments/wil/group_vars/infra_networking/secrets.sops.yml '["authelia_password_hash"]' '"$argon2id$..."'
+sops set ansible/inventory/group_vars/site_wil/infra_networking/secrets.sops.yml '["authelia_password_hash"]' '"$argon2id$..."'
 ```
 
 Use single quotes as shown: in double quotes the shell eats the `$` parts of the digest. After the deploy, `docker ps` on the networking VM should show `authelia` as `(healthy)` and `oauth2-proxy` as up.
@@ -93,7 +93,7 @@ docker run --rm authelia/authelia:4.39.28 authelia crypto hash generate pbkdf2 -
 Store the digest, then deploy networking:
 
 ```bash
-sops set ansible/environments/ldn/group_vars/infra_networking/secrets.sops.yml '["authelia_oidc_kasm_client_secret_hash"]' '"$pbkdf2-sha512$..."'
+sops set ansible/inventory/group_vars/site_ldn/infra_networking/secrets.sops.yml '["authelia_oidc_kasm_client_secret_hash"]' '"$pbkdf2-sha512$..."'
 ```
 
 ```bash
@@ -131,11 +131,11 @@ Each site's Proxmox logs in through that site's Authelia as a client of its own:
 Generate a client secret per site, using the same command as for [Kasm](#kasm). Store both values, because Proxmox's realm needs the password itself, then deploy networking:
 
 ```bash
-sops set ansible/environments/wil/group_vars/infra_networking/secrets.sops.yml '["authelia_oidc_proxmox_client_secret"]' '"<Random Password>"'
+sops set ansible/inventory/group_vars/site_wil/infra_networking/secrets.sops.yml '["authelia_oidc_proxmox_client_secret"]' '"<Random Password>"'
 ```
 
 ```bash
-sops set ansible/environments/wil/group_vars/infra_networking/secrets.sops.yml '["authelia_oidc_proxmox_client_secret_hash"]' '"$pbkdf2-sha512$..."'
+sops set ansible/inventory/group_vars/site_wil/infra_networking/secrets.sops.yml '["authelia_oidc_proxmox_client_secret_hash"]' '"$pbkdf2-sha512$..."'
 ```
 
 Proxmox fetches Authelia's settings itself, so the host must resolve the login page, which is not in public DNS. Check from the host:

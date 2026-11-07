@@ -1,0 +1,5 @@
+---
+# --- Site ---
+# Every host in [site_wil] gets this folder: wil's own values, in sub-folders
+# named after the group that reads them, and all of wil's secrets.
+site: wil

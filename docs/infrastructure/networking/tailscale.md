@@ -78,7 +78,7 @@ Services on one site can be accessed from the other. For example, a client in LD
 
 ### Trusted Network Configuration
 
-Both sites include the Tailscale CGNAT range in their BIND9 trusted networks:
+Both sites include the Tailscale CGNAT range in their BIND9 trusted networks, which are derived in `group_vars/all/sites.yml`:
 
 ```yaml
 dns_trusted_networks:
@@ -140,9 +140,8 @@ Split DNS entries in the Tailscale admin console route domain queries to the cor
 1. Set up Tailscale on the new site's networking VM as a subnet router (see above)
 2. On existing sites, ensure `tailscale_accept_routes: true` so they accept the new site's routes
 3. Add [static routes on each site's UDM Pro](unifi.md#adding-a-new-site-route) pointing the new subnet at the local Tailscale VM
-4. Add the new site's subnet to `dns_trusted_networks` on existing DNS servers
-5. Configure zone transfers between the new site and existing sites (see [DNS — Configure zone transfer to a new secondary](dns.md#configure-zone-transfer-to-a-new-secondary))
-6. Deploy all affected environments
+4. Add the new site's row to `group_vars/all/sites.yml`; every DNS server then trusts its subnet and exchanges zones with it (see [DNS — Configure zone transfer to a new secondary](dns.md#configure-zone-transfer-to-a-new-secondary))
+5. Deploy networking at every site
 
 ### Force re-authentication
 

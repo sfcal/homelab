@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Wire an environment's CI keys into the repo (called by `task ci:keys`).
 
-- ansible/environments/<env>/group_vars/all/ci.yml: ci_deploy_ssh_pubkey
+- ansible/inventory/group_vars/site_<env>/ci.yml: ci_deploy_ssh_pubkey
 - .sops.yaml: append the CI age recipient to the rule tagged `# ci:<env>`
 Idempotent: re-running with the same keys changes nothing.
 """
@@ -19,7 +19,7 @@ age_pub = next(
     if line.startswith("# public key:")
 )
 
-ci_yml = root / f"ansible/environments/{env}/group_vars/all/ci.yml"
+ci_yml = root / f"ansible/inventory/group_vars/site_{env}/ci.yml"
 text, n = re.subn(
     r"^ci_deploy_ssh_pubkey:.*$",
     f'ci_deploy_ssh_pubkey: "{ssh_pub}"',

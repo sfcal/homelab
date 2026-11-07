@@ -31,8 +31,8 @@ Step-CA initializes on first run with a root CA certificate and an admin provisi
 | `playbooks/infrastructure/ca/tasks/step-ca.yml` | Installation and configuration task |
 | `playbooks/infrastructure/ca/templates/compose.yaml.j2` | Docker Compose service definition |
 | `playbooks/infrastructure/ca/handlers/main.yml` | Container lifecycle handlers |
-| `environments/<env>/group_vars/infra_ca/vars.yml` | Per-environment CA variables |
-| `environments/<env>/group_vars/infra_ca/secrets.sops.yml` | Encrypted provisioner password |
+| `inventory/group_vars/site_<env>/infra_ca/vars.yml` | Per-environment CA variables |
+| `inventory/group_vars/site_<env>/infra_ca/secrets.sops.yml` | Encrypted provisioner password |
 
 ## Hosts
 
@@ -74,7 +74,7 @@ The container runs `smallstep/step-ca` with the following configuration:
 
 ## Configuration Reference
 
-All variables are set in `ansible/environments/<env>/group_vars/infra_ca/vars.yml`.
+All variables are set in `ansible/inventory/group_vars/site_<env>/infra_ca/vars.yml`.
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
@@ -90,7 +90,7 @@ All variables are set in `ansible/environments/<env>/group_vars/infra_ca/vars.ym
 | `step_ca_max_cert_duration` | `string` | Maximum certificate validity period | `"17520h"` |
 | `step_ca_provisioner_password` | `string` | Admin provisioner password (SOPS-encrypted) | (required) |
 
-<small>**Sources:** `ansible/environments/<env>/group_vars/infra_ca/vars.yml` · `ansible/environments/<env>/group_vars/infra_ca/secrets.sops.yml`</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_ca/vars.yml` · `ansible/inventory/group_vars/site_<env>/infra_ca/secrets.sops.yml`</small>
 
 ## Common Tasks
 
@@ -116,7 +116,7 @@ ssh sfcal@10.2.20.9 cat /opt/step-ca/root_ca.crt
 
 ### Change certificate duration
 
-1. Edit `ansible/environments/<env>/group_vars/infra_ca/vars.yml`:
+1. Edit `ansible/inventory/group_vars/site_<env>/infra_ca/vars.yml`:
 
     ```yaml
     step_ca_default_cert_duration: "2160h"   # 90 days

@@ -25,7 +25,7 @@ VFs exist only after something writes to `sriov_numvfs`, and they vanish on rebo
 
 Then it runs `pvesh get /cluster/mapping/pci --check-node pve-ldn`, the same validation `qm start` performs, and fails if a mapping no longer matches the hardware.
 
-Configuration (`ansible/environments/ldn/group_vars/infra_proxmox/vars.yml`):
+Configuration (`ansible/inventory/group_vars/infra_proxmox/vars.yml`):
 
 ```yaml
 b50_num_vfs: 3

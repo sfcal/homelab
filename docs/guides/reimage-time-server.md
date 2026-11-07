@@ -36,7 +36,7 @@ The MU's timecard runs PTM-enabled firmware that hangs the box the moment the in
 
     (`10.3.30.123` is the address the entry pins on re-image; an MU that predates the pin answers on its older address. Console fallback if SSH is down.)
 
-2. **Pin the release** in `ansible/environments/ldn/group_vars/infra_netboot/vars.yml`: set `netboot_ubuntu_iso_url` and `netboot_ubuntu_iso_sha256` (from the `SHA256SUMS` file next to the ISO; superseded interim releases move to `old-releases.ubuntu.com` — point the URL there for the exact base image). Then redeploy:
+2. **Pin the release** in `ansible/inventory/group_vars/site_ldn/infra_netboot/vars.yml`: set `netboot_ubuntu_iso_url` and `netboot_ubuntu_iso_sha256` (from the `SHA256SUMS` file next to the ISO; superseded interim releases move to `old-releases.ubuntu.com` — point the URL there for the exact base image). Then redeploy:
 
     ```bash
     task ansible:deploy-netboot ENV=ldn

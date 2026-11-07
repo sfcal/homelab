@@ -64,12 +64,12 @@ graph TD
 | `playbooks/infrastructure/monitoring/templates/compose.yaml.j2` | Docker Compose definition |
 | `playbooks/infrastructure/monitoring/templates/prometheus.yml.j2` | Prometheus scrape config |
 | `playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2` | Grafana datasource provisioning |
-| `playbooks/infrastructure/monitoring/templates/services.yaml.j2` | Homepage services dashboard |
+| `playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2` | Homepage services dashboard |
 | `playbooks/infrastructure/monitoring/templates/bookmarks.yaml.j2` | Homepage bookmarks |
 | `playbooks/infrastructure/monitoring/templates/settings.yaml.j2` | Homepage theme and layout |
 | `playbooks/infrastructure/monitoring/templates/widgets.yaml.j2` | Homepage widgets |
 | `playbooks/infrastructure/monitoring/handlers/main.yml` | Container lifecycle handlers |
-| `environments/<env>/group_vars/infra_monitoring/` | Per-environment variables |
+| `inventory/group_vars/site_<env>/infra_monitoring/` | Per-environment variables |
 
 ## Deployment
 
@@ -141,7 +141,7 @@ Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandm
 | `prometheus_ptp_node_targets` | `list[string]` | PTP grandmaster node_exporter endpoints (job `node`, `:9100`) | `[]` |
 | `node_exporter_image` | `string` | Docker image for Node Exporter sidecar | (per-env) |
 
-<small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/prometheus.yml` · `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml`</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_monitoring/prometheus.yml` · `ansible/inventory/group_vars/site_<env>/infra_monitoring/containers.yml`</small>
 
 ---
 
@@ -195,7 +195,7 @@ Dashboards are provisioned from files — any JSON dropped into `playbooks/infra
 | `grafana_admin_password` | `string` | Admin password (SOPS-encrypted) | (required) |
 | `grafana_url` | `string` | Root URL for links in notifications and dashboards | (per-env) |
 
-<small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/grafana.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2)</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_monitoring/grafana.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/grafana-datasources.yml.j2)</small>
 
 ---
 
@@ -229,11 +229,11 @@ Homepage is configured via four YAML template files:
 
 `services.yaml.j2` is plain Homepage YAML; edit it directly. Three parts are less obvious:
 
-- **Apps** and **Infrastructure** differ per site: one `if`/`else` block picks the ldn or wil cards by the inventory folder name. Everything else is shared by both sites.
+- **Apps** and **Infrastructure** differ per site: one `if`/`else` block picks the ldn or wil cards by the host's `site`. Everything else is shared by both sites.
 - **System Activity** shows the four panels of the System Activity Grafana dashboard in iframes (`<grafana_url>/d-solo/system-activity?panelId=1` to `4`). The time range and refresh interval come from the dashboard JSON.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
-<small>**Sources:** `ansible/environments/<env>/group_vars/infra_monitoring/containers.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2)</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_monitoring/containers.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2)</small>
 
 ---
 
@@ -251,7 +251,7 @@ These variables apply to all monitoring containers:
 
 ### Add a new Prometheus scrape target
 
-1. Edit `ansible/environments/<env>/group_vars/infra_monitoring/prometheus.yml`:
+1. Edit `ansible/inventory/group_vars/site_<env>/infra_monitoring/prometheus.yml`:
 
     ```yaml
     prometheus_node_targets:
@@ -267,7 +267,7 @@ These variables apply to all monitoring containers:
 
 ### Change metrics retention
 
-1. Edit `ansible/environments/<env>/group_vars/infra_monitoring/prometheus.yml`:
+1. Edit `ansible/inventory/group_vars/site_<env>/infra_monitoring/prometheus.yml`:
 
     ```yaml
     prometheus_retention: "90d"
@@ -281,7 +281,7 @@ These variables apply to all monitoring containers:
 
 ### Add a Homepage service widget
 
-1. Edit `ansible/playbooks/infrastructure/monitoring/templates/services.yaml.j2`
+1. Edit `ansible/playbooks/infrastructure/monitoring/templates/homepage/services.yaml.j2`
 2. Add a new service entry under the appropriate section
 3. If the service requires an API key, add the key to `secrets.sops.yml` and pass it through `compose.yaml.j2`
 4. Deploy:

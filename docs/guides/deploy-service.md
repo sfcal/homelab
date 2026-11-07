@@ -8,7 +8,7 @@ Most applications follow this pattern. The shared `deploy-app.yml` playbook hand
 
 ### 1. Add the App to `apps.yml`
 
-Add an entry to `ansible/environments/<env>/group_vars/all/apps.yml`:
+Add an entry to `ansible/inventory/group_vars/all/apps.yml`:
 
 ```yaml
 myapp:
@@ -43,9 +43,13 @@ services:
 
 ### 3. Add to Ansible Inventory
 
-Add a host group to `ansible/environments/<env>/hosts.ini`:
+Add a host group to `ansible/inventory/hosts.ini`, and make sure the host is also listed in its site group:
 
 ```ini
+[site_wil]
+# ... existing hosts ...
+10.2.20.60
+
 [app_myapp]
 10.2.20.60
 

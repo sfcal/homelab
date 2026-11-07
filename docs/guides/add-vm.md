@@ -49,9 +49,13 @@ task terraform:deploy ENV=wil
 
 ## 3. Add to Ansible Inventory
 
-Add the VM's IP to `ansible/environments/<env>/hosts.ini`:
+Add the VM's IP to `ansible/inventory/hosts.ini`, in its site group and in the group its playbook targets:
 
 ```ini
+[site_wil]
+# ... existing hosts ...
+10.2.20.80
+
 [app_myserver]
 10.2.20.80
 

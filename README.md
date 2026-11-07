@@ -248,19 +248,19 @@ Install Docker and deploy services to your VMs:
 1. **Review inventory:**
 ```bash
 cd ansible
-cat environments/dev/hosts.ini
+cat inventory/hosts.ini
 ```
 
 2. **Configure environment settings:**
 ```bash
 # Global settings (domains, timezone, deploy path)
-cat environments/dev/group_vars/all.yml
+cat inventory/group_vars/all/vars.yml
 
 # Unified services list (shared between DNS and reverse proxy)
-cat environments/dev/group_vars/services.yml
+cat inventory/group_vars/all/proxy/_services.yml
 ```
 
-The `services.yml` file is the single source of truth — it defines every service's subdomain, backend host/port, and whether it's proxied through Caddy.
+The `_services.yml` file is the single source of truth — it defines every service's subdomain, backend host/port, and whether it's proxied through Caddy.
 
 #### Deploy Everything
 
@@ -297,7 +297,7 @@ hl task ansible:ping ENV=dev
 
 ## Troubleshooting
 
-Adding a new service? Update `ansible/environments/<env>/group_vars/services.yml` then run:
+Adding a new service? Update `ansible/inventory/group_vars/all/apps.yml` (or `all/proxy/<domain>.yml`) then run:
 ```bash
 hl task ansible:deploy-networking ENV=dev
 ```

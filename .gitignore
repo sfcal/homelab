@@ -71,10 +71,10 @@ __pycache__/
 docker/yolo/models
 
 # certificates
-ansible/environments/*/group_vars/infra_ca/*.crt
-ansible/environments/*/group_vars/infra_ca/*.key
-ansible/environments/*/group_vars/infra_ca/*.pem
-ansible/environments/*/group_vars/infra_ca/*.csr
+ansible/inventory/group_vars/site_*/infra_ca/*.crt
+ansible/inventory/group_vars/site_*/infra_ca/*.key
+ansible/inventory/group_vars/site_*/infra_ca/*.pem
+ansible/inventory/group_vars/site_*/infra_ca/*.csr
 
 # obsidian
 docs/.obsidian

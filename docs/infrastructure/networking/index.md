@@ -97,7 +97,7 @@ graph LR
     B --> D["Caddyfile.j2\n(reverse proxy)"]
 ```
 
-Service definitions come from two sources. Apps in the registry (`group_vars/all/apps.yml`) declare a `proxy:` block, from which `_services.yml` generates entries automatically. Manual per-domain files in `ansible/environments/<env>/group_vars/all/proxy/` cover services outside the catalog (third-party devices, media stack, monitoring). The `_services.yml` file aggregates the domain lists (injecting the `domain` field) and appends the registry-generated entries.
+Service definitions come from two sources. Apps in the registry (`group_vars/all/apps.yml`) declare a `proxy:` block, from which `_services.yml` generates entries automatically. Manual per-domain files in `ansible/inventory/group_vars/all/proxy/` cover services outside the catalog (third-party devices, media stack, monitoring). The `_services.yml` file aggregates the domain lists (injecting the `domain` field), appends the registry-generated entries, and keeps only the zones of the host's site.
 
 See [Reverse Proxy — Service Definition Reference](proxy.md#service-definition-reference) for the full field specification.
 
@@ -133,9 +133,10 @@ Networking → Step-CA → NTP → Monitoring → Applications
 | `ansible/playbooks/infrastructure/networking/tasks/` | Per-component task files |
 | `ansible/playbooks/infrastructure/networking/templates/` | Jinja2 config templates |
 | `ansible/playbooks/infrastructure/networking/handlers/main.yml` | Service restart handlers |
-| `ansible/environments/<env>/group_vars/infra_networking/` | Per-environment variables |
-| `ansible/environments/<env>/group_vars/all/proxy/` | Manual service definitions and aggregation |
-| `ansible/environments/<env>/group_vars/all/apps.yml` | App registry (`proxy:` blocks) |
+| `ansible/inventory/group_vars/site_<env>/infra_networking/` | Per-environment variables |
+| `ansible/inventory/group_vars/all/sites.yml` | Each site's network, DNS server and zones (cross-site DNS variables are derived from it) |
+| `ansible/inventory/group_vars/all/proxy/` | Manual service definitions and aggregation |
+| `ansible/inventory/group_vars/all/apps.yml` | App registry (`proxy:` blocks) |
 
 ## Cloudflare DDNS
 
@@ -143,7 +144,7 @@ Cloudflare DDNS runs as a Docker container using the [`favonia/cloudflare-ddns`]
 
 ### Configuration
 
-Edit `ansible/environments/<env>/group_vars/infra_networking/ddns.yml`:
+Edit `ansible/inventory/group_vars/site_<env>/infra_networking/ddns.yml`:
 
 ```yaml
 ddns_domains:

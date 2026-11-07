@@ -1,14 +1,14 @@
 name: Deploy
 
 # Push-based GitOps for Renovate image bumps: a merge that changes
-# ansible/environments/*/group_vars runs the affected playbooks against that
-# environment over Tailscale. See docs/guides/gitops.md.
+# ansible/inventory/group_vars runs the affected playbooks against each site
+# it touches over Tailscale. See docs/guides/gitops.md.
 
 on:
   push:
     branches: [main]
     paths:
-      - "ansible/environments/*/group_vars/**"
+      - "ansible/inventory/group_vars/**"
   workflow_dispatch:
     inputs:
       env:

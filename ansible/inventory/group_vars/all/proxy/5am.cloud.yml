@@ -10,8 +10,9 @@ cloud_services:
     backend_host: 185.199.108.153
     backend_port: 443
     proxied: false
-  # KOReader sync server on the ldn web VM, reached over Tailscale
+  # KOReader sync server on the ldn web VM, reached over Tailscale; host and
+  # port follow apps.kosync
   - name: kosync
-    backend_host: 10.3.20.70
-    backend_port: 17200
+    backend_host: "{{ groups['app_kosync'] | first }}"
+    backend_port: "{{ apps.kosync.port }}"
     proxied: true

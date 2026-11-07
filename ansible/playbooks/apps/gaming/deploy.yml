@@ -13,15 +13,15 @@
         name: common
 
   tasks:
-    # Game data (worlds, ROM library) is local to the VM unless the environment
-    # defines nfs_mounts (group_vars/app_gaming/nfs.yml).
+    # Game data (worlds, ROM library) is local to the VM unless the site
+    # defines nfs_mounts (group_vars/site_<site>/app_gaming/nfs.yml).
     - name: Configure NFS mounts.
       ansible.builtin.include_role:
         name: nfs_mount
       when: nfs_mounts is defined
 
-    # Each stack is deployed only where group_vars/app_gaming/vars.yml defines
-    # its image: Terraria on wil, RomM and Wolf on ldn.
+    # Each stack is deployed only where group_vars/site_<site>/app_gaming/vars.yml
+    # defines its image: Terraria on wil, RomM and Wolf on ldn.
     - name: Configure Terraria.
       ansible.builtin.include_tasks: tasks/terraria.yml
       when: terraria_image is defined

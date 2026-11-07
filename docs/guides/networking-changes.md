@@ -6,7 +6,7 @@ Common DNS, proxy, and routing operations.
 
 ### Registry apps
 
-For apps in the [app registry](../reference/config.md#app-registry), add a `proxy:` block to the app's entry in `ansible/environments/<env>/group_vars/all/apps.yml`:
+For apps in the [app registry](../reference/config.md#app-registry), add a `proxy:` block to the app's entry in `ansible/inventory/group_vars/all/apps.yml`:
 
 ```yaml
 # apps.yml
@@ -31,7 +31,7 @@ task ansible:deploy-networking ENV=wil
 
 ### Non-catalog services
 
-For services outside the registry (third-party devices, media stack, monitoring), add an entry to the appropriate domain file in `ansible/environments/<env>/group_vars/all/proxy/`:
+For services outside the registry (third-party devices, media stack, monitoring), add an entry to the appropriate domain file in `ansible/inventory/group_vars/all/proxy/`:
 
 ```yaml
 # wil.5am.cloud.yml
@@ -69,7 +69,7 @@ For registry-generated entries, `backend_host` and `backend_port` are derived �
 
 ## Add a New Domain
 
-1. Create a domain file in `ansible/environments/<env>/group_vars/all/proxy/`:
+1. Create a domain file in `ansible/inventory/group_vars/all/proxy/`:
 
     ```yaml
     # mydomain.com.yml
@@ -80,14 +80,13 @@ For registry-generated entries, `backend_host` and `backend_port` are derived �
         proxied: true
     ```
 
-2. Add the domain to `group_vars/all/vars.yml`:
+2. Add the domain to the site's `zones` in `group_vars/all/sites.yml`:
 
     ```yaml
-    domains:
-      - 5am.video
-      - 5am.cloud
-      # ... existing domains ...
-      - mydomain.com
+    sites:
+      wil:
+        # ...
+        zones: [5am.video, 5am.cloud, wil.5am.cloud, ext.5am.cloud, sfc.al, mydomain.com]
     ```
 
 3. Add the list to `_services.yml` aggregation:
@@ -95,25 +94,28 @@ For registry-generated entries, `backend_host` and `backend_port` are derived �
     ```yaml
     services: >-
       {{
-        ...
-        (mydomain_services | default([]) | map('combine', {'domain': 'mydomain.com'}) | list)
+        (
+          ...
+          (mydomain_services | default([]) | map('combine', {'domain': 'mydomain.com'}) | list) +
+          registry_services
+        ) | selectattr('domain', 'in', sites[site].zones) | list
       }}
     ```
 
-4. Redeploy networking: `task ansible:deploy-networking ENV=wil`
+4. Redeploy networking at every site, so the other sites pick up the new zone as secondaries: `task ansible:deploy-networking ENV=wil`, then `ENV=ldn`
 
 ## Add a PTR Record
 
-PTR records (reverse DNS) are not generated from the `services` list — the reverse zone template (`reverse.zone.j2`) is rendered from the `dns_ptr_records` list in `group_vars/infra_networking/bind9.yml`. Add an entry there for any host that needs reverse DNS.
+PTR records (reverse DNS) are not generated from the `services` list — the reverse zone template (`reverse.zone.j2`) is rendered from the `dns_ptr_records` list in `group_vars/site_<env>/infra_networking/bind9.yml`. Add an entry there for any host that needs reverse DNS.
 
 See [DNS — Reverse DNS](../infrastructure/networking/dns.md#reverse-dns-ptr-records) for details.
 
 ## Set Up Cross-Site Zone Transfer
 
-To replicate DNS zones between sites (e.g., WIL ↔ LDN):
+Zone transfers between sites (e.g., WIL ↔ LDN) are derived from `group_vars/all/sites.yml`: every site's BIND9 is a secondary for the other sites' `zones`. To change them:
 
-1. Configure BIND9 on the primary site as zone master with `allow-transfer`
-2. Configure BIND9 on the secondary site as a slave zone
+1. Edit the site's row in `group_vars/all/sites.yml` (`dns`, `ts_router_ips`, `zones`)
+2. Redeploy networking at every site
 3. Ensure Tailscale connectivity between sites
 
 See [DNS — Cross-Site Zone Transfers](../infrastructure/networking/dns.md#cross-site-zone-transfers) for the full configuration.

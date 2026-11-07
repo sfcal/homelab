@@ -1,9 +1,12 @@
 version: '3'
 
 vars:
-  ENV_DIR: 'environments/{{.ENV}}'
-  HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
-  APPS_FILE: '{{.ENV_DIR}}/group_vars/all/apps.yml'
+  HOSTS_FILE: 'inventory/hosts.ini'
+  APPS_FILE: 'inventory/group_vars/all/apps.yml'
+  # One inventory holds every site; ENV picks the site to run against. To narrow
+  # a run, pass a pattern inside the site, e.g. LIMIT='site_wil:&infra_networking'
+  # (a --limit in EXTRA_ARGS would replace the site limit, not narrow it).
+  LIMIT: 'site_{{.ENV}}'
 
 tasks:
   # --- Internal Tasks ---
@@ -12,7 +15,7 @@ tasks:
     internal: true
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible-playbook -i {{.HOSTS_FILE}} playbooks/{{.PLAYBOOK_PATH}} {{.EXTRA_ARGS | default ""}}
+      - ansible-playbook -i {{.HOSTS_FILE}} --limit '{{.LIMIT}}' playbooks/{{.PLAYBOOK_PATH}} {{.EXTRA_ARGS | default ""}}
 
   # --- Full Deployment ---
 
@@ -109,7 +112,7 @@ tasks:
   # --- Utility Tasks ---
 
   ping:
-    desc: Ping all hosts in inventory
+    desc: Ping all hosts of the site
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
-      - ansible -i {{.HOSTS_FILE}} all -m ping
+      - ansible -i {{.HOSTS_FILE}} '{{.LIMIT}}' -m ping

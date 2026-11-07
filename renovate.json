@@ -77,7 +77,7 @@
       "customType": "regex",
       "description": "Ansible group_vars Docker image references",
       "managerFilePatterns": [
-        "/ansible/environments/.+/group_vars/.+\\.yml$/"
+        "/ansible/inventory/group_vars/.+\\.yml$/"
       ],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\n\\s*\\w+:\\s*\"(?<depName>[^:]+):(?<currentValue>[^\"]+)\""

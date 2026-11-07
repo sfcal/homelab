@@ -35,7 +35,7 @@ task ansible:ping ENV=wil
 | `deploy-gaming` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `deploy-hermes` | Hermes Agent, Claude Code and the Claude subscription plugin |
 | `deploy-app APP=<name>` | Single data-driven app |
-| `ping` | Test connectivity to all hosts |
+| `ping` | Test connectivity to all hosts of the site |
 
 All commands require `ENV=<env>` and are prefixed with `task ansible:`.
 
@@ -82,7 +82,7 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 
 ### Data-Driven Apps
 
-Most applications use the shared `deploy-app.yml` playbook. Apps are defined in `ansible/environments/<env>/group_vars/all/apps.yml`:
+Most applications use the shared `deploy-app.yml` playbook. Apps are defined in `ansible/inventory/group_vars/all/apps.yml`:
 
 ```yaml
 birdle:
@@ -152,17 +152,16 @@ ansible/
 │   ├── docker_service/
 │   ├── tailscale/
 │   └── nfs_mount/
-└── environments/
-    └── <env>/
-        ├── hosts.ini
-        └── group_vars/
+└── inventory/
+    ├── hosts.ini                    # Both sites
+    └── group_vars/
 ```
 
 ## Troubleshooting
 
 **Connection refused** — Verify the VM is running and the IP in `hosts.ini` is correct. Test with `ssh sfcal@<ip>`.
 
-**"No hosts matched"** — The host group in the playbook doesn't match any group in `hosts.ini`. Check group names match (e.g., `infra_networking`, `app_birdle`).
+**"No hosts matched"** — The host group in the playbook doesn't match any group in `hosts.ini`, or none of its hosts are in the site group `ENV=` picks (`site_<env>`). Check group names match (e.g., `infra_networking`, `app_birdle`).
 
 **Handler not triggered** — Handlers only run when a task reports `changed`. If you need to force a restart, use `--force-handlers` or run the service command directly.
 

@@ -45,7 +45,7 @@ task ansible:deploy-media ENV=wil        # 5. Applications
 ## Repository Structure
 
 ```
-ansible/                    Playbooks, roles, per-environment inventories
+ansible/                    Playbooks, roles, one inventory for both sites
 terraform/                  VM provisioning with per-environment tfvars
 packer/                     VM template definitions (Ubuntu, Debian)
 docker/                     Docker execution environment

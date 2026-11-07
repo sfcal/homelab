@@ -10,8 +10,8 @@ BIND9 provides internal authoritative DNS with split-horizon resolution across a
 | `ansible/playbooks/infrastructure/networking/templates/named.conf.j2` | Main BIND9 configuration |
 | `ansible/playbooks/infrastructure/networking/templates/domain.zone.j2` | Per-domain zone file template |
 | `ansible/playbooks/infrastructure/networking/templates/reverse.zone.j2` | Reverse DNS zone template |
-| `ansible/environments/<env>/group_vars/infra_networking/bind9.yml` | Per-environment DNS variables |
-| `ansible/environments/<env>/group_vars/all/vars.yml` | Domain list (`domains` variable) |
+| `ansible/inventory/group_vars/site_<env>/infra_networking/bind9.yml` | Per-environment DNS variables |
+| `ansible/inventory/group_vars/all/sites.yml` | Each site's DNS server and zones (`domains` and the zone transfer variables are derived from it) |
 
 ## Split-Horizon DNS
 
@@ -38,13 +38,13 @@ This logic lives in the `domain.zone.j2` template:
 
 ### Local-Only Zones
 
-`wil.5am.cloud` and `ldn.5am.cloud` are **local-only**: they have no records in the public Cloudflare zone and only resolve through BIND9. Public DNS records are created exclusively for the hostnames listed in `ddns_domains` (`group_vars/infra_networking/ddns.yml`), e.g. `plex.5am.video` and `kosync.5am.cloud`. Everything else must reach the internal BIND servers (directly on the LAN, or via Tailscale split DNS when roaming); a query that leaks to a public resolver returns NXDOMAIN rather than a wrong answer.
+`wil.5am.cloud` and `ldn.5am.cloud` are **local-only**: they have no records in the public Cloudflare zone and only resolve through BIND9. Public DNS records are created exclusively for the hostnames listed in `ddns_domains` (`group_vars/site_<env>/infra_networking/ddns.yml`), e.g. `plex.5am.video` and `kosync.5am.cloud`. Everything else must reach the internal BIND servers (directly on the LAN, or via Tailscale split DNS when roaming); a query that leaks to a public resolver returns NXDOMAIN rather than a wrong answer.
 
 This works from either site because each BIND server holds every zone — master for its own site's zones and slave (via zone transfer) for the other's — so both `10.2.20.53` and `10.3.20.53` answer all local names. For this to hold, client VLANs must hand out the BIND servers via DHCP (see [Gateway — DHCP DNS](unifi.md#dhcp-dns)); never point clients at a public resolver.
 
 BIND9 generates zone files from two data sources:
 
-1. **`domains`** — list in `group_vars/all/vars.yml` defines which zones this server is authoritative for
+1. **`domains`** — derived from the site's `zones` in `group_vars/all/sites.yml`, defines which zones this server is authoritative for
 2. **`services`** — aggregated service list provides A records within each zone. It is built from two sources: manual per-domain lists in `group_vars/all/proxy/<domain>.yml` (non-catalog services) plus registry-generated entries from `proxy:` blocks in `group_vars/all/apps.yml` (see [Reverse Proxy — Registry-Generated Entries](proxy.md#registry-generated-entries))
 
 For each domain, the `domain.zone.j2` template generates:
@@ -57,7 +57,7 @@ For each domain, the `domain.zone.j2` template generates:
 === "WIL"
 
     ```yaml
-    # environments/wil/group_vars/all/vars.yml
+    # derived from sites.wil.zones (group_vars/all/sites.yml)
     domains:
       - name: "5am.video"
       - name: "5am.cloud"
@@ -69,7 +69,7 @@ For each domain, the `domain.zone.j2` template generates:
 === "LDN"
 
     ```yaml
-    # environments/ldn/group_vars/all/vars.yml
+    # derived from sites.ldn.zones (group_vars/all/sites.yml)
     domains:
       - name: "ldn.5am.cloud"
     ```
@@ -96,7 +96,7 @@ graph LR
 | `sfc.al` | WIL (`10.2.20.53`) | LDN (`10.3.20.53`) |
 | `ldn.5am.cloud` | LDN (`10.3.20.53`) | WIL (`10.2.20.53`) |
 
-Zone transfer configuration is set per-environment:
+Zone transfer configuration is derived from each site's row in `group_vars/all/sites.yml`: a site replicates every other site's `zones`, with that site's `dns` and `ts_router_ips` as masters (cross-site NOTIFYs arrive from the tailnet IP), and allows transfers from and sends notifies to the other sites' `dns`:
 
 === "WIL"
 
@@ -106,6 +106,7 @@ Zone transfer configuration is set per-environment:
       - name: "ldn.5am.cloud"
         masters:
           - "10.3.20.53"
+          - "100.78.61.80"
 
     dns_transfer_clients:
       - "10.3.20.53"
@@ -123,18 +124,23 @@ Zone transfer configuration is set per-environment:
       - name: "5am.video"
         masters:
           - "10.2.20.53"
+          - "100.103.137.102"
       - name: "5am.cloud"
         masters:
           - "10.2.20.53"
+          - "100.103.137.102"
       - name: "wil.5am.cloud"
         masters:
           - "10.2.20.53"
+          - "100.103.137.102"
       - name: "ext.5am.cloud"
         masters:
           - "10.2.20.53"
+          - "100.103.137.102"
       - name: "sfc.al"
         masters:
           - "10.2.20.53"
+          - "100.103.137.102"
 
     dns_transfer_clients:
       - "10.2.20.53"
@@ -200,15 +206,15 @@ The `octet` is the last octet of the IP address. The `hostname` must end with a 
 
 ## Configuration Reference
 
-All variables are set in `ansible/environments/<env>/group_vars/infra_networking/bind9.yml`.
+All variables are set in `ansible/inventory/group_vars/site_<env>/infra_networking/bind9.yml`, except the ones marked (derived), which come from `ansible/inventory/group_vars/all/sites.yml`.
 
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
 | `dns_forwarders` | `list[string]` | Upstream DNS servers for recursive queries | `["1.1.1.1", "1.0.0.1"]` |
-| `dns_trusted_networks` | `list[string]` | Networks allowed to query and use recursion | (per-env) |
-| `dns_secondary_zones` | `list[object]` | Zones to replicate from remote primaries via AXFR | `[]` |
-| `dns_transfer_clients` | `list[string]` | IPs/CIDRs allowed to pull AXFR zone transfers | `[]` |
-| `dns_notify_targets` | `list[string]` | IPs to notify on zone changes (must be IPs, not CIDRs) | `[]` |
+| `dns_trusted_networks` | `list[string]` | Networks allowed to query and use recursion | (derived) |
+| `dns_secondary_zones` | `list[object]` | Zones to replicate from remote primaries via AXFR | (derived) |
+| `dns_transfer_clients` | `list[string]` | IPs/CIDRs allowed to pull AXFR zone transfers | (derived) |
+| `dns_notify_targets` | `list[string]` | IPs to notify on zone changes (must be IPs, not CIDRs) | (derived) |
 | `dns_forward_zones` | `list[string\|object]` | Zones to forward to external resolvers | `[]` |
 | `reverse_proxy_ip` | `string` | IP for DNS A records of proxied services (Caddy IP) | (per-env) |
 | `dns_reverse_zone` | `string` | Reverse DNS zone name (`in-addr.arpa` format) | (per-env) |
@@ -218,7 +224,7 @@ All variables are set in `ansible/environments/<env>/group_vars/infra_networking
 
 ### Add a PTR record
 
-1. Edit `ansible/environments/<env>/group_vars/infra_networking/bind9.yml`
+1. Edit `ansible/inventory/group_vars/site_<env>/infra_networking/bind9.yml`
 2. Add an entry to `dns_ptr_records`:
 
     ```yaml
@@ -236,7 +242,7 @@ All variables are set in `ansible/environments/<env>/group_vars/infra_networking
 
 ### Add a forward zone
 
-1. Edit `ansible/environments/<env>/group_vars/infra_networking/bind9.yml`
+1. Edit `ansible/inventory/group_vars/site_<env>/infra_networking/bind9.yml`
 2. Add an entry to `dns_forward_zones`:
 
     ```yaml
@@ -254,15 +260,12 @@ All variables are set in `ansible/environments/<env>/group_vars/infra_networking
 
 ### Configure zone transfer to a new secondary
 
-On the **primary** server's `bind9.yml`:
+There is nothing to set in `bind9.yml`: every site's BIND9 is a secondary for the other sites' `zones`, derived from `group_vars/all/sites.yml`. To add a site, or change a site's `dns`, `ts_router_ips` or `zones`, edit its row there, then deploy networking at every site:
 
-1. Add the secondary IP to `dns_transfer_clients`
-2. Add the secondary IP to `dns_notify_targets`
-
-On the **secondary** server's `bind9.yml`:
-
-1. Add zones to `dns_secondary_zones` with the primary's IP as master
-2. Add the primary IP to `dns_transfer_clients` (for reciprocal transfers)
+```bash
+task ansible:deploy-networking ENV=wil
+task ansible:deploy-networking ENV=ldn
+```
 
 Ensure network connectivity between servers (direct or via [Tailscale](tailscale.md)).
 
@@ -285,6 +288,6 @@ dig AXFR 5am.video @10.2.20.53
 
 **Wrong IP returned** — If a proxied service resolves to `backend_host` instead of `reverse_proxy_ip`, check that `proxied: true` is set. If a non-proxied service resolves to the Caddy IP, check that `proxied: false` is set.
 
-**Zone transfer not working** — Verify Tailscale connectivity between sites. Check that `dns_transfer_clients` includes the remote DNS server IP and the CGNAT range. Test with `dig AXFR <zone> @<primary-dns>`.
+**Zone transfer not working** — Verify Tailscale connectivity between sites. Check that `dns_transfer_clients` (derived from `group_vars/all/sites.yml`) includes the remote DNS server IP and the CGNAT range. Test with `dig AXFR <zone> @<primary-dns>`.
 
 **Serial number not incrementing** — Zone serials use the current epoch. If BIND9 doesn't pick up changes, restart the container: `ssh <networking-ip> docker restart bind9`.

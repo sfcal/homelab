@@ -1,6 +1,6 @@
 # Provision a CM5 over the Network
 
-Netboot-provision (or re-image) a Raspberry Pi Compute Module 5 time-server node to a fresh Ubuntu install on its eMMC. Covered nodes and their identities live in `cm5_hosts` in `ansible/environments/ldn/group_vars/infra_netboot/vars.yml` (currently `CM1`, `10.3.30.11` and `CM2`, `10.3.30.12`).
+Netboot-provision (or re-image) a Raspberry Pi Compute Module 5 time-server node to a fresh Ubuntu install on its eMMC. Covered nodes and their identities live in `cm5_hosts` in `ansible/inventory/group_vars/site_ldn/infra_netboot/vars.yml` (currently `CM1`, `10.3.30.11` and `CM2`, `10.3.30.12`).
 
 ## How It Works
 

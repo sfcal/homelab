@@ -1,0 +1,56 @@
+---
+# --- Sites ---
+# One row per site. What each site needs to know about the others (BIND9
+# secondaries, zone transfers, notifies, trusted networks) is derived below,
+# so a change here reaches every site on its next networking deploy.
+#   cidr           the site's LAN range
+#   tz             timezone of the site's hosts
+#   dns            the site's BIND9 primary (its networking VM)
+#   ts_router_ips  tailnet address of the site's subnet router (the same VM);
+#                  cross-site NOTIFYs arrive SNATed to it
+#   zones          zones the site is primary for, in zone/Caddyfile order
+sites:
+  wil:
+    cidr: 10.2.0.0/16
+    tz: America/New_York
+    dns: ["10.2.20.53"]
+    ts_router_ips: ["100.103.137.102"]
+    zones: [5am.video, 5am.cloud, wil.5am.cloud, ext.5am.cloud, sfc.al]
+  ldn:
+    cidr: 10.3.0.0/16
+    tz: Europe/London
+    dns: ["10.3.20.53"]
+    ts_router_ips: ["100.78.61.80"]
+    zones: [ldn.5am.cloud]
+
+# This host's site is `site`, set in group_vars/site_<site>/vars.yml.
+other_sites: "{{ sites | dict2items | rejectattr('key', 'eq', site) | map(attribute='value') | list }}"
+
+# --- Derived: BIND9 (networking VMs) ---
+
+# Every site's LAN, own first, plus Tailscale CGNAT (cross-site forwarding).
+dns_trusted_networks: >-
+  {{ ['localhost', 'localnets', sites[site].cidr]
+     + (other_sites | map(attribute='cidr') | list)
+     + ['100.64.0.0/10'] }}
+
+# Replicate every other site's zones from its primary. The primary's tailnet
+# address is listed alongside its LAN address because cross-site NOTIFYs
+# arrive SNATed to it and BIND refuses notifies from IPs not in the masters list.
+# {% %} loops force string output, so emit JSON and parse it back.
+dns_secondary_zones: "{{ dns_secondary_zones_json | from_json }}"
+
+dns_secondary_zones_json: >-
+  {%- set out = [] -%}
+  {%- for other in other_sites -%}
+  {%-   for zone in other.zones -%}
+  {%-     set _ = out.append({'name': zone, 'masters': other.dns + other.ts_router_ips}) -%}
+  {%-   endfor -%}
+  {%- endfor -%}
+  {{ out | to_json }}
+
+# IPs allowed to pull zone transfers from this server
+dns_transfer_clients: "{{ (other_sites | map(attribute='dns') | flatten) + ['100.64.0.0/10'] }}"
+
+# IPs to notify on zone changes (must be specific IPs, not CIDRs)
+dns_notify_targets: "{{ other_sites | map(attribute='dns') | flatten }}"

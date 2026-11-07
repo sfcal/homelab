@@ -21,19 +21,19 @@ tasks:
       - test -f '{{.CI_DIR}}/id_ed25519' || ssh-keygen -q -t ed25519 -N '' -C 'homelab-ci-{{.ENV}}' -f '{{.CI_DIR}}/id_ed25519'
       - test -f '{{.CI_DIR}}/age.txt' || age-keygen -o '{{.CI_DIR}}/age.txt' 2>/dev/null
       - python3 .taskfiles/ci/wire-keys.py '{{.ENV}}' '{{.CI_DIR}}'
-      - find 'ansible/environments/{{.ENV}}' -name '*.sops.yml' -exec sops updatekeys --yes {} \;
-      - echo "Next - commit .sops.yaml + ansible/environments/{{.ENV}}, then task ansible:deploy-ci-access ENV={{.ENV}}"
+      - find 'ansible/inventory/group_vars/site_{{.ENV}}' -name '*.sops.yml' -exec sops updatekeys --yes {} \;
+      - echo "Next - commit .sops.yaml + ansible/inventory/group_vars/site_{{.ENV}}, then task ansible:deploy-ci-access ENV={{.ENV}}"
 
   known-hosts:
     desc: Record host keys of the hosts CI deploys to (ENV=<env>; run from the LAN or tailnet)
     dir: '{{.ROOT_DIR}}/ansible'
     cmds:
       - >-
-        ansible '{{.TARGET_PATTERN}}' -i 'environments/{{.ENV}}/hosts.ini' --list-hosts 2>/dev/null
+        ansible '{{.TARGET_PATTERN}}' -i inventory/hosts.ini --limit 'site_{{.ENV}}' --list-hosts 2>/dev/null
         | awk 'NR > 1 {print $1}' | sort -u
-        | xargs ssh-keyscan -T 5 -t ed25519 2>/dev/null | sort > 'environments/{{.ENV}}/known_hosts'
-      - test -s 'environments/{{.ENV}}/known_hosts'
-      - cat 'environments/{{.ENV}}/known_hosts'
+        | xargs ssh-keyscan -T 5 -t ed25519 2>/dev/null | sort > 'inventory/known_hosts/{{.ENV}}'
+      - test -s 'inventory/known_hosts/{{.ENV}}'
+      - cat 'inventory/known_hosts/{{.ENV}}'
 
   secrets:
     desc: Create the GitHub environment and upload its SSH + age secrets with gh (ENV=<env>)

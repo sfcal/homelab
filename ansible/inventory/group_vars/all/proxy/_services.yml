@@ -1,9 +1,11 @@
 ---
 # Proxy/DNS Service Definitions
 # The unified `services` list (consumed by domain.zone.j2 and Caddyfile.j2 on
-# the networking host) is built from two sources:
+# the networking host) is built from two sources, then cut down to the zones
+# of the host's site (sites.yml):
 #   1. Manual per-domain lists (proxy/<domain>.yml) — services OUTSIDE the app
-#      registry: Proxmox/KVM/Haivision devices, monitoring.
+#      registry: Proxmox/NAS/KVM/Haivision devices, media stack, monitoring,
+#      frigate, GitHub Pages.
 #   2. registry_services — generated from group_vars/all/apps.yml. Every
 #      `proxy:` block (top-level app or one-level-nested sub-service, e.g.
 #      apps.work.microbin.proxy) emits one entry. backend_host is the first
@@ -52,9 +54,17 @@ registry_services_json: >-
   {{ out | to_json }}
 
 # --- Aggregation ---
-# Manual lists first (keeps zone/Caddyfile ordering stable), registry last.
+# Manual lists first (keeps zone/Caddyfile ordering stable), registry last,
+# then only the entries for zones this host's site is primary for.
 services: >-
   {{
-    (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
-    registry_services
+    (
+      (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
+      (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
+      (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
+      (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
+      (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list) +
+      (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
+      registry_services
+    ) | selectattr('domain', 'in', sites[site].zones) | list
   }}

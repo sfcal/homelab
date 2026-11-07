@@ -1,13 +1,12 @@
 version: '3'
 
 vars:
-  ENV_DIR: 'environments/{{.ENV}}'
-  HOSTS_FILE: '{{.ENV_DIR}}/hosts.ini'
+  HOSTS_FILE: 'inventory/hosts.ini'
   CA_USER: 'sfcal'
   CA_CONTAINER: 'step-ca'
   CA_PORT: '9000'
   DEFAULT_DURATION: '8760h'
-  OUTPUT_DIR: '{{.ENV_DIR}}/group_vars/infra_ca'
+  OUTPUT_DIR: 'inventory/group_vars/site_{{.ENV}}/infra_ca'
 
 tasks:
   sign:
@@ -15,7 +14,7 @@ tasks:
     desc: "Sign a CSR using Step-CA (requires CSR=path/to/file.csr)"
     vars:
       CA_HOST:
-        sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
+        sh: ansible 'infra_ca:&site_{{.ENV}}' -i {{.HOSTS_FILE}} --list-hosts 2>/dev/null | awk 'NR == 2 {print $1}'
       CSR_ABS:
         sh: realpath "{{.USER_WORKING_DIR}}/{{.CSR}}"
       CSR: '{{.CSR}}'
@@ -46,7 +45,7 @@ tasks:
     desc: "Fetch the root CA certificate"
     vars:
       CA_HOST:
-        sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
+        sh: ansible 'infra_ca:&site_{{.ENV}}' -i {{.HOSTS_FILE}} --list-hosts 2>/dev/null | awk 'NR == 2 {print $1}'
     cmds:
       - mkdir -p {{.OUTPUT_DIR}}
       - scp {{.CA_USER}}@{{.CA_HOST}}:/opt/step-ca/root_ca.crt {{.OUTPUT_DIR}}/root_ca.crt
@@ -57,6 +56,6 @@ tasks:
     desc: "Check Step-CA health"
     vars:
       CA_HOST:
-        sh: grep -A1 '^\[infra_ca\]' {{.HOSTS_FILE}} | tail -1
+        sh: ansible 'infra_ca:&site_{{.ENV}}' -i {{.HOSTS_FILE}} --list-hosts 2>/dev/null | awk 'NR == 2 {print $1}'
     cmds:
       - curl -sk https://{{.CA_HOST}}:{{.CA_PORT}}/health | python3 -m json.tool

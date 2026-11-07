@@ -1,6 +1,7 @@
 ---
-# hosts falls back to a nonexistent group so environments whose registry
-# lacks this app skip the play (site.yml imports every app unconditionally).
+# site.yml imports every app unconditionally: under --limit site_<site>, apps
+# of other sites match no hosts and skip, and an app_name missing from the
+# registry falls back to a nonexistent group and skips too.
 - name: "Deploy {{ app_name }}"
   hosts: "{{ apps[app_name].host_group | default('app_not_in_registry') }}"
   become: true

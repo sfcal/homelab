@@ -7,7 +7,7 @@ Consolidated reference for configuration formats used across the homelab.
 Service definitions drive both DNS records and reverse proxy entries. They come from two sources:
 
 1. **App registry** — apps in `group_vars/all/apps.yml` declare a `proxy:` block; `_services.yml` generates a `registry_services` entry for each one (see [App Registry](#app-registry))
-2. **Manual per-domain files** — for services outside the catalog (third-party devices, media stack, monitoring, Frigate, cloud gaming), each domain has its own file in `ansible/environments/<env>/group_vars/all/proxy/`:
+2. **Manual per-domain files** — for services outside the catalog (third-party devices, media stack, monitoring, Frigate, cloud gaming), each domain has its own file in `ansible/inventory/group_vars/all/proxy/`:
 
 ```
 proxy/
@@ -15,7 +15,8 @@ proxy/
 ├── 5am.video.yml          # video_services
 ├── 5am.cloud.yml          # cloud_services
 ├── wil.5am.cloud.yml      # wil_services
-└── ext.5am.cloud.yml      # ext_services
+├── ext.5am.cloud.yml      # ext_services
+└── ldn.5am.cloud.yml      # ldn_services
 ```
 
 ### Service Entry Format
@@ -48,17 +49,20 @@ For registry-generated entries, `backend_host` is derived (first inventory host 
 
 ### Service Aggregation
 
-`_services.yml` combines all manual domain lists (injecting the domain name) and appends the registry-generated entries:
+`_services.yml` combines all manual domain lists (injecting the domain name), appends the registry-generated entries, and keeps only the zones of the host's site:
 
 ```yaml
 services: >-
   {{
-    (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
-    (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
-    (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
-    (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
-    (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list) +
-    registry_services
+    (
+      (video_services | default([]) | map('combine', {'domain': '5am.video'}) | list) +
+      (cloud_services | default([]) | map('combine', {'domain': '5am.cloud'}) | list) +
+      (wil_services | default([]) | map('combine', {'domain': 'wil.5am.cloud'}) | list) +
+      (ext_services | default([]) | map('combine', {'domain': 'ext.5am.cloud'}) | list) +
+      (sfc_services | default([]) | map('combine', {'domain': 'sfc.al'}) | list) +
+      (ldn_services | default([]) | map('combine', {'domain': 'ldn.5am.cloud'}) | list) +
+      registry_services
+    ) | selectattr('domain', 'in', sites[site].zones) | list
   }}
 ```
 
@@ -70,7 +74,7 @@ VMs are defined in HCL maps in `terraform/environments/<env>/vms.auto.tfvars`. S
 
 ## App Registry
 
-Data-driven apps are defined in `ansible/environments/<env>/group_vars/all/apps.yml` — the single service catalog for images, ports, and proxy/DNS metadata:
+Data-driven apps are defined in `ansible/inventory/group_vars/all/apps.yml` — the single service catalog for images, ports, and proxy/DNS metadata:
 
 ```yaml
 apps:
@@ -139,22 +143,17 @@ Compose templates read these via `apps.work.<svc>.*`.
 |--------|---------|---------|
 | `infra_*` | Infrastructure services | `infra_networking`, `infra_ca` |
 | `app_*` | Applications | `app_mediastack`, `app_birdle` |
+| `site_*` | Sites; every host is in one | `site_wil`, `site_ldn` |
 
 Parent groups: `[infrastructure:children]` and `[apps:children]` aggregate all groups of each type.
 
 ## Global Variables
 
-Defined in `ansible/environments/<env>/group_vars/all/vars.yml`:
+Defined in `ansible/inventory/group_vars/all/vars.yml`, filled in from the site's row in `all/sites.yml` (see [Environments](../concepts/environments.md)):
 
 ```yaml
-domains:
-  - 5am.video
-  - 5am.cloud
-  - wil.5am.cloud
-  - ext.5am.cloud
-  - sfc.al
-
-system_timezone: America/New_York
+domains: "{{ sites[site].zones | map('community.general.dict_kv', 'name') | list }}"
+system_timezone: "{{ sites[site].tz }}"
 ```
 
 ### Filesystem Layout

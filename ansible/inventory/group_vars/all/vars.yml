@@ -1,10 +1,9 @@
 ---
-# Global variables for LDN environment
+# Global variables (every site). The site's row in sites.yml fills these in.
 
 # Domains managed by DNS and reverse proxy
-domains:
-  - name: "ldn.5am.cloud"
-system_timezone: Europe/London
+domains: "{{ sites[site].zones | map('community.general.dict_kv', 'name') | list }}"
+system_timezone: "{{ sites[site].tz }}"
 
 # Host filesystem layout follows the FHS and is hard-coded in the playbooks:
 #   /opt/<project>                compose files, Dockerfiles, Ansible-rendered config

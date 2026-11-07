@@ -16,7 +16,7 @@ terraria_motd: "Welcome to the Terraria server!"
 terraria_language: "en-US"
 terraria_npcstream: 60
 terraria_seed: ""
-# Join password: terraria_server_password in group_vars/all/app.secrets.sops.yml
+# Join password: terraria_server_password in group_vars/site_wil/app.secrets.sops.yml
 # (empty for an open server).
 
 # Container image

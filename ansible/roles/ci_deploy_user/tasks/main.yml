@@ -6,8 +6,8 @@
       - ci_deploy_ssh_from | length > 0
     fail_msg: >-
       ci_deploy_ssh_pubkey or ci_deploy_ssh_from is empty. Run
-      `task ci:keys ENV=<env>` to generate the key and fill in
-      environments/<env>/group_vars/all/ci.yml.
+      `task ci:keys ENV=<site>` to generate the key and fill in
+      inventory/group_vars/site_<site>/ci.yml.
 
 - name: Create the CI deploy user.
   ansible.builtin.user:

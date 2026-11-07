@@ -75,7 +75,7 @@ jobs:
       - name: Install SSH key and known_hosts
         env:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-          KNOWN_HOSTS: ansible/environments/${{ inputs.env }}/known_hosts
+          KNOWN_HOSTS: ansible/inventory/known_hosts/${{ inputs.env }}
         run: |
           test -s "$KNOWN_HOSTS" || { echo "::error::$KNOWN_HOSTS missing; run task ci:known-hosts"; exit 1; }
           install -d -m 0700 ~/.ssh
@@ -104,15 +104,15 @@ jobs:
           KIND: ${{ matrix.kind }}
           TARGET: ${{ matrix.target }}
         # No --diff/-v: rendered templates contain decrypted secrets and the
-        # run logs may be public.
+        # run logs may be public. --limit is required: this job's age key
+        # decrypts only its own site's secrets.
         run: |
-          inventory="environments/$ENV_NAME/hosts.ini"
           case "$KIND" in
             app)
-              ansible-playbook -i "$inventory" playbooks/deploy-app.yml \
-                -e "app_name=$TARGET" -e "@environments/$ENV_NAME/group_vars/all/apps.yml" ;;
+              ansible-playbook -i inventory/hosts.ini --limit "site_$ENV_NAME" playbooks/deploy-app.yml \
+                -e "app_name=$TARGET" -e "@inventory/group_vars/all/apps.yml" ;;
             playbook)
-              ansible-playbook -i "$inventory" "playbooks/$TARGET" ;;
+              ansible-playbook -i inventory/hosts.ini --limit "site_$ENV_NAME" "playbooks/$TARGET" ;;
             *)
               echo "::error::unknown target kind '$KIND'"; exit 1 ;;
           esac

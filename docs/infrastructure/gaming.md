@@ -1,6 +1,6 @@
 # Gaming (Terraria, Wolf, RomM)
 
-One playbook, `ansible/playbooks/apps/gaming/deploy.yml`, deploys every game stack on an environment's `app_gaming` host. A stack runs only where that environment's `group_vars/app_gaming/vars.yml` defines its image (`terraria_image`, `romm_image`, `wolf_image`), so the same command deploys different stacks per environment:
+One playbook, `ansible/playbooks/apps/gaming/deploy.yml`, deploys every game stack on an environment's `app_gaming` host. A stack runs only where that environment's `group_vars/site_<env>/app_gaming/vars.yml` defines its image (`terraria_image`, `romm_image`, `wolf_image`), so the same command deploys different stacks per environment:
 
 | Environment | VM | Stacks |
 |-------------|----|--------|
@@ -12,7 +12,7 @@ task ansible:deploy-gaming ENV=wil   # Terraria
 task ansible:deploy-gaming ENV=ldn   # Wolf and RomM
 ```
 
-To run a stack in another environment, copy its vars into that environment's `group_vars/app_gaming/vars.yml`, along with its secrets.
+To run a stack in another environment, copy its vars into that environment's `group_vars/site_<env>/app_gaming/vars.yml`, along with its secrets.
 
 ## Files
 
@@ -25,10 +25,10 @@ To run a stack in another environment, copy its vars into that environment's `gr
 | `ansible/playbooks/apps/gaming/templates/romm-compose.yaml.j2` | RomM and MariaDB |
 | `ansible/playbooks/apps/gaming/templates/romm-config.yml.j2` | RomM library layout |
 | `ansible/playbooks/apps/gaming/files/85-wolf.rules` | Upstream udev rules (`/dev/uinput`, `/dev/uhid`, virtual pads off the host seat) |
-| `ansible/environments/wil/group_vars/app_gaming/vars.yml` | Terraria image, paths, world settings |
-| `ansible/environments/wil/group_vars/all/app.secrets.sops.yml` | Terraria join password (`terraria_server_password`) |
-| `ansible/environments/ldn/group_vars/app_gaming/vars.yml` | Wolf and RomM images, paths, render node |
-| `ansible/environments/ldn/group_vars/app_gaming/secrets.sops.yml` | RomM database, auth and IGDB secrets |
+| `ansible/inventory/group_vars/site_wil/app_gaming/vars.yml` | Terraria image, paths, world settings |
+| `ansible/inventory/group_vars/site_wil/app.secrets.sops.yml` | Terraria join password (`terraria_server_password`) |
+| `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml` | Wolf and RomM images, paths, render node |
+| `ansible/inventory/group_vars/site_ldn/app_gaming/secrets.sops.yml` | RomM database, auth and IGDB secrets |
 
 ## Terraria
 
@@ -86,7 +86,7 @@ RomM is proxied as `https://roms.ldn.5am.cloud` (container port 8080, host port 
 
 ## ROM library
 
-`romm_library_path` (`/srv/romm/library`) holds `roms/<platform>/<game>` and `bios/<platform>`, RomM's default layout. Pegasus and RetroArch mount `roms/` at `/ROMs`. The library is local to the VM; to use a NAS, add `nfs_mounts` in `ansible/environments/ldn/group_vars/app_gaming/nfs.yml` and point `romm_library_path` at the mount.
+`romm_library_path` (`/srv/romm/library`) holds `roms/<platform>/<game>` and `bios/<platform>`, RomM's default layout. Pegasus and RetroArch mount `roms/` at `/ROMs`. The library is local to the VM; to use a NAS, add `nfs_mounts` in `ansible/inventory/group_vars/site_ldn/app_gaming/nfs.yml` and point `romm_library_path` at the mount.
 
 GameCube games go in `roms/gc/` and Wii games in `roms/wii/` (the play creates both). RomM maps `gc` to its `ngc` platform, and these are the folder names the Pegasus image scans; `roms/ngc/` would work for RomM but not Pegasus.
 

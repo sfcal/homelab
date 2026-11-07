@@ -1,9 +1,9 @@
 # GitOps Deploys
 
 Renovate image bumps deploy themselves. When a Renovate merge to `main` changes
-`ansible/environments/*/group_vars/`, the **Deploy** workflow joins the tailnet
+`ansible/inventory/group_vars/`, the **Deploy** workflow joins the tailnet
 from a GitHub-hosted runner and runs the affected playbooks — the same ones
-`task ansible:deploy-*` runs — against that environment.
+`task ansible:deploy-*` runs — against each environment it touches.
 
 ```mermaid
 graph LR
@@ -25,7 +25,7 @@ graph LR
 | Bootstrap tasks | `.taskfiles/ci/Taskfile.yaml` |
 
 - **Trigger** — `push` to `main` touching `group_vars`, *and* the head commit is authored by `renovate[bot]`. Your own commits are never auto-deployed; use `task ansible:deploy-*` or **Run workflow**.
-- **Plan** — diffs `group_vars` between the environment's tag `deploy/<env>` (last successful deploy) and the pushed commit. Because the base is the last *successful* deploy, a run that was cancelled, superseded or failed is picked up by the next one.
+- **Plan** — diffs `group_vars` between the environment's tag `deploy/<env>` (last successful deploy) and the pushed commit. Because the base is the last *successful* deploy, a run that was cancelled, superseded or failed is picked up by the next one. A changed file counts for an environment when it's in `site_<env>/` or in the folder of a group with hosts there; other sites' folders are skipped, and files moved without changes don't count.
 - **Targets** — only the allowlist below is ever auto-deployed. Anything else that changed is listed in the run summary as "deploy manually".
 - **Order** — wil first, ldn only if wil didn't fail (no manual approval). One target at a time per environment; runs queue per environment.
 - **Compose** — playbooks apply image bumps with `compose up` (`state: present`), which recreates only the services whose image or definition changed.
@@ -35,21 +35,21 @@ graph LR
 
 | Changed under `group_vars/` | Runs |
 |-----------------------------|------|
-| `all/apps.yml` | `deploy-app.yml` for each app whose entry changed |
+| `all/apps.yml` | `deploy-app.yml` for each app whose entry changed and that is hosted in the environment |
 | `app_mediastack/` | `apps/media/deploy.yml` |
-| `app_frigate/` | `apps/frigate/deploy.yml` |
-| `app_gaming/` | `apps/gaming/deploy.yml` |
-| `infra_monitoring/` | `infrastructure/monitoring/deploy.yml` |
-| `infra_netboot/` | `infrastructure/netboot/deploy.yml` |
+| `app_frigate/`, `site_wil/app_frigate/` | `apps/frigate/deploy.yml` |
+| `site_<env>/app_gaming/` | `apps/gaming/deploy.yml` |
+| `site_<env>/infra_monitoring/` | `infrastructure/monitoring/deploy.yml` |
+| `site_<env>/infra_netboot/` | `infrastructure/netboot/deploy.yml` |
 
-Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, and `all/` other than `apps.yml`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
+Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/` other than `apps.yml`, and files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
 
 ## Security model
 
 - The runner joins as an **ephemeral `tag:ci` node** using workload identity federation — no long-lived Tailscale secret.
 - The Tailscale policy grants `tag:ci` **TCP 22 to the deploy hosts only**. `ldn-gateway` also advertises the Haivision corporate /16s, so the grant must stay host-specific.
 - CI logs in as **`deploy`**, whose key carries `from="<site gateway LAN IP>"`. The subnet router SNATs tailnet traffic, so the key only works when it arrives via the tailnet. `deploy` has passwordless sudo (every play uses `become`), so treat `SSH_DEPLOY_KEY` as root on the deploy hosts.
-- Each environment has its own **CI age key**. `.sops.yaml` encrypts `ansible/environments/<env>/**/*.sops.yml` to master + that CI key only, so CI can't read Terraform/Packer credentials or the other environment's secrets.
+- Each environment has its own **CI age key**. `.sops.yaml` encrypts `ansible/inventory/group_vars/site_<env>/**/*.sops.yml` to master + that CI key only, so CI can't read Terraform/Packer credentials or the other environment's secrets. That's why every Ansible secret lives in its site's folder, and why each job runs with `--limit site_<env>`: without it the run would need the other site's secrets too.
 - Secrets are **GitHub environment secrets** (`wil`, `ldn`), so they're only released to jobs running in that environment.
 - **Logs** — the workflow never runs with `--diff` or `-v`; rendered templates contain decrypted secrets.
 
@@ -129,8 +129,8 @@ From your machine, on the LAN or tailnet:
 ```bash
 task ci:keys ENV=wil               # CI SSH + age keys in ~/.config/homelab-ci/wil, re-encrypts wil secrets
 task ansible:deploy-ci-access ENV=wil
-task ci:known-hosts ENV=wil        # writes ansible/environments/wil/known_hosts
-git add .sops.yaml ansible/environments/wil && git commit -m "ci deploy keys for wil"
+task ci:known-hosts ENV=wil        # writes ansible/inventory/known_hosts/wil
+git add .sops.yaml ansible/inventory/group_vars/site_wil ansible/inventory/known_hosts/wil && git commit -m "ci deploy keys for wil"
 ```
 
 ### 3. GitHub

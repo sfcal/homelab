@@ -8,10 +8,10 @@ Secrets are encrypted at rest with **SOPS** using **Age** encryption and committ
 
 ```bash
 # Edit a secrets file (decrypts in-editor, re-encrypts on save)
-sops ansible/environments/wil/group_vars/all/secrets.sops.yml
+sops ansible/inventory/group_vars/site_wil/secrets.sops.yml
 
 # Decrypt to stdout
-sops decrypt ansible/environments/wil/group_vars/all/secrets.sops.yml
+sops decrypt ansible/inventory/group_vars/site_wil/secrets.sops.yml
 
 # Encrypt a new file
 sops encrypt --in-place myfile.yml
@@ -39,9 +39,12 @@ SOPS determines which files to encrypt and how based on creation rules in `.sops
 |---------|-----------|---------|
 | `terraform/**/*.tfvars` | Full file | Proxmox credentials, SSH keys |
 | `packer/**/*.pkrvars.hcl` | Full file | Proxmox API tokens |
-| `(docker\|ansible)/**/*.sops.yml` | Full file | Ansible secrets, Docker configs |
+| `ansible/inventory/group_vars/site_<site>/**/*.sops.yml` | Full file, master + that site's CI key | Ansible secrets |
+| `(docker\|ansible/(playbooks\|roles))/**/*.sops.yml` | Full file | Docker configs |
 | `(docker\|ansible)/**/*.env` | Full file | Docker environment files |
-| `(docker\|ansible)/**/cf-token` | Full file | Cloudflare API tokens |
+| `(docker\|ansible/(playbooks\|roles))/**/cf-token` | Full file | Cloudflare API tokens |
+
+No rule covers the rest of `ansible/inventory/`, so sops refuses a secret saved outside a site folder instead of encrypting it for the master key only (which the site's CI could not read).
 
 !!! tip
     Decrypted temporary files match the pattern `**/.decrypted~*` and are gitignored. Never commit decrypted secrets.
@@ -50,13 +53,13 @@ SOPS determines which files to encrypt and how based on creation rules in `.sops
 
 ### Adding a New Secret
 
-1. Create the file following the naming convention (e.g., `secrets.sops.yml`)
+1. Create the file following the naming convention (e.g., `secrets.sops.yml`). Every Ansible secret goes in its site's folder, `ansible/inventory/group_vars/site_<site>/`, so that site's CI key can decrypt it
 2. SOPS auto-detects the creation rule from `.sops.yaml` and encrypts with the correct key
 3. Commit the encrypted file
 
 ```bash
 # Create and encrypt a new secrets file
-sops ansible/environments/wil/group_vars/app_myservice/secrets.sops.yml
+sops ansible/inventory/group_vars/site_wil/app_myservice/secrets.sops.yml
 ```
 
 ### Using Secrets in Ansible

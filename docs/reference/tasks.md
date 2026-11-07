@@ -25,7 +25,7 @@ task --list-all
 | `task ansible:deploy-hermes ENV=ldn` | Hermes Agent, Claude Code and the Claude subscription plugin |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
 | `task ansible:deploy-ci-access ENV=wil` | Create the CI deploy user on hosts the deploy workflow targets |
-| `task ansible:ping ENV=wil` | Test connectivity to all hosts |
+| `task ansible:ping ENV=wil` | Test connectivity to all hosts of the site |
 
 ## Terraform
 
@@ -65,7 +65,7 @@ Bootstrap for the GitHub Actions deploy workflow — see [GitOps Deploys](../gui
 | Command | Description |
 |---------|-------------|
 | `task ci:keys ENV=wil` | Generate the environment's CI SSH + age keys, wire them into `ci.yml` / `.sops.yaml`, re-encrypt its secrets |
-| `task ci:known-hosts ENV=wil` | Record host keys of the hosts CI deploys to into `environments/<env>/known_hosts` |
+| `task ci:known-hosts ENV=wil` | Record host keys of the hosts CI deploys to into `inventory/known_hosts/<env>` |
 | `task ci:secrets ENV=wil` | Create the GitHub environment and upload `SSH_DEPLOY_KEY` / `SOPS_AGE_KEY` with `gh` |
 
 ## Docker
@@ -85,7 +85,7 @@ Bootstrap for the GitHub Actions deploy workflow — see [GitOps Deploys](../gui
 
 | Variable | Used By | Default | Description |
 |----------|---------|---------|-------------|
-| `ENV` | All | `dev` | Target environment (e.g., `wil`, `ldn`) |
+| `ENV` | All | `ldn` | Target environment (e.g., `wil`, `ldn`) |
 | `VM` | Terraform | — | VM key from `vms.auto.tfvars` |
 | `APP` | Ansible | — | App name from `apps.yml` |
 | `CSR` | CA | — | Path to certificate signing request |
@@ -95,6 +95,6 @@ Bootstrap for the GitHub Actions deploy workflow — see [GitOps Deploys](../gui
 
 **"task: Task not found"** — Check the exact task name with `task --list-all`. Namespace and command are separated by `:`.
 
-**Wrong environment** — `ENV` defaults to `dev`. Always pass `ENV=wil` (or your environment) explicitly.
+**Wrong environment** — `ENV` defaults to `ldn` (production). Always pass `ENV=wil` (or your environment) explicitly.
 
 **Ansible timeout** — Add `-vvv` for verbose output: edit the task in `.taskfiles/ansible/Taskfile.yaml` and add `-vvv` to `EXTRA_ARGS`.

@@ -45,7 +45,7 @@ The token stays in `/var/lib/hermes/data/.env` on the VM, not in the repo, so a 
 
 Text the bot about something on Plex, such as a failed download, bad sound or the wrong HDR format. The `plex-fix` skill checks the file and how Plex is playing it, suggests a replacement and asks before grabbing it. The old file stays until the new one imports, and Hermes checks back about 30 minutes later. `/plex-fix` also starts it.
 
-Hermes reaches Radarr, Sonarr and Plex on `10.2.0.5` over the site tunnel, using the keys in `group_vars/app_hermes/secrets.sops.yml`. These are copies of the keys Homepage uses in wil, so update both if you rotate one.
+Hermes reaches Radarr, Sonarr and Plex on `10.2.0.5` over the site tunnel, using the keys in `group_vars/site_ldn/app_hermes/secrets.sops.yml`. These are copies of the keys Homepage uses in wil, so update both if you rotate one.
 
 - **Format preference:** SDR or HDR10 first, and no Dolby Vision-only files. Change this in `SKILL.md`.
 - **Limits:** Hermes can't hear or see a file, so sound fixes are best guesses. If a replacement ranks lower than the current file, Radarr or Sonarr refuses the import and the old file stays. Hermes can't finish a manual import either.
@@ -77,7 +77,7 @@ docker exec -u hermes hermes python3 /opt/data/skills/email/fastmail-triage/scri
 After that, text the bot to sort now, show the last report, undo a sort, or always file a sender somewhere.
 
 - **What it can do:** move mail out of the Inbox into those five folders, up to 150 messages a run and 40 per sender. Every move can be undone. It holds back people, conversations, flagged mail and subjects about payments, security and other matters on its protected lists.
-- **Personal settings:** your addresses, protected senders and the phrases that say something about your life are in `group_vars/app_hermes/fastmail.sops.yml`, because this repo is public. Keep them out of `default-config.json`. The scan refuses to run if they're missing.
+- **Personal settings:** your addresses, protected senders and the phrases that say something about your life are in `group_vars/site_ldn/app_hermes/fastmail.sops.yml`, because this repo is public. Keep them out of `default-config.json`. The scan refuses to run if they're missing.
 - **Safety:** mail text only reaches a model with no tools, so a hostile subject line has nothing to act with. Reports carry counts and short sender addresses, never subject lines. Fastmail's Email scope can also delete mail, and the agent's terminal could read the token file, so don't ask Hermes to read mail text in chat.
 - **History:** Hermes saves each job's prompt, and a chat search can find it. The 08:30 job deletes those prompts, and the report says if that fails, so subject lines are searchable for about 30 minutes each week.
 
@@ -106,9 +106,9 @@ Run `task ansible:deploy-hermes ENV=ldn` to update everything:
 | `ansible/playbooks/apps/hermes/files/plex-fix/` | The `plex-fix` skill and its helper script |
 | `ansible/playbooks/apps/hermes/files/fastmail-triage/` | The `fastmail-triage` skill, its public defaults and design notes |
 | `ansible/playbooks/apps/hermes/tests/` | Offline tests for `fastmail-triage` |
-| `ansible/environments/ldn/group_vars/app_hermes/vars.yml` | Hermes image and where the email report goes |
-| `ansible/environments/ldn/group_vars/app_hermes/secrets.sops.yml` | Radarr, Sonarr and Plex keys |
-| `ansible/environments/ldn/group_vars/app_hermes/fastmail.sops.yml` | Your addresses and private protection lists for `fastmail-triage` |
+| `ansible/inventory/group_vars/app_hermes/vars.yml` | Hermes image and where the email report goes |
+| `ansible/inventory/group_vars/site_ldn/app_hermes/secrets.sops.yml` | Radarr, Sonarr and Plex keys |
+| `ansible/inventory/group_vars/site_ldn/app_hermes/fastmail.sops.yml` | Your addresses and private protection lists for `fastmail-triage` |
 | `terraform/environments/ldn/vms.auto.tfvars` | VM definition (`hermes_server`) |
 | `/opt/hermes` on the VM | `compose.yaml` |
 | `/var/lib/hermes/data` on the VM | Hermes config, chats and memory, Claude Code, the plugin and the Claude login |

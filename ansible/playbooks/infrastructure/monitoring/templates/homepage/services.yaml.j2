@@ -144,8 +144,8 @@
         href: https://wizarr.5am.video
         siteMonitor: http://10.2.0.5:5690
 
-# Each site lists its own apps and infrastructure (the site is the inventory folder name)
-{% if inventory_dir | basename == 'ldn' %}
+# Each site lists its own apps and infrastructure (site comes from the host's site_<site> group)
+{% if site == 'ldn' %}
 - Apps:
     - Kasm:
         icon: kasm.png
