@@ -8,6 +8,7 @@ The homelab supports multiple deployment environments, each with isolated config
 |-------------|---------|---------------|--------------|
 | **WIL** | Development / Primary | 10.2.20.0/24 | `proxmox` |
 | **LDN** | Production (London) | 10.3.20.0/24 | `pve-lon` |
+| **OVH** | Dashboard VPS (Virginia), outside the lab | none; tailnet name `dashboard` | — |
 
 Every `task` command takes an `ENV=` variable that threads through to Terraform, Ansible, and Packer:
 
@@ -71,7 +72,7 @@ Terraform and Packer have a directory per environment. Ansible has one inventory
 Every host in `hosts.ini` is listed in its site group (`[site_wil]`, `[site_ldn]`) and in the role groups the playbooks target, so `[infra_networking]` lists both `.53` VMs. Group variables come from two kinds of folders:
 
 - `all/` — every host. `sites.yml` has one row per site; `domains`, `system_timezone` and the cross-site BIND9 settings (trusted networks, secondary zones, zone transfers, notifies) are derived from it. `vars.yml` also combines the site's DNS/proxy lists into `services`.
-- `site_<site>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (they apply to every host of the site), and all of the site's secrets. Groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp`, `infra_dashboard` at wil; `app_hermes`, `infra_proxmox` at ldn) have their folder there too.
+- `site_<site>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (they apply to every host of the site), and all of the site's secrets. Groups that run at one site only (`app_mediastack`, `app_frigate`, `infra_ntp` at wil; `app_hermes`, `infra_proxmox` at ldn; `infra_dashboard` at ovh) have their folder there too.
 
 ```yaml
 # ansible/inventory/group_vars/all/sites.yml
@@ -84,9 +85,14 @@ sites:
     zones: [5am.video, 5am.cloud, wil.5am.cloud, ext.5am.cloud, sfc.al]  # Zones it is primary for
   ldn:
     # ...
+  ovh:                                  # Dashboard VPS: no LAN or DNS, so no cidr
+    tz: America/New_York
+    dns: []
+    ts_router_ips: []
+    zones: []
 ```
 
-To add a site, or move a site's DNS server or zones, edit its row, then deploy networking at every site.
+To add a site, or move a site's DNS server or zones, edit its row, then deploy networking at every site. A site without DNS (ovh) changes nothing at the others.
 
 ## How `ENV=` Works
 

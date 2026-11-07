@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ansible (configuration/deployment), Packer (VM templates), and go-task (task runner). Multiple environments: wil (dev), ldn (prod).
+Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ansible (configuration/deployment), Packer (VM templates), and go-task (task runner). Multiple environments: wil (dev), ldn (prod), ovh (the dashboard VPS: no Proxmox, no LAN).
 
 ## Repository Structure
 
@@ -34,14 +34,14 @@ Discover all tasks: `task --list-all --json`
 ## Environments
 
 One Ansible inventory for both sites: `ansible/inventory/hosts.ini`. Every host is in its site group (`site_wil`, `site_ldn`) and in its role groups; the Taskfile turns `ENV=<env>` into `--limit site_<env>`. A host added to the inventory must also go under its `[site_<env>]` group.
-- `ansible/inventory/group_vars/all/sites.yml` — one row per site (`cidr`, `tz`, `dns`, `ts_router_ips`, `zones`). Cross-site values derive from it (BIND trusted networks, secondary zones, allow-transfer, also-notify) and so do `domains` and `system_timezone`; never hand-copy one site's addresses into the other's vars
+- `ansible/inventory/group_vars/all/sites.yml` — one row per site (`cidr`, `tz`, `dns`, `ts_router_ips`, `zones`; a site without a LAN or DNS, like ovh, leaves out `cidr` and has empty lists). Cross-site values derive from it (BIND trusted networks, secondary zones, allow-transfer, also-notify) and so do `domains` and `system_timezone`; never hand-copy one site's addresses into the other's vars
 - `ansible/inventory/group_vars/all/vars.yml` — values worked out for the host's site (`domains`, `system_timezone`, the DNS/proxy `services` list); `all/` holds only this file and `sites.yml`
 - `ansible/inventory/group_vars/site_<env>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (e.g. `site_wil/infra_networking/bind9.yml`; they apply to every host of the site), and all of the site's secrets in one file, `secrets.sops.yml`
 - No `group_vars/<group>/` folders: a group that runs at one site only keeps its values in that site's folder too (`site_wil/app_mediastack/`, `site_ldn/infra_proxmox/`); if it starts running at the other site, copy the folder there. Site vars reach every host of the site, so never gate a task on `<var> is defined` when another group at the site sets that var (the gaming NFS step uses `gaming_nfs`, not `nfs_mounts`, for this reason)
 - `terraform/environments/<env>/vms.auto.tfvars` — VM definitions (HCL)
 - `terraform/environments/<env>/terraform.tfstate` — provisioning state
 
-Network ranges: wil=10.2.x.x, ldn=10.3.x.x
+Network ranges: wil=10.2.x.x, ldn=10.3.x.x, ovh=none (VPS 135.148.219.216, tailnet name `dashboard`)
 
 ## Conventions
 
@@ -99,7 +99,7 @@ Paths are hard-coded (no base-path variables); keep new templates on the same sp
 ## Secrets
 
 SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
-- `*.sops.yml` — encrypted ansible vars: one file per site, `ansible/inventory/group_vars/site_<env>/secrets.sops.yml`, with a `# --- <group> ---` section for each group that reads them (encrypted to master + that site's CI key)
+- `*.sops.yml` — encrypted ansible vars: one file per site, `ansible/inventory/group_vars/site_<env>/secrets.sops.yml`, with a `# --- <group> ---` section for each group that reads them (encrypted to master + that site's CI key; ovh has no CI key yet, so master only)
 - `*.tfvars` — encrypted terraform vars (credentials)
 - `*.pkrvars.hcl` — encrypted packer vars
 - `.env` files — encrypted docker env files

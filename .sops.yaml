@@ -20,6 +20,9 @@ creation_rules:
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8,age1u46hpfwu54vuk7845f82vxcrmhnwqztv37szqee2c0m9t60gmd7svajvj7  # ci:wil
   - path_regex: ansible/inventory/group_vars/site_ldn/.*\.sops\.ya?ml
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8,age1yrenva8h73x5yyftertvmnultzcdyqy06d57rrd72y69rv7h4s7s7spc3d  # ci:ldn
+  # ovh (dashboard VPS): not deployed by CI yet, so master key only
+  - path_regex: ansible/inventory/group_vars/site_ovh/.*\.sops\.ya?ml
+    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8  # ci:ovh
   - path_regex: (docker|ansible/(playbooks|roles))/.*/(.+\.sops\.ya?ml|cf-token)
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: (docker|ansible)/.*\.env$

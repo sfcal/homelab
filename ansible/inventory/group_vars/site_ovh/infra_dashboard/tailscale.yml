@@ -1,0 +1,12 @@
+---
+# Tailscale client (not a subnet router)
+tailscale_mode: "client"
+
+# Accept the sites' subnet routes: the widgets reach 10.2.x.x and 10.3.x.x
+tailscale_accept_routes: true
+
+# Hostname as it appears in Tailscale admin console (http://dashboard/)
+tailscale_hostname: "dashboard"
+
+# tailscale_auth_key is not stored for ovh: the VPS joined with a login link.
+# To rejoin, add one to site_ovh/secrets.sops.yml (Reusable + Pre-approved).

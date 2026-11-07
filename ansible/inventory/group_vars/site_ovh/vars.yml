@@ -1,0 +1,6 @@
+---
+# --- Site ---
+# Every host in [site_ovh] gets this folder: ovh's own values, in sub-folders
+# named after the group that reads them, and all of ovh's secrets. ovh is the
+# OVH VPS (Virginia) outside the lab: no LAN, no DNS, reached over the tailnet.
+site: ovh

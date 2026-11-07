@@ -9,6 +9,8 @@
 #   ts_router_ips  tailnet address of the site's subnet router (the same VM);
 #                  cross-site NOTIFYs arrive SNATed to it
 #   zones          zones the site is primary for, in zone/Caddyfile order
+# A site without a LAN or DNS (ovh, the dashboard VPS) leaves out cidr and has
+# empty lists, so the other sites' BIND9 config doesn't change for it.
 sites:
   wil:
     cidr: 10.2.0.0/16
@@ -22,6 +24,11 @@ sites:
     dns: ["10.3.20.53"]
     ts_router_ips: ["100.73.47.81"]
     zones: [ldn.5am.cloud]
+  ovh:
+    tz: America/New_York
+    dns: []
+    ts_router_ips: []
+    zones: []
 
 # This host's site is `site`, set in group_vars/site_<site>/vars.yml.
 other_sites: "{{ sites | dict2items | rejectattr('key', 'eq', site) | map(attribute='value') | list }}"
@@ -31,7 +38,7 @@ other_sites: "{{ sites | dict2items | rejectattr('key', 'eq', site) | map(attrib
 # Every site's LAN, own first, plus Tailscale CGNAT (cross-site forwarding).
 dns_trusted_networks: >-
   {{ ['localhost', 'localnets', sites[site].cidr]
-     + (other_sites | map(attribute='cidr') | list)
+     + (other_sites | selectattr('cidr', 'defined') | map(attribute='cidr') | list)
      + ['100.64.0.0/10'] }}
 
 # Replicate every other site's zones from its primary. The primary's tailnet

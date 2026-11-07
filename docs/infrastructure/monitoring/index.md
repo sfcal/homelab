@@ -83,14 +83,15 @@ graph TD
 | `playbooks/infrastructure/dashboard/templates/homepage/bookmarks.yaml.j2` | Homepage bookmarks |
 | `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme and layout |
 | `playbooks/infrastructure/dashboard/templates/homepage/widgets.yaml.j2` | Homepage widgets |
-| `inventory/group_vars/site_wil/infra_dashboard/vars.yml` | Image and allowed hosts |
-| `inventory/group_vars/site_wil/secrets.sops.yml` | Widget API keys (section `infra_dashboard`) |
+| `inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | Image and allowed hosts |
+| `inventory/group_vars/site_ovh/infra_dashboard/tailscale.yml` | Tailscale client settings |
+| `inventory/group_vars/site_ovh/secrets.sops.yml` | Widget API keys (section `infra_dashboard`) |
 
 ## Deployment
 
 ```bash
 task ansible:deploy-monitoring ENV=wil
-task ansible:deploy-dashboard ENV=wil    # Homepage on the OVH VPS (the VPS is in site_wil)
+task ansible:deploy-dashboard ENV=ovh    # Homepage on the OVH VPS (site ovh)
 ```
 
 ### Monitoring Stack Deployment
@@ -223,7 +224,7 @@ Tailnet only: **http://dashboard/** (needs Tailscale's DNS on the device, which 
 
 `tailscale serve` cannot proxy to the sites' subnets itself (tailscaled's own connections don't use the subnet routes), so anything the browser needs from a site must be reachable from the browser directly, like the Grafana panels.
 
-The VPS joins the tailnet as a client named `dashboard` that accepts the sites' subnet routes, which is how its widgets reach `10.2.x.x` and `10.3.x.x`. Its Tailscale values are set in `dashboard/deploy.yml`, not in group vars, because every wil host also inherits `site_wil/infra_networking/tailscale.yml` (wil-gateway's subnet router).
+The VPS joins the tailnet as a client named `dashboard` that accepts the sites' subnet routes, which is how its widgets reach `10.2.x.x` and `10.3.x.x`. Its Tailscale values are in `site_ovh/infra_dashboard/tailscale.yml`. The VPS is its own site, `ovh`, so it inherits nothing from the lab sites (in `site_wil` it would pick up wil-gateway's subnet-router settings).
 
 ### Container Configuration
 
@@ -256,7 +257,7 @@ Homepage is configured via four YAML template files:
 - **Node Exporters** lists the targets of each site's `prometheus_node_targets` by hand; add a node there too.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
-<small>**Sources:** `ansible/inventory/group_vars/site_wil/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2)</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2)</small>
 
 ---
 
@@ -306,9 +307,9 @@ These variables apply to all monitoring containers:
 
 1. Edit `ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`
 2. Add a new service entry under the appropriate section
-3. If the service requires an API key, add the key to the `infra_dashboard` section of `group_vars/site_wil/secrets.sops.yml` and pass it through `dashboard/templates/compose.yaml.j2`
+3. If the service requires an API key, add the key to the `infra_dashboard` section of `group_vars/site_ovh/secrets.sops.yml` and pass it through `dashboard/templates/compose.yaml.j2`
 4. Deploy:
 
     ```bash
-    task ansible:deploy-dashboard ENV=wil
+    task ansible:deploy-dashboard ENV=ovh
     ```

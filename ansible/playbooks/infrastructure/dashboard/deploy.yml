@@ -13,16 +13,9 @@
         name: common
 
   tasks:
-    # Set here, not in group vars: every wil host also gets
-    # site_wil/infra_networking/tailscale.yml (wil-gateway's subnet router).
     - name: Configure Tailscale.
       ansible.builtin.include_role:
         name: tailscale
-      vars:
-        tailscale_mode: client
-        tailscale_hostname: dashboard
-        # Widgets reach both sites' LANs through the subnet routers
-        tailscale_accept_routes: true
 
     - name: Configure Homepage.
       ansible.builtin.include_tasks: tasks/homepage.yml
