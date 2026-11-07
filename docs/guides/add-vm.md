@@ -84,13 +84,13 @@ task ansible:ping ENV=wil
 | `description` | string | `"Virtual Machine"` | Proxmox description |
 | `proxmox_node` | string | required | Proxmox host (e.g., `proxmox`, `pve-lon`) |
 | `vmid` | number | required | Unique Proxmox VM ID |
-| `template_name` | string | required | Packer template to clone |
+| `template_name` | string | required | Packer template to clone (exactly one of that name on the node) |
 | `ip_address` | string | required | Static IP (assumes /24 subnet) |
 | `gateway` | string | required | Default gateway |
 | `nameserver` | string | required | DNS server (usually the networking VM) |
 | `cores` | number | `2` | CPU cores |
 | `memory` | number | `2048` | RAM in MB |
-| `disk_size` | string | `"20G"` | Root disk size |
+| `disk_size` | string | `"20G"` | Root disk size in GB, written `"<N>G"` |
 | `storage_pool` | string | required | Proxmox storage (e.g., `local-lvm`) |
 | `network_bridge` | string | `"vmbr0"` | Network bridge |
 | `tags` | string | `""` | `"infrastructure"` or `"application"` |
@@ -99,7 +99,7 @@ task ansible:ping ENV=wil
 
 ## Troubleshooting
 
-**Template not found** — The `template_name` must match an existing Packer template. Check with `qm list` on the Proxmox host. Build one with `task packer:build-ubuntu ENV=wil`.
+**Template not found** — The `template_name` must match exactly one Packer template on the node; otherwise the plan fails at `clone.vm_id`. Check with `qm list` on the Proxmox host. Build one with `task packer:build-ubuntu ENV=wil`.
 
 **VMID conflict** — Each VM needs a unique VMID. Check existing IDs in `vms.auto.tfvars` or with `qm list`.
 

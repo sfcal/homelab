@@ -26,7 +26,7 @@ VMs are defined as a map in `terraform/environments/<env>/vms.auto.tfvars`. The 
 terraform/
 ├── main.tf                          # Root module (for_each over vms)
 ├── modules/vm/
-│   ├── main.tf                      # proxmox_vm_qemu resource
+│   ├── main.tf                      # proxmox_virtual_environment_vm resource (bpg/proxmox)
 │   └── variables.tf                 # VM variable definitions
 └── environments/
     ├── wil/
@@ -90,19 +90,19 @@ vms = {
 | `description` | string | `"Virtual Machine"` | Proxmox description |
 | `proxmox_node` | string | required | Target Proxmox host |
 | `vmid` | number | required | Unique VM ID |
-| `template_name` | string | required | Packer template to clone |
+| `template_name` | string | required | Packer template to clone; exactly one template of that name must exist on `proxmox_node` |
 | `tags` | string | `""` | `"infrastructure"` or `"application"` |
 | `onboot` | bool | `true` | Auto-start on Proxmox boot |
 | `cores` | number | `2` | CPU cores |
 | `memory` | number | `2048` | RAM in MB |
-| `disk_size` | string | `"20G"` | Root disk size |
+| `disk_size` | string | `"20G"` | Root disk size in GB, written `"<N>G"` |
 | `storage_pool` | string | required | Proxmox storage pool |
 | `network_bridge` | string | `"vmbr0"` | Network bridge |
 | `ip_address` | string | required | Static IP (assumes /24) |
 | `gateway` | string | required | Default gateway |
 | `nameserver` | string | required | DNS server |
 | `ssh_user` | string | required | SSH username |
-| `ssh_public_key` | string | required | Passed from environment variables |
+| `ssh_public_key` | string | required | Passed from environment variables; one key per line |
 | `bios` | string | `"seabios"` | `"ovmf"` for UEFI (required with `pci_mapping`) |
 | `machine` | string | `""` (Proxmox default) | `"q35"` for PCIe passthrough |
 | `pci_mapping` | string | `""` | Proxmox PCI resource mapping ID (e.g. `b50-vf1`); see [Proxmox Hosts](../infrastructure/proxmox.md) |
@@ -120,14 +120,15 @@ vms = {
 
 ## Implementation Details
 
-- **Full clones** — VMs are full clones, not linked. Independent of templates after creation.
-- **Cloud-init** — Static IP configured via `ipconfig0 = "ip=<address>/24,gw=<gateway>"`. Assumes /24 subnets.
-- **State** — Per-environment state files at `terraform/environments/<env>/terraform.tfstate`.
+- **Provider** — [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs), pinned in `versions.tf`. It takes the endpoint and API token from the same `terraform.tfvars` variables (`proxmox_api_url` without `/api2/json`, `<token id>=<secret>`).
+- **Full clones** — VMs are full clones, not linked. Independent of templates after creation. The template is looked up by name on every plan, so a missing or duplicated template name fails the plan (it never destroys anything).
+- **Cloud-init** — Static IP via the `initialization` block (`ipconfig0: ip=<address>/24,gw=<gateway>`, drive on `ide0`). Assumes /24 subnets. bpg keeps cloud-init values of the template that the module does not set, such as a `cipassword` set by hand on the template; telmate removed them.
+- **State** — Per-environment state files at `terraform/environments/<env>/terraform.tfstate`. Import a VM with `terraform import 'module.infrastructure.module.vms["<key>"].proxmox_virtual_environment_vm.vm' <node>/<vmid>`.
 - **QEMU agent** — Enabled on all VMs (installed in Packer templates).
 
 ## Troubleshooting
 
-**"template not found"** — The `template_name` must match a Packer-built template. Check with `qm list` on the Proxmox host. Names follow `ubuntu-server-<env>-base`.
+**Plan error at `clone.vm_id`** — "Attempt to get attribute from null value" means no template named `template_name` exists on `proxmox_node`; "must be a list, set, or tuple value with either zero or one elements" means two templates share the name. Check with `qm list` on the Proxmox host. Names follow `ubuntu-server-<env>-base`.
 
 **"VMID already exists"** — Another VM uses that ID. Check `qm list` or the existing entries in `vms.auto.tfvars`.
 

@@ -4,28 +4,45 @@
  * Creates a single VM in Proxmox from a template
  */
 
-resource "proxmox_vm_qemu" "vm" {
+# The clone block takes the template's VMID; look it up by name.
+data "proxmox_virtual_environment_vms" "template" {
+  node_name = var.proxmox_node
+
+  filter {
+    name   = "template"
+    values = [true]
+  }
+
+  filter {
+    name   = "name"
+    values = [var.template_name]
+  }
+}
+
+resource "proxmox_virtual_environment_vm" "vm" {
   # General settings
   name        = var.name
   description = var.description
-  target_node = var.proxmox_node
-  vmid        = var.vmid
-  agent       = 1
-  tags        = var.tags
+  node_name   = var.proxmox_node
+  vm_id       = var.vmid
+  tags        = compact(split(";", var.tags))
+
+  agent {
+    enabled = true
+  }
 
   # Clone settings
-  clone      = var.template_name
-  full_clone = true
+  clone {
+    vm_id = one(data.proxmox_virtual_environment_vms.template.vms).vm_id
+    full  = true
+  }
 
   # Boot settings
-  start_at_node_boot = var.onboot
-  automatic_reboot   = true
+  on_boot = var.onboot
 
   # Hardware settings
-  qemu_os = "other"
   bios    = var.bios
   machine = var.machine != "" ? var.machine : null
-  memory  = var.memory
 
   cpu {
     cores   = var.cores
@@ -33,68 +50,78 @@ resource "proxmox_vm_qemu" "vm" {
     type    = "host"
   }
 
-  # EFI disk is inherited from the cloned template (which packer builds with
-  # efi_config{}). Declaring it here causes telmate to create a fresh EFI disk
-  # on clone and orphan the cloned one as "Unused Disk 0".
+  memory {
+    dedicated = var.memory
+  }
+
+  # The cloned template's EFI disk is kept: bpg only checks its type, so
+  # declaring it here does not add a second one.
+  dynamic "efi_disk" {
+    for_each = var.bios == "ovmf" ? [1] : []
+    content {
+      datastore_id = var.storage_pool
+      type         = "4m"
+    }
+  }
 
   # PCIe passthrough via Proxmox resource mapping -- only when mapping ID provided
-  dynamic "pcis" {
+  dynamic "hostpci" {
     for_each = var.pci_mapping != "" ? [1] : []
     content {
-      pci0 {
-        mapping {
-          mapping_id = var.pci_mapping
-          pcie       = true
-        }
-      }
+      device  = "hostpci0"
+      mapping = var.pci_mapping
+      pcie    = true
+      rombar  = true # bpg sends rombar=0 when unset
     }
   }
 
   # Network settings
-  network {
-    id     = 0
+  network_device {
     bridge = var.network_bridge
     model  = "virtio"
   }
 
   # Storage settings
-  scsihw = "virtio-scsi-single"
+  scsi_hardware = "virtio-scsi-single"
 
-  disks {
-    ide {
-      ide0 {
-        cloudinit {
-          storage = var.storage_pool
-        }
-      }
-    }
-    virtio {
-      virtio0 {
-        disk {
-          storage   = var.storage_pool
-          size      = var.disk_size
-          iothread  = true
-          replicate = false
-        }
-      }
-    }
+  disk {
+    interface    = "virtio0"
+    datastore_id = var.storage_pool
+    size         = tonumber(trimsuffix(var.disk_size, "G"))
+    iothread     = true
+    replicate    = false
   }
 
   # Cloud-init settings
-  os_type    = "cloud-init"
-  ipconfig0  = "ip=${var.ip_address}/24,gw=${var.gateway}"
-  nameserver = var.nameserver
-  ciuser     = var.ssh_user
-  sshkeys    = var.ssh_public_key
+  initialization {
+    interface    = "ide0"
+    datastore_id = var.storage_pool
+    upgrade      = false
+
+    ip_config {
+      ipv4 {
+        address = "${var.ip_address}/24"
+        gateway = var.gateway
+      }
+    }
+
+    dns {
+      servers = [var.nameserver]
+    }
+
+    user_account {
+      username = var.ssh_user
+      keys     = compact(split("\n", var.ssh_public_key))
+    }
+  }
 
   lifecycle {
     ignore_changes = [
-      network,
-      # The template only matters at creation. Both are ForceNew in telmate and
-      # are never read back, so without this an imported VM (or a renamed
-      # template) plans as destroy + recreate.
+      network_device,
+      # The template only matters at creation. clone is never read back, so
+      # without this an imported VM (or a renamed template) plans as
+      # destroy + recreate.
       clone,
-      full_clone,
     ]
   }
 }

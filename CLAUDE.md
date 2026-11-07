@@ -76,6 +76,7 @@ Every playbook follows this structure (exception: `infrastructure/proxmox/deploy
 ```
 
 ### Terraform
+- Provider: bpg/proxmox (`proxmox_virtual_environment_vm`), pinned exactly in the root and env `versions.tf`
 - VM definitions in `vms.auto.tfvars` as HCL map
 - Fields: name, description, proxmox_node, vmid, template_name, ip_address, gateway, nameserver, cores, memory, disk_size, storage_pool, network_bridge, tags, ssh_user
 - Tags: "infrastructure" or "application"

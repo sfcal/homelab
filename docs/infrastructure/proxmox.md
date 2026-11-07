@@ -53,16 +53,14 @@ Expect `0b:00.0` on `xe`, `0b:00.1` to `0b:00.3` on `vfio-pci`, and no `checks` 
 
 ## Terraform notes
 
-The GPU VM `game_server` is defined in `terraform/environments/ldn/vms.auto.tfvars` with `bios = "ovmf"`, `machine = "q35"` and `pci_mapping`. `work_server` keeps `bios` and `machine` but no longer maps a VF; VMs 118 and 121 are hand-made clones outside Terraform, given their VF with `qm set <vmid> --hostpci0 mapping=b50-vfN,pcie=1`. The provider (telmate 3.0.2-rc07) only format-checks the mapping ID; whether the VF exists is discovered at VM start. On apply the provider also starts a stopped VM.
+The GPU VM `game_server` is defined in `terraform/environments/ldn/vms.auto.tfvars` with `bios = "ovmf"`, `machine = "q35"` and `pci_mapping`. `work_server` keeps `bios` and `machine` but no longer maps a VF; VMs 118 and 121 are hand-made clones outside Terraform, given their VF with `qm set <vmid> --hostpci0 mapping=b50-vfN,pcie=1`. The provider is bpg/proxmox (`proxmox_virtual_environment_vm`). The module sets `rombar = true` on the mapped device because bpg sends `rombar=0` when it is left out. On apply the provider also starts a stopped VM (`started` defaults to true), so a stopped GPU VM is started and needs its VF free.
 
-As of October 2026 the ldn state holds only `web_server`; every other ldn VM has to be imported before `task terraform:deploy ENV=ldn` (which applies with `-auto-approve`) is safe to run:
+Since November 2026 the ldn state holds all eight ldn VMs as `proxmox_virtual_environment_vm` (imported when the provider changed from telmate). A VM made outside Terraform is imported with `<node>/<vmid>` as the ID:
 
 ```bash
 cd terraform/environments/ldn
-for pair in networking_server:3000 ca_server:3003 monitoring_server:3002 work_server:3004 game_server:3005 netboot_server:3006; do
-  terraform import "module.infrastructure.module.vms[\"${pair%%:*}\"].proxmox_vm_qemu.vm" "pve-ldn/qemu/${pair##*:}"
-done
+terraform import 'module.infrastructure.module.vms["<key>"].proxmox_virtual_environment_vm.vm' pve-ldn/<vmid>
 terraform plan
 ```
 
-The VM module ignores `clone` and `full_clone` changes so an imported VM does not plan as a replacement. Always read the plan before applying: anything marked `forces replacement` would destroy the VM.
+The VM module ignores `clone` changes so an imported VM does not plan as a replacement. Always read the plan before applying (`task terraform:deploy ENV=ldn` applies with `-auto-approve`): anything marked `forces replacement` would destroy the VM.
