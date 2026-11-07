@@ -26,9 +26,9 @@ To run a stack in another environment, copy its vars into that environment's `gr
 | `ansible/playbooks/apps/gaming/templates/romm-config.yml.j2` | RomM library layout |
 | `ansible/playbooks/apps/gaming/files/85-wolf.rules` | Upstream udev rules (`/dev/uinput`, `/dev/uhid`, virtual pads off the host seat) |
 | `ansible/inventory/group_vars/site_wil/app_gaming/vars.yml` | Terraria image, paths, world settings |
-| `ansible/inventory/group_vars/site_wil/app.secrets.sops.yml` | Terraria join password (`terraria_server_password`) |
+| `ansible/inventory/group_vars/site_wil/secrets.sops.yml` | Terraria join password (`terraria_server_password`) |
 | `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml` | Wolf and RomM images, paths, render node |
-| `ansible/inventory/group_vars/site_ldn/app_gaming/secrets.sops.yml` | RomM database, auth and IGDB secrets |
+| `ansible/inventory/group_vars/site_ldn/secrets.sops.yml` | RomM database, auth and IGDB secrets (section `app_gaming`) |
 
 ## Terraria
 

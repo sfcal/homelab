@@ -53,13 +53,13 @@ No rule covers the rest of `ansible/inventory/`, so sops refuses a secret saved 
 
 ### Adding a New Secret
 
-1. Create the file following the naming convention (e.g., `secrets.sops.yml`). Every Ansible secret goes in its site's folder, `ansible/inventory/group_vars/site_<site>/`, so that site's CI key can decrypt it
-2. SOPS auto-detects the creation rule from `.sops.yaml` and encrypts with the correct key
+1. Every Ansible secret goes in its site's one secrets file, `ansible/inventory/group_vars/site_<site>/secrets.sops.yml`, so that site's CI key can decrypt it. Open it with `sops` and add the key under the `# --- <group> ---` section of the group that reads it (start a section for a new group)
+2. SOPS re-encrypts the file when you save it, for the master key and that site's CI key
 3. Commit the encrypted file
 
 ```bash
-# Create and encrypt a new secrets file
-sops ansible/inventory/group_vars/site_wil/app_myservice/secrets.sops.yml
+# Add or change a secret
+sops ansible/inventory/group_vars/site_wil/secrets.sops.yml
 ```
 
 ### Using Secrets in Ansible

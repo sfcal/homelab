@@ -36,7 +36,7 @@ Discover all tasks: `task --list-all --json`
 One Ansible inventory for both sites: `ansible/inventory/hosts.ini`. Every host is in its site group (`site_wil`, `site_ldn`) and in its role groups; the Taskfile turns `ENV=<env>` into `--limit site_<env>`. A host added to the inventory must also go under its `[site_<env>]` group.
 - `ansible/inventory/group_vars/all/sites.yml` — one row per site (`cidr`, `tz`, `dns`, `ts_router_ips`, `zones`). Cross-site values derive from it (BIND trusted networks, secondary zones, allow-transfer, also-notify) and so do `domains` and `system_timezone`; never hand-copy one site's addresses into the other's vars
 - `ansible/inventory/group_vars/all/vars.yml` — values worked out for the host's site (`domains`, `system_timezone`, the DNS/proxy `services` list); `all/` holds only this file and `sites.yml`
-- `ansible/inventory/group_vars/site_<env>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (e.g. `site_wil/infra_networking/bind9.yml`; they apply to every host of the site), and all of the site's secrets
+- `ansible/inventory/group_vars/site_<env>/` — that site's own values: its app registry (`apps.yml`), its DNS/proxy entries (`proxy/<domain>.yml`), sub-folders named after the group that reads them (e.g. `site_wil/infra_networking/bind9.yml`; they apply to every host of the site), and all of the site's secrets in one file, `secrets.sops.yml`
 - No `group_vars/<group>/` folders: a group that runs at one site only keeps its values in that site's folder too (`site_wil/app_mediastack/`, `site_ldn/infra_proxmox/`); if it starts running at the other site, copy the folder there. Site vars reach every host of the site, so never gate a task on `<var> is defined` when another group at the site sets that var (the gaming NFS step uses `gaming_nfs`, not `nfs_mounts`, for this reason)
 - `terraform/environments/<env>/vms.auto.tfvars` — VM definitions (HCL)
 - `terraform/environments/<env>/terraform.tfstate` — provisioning state
@@ -99,7 +99,7 @@ Paths are hard-coded (no base-path variables); keep new templates on the same sp
 ## Secrets
 
 SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
-- `*.sops.yml` — encrypted ansible vars; every one lives in its site's folder `ansible/inventory/group_vars/site_<env>/` (encrypted to master + that site's CI key)
+- `*.sops.yml` — encrypted ansible vars: one file per site, `ansible/inventory/group_vars/site_<env>/secrets.sops.yml`, with a `# --- <group> ---` section for each group that reads them (encrypted to master + that site's CI key)
 - `*.tfvars` — encrypted terraform vars (credentials)
 - `*.pkrvars.hcl` — encrypted packer vars
 - `.env` files — encrypted docker env files
@@ -155,7 +155,7 @@ Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically 
 - Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
 - Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
-- Each site's sops files (`group_vars/site_<env>/`) are encrypted to master + that site's CI age key (`.sops.yaml`, `# ci:<env>` rules), so every CI ansible run must keep `--limit site_<env>`: without it Ansible tries to decrypt the other site's files and fails
+- Each site's sops file (`group_vars/site_<env>/secrets.sops.yml`) is encrypted to master + that site's CI age key (`.sops.yaml`, `# ci:<env>` rules), so every CI ansible run must keep `--limit site_<env>`: without it Ansible tries to decrypt the other site's file and fails
 - The planner maps a changed file to a site: `site_<env>/<group>/` and the folders of groups with hosts at the site count for it, `site_<env>/apps.yml` deploys only the apps whose entry changed; files moved unchanged don't count
 
 ## Proxy & DNS Service Definitions
@@ -207,7 +207,7 @@ Authelia (login page) and oauth2-proxy (login check) run next to Caddy on each n
 - `auth: true` on a service entry (or inside a registry `proxy:` block) wraps it in the Caddyfile's `(login)` block: Caddy asks oauth2-proxy, which sends the browser to Authelia (OpenID Connect) and back. Works on any domain. Browser UIs only: leave it off anything apps, devices or scripts reach by hostname (Plex, KOSync, MicroBin) and off public sites
 - A service entry named `auth` (backend `authelia:9091`) is the site's login page; one per site: `auth.wil.5am.cloud`, `auth.ldn.5am.cloud`. Never add a login page on another domain
 - Authelia's client `redirect_uris` and oauth2-proxy's cookie domains are generated from the flagged services, so flagging a service needs only a networking deploy
-- Secrets per site in `group_vars/site_<env>/infra_networking/secrets.sops.yml` (names listed in `authelia.yml` there)
+- Secrets per site in the `infra_networking` section of `group_vars/site_<env>/secrets.sops.yml` (names listed in `infra_networking/authelia.yml`)
 - Kasm stays unflagged: it logs in through Authelia itself as a second OpenID Connect client (`kasm` in `authelia-configuration.yml.j2`; its side lives in Kasm's database, values in the SSO docs)
 
 ## Adding New Services

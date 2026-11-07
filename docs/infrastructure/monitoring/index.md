@@ -84,7 +84,7 @@ graph TD
 | `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme and layout |
 | `playbooks/infrastructure/dashboard/templates/homepage/widgets.yaml.j2` | Homepage widgets |
 | `inventory/group_vars/site_wil/infra_dashboard/vars.yml` | Image and allowed hosts |
-| `inventory/group_vars/site_wil/infra_dashboard/secrets.sops.yml` | Widget API keys |
+| `inventory/group_vars/site_wil/secrets.sops.yml` | Widget API keys (section `infra_dashboard`) |
 
 ## Deployment
 
@@ -306,7 +306,7 @@ These variables apply to all monitoring containers:
 
 1. Edit `ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`
 2. Add a new service entry under the appropriate section
-3. If the service requires an API key, add the key to `group_vars/site_wil/infra_dashboard/secrets.sops.yml` and pass it through `dashboard/templates/compose.yaml.j2`
+3. If the service requires an API key, add the key to the `infra_dashboard` section of `group_vars/site_wil/secrets.sops.yml` and pass it through `dashboard/templates/compose.yaml.j2`
 4. Deploy:
 
     ```bash

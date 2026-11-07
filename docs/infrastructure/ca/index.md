@@ -32,7 +32,7 @@ Step-CA initializes on first run with a root CA certificate and an admin provisi
 | `playbooks/infrastructure/ca/templates/compose.yaml.j2` | Docker Compose service definition |
 | `playbooks/infrastructure/ca/handlers/main.yml` | Container lifecycle handlers |
 | `inventory/group_vars/site_<env>/infra_ca/vars.yml` | Per-environment CA variables |
-| `inventory/group_vars/site_<env>/infra_ca/secrets.sops.yml` | Encrypted provisioner password |
+| `inventory/group_vars/site_<env>/secrets.sops.yml` | Encrypted provisioner password (section `infra_ca`) |
 
 ## Hosts
 
@@ -90,7 +90,7 @@ All variables are set in `ansible/inventory/group_vars/site_<env>/infra_ca/vars.
 | `step_ca_max_cert_duration` | `string` | Maximum certificate validity period | `"17520h"` |
 | `step_ca_provisioner_password` | `string` | Admin provisioner password (SOPS-encrypted) | (required) |
 
-<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_ca/vars.yml` · `ansible/inventory/group_vars/site_<env>/infra_ca/secrets.sops.yml`</small>
+<small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_ca/vars.yml` · `ansible/inventory/group_vars/site_<env>/secrets.sops.yml`</small>
 
 ## Common Tasks
 

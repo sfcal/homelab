@@ -10,7 +10,7 @@ oauth2_proxy_image: "quay.io/oauth2-proxy/oauth2-proxy:v7.15.6"
 
 # Login user
 authelia_user: sfcal
-# Stored in infra_networking/secrets.sops.yml:
+# Stored in site_ldn/secrets.sops.yml:
 #   authelia_password_hash, authelia_storage_encryption_key,
 #   authelia_oidc_hmac_secret, authelia_oidc_private_key,
 #   authelia_oidc_client_secret, authelia_oidc_client_secret_hash,
