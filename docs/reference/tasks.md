@@ -22,6 +22,7 @@ task --list-all
 | `task ansible:deploy-homeassistant ENV=wil` | Home Assistant |
 | `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
 | `task ansible:deploy-gaming ENV=ldn` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
+| `task ansible:deploy-hermes ENV=ldn` | Hermes Agent, Claude Code and the Claude subscription plugin |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
 | `task ansible:deploy-ci-access ENV=wil` | Create the CI deploy user on hosts the deploy workflow targets |
 | `task ansible:ping ENV=wil` | Test connectivity to all hosts |

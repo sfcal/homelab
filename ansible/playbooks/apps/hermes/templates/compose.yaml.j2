@@ -1,0 +1,11 @@
+---
+services:
+  hermes:
+    image: {{ hermes_image }}
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    # Chromium for the browser tools needs more than Docker's 64 MB default.
+    shm_size: 1g
+    volumes:
+      - /var/lib/hermes/data:/opt/data

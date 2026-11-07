@@ -42,7 +42,7 @@ graph LR
 | `infra_monitoring/` | `infrastructure/monitoring/deploy.yml` |
 | `infra_netboot/` | `infrastructure/netboot/deploy.yml` |
 
-Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, and `all/` other than `apps.yml`. CI has no SSH access to those hosts at all. To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
+Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, and `all/` other than `apps.yml`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
 
 ## Security model
 

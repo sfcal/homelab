@@ -54,6 +54,10 @@
 - import_playbook: apps/gaming/deploy.yml
   tags: ['gaming', 'terraria', 'wolf', 'romm', 'applications']
 
+# 9. Hermes Agent
+- import_playbook: apps/hermes/deploy.yml
+  tags: ['hermes', 'applications']
+
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml

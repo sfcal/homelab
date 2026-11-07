@@ -82,6 +82,7 @@ Taskfile.yaml               Root task runner entry point
 | RomM | `app_gaming` | ROM manager |
 | Website | `app_website` | Personal website |
 | Terraria | `app_gaming` | Game server |
+| Hermes Agent | `app_hermes` | AI agent on the Claude subscription |
 
 ## Key Design Decisions
 

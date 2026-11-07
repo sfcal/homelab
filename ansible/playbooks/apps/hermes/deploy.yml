@@ -1,0 +1,118 @@
+---
+# Sign in to Claude once by hand, on the VM (the login stays in the data directory):
+#   docker exec -it -u hermes hermes claude auth login
+- name: Deploy Hermes Agent
+  hosts: app_hermes
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Deploy Hermes via docker_service role.
+      ansible.builtin.include_role:
+        name: docker_service
+      vars:
+        service_name: hermes
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_images:
+          - "{{ hermes_image }}"
+
+    - name: Wait for Hermes to set up its data directory.
+      ansible.builtin.wait_for:
+        path: /var/lib/hermes/data/gateway.pid
+
+    # Claude Code and the plugin live in the data directory, so a new image
+    # keeps them. Each deploy moves both to their current release.
+    # npm 12 skips Claude Code's install step unless --allow-scripts names it.
+    - name: Install or update Claude Code.
+      ansible.builtin.command: >-
+        docker exec -u hermes hermes npm install -g --prefix /opt/data/.local
+        --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code@latest
+      changed_when: false
+
+    # First deploy only: `hermes model` can change the model afterwards.
+    - name: Install the Claude subscription plugin and select it.
+      ansible.builtin.shell:
+        cmd: >-
+          docker exec hermes hermes plugins install claude-subscription-directsdk &&
+          docker exec hermes hermes config set model.provider claude-subscription-directsdk-experimental &&
+          docker exec hermes hermes config set model.default claude-opus-5-5
+        creates: /var/lib/hermes/data/plugins/claude-subscription-directsdk-experimental
+      notify: Restart hermes
+
+    - name: Update the Claude subscription plugin.
+      ansible.builtin.command: docker exec hermes hermes plugins update claude-subscription-directsdk-experimental
+      register: hermes_plugin_update
+      changed_when: "'already at' not in hermes_plugin_update.stdout"
+      notify: Restart hermes
+
+    - name: Install the plex-fix skill.
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/plex-fix/"
+        dest: /var/lib/hermes/data/skills/media/plex-fix/
+        owner: "10000"
+        group: "10000"
+        mode: "0644"
+        directory_mode: "0755"
+      notify: Restart hermes
+
+    - name: Give Hermes the Radarr, Sonarr and Plex credentials.
+      ansible.builtin.lineinfile:
+        path: /var/lib/hermes/data/.env
+        regexp: "^{{ item.name }}="
+        line: "{{ item.name }}={{ item.value }}"
+      loop:
+        - { name: RADARR_API_KEY, value: "{{ hermes_radarr_api_key }}" }
+        - { name: SONARR_API_KEY, value: "{{ hermes_sonarr_api_key }}" }
+        - { name: PLEX_TOKEN, value: "{{ hermes_plex_token }}" }
+      no_log: true
+      notify: Restart hermes
+
+    - name: Install the fastmail-triage skill.
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/fastmail-triage/"
+        dest: /var/lib/hermes/data/skills/email/fastmail-triage/
+        owner: "10000"
+        group: "10000"
+        mode: "0644"
+        directory_mode: "0755"
+      notify: Restart hermes
+
+    - name: Create the fastmail-triage data directory.
+      ansible.builtin.file:
+        path: /var/lib/hermes/data/data/fastmail-triage
+        state: directory
+        owner: "10000"
+        group: "10000"
+        mode: "0700"
+
+    # Addresses and senders that stay out of this public repo. The Fastmail
+    # token isn't here: it's set by hand and stays on the VM.
+    - name: Give fastmail-triage its private settings.
+      ansible.builtin.copy:
+        content: "{{ hermes_fastmail_site_config | to_nice_json }}\n"
+        dest: /var/lib/hermes/data/data/fastmail-triage/site-config.json
+        owner: "10000"
+        group: "10000"
+        mode: "0600"
+      no_log: true
+
+    # Keeps any schedule or pause set on the VM. Only the report's destination
+    # comes from group_vars.
+    - name: Create or repair the fastmail-triage cron jobs.
+      ansible.builtin.command: >-
+        docker exec -u hermes hermes python3
+        /opt/data/skills/email/fastmail-triage/scripts/install.py
+        --deliver {{ hermes_fastmail_deliver }}
+      changed_when: false
+
+    # A seat belt, not a hard limit: it only sees terminal commands, and the
+    # keys above can still delete anything.
+    - name: Block delete calls to the media server.
+      ansible.builtin.command: >-
+        docker exec hermes hermes config set approvals.deny
+        '["*DELETE*10.2.0.5*", "*10.2.0.5*DELETE*"]'
+      changed_when: false

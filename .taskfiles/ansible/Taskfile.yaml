@@ -92,6 +92,12 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/gaming/deploy.yml }
 
+  deploy-hermes:
+    desc: Deploy Hermes Agent
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/hermes/deploy.yml }
+
   # --- CI ---
 
   deploy-ci-access:

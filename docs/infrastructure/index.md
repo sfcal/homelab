@@ -19,3 +19,4 @@ task ansible:deploy-monitoring ENV=wil   # 4. Metrics and dashboards
 4. [**Monitoring**](monitoring/index.md) — Metrics (Prometheus), dashboards (Grafana, Homepage), uptime (Uptime Kuma)
 5. [**Docker Services**](docker.md) — Container definitions and compose templates
 6. [**Gaming**](gaming.md) — Terraria server (wil); Wolf (Moonlight streaming) and RomM on the GPU VM (ldn)
+7. [**Hermes Agent**](hermes.md) — AI agent on the Claude subscription (ldn)

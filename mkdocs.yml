@@ -127,6 +127,7 @@ nav:
     - Monitoring: infrastructure/monitoring/index.md
     - Docker Services: infrastructure/docker.md
     - Gaming (Terraria, Wolf, RomM): infrastructure/gaming.md
+    - Hermes Agent: infrastructure/hermes.md
 
 validation:
   omitted_files: warn

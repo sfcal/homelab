@@ -33,6 +33,7 @@ task ansible:ping ENV=wil
 | `deploy-homeassistant` | Home Assistant |
 | `deploy-frigate` | Frigate NVR |
 | `deploy-gaming` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
+| `deploy-hermes` | Hermes Agent, Claude Code and the Claude subscription plugin |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts |
 
@@ -107,6 +108,7 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 | Home Assistant | Custom configuration management |
 | Frigate | NFS mount, dedicated compose/config tasks |
 | Gaming | Stacks selected per environment (Terraria; Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |
+| Hermes Agent | Installs Claude Code, the Claude subscription plugin and the `plex-fix` skill inside the running container |
 
 ## Roles
 

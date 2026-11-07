@@ -24,6 +24,10 @@ Deploy with `task ansible:deploy-media ENV=wil`.
 
 Terraria (wil) and Wolf with RomM (ldn) share one playbook on the `app_gaming` host; each environment gets the stacks its group_vars define. Deploy with `task ansible:deploy-gaming ENV=<env>`; see [Gaming](gaming.md).
 
+## Hermes Agent
+
+Hermes Agent (ldn) has its own playbook, which also installs Claude Code and the Claude subscription plugin in the container. Deploy with `task ansible:deploy-hermes ENV=ldn`; see [Hermes Agent](hermes.md).
+
 ## Data-Driven Apps
 
 Most applications use the shared `deploy-app.yml` playbook and are defined in `ansible/environments/<env>/group_vars/all/apps.yml`. See [Deploy a Service](../guides/deploy-service.md) for the full workflow.

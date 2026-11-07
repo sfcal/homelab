@@ -21,8 +21,9 @@ HEAD_SHA=${HEAD_SHA:-$(git rev-parse HEAD)}
 
 # --- Auto-deploy allowlist: group_vars directory -> playbook ---
 # Keep in sync with the host pattern in ansible/playbooks/ci-access.yml.
-# Anything else under group_vars (infra_ca, infra_networking, infra_ntp,
-# infra_proxmox, all/ except apps.yml) is reported but never auto-deployed.
+# Anything else under group_vars (app_hermes, infra_ca, infra_networking,
+# infra_ntp, infra_proxmox, all/ except apps.yml) is reported but never
+# auto-deployed.
 declare -A PLAYBOOK_FOR=(
   [app_mediastack]=apps/media/deploy.yml
   [app_frigate]=apps/frigate/deploy.yml
