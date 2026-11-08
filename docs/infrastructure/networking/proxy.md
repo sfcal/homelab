@@ -454,7 +454,7 @@ Set `enabled: false` on the service entry (for registry apps, inside the `proxy:
 
 ## Troubleshooting
 
-**502 Bad Gateway** — Caddy can reach the backend but it's not responding. Check the backend container is running: `ssh <host> docker ps`. Verify `backend_port` matches the container's exposed port. A service with `auth: true` also answers 502 while Authelia is down: check `docker ps` on the networking VM.
+**502 Bad Gateway** — Caddy can reach the backend but it's not responding. Check the backend container is running: `ssh <host> docker ps`. Verify `backend_port` matches the container's exposed port. A service with `auth: true` also answers 502 while oauth2-proxy is down: check `docker ps` on the networking VM.
 
 **Certificate not issuing** — Check Caddy logs: `ssh <networking-ip> docker logs caddy`. Common causes: Cloudflare API token expired, domain not on Cloudflare, or Let's Encrypt rate limit hit.
 

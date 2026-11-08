@@ -1,0 +1,46 @@
+---
+# Grafana is in the dashboard's compose project, which homepage.yml starts:
+# run this first, so the mounts exist when it does.
+- name: Create Grafana directories.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: "0755"
+  loop:
+    - { path: /opt/dashboard/grafana, owner: root }
+    - { path: /var/lib/dashboard/grafana, owner: "1000" }
+
+# Grafana reads its datasources at start, so restart it when they change.
+- name: Deploy Grafana provisioning.
+  ansible.builtin.copy:
+    src: files/grafana/provisioning
+    dest: /opt/dashboard/grafana/
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+  notify:
+    - Restart grafana
+
+# Grafana rescans this folder every 30 seconds by itself.
+- name: Deploy Grafana dashboards.
+  ansible.builtin.copy:
+    src: files/grafana/dashboards
+    dest: /opt/dashboard/grafana/
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
+# Grafana listens on 127.0.0.1 only; this puts it on the tailnet at
+# http://dashboard:3000. tailscaled keeps it across reboots.
+- name: Read tailscale serve config.
+  ansible.builtin.command: tailscale serve status --json
+  register: grafana_serve
+  changed_when: false
+
+- name: Serve Grafana on the tailnet.
+  ansible.builtin.command: tailscale serve --bg --http=3000 http://127.0.0.1:3000
+  when: "'http://127.0.0.1:3000' not in grafana_serve.stdout"

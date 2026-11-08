@@ -1,0 +1,12 @@
+---
+services:
+  isponsorblocktv:
+    image: {{ apps[app_name].image }}
+    container_name: isponsorblocktv
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
+    volumes:
+      # config.json (paired TVs, skip settings), written by the setup wizard.
+      # Until a TV is paired the container exits every 10 s and restarts.
+      - /var/lib/isponsorblocktv/data:/app/data

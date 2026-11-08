@@ -10,9 +10,22 @@
     mode: "0755"
   loop:
     - /opt/dashboard
+    - /opt/dashboard/caddy
     - /var/lib/dashboard
     - /var/lib/dashboard/uptime-kuma
     - /var/lib/dashboard/caddy
+
+# The sites' Caddy build: it adds the Cloudflare DNS plugin, which
+# auth.5am.cloud's certificate needs (DNS-01: the name has no public address).
+- name: Deploy Caddy's Dockerfile.
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../networking/templates/Dockerfile.j2"
+    dest: /opt/dashboard/caddy/Dockerfile
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Rebuild caddy
 
 - name: Deploy the Caddyfile.
   ansible.builtin.copy:

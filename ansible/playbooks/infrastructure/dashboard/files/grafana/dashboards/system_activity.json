@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "CPU, memory, network and disk activity for every node-exporter host. Homepage embeds panels 1-4 by id.",
+  "description": "CPU, memory, network and disk activity for every node-exporter host. Pick the site's Prometheus with the Site variable (?var-ds=prometheus-wil or prometheus-ldn). Homepage embeds panels 1-4 by id.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${ds}"
       },
       "description": "CPU busy, averaged over each host's cores.",
       "fieldConfig": {
@@ -75,7 +75,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\"}[$__rate_interval])))",
@@ -90,7 +90,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${ds}"
       },
       "description": "Memory in use (1 - MemAvailable / MemTotal).",
       "fieldConfig": {
@@ -140,7 +140,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node-exporter\"} / node_memory_MemTotal_bytes{job=\"node-exporter\"})",
@@ -155,7 +155,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${ds}"
       },
       "description": "Received plus sent, without loopback, Docker and VPN interfaces.",
       "fieldConfig": {
@@ -203,7 +203,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "8 * sum by (instance) (rate(node_network_receive_bytes_total{job=\"node-exporter\", device!~\"lo|veth.+|docker.+|br-.+|tailscale.+|tun.+\"}[$__rate_interval]) + rate(node_network_transmit_bytes_total{job=\"node-exporter\", device!~\"lo|veth.+|docker.+|br-.+|tailscale.+|tun.+\"}[$__rate_interval]))",
@@ -218,7 +218,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${ds}"
       },
       "description": "Read plus written, without device-mapper volumes (they repeat the disk underneath).",
       "fieldConfig": {
@@ -266,7 +266,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${ds}"
           },
           "editorMode": "code",
           "expr": "sum by (instance) (rate(node_disk_read_bytes_total{job=\"node-exporter\", device!~\"dm-.+\"}[$__rate_interval]) + rate(node_disk_written_bytes_total{job=\"node-exporter\", device!~\"dm-.+\"}[$__rate_interval]))",
@@ -286,7 +286,19 @@
     "node-exporter"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {},
+        "includeAll": false,
+        "label": "Site",
+        "name": "ds",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",

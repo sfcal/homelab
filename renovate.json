@@ -70,6 +70,13 @@
         "koreader/kosync"
       ],
       "versioning": "loose"
+    },
+    {
+      "description": "Kanidm upgrades go one minor version at a time and can't be rolled back: open the PR, never automerge",
+      "matchPackageNames": [
+        "kanidm/server"
+      ],
+      "automerge": false
     }
   ],
   "customManagers": [

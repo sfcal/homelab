@@ -1,0 +1,17 @@
+# Managed by Ansible (infrastructure/dashboard). Kanidm, on the tailnet only at
+# https://auth.5am.cloud (Caddy in front: files/Caddyfile).
+# `domain` is permanent: passkeys and OAuth2 tokens are tied to it, and
+# changing it needs `kanidmd domain rename`. `origin` must match it.
+version = "2"
+bindaddress = "0.0.0.0:8443"
+db_path = "/data/kanidm.db"
+tls_chain = "/data/chain.pem"
+tls_key = "/data/key.pem"
+domain = "auth.5am.cloud"
+origin = "https://auth.5am.cloud"
+
+# Daily at 22:00 UTC; the last 7 stay in /var/lib/dashboard/kanidm/backups.
+[online_backup]
+path = "/data/backups/"
+schedule = "00 22 * * *"
+versions = 7

@@ -62,8 +62,8 @@ Or deploy services individually, in dependency order:
 task ansible:deploy-networking ENV=wil     # DNS, Caddy, Tailscale
 task ansible:deploy-ca ENV=wil             # Step-CA certificate authority
 task ansible:deploy-ntp ENV=wil            # Chrony time server
-task ansible:deploy-monitoring ENV=wil     # Prometheus, Grafana
-task ansible:deploy-dashboard ENV=ovh      # Homepage (OVH VPS)
+task ansible:deploy-monitoring ENV=wil     # Prometheus
+task ansible:deploy-dashboard ENV=ovh      # Grafana, Homepage, Kanidm (OVH VPS)
 task ansible:deploy-media ENV=wil          # Plex, *arr stack
 ```
 

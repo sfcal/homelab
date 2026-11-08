@@ -1,7 +1,7 @@
 # Managed by Ansible (infrastructure/dashboard). The VPS's only public site:
 # Uptime Kuma's badges, for the README. Everything else in Uptime Kuma, its
-# login included, is on the tailnet only (http://dashboard:3001). Certificates
-# come from Let's Encrypt over port 80/443.
+# login included, is on the tailnet only (http://dashboard:3001). Its
+# certificate comes from Let's Encrypt over port 80/443.
 uptime.ext.5am.cloud {
 	handle /api/badge/* {
 		reverse_proxy uptime-kuma:3001
@@ -9,5 +9,29 @@ uptime.ext.5am.cloud {
 
 	handle {
 		respond 404
+	}
+}
+
+# Any other name on the public listener, auth.5am.cloud included (Caddy shares
+# one certificate store across listeners): close the connection.
+https:// {
+	abort
+}
+
+# Kanidm, tailnet only. Listens on 127.0.0.1:8443, which `tailscale serve
+# --tcp=443` publishes on the VPS's tailnet address, never on the public one.
+auth.5am.cloud:8443 {
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+		propagation_delay 2m
+		resolvers 1.1.1.1
+	}
+	# HTTPS upstreams get the upstream's address as Host unless told
+	# otherwise; Kanidm needs the real name.
+	reverse_proxy https://kanidm:8443 {
+		header_up Host {host}
+		transport http {
+			tls_insecure_skip_verify
+		}
 	}
 }

@@ -38,8 +38,8 @@ system_timezone: "{{ sites[site].tz }}"
 #   host_header     (optional) - "upstream": adds Host header override
 #   encode          (optional) - encoding type, e.g. "gzip"
 #   read_buffer     (optional) - transport read buffer size in bytes
-#   auth            (optional) - true: Caddy asks Authelia for a login before proxying.
-#                                Works on any domain; the site's login page is the entry named `auth`.
+#   auth            (optional) - true: Caddy asks oauth2-proxy, which signs the user in
+#                                with Kanidm (auth.5am.cloud), before proxying. Works on any domain.
 
 # Registry-derived entries.
 # {% %} loops force string output, so emit JSON and parse it back.

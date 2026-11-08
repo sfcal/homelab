@@ -279,7 +279,7 @@ hl task ansible:deploy-all ENV=dev
 ```bash
 # Infrastructure
 hl task ansible:deploy-networking ENV=dev   # DNS + reverse proxy + Tailscale
-hl task ansible:deploy-monitoring ENV=dev   # Prometheus, Grafana
+hl task ansible:deploy-monitoring ENV=dev   # Prometheus
 
 # Applications
 hl task ansible:deploy-media ENV=dev        # Full media stack

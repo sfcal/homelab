@@ -9,6 +9,7 @@
 #   ts_router_ips  tailnet address of the site's subnet router (the same VM);
 #                  cross-site NOTIFYs arrive SNATed to it
 #   zones          zones the site is primary for, in zone/Caddyfile order
+#   tailnet_ip     the VPS's own tailnet address (ovh only)
 # A site without a LAN or DNS (ovh, the dashboard VPS) leaves out cidr and has
 # empty lists, so the other sites' BIND9 config doesn't change for it.
 sites:
@@ -29,6 +30,7 @@ sites:
     dns: []
     ts_router_ips: []
     zones: []
+    tailnet_ip: 100.116.40.99
 
 # This host's site is `site`, set in group_vars/site_<site>/vars.yml.
 other_sites: "{{ sites | dict2items | rejectattr('key', 'eq', site) | map(attribute='value') | list }}"

@@ -1,0 +1,35 @@
+---
+# oauth2-proxy answers Caddy's login check for every service with auth: true
+# and signs users in with Kanidm on the VPS (https://auth.5am.cloud, client
+# oauth2-proxy-<site>). Its sessions live in cookies, so it keeps no state.
+- name: Create the oauth2-proxy directory.
+  ansible.builtin.file:
+    path: /opt/oauth2-proxy
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy oauth2-proxy's settings.
+  ansible.builtin.template:
+    src: templates/oauth2-proxy.env.j2
+    dest: /opt/oauth2-proxy/oauth2-proxy.env
+    owner: root
+    group: root
+    mode: "0600"
+  notify:
+    - Restart oauth2-proxy
+
+- name: Create the external caddy docker network.
+  community.docker.docker_network:
+    name: caddy
+    state: present
+
+- name: Deploy oauth2-proxy.
+  ansible.builtin.include_role:
+    name: docker_service
+  vars:
+    service_name: oauth2-proxy
+    service_compose_template: templates/oauth2-proxy-compose.yaml.j2
+    service_images:
+      - "{{ oauth2_proxy_image }}"

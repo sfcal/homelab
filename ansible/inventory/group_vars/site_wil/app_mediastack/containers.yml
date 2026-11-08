@@ -39,6 +39,4 @@ tdarr_image: "ghcr.io/haveagitgat/tdarr:2.65.01"
 # renovate: datasource=docker
 wizarr_image: "ghcr.io/wizarrrr/wizarr:latest"
 # renovate: datasource=docker
-dispatcharr_image: "ghcr.io/dispatcharr/dispatcharr:latest"
-# renovate: datasource=docker
 node_exporter_image: "prom/node-exporter:v1.12.1"

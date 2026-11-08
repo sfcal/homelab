@@ -50,6 +50,14 @@ apps:
       domain: ldn.5am.cloud
       proxied: true
 
+  # Skips SponsorBlock segments on YouTube TV apps. No web UI, no port, no
+  # proxy: it only talks out to YouTube. TVs are paired once by hand (see
+  # docs/infrastructure/docker.md).
+  isponsorblocktv:
+    host_group: app_isponsorblocktv
+    # renovate: datasource=docker
+    image: "ghcr.io/dmunozv04/isponsorblocktv:v2.11.0"
+
   work:
     host_group: app_work
     microbin:

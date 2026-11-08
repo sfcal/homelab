@@ -1,0 +1,48 @@
+---
+# Kanidm is in the dashboard's compose project, which homepage.yml starts: run
+# this first, so its config and certificate exist when it does. The state
+# folder holds the identity database and private keys: root only.
+- name: Create Kanidm directories.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: /opt/dashboard/kanidm, mode: "0755" }
+    - { path: /var/lib/dashboard/kanidm, mode: "0700" }
+
+- name: Deploy Kanidm's server.toml.
+  ansible.builtin.template:
+    src: templates/kanidm-server.toml.j2
+    dest: /opt/dashboard/kanidm/server.toml
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart kanidm
+
+# Certificate for the Caddy -> Kanidm hop, made once. It expires after 5 days,
+# which doesn't matter: Caddy doesn't verify this hop, and Kanidm starts and
+# serves with an expired one (tested with 1.12.0).
+- name: Generate Kanidm's backend certificate.
+  ansible.builtin.command: >-
+    docker run --rm
+    -v /var/lib/dashboard/kanidm:/data
+    -v /opt/dashboard/kanidm/server.toml:/data/server.toml:ro
+    {{ kanidm_image }} kanidmd cert-generate
+  args:
+    creates: /var/lib/dashboard/kanidm/chain.pem
+
+# Caddy answers auth.5am.cloud on 127.0.0.1:8443 only; this forwards port 443
+# of the tailnet address to it as raw TCP, so TLS ends at Caddy. Nothing
+# publishes it on the public address. tailscaled keeps it across reboots.
+- name: Read tailscale serve config.
+  ansible.builtin.command: tailscale serve status --json
+  register: kanidm_serve
+  changed_when: false
+
+- name: Serve Kanidm on the tailnet.
+  ansible.builtin.command: tailscale serve --bg --tcp=443 tcp://127.0.0.1:8443
+  when: "'127.0.0.1:8443' not in kanidm_serve.stdout"

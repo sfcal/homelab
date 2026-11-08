@@ -1,12 +1,4 @@
 ---
-# Lab VMs get Docker from the Packer template; the VPS doesn't.
-- name: Install Docker.
-  ansible.builtin.apt:
-    name:
-      - docker.io
-      - docker-compose-v2
-    state: present
-
 - name: Create dashboard directories.
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -33,7 +25,8 @@
   notify:
     - Restart homepage
 
-# Holds the API keys, and the VPS is on the internet: root only.
+# Holds the API keys and the Cloudflare token, and the VPS is on the internet:
+# root only.
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: templates/compose.yaml.j2
@@ -42,9 +35,10 @@
     group: root
     mode: "0600"
 
-# `compose up` recreates only services whose definition/image changed.
-# Starts Uptime Kuma and Caddy too (tasks/uptime-kuma.yml).
-- name: Ensure Homepage, Uptime Kuma and Caddy are running.
+# `compose up` recreates only services whose definition/image changed. Starts
+# Uptime Kuma, Caddy, Grafana and Kanidm too (tasks/uptime-kuma.yml,
+# grafana.yml, kanidm.yml).
+- name: Ensure Homepage, Uptime Kuma, Caddy, Grafana and Kanidm are running.
   community.docker.docker_compose_v2:
     project_src: /opt/dashboard
     state: present

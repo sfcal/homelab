@@ -30,10 +30,15 @@
       ansible.builtin.include_tasks: tasks/ddns.yml
       when: ddns_domains | default([]) | length > 0
 
-    # Before Caddy: a missing Authelia secret stops the play here, before the
-    # Caddyfile starts sending protected services to the login page.
-    - name: Configure Authelia.
-      ansible.builtin.include_tasks: tasks/authelia.yml
+    # Before Caddy: a missing secret stops the play here, before the Caddyfile
+    # starts sending protected services to the login.
+    - name: Configure oauth2-proxy.
+      ansible.builtin.include_tasks: tasks/oauth2-proxy.yml
+
+    # Also before Caddy: a newly flagged service's callback is in Kanidm
+    # before Caddy starts sending its users to the login.
+    - name: Sync Kanidm's redirect URLs.
+      ansible.builtin.include_tasks: tasks/kanidm_redirects.yml
 
     - name: Configure Caddy.
       ansible.builtin.include_tasks: tasks/caddy.yml

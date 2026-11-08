@@ -37,15 +37,57 @@ services:
     volumes:
       - /var/lib/dashboard/uptime-kuma:/app/data
 
+  # One Grafana for both sites; its datasources are each site's Prometheus
+  # (files/grafana/provisioning). Localhost only: `tailscale serve` puts it on
+  # :3000.
+  grafana:
+    image: {{ grafana_image }}
+    container_name: grafana
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 256m
+    environment:
+      - GF_SECURITY_ADMIN_USER={{ grafana_admin_user }}
+      - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
+      - GF_SERVER_ROOT_URL={{ grafana_url }}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      # Let Homepage show Grafana panels in iframes without a login
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - /var/lib/dashboard/grafana:/var/lib/grafana
+      - /opt/dashboard/grafana/provisioning:/etc/grafana/provisioning:ro
+      - /opt/dashboard/grafana/dashboards:/etc/grafana/dashboards:ro
+    user: "1000:1000"
+
+  # One login for both sites, tailnet only. No published port: only Caddy
+  # reaches it, as kanidm:8443 (files/Caddyfile).
+  kanidm:
+    image: {{ kanidm_image }}
+    container_name: kanidm
+    restart: unless-stopped
+    volumes:
+      - /var/lib/dashboard/kanidm:/data
+      - /opt/dashboard/kanidm/server.toml:/data/server.toml:ro
+
   # Public: Uptime Kuma's badges only (files/Caddyfile). Bound to the public
-  # address: `tailscale serve` already holds port 80 on the tailnet address.
+  # address: `tailscale serve` already holds ports 80 and 443 on the tailnet
+  # address. Kanidm's site is on 127.0.0.1:8443, which `tailscale serve`
+  # publishes on the tailnet's port 443. Built with the Cloudflare DNS plugin
+  # (networking/templates/Dockerfile.j2) for that site's certificate.
   caddy:
-    image: {{ caddy_image }}
+    build: ./caddy
     container_name: caddy
     restart: unless-stopped
+    environment:
+      - CF_API_TOKEN={{ cf_api_token }}
     ports:
       - "{{ ansible_default_ipv4.address }}:80:80"
       - "{{ ansible_default_ipv4.address }}:443:443"
+      - "127.0.0.1:8443:8443"
     volumes:
       - /opt/dashboard/Caddyfile:/etc/caddy/Caddyfile:ro
       - /var/lib/dashboard/caddy:/data

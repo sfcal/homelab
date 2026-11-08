@@ -35,7 +35,7 @@ graph TD
 task ansible:deploy-networking ENV=wil   # 1. DNS, Caddy, Tailscale
 task ansible:deploy-ca ENV=wil           # 2. Step-CA
 task ansible:deploy-ntp ENV=wil          # 3. Chrony
-task ansible:deploy-monitoring ENV=wil   # 4. Prometheus, Grafana
+task ansible:deploy-monitoring ENV=wil   # 4. Prometheus
 task ansible:deploy-media ENV=wil        # 5. Applications
 ```
 
@@ -61,11 +61,11 @@ Taskfile.yaml               Root task runner entry point
 
 | Service | Host Group | IP (WIL) | Purpose |
 |---------|-----------|----------|---------|
-| BIND9, Caddy, Authelia, Tailscale, DDNS | `infra_networking` | 10.2.20.53 | DNS, reverse proxy, VPN |
+| BIND9, Caddy, oauth2-proxy, Tailscale, DDNS | `infra_networking` | 10.2.20.53 | DNS, reverse proxy, VPN |
 | Step-CA | `infra_ca` | 10.2.20.9 | Private certificate authority |
 | Chrony | `infra_ntp` | 10.2.20.123 | NTP time synchronization |
-| Prometheus, Grafana | `infra_monitoring` | 10.2.20.30 | Metrics and dashboards |
-| Homepage | `infra_dashboard` | 135.148.219.216 (OVH VPS, tailnet only) | Service dashboard for both sites |
+| Prometheus | `infra_monitoring` | 10.2.20.30 | Metrics |
+| Grafana, Homepage | `infra_dashboard` | 135.148.219.216 (OVH VPS, tailnet only) | Metrics dashboards and service dashboard for both sites |
 
 ### Applications
 
@@ -75,6 +75,7 @@ Taskfile.yaml               Root task runner entry point
 | Home Assistant | `app_homeassistant` | Home automation |
 | Birdle | `app_birdle` | Bird identification game |
 | Bookstack | `app_bookstack` | Wiki/documentation |
+| iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
 | Kasm | `app_work` | Browser-based desktops |
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
 | MicroBin | `app_work` | Pastebin |

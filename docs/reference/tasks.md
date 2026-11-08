@@ -15,8 +15,8 @@ task --list-all
 | `task ansible:deploy-networking ENV=wil` | DNS, reverse proxy, Tailscale |
 | `task ansible:deploy-ca ENV=wil` | Step-CA certificate authority |
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
-| `task ansible:deploy-monitoring ENV=wil` | Prometheus, Grafana |
-| `task ansible:deploy-dashboard ENV=ovh` | Homepage and Uptime Kuma on the OVH VPS |
+| `task ansible:deploy-monitoring ENV=wil` | Prometheus |
+| `task ansible:deploy-dashboard ENV=ovh` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
 | `task ansible:deploy-kasm-agent ENV=ovh` | Kasm agent for Deluge on the OVH VPS |
 | `task ansible:deploy-netboot ENV=wil` | netboot.xyz PXE re-imaging |
 | `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |

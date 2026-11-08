@@ -37,7 +37,7 @@
       "description": "Expected 1 (Timecard PHC selected). 0 = not synchronised.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -49,7 +49,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}}",
@@ -104,7 +104,7 @@
       "description": "Leap-status proxy: chrony_exporter v0.13.3 has no leap metric; stratum 0 == 'Not synchronised'.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 4,
@@ -116,7 +116,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "(chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"} > bool 0) * chrony_up{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}}",
@@ -177,7 +177,7 @@
       "description": "Instantaneous system clock offset estimate vs the selected source.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 8,
@@ -189,7 +189,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_system_time_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}}",
@@ -245,7 +245,7 @@
       "description": "Currently selected source. 'AC' = Timecard PHC refclock.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 13,
@@ -257,7 +257,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_info{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} {{tracking_name}}",
@@ -304,7 +304,7 @@
       "description": "Fraction of the last 8 polls of the Timecard PHC that returned samples.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 19,
@@ -316,7 +316,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_sources_reachability_ratio{job=\"chrony\",instance=~\"$host:.*\",source_address!~\"[0-9.]+|.*:.*\"}",
           "legendFormat": "{{instance}} {{source_name}}",
@@ -384,7 +384,7 @@
       "description": "Each server's clock minus the GPS-disciplined observer's clock, from the observer's noselect NTP sources (chronyc sources last sample, negated: chronyc reports local \u2212 source). This is the error a LAN client sees: one LAN hop and the server's own timestamping latency are included. Shows the servers picked in Time server; each must be a noselect source on the observer (ptp-experiments chrony_noselect_servers); unreachable sources are hidden rather than plotted as 0. Symlog axis, linear inside \u00b11 \u00b5s, so ms (VM over WAN) and \u00b5s (Pi + PPS) share one scale. Confirm the sign on the dry run.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -396,7 +396,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "label_replace(label_replace(label_replace((-chrony_sources_last_sample_offset_seconds{job=\"chrony\",instance=~\"$observer:.*\",source_address=~\"$host\"} and on(instance, source_address) chrony_sources_reachability_ratio{job=\"chrony\"} > 0), \"sut\", \"VM (stage 1)\", \"source_address\", \"10\\\\.3\\\\.20\\\\.157\"), \"sut\", \"Pi CM1 (stages 2-3)\", \"source_address\", \"10\\\\.3\\\\.30\\\\.11\"), \"sut\", \"Pi time1 (no GPS)\", \"source_address\", \"10\\\\.3\\\\.30\\\\.12\")",
           "legendFormat": "{{sut}}",
@@ -475,7 +475,7 @@
       "description": "Selected-source offsets. PHC-locked steady state is tens of ns; anything in the \u00b5s range means fallback. Refclock updates at 1 Hz, scraped at 15 s.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -487,7 +487,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} last offset",
@@ -496,7 +496,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_system_time_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} system time offset",
@@ -553,7 +553,7 @@
       "description": "AC = Timecard PHC, NIC = i226 PHC (noselect, ts2phc-disciplined). Divergence between them or vs zero indicates a broken segment.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 12,
@@ -565,7 +565,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_sources_last_sample_offset_seconds{job=\"chrony\",instance=~\"$host:.*\",source_address!~\"[0-9.]+|.*:.*\"}",
           "legendFormat": "{{instance}} {{source_name}}",
@@ -574,7 +574,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_sources_last_sample_error_margin_seconds{job=\"chrony\",instance=~\"$host:.*\"} * on(instance, source_address) group_left chrony_sources_state_info{job=\"chrony\",instance=~\"$host:.*\",source_state=\"sync\"}",
           "legendFormat": "{{instance}} {{source_name}} error margin (selected)",
@@ -631,7 +631,7 @@
       "description": "Long-term RMS of the system clock offset. Log scale spans PHC-locked (~1e-8) to NTP-fallback (~1e-4) regimes.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -643,7 +643,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_rms_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} rms offset",
@@ -701,7 +701,7 @@
       "description": "Every source chrony knows about on each selected host, as in `chronyc sources`: last-sample offset of the source vs the host's system clock. Refclocks (GPS, PPS, NIC, TC) and NTP servers share the axis, so a locked PPS sits on zero while NTP servers wander in the \u00b1100 \u00b5s bands. Polls are 16 s for refclocks and 64\u20131024 s for servers; 1 m query step.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 12,
@@ -713,7 +713,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_sources_last_sample_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} {{source_name}}",
@@ -795,7 +795,7 @@
       "description": "Autoscaled, NOT zero-centered: the oscillator sits near -33 ppm and the signal is the shape. CPU temp on right axis to correlate thermal drift.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -807,7 +807,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_frequency_ppms{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} frequency (ppm)",
@@ -816,7 +816,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "avg(node_hwmon_temp_celsius{job=\"node\",chip=\"platform_coretemp_0\"})",
           "legendFormat": "CPU temp",
@@ -905,7 +905,7 @@
       "description": "Difference between measured and applied frequency for the selected source.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 12,
@@ -917,7 +917,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_residual_frequency_ppms{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} residual freq",
@@ -974,7 +974,7 @@
       "description": "Error bound on the frequency estimate. Alert threshold 1 ppm marked.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 18,
@@ -986,7 +986,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_skew_ppms{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} skew",
@@ -1064,7 +1064,7 @@
       "description": "Dispersion grows between updates and resets on each \u2014 the sawtooth is the heartbeat. 15 s step, no averaging: a stalled sawtooth means the source went quiet.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -1076,7 +1076,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_root_delay_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} root delay",
@@ -1086,7 +1086,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_root_dispersion_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} root dispersion",
@@ -1096,7 +1096,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_root_delay_seconds{job=\"chrony\",instance=~\"$host:.*\"} / 2 + chrony_tracking_root_dispersion_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} worst-case error (delay/2 + dispersion)",
@@ -1167,7 +1167,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -1179,7 +1179,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} stratum",
@@ -1250,7 +1250,7 @@
       "description": "One band per source name over time; a change of band = chrony switched reference (e.g. PHC \u2192 NPL fallback).",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -1262,7 +1262,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_info{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} {{tracking_name}}",
@@ -1321,7 +1321,7 @@
       "description": "",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -1333,7 +1333,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "(chrony_tracking_stratum{job=\"chrony\",instance=~\"$host:.*\"} > bool 0) * chrony_up{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} sync",
@@ -1409,7 +1409,7 @@
       "description": "Distribution of tracking offset samples over the dashboard range. Healthy = Gaussian, centred on zero. Skew/bimodality = systematic asymmetry or a source change mid-range.",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 0,
@@ -1421,7 +1421,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} offset",
@@ -1453,7 +1453,7 @@
       "description": "Offset bucketed over time; view \u22653 days and diurnal effects appear as repeating vertical banding. (True hour-of-day folding needs the marcusolsson-hourly-heatmap-panel plugin \u2014 not installed since the Grafana container is offline-only.)",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "prometheus-ldn"
       },
       "gridPos": {
         "x": 12,
@@ -1465,7 +1465,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "prometheus-ldn"
           },
           "expr": "chrony_tracking_last_offset_seconds{job=\"chrony\",instance=~\"$host:.*\"}",
           "legendFormat": "{{instance}} offset",
@@ -1517,7 +1517,7 @@
         "type": "query",
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "prometheus-ldn"
         },
         "definition": "label_values(chrony_up{job=\"chrony\"}, instance)",
         "query": {
@@ -1548,7 +1548,7 @@
         "type": "query",
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "prometheus-ldn"
         },
         "query": {
           "query": "label_values(chrony_up{job=\"chrony\"}, instance)",

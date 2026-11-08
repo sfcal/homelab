@@ -17,3 +17,9 @@ cloud_services:
     backend_host: "{{ groups['app_kosync'] | first }}"
     backend_port: 17200
     proxied: true
+  # Kanidm on the ovh VPS, tailnet only (tailscale serve :443). No Cloudflare
+  # record.
+  - name: auth
+    backend_host: "{{ sites.ovh.tailnet_ip }}"
+    backend_port: 443
+    proxied: false

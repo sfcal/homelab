@@ -1,0 +1,22 @@
+apiVersion: 1
+
+# Each site's Prometheus (its monitoring VM), over the tailnet: the VPS accepts
+# the sites' subnet routes. Dashboards bind to these uids: System Activity and
+# Node Exporter Full have a datasource variable to pick the site, Chrony Detail
+# and GPSD use prometheus-ldn (the PTP grandmaster is in ldn).
+datasources:
+  - name: Prometheus (wil)
+    uid: prometheus-wil
+    type: prometheus
+    access: proxy
+    url: http://10.2.20.30:9090
+    isDefault: true
+    editable: true
+
+  - name: Prometheus (ldn)
+    uid: prometheus-ldn
+    type: prometheus
+    access: proxy
+    url: http://10.3.20.30:9090
+    isDefault: false
+    editable: true

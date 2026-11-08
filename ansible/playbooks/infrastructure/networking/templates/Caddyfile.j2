@@ -3,7 +3,7 @@
 }
 
 # Login check for services with `auth: true`. Caddy asks oauth2-proxy; a browser
-# without a session is sent to the Authelia login page and back to where it was.
+# without a session is sent to Kanidm's login page and back to where it was.
 (login) {
         handle /oauth2/* {
                 reverse_proxy oauth2-proxy:4180

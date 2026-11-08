@@ -10,23 +10,9 @@
     # Rendered config under /opt, container state under /var/lib.
     - "/opt/monitoring"
     - "/opt/monitoring/prometheus"
-    - "/opt/monitoring/grafana"
-    - "/opt/monitoring/grafana/provisioning"
-    - "/opt/monitoring/grafana/provisioning/datasources"
-    - "/opt/monitoring/grafana/provisioning/dashboards"
-    - "/opt/monitoring/grafana/dashboards"
     - "/var/lib/monitoring"
     - "/var/lib/monitoring/prometheus"
-    - "/var/lib/monitoring/grafana"
     - "/var/lib/monitoring/uptime-kuma"
-
-- name: Set ownership on Grafana data directory.
-  ansible.builtin.file:
-    path: "/var/lib/monitoring/grafana"
-    state: directory
-    owner: "{{ monitoring_uid }}"
-    group: "{{ monitoring_gid }}"
-    recurse: true
 
 - name: Set ownership on Prometheus data directory.
   ansible.builtin.file:
@@ -46,36 +32,6 @@
   notify:
     - Restart prometheus
 
-- name: Deploy Grafana datasource provisioning.
-  ansible.builtin.template:
-    src: templates/grafana-datasources.yml.j2
-    dest: "/opt/monitoring/grafana/provisioning/datasources/datasources.yml"
-    owner: "{{ monitoring_uid }}"
-    group: "{{ monitoring_gid }}"
-    mode: "0644"
-  notify:
-    - Restart grafana
-
-- name: Deploy Grafana dashboard provisioning.
-  ansible.builtin.template:
-    src: templates/grafana-dashboards.yml.j2
-    dest: "/opt/monitoring/grafana/provisioning/dashboards/dashboards.yml"
-    owner: "{{ monitoring_uid }}"
-    group: "{{ monitoring_gid }}"
-    mode: "0644"
-  notify:
-    - Restart grafana
-
-- name: Deploy Grafana dashboards.
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "/opt/monitoring/grafana/dashboards/"
-    owner: "{{ monitoring_uid }}"
-    group: "{{ monitoring_gid }}"
-    mode: "0644"
-  with_fileglob:
-    - files/dashboards/*.json
-
 - name: Deploy compose.yaml.
   ansible.builtin.template:
     src: templates/compose.yaml.j2
@@ -85,7 +41,8 @@
     mode: "0644"
 
 # `compose up` recreates only services whose definition/image changed, and
-# stops services no longer in compose.yaml (Homepage moved to the dashboard VPS).
+# stops services no longer in compose.yaml (Homepage and Grafana moved to the
+# dashboard VPS).
 - name: Ensure Monitoring Stack is running.
   community.docker.docker_compose_v2:
     project_src: "/opt/monitoring"

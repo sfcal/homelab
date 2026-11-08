@@ -42,7 +42,7 @@ Internal clients query BIND9 for service hostnames. Proxied services resolve to 
 | [UniFi UDM Pro](unifi.md) | Gateway, VLANs, static routes, port forwarding | [Gateway](unifi.md) |
 | [BIND9](dns.md) | Internal authoritative DNS with split-horizon resolution | [DNS Services](dns.md) |
 | [Caddy](proxy.md) | Reverse proxy with automatic wildcard TLS via Cloudflare | [Reverse Proxy](proxy.md) |
-| [Authelia](sso.md) | Single sign-on login in front of proxied services | [Single Sign-On](sso.md) |
+| [oauth2-proxy](sso.md) | Login check in front of proxied services; users sign in with Kanidm on the VPS | [Single Sign-On](sso.md) |
 | [Tailscale](tailscale.md) | Encrypted WireGuard VPN mesh between sites | [VPN](tailscale.md) |
 | Cloudflare DDNS | Updates public DNS records with current public IP | [Below](#cloudflare-ddns) |
 
@@ -83,7 +83,7 @@ Infrastructure VMs use consistent IP suffixes across environments:
 | Networking (DNS, Caddy, Tailscale) | `.53` | `10.2.20.53` | `10.3.20.53` |
 | Certificate Authority (Step-CA) | `.9` | `10.2.20.9` | `10.3.20.9` |
 | NTP Server (Chrony) | `.123` | `10.2.20.123` | `10.3.20.123` |
-| Monitoring (Prometheus, Grafana) | `.30` | `10.2.20.30` | `10.3.20.30` |
+| Monitoring (Prometheus) | `.30` | `10.2.20.30` | `10.3.20.30` |
 
 ## Service Definition System
 
@@ -114,7 +114,7 @@ The playbook targets the `infra_networking` host group and runs five components 
 1. **Tailscale** — VPN mesh (via role)
 2. **BIND9** — DNS server configuration and zone files
 3. **Cloudflare DDNS** — dynamic DNS updater container
-4. **Authelia** — single sign-on login
+4. **oauth2-proxy** — login check (users sign in with Kanidm), then the sync of Kanidm's redirect URLs
 5. **Caddy** — reverse proxy with TLS
 
 ### Deployment Order

@@ -18,9 +18,9 @@
     project_src: "/opt/cloudflare-ddns"
     state: restarted
 
-- name: Restart authelia
+- name: Restart oauth2-proxy
   community.docker.docker_compose_v2:
-    project_src: "/opt/authelia"
+    project_src: "/opt/oauth2-proxy"
     state: restarted
 
 - name: Rebuild caddy

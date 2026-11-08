@@ -12,6 +12,15 @@
       ansible.builtin.include_role:
         name: common
 
+    # Lab VMs get Docker from the Packer template; the VPS doesn't. Here, so
+    # it's in place before tasks/kanidm.yml runs a container.
+    - name: Install Docker.
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose-v2
+        state: present
+
   tasks:
     - name: Configure Tailscale.
       ansible.builtin.include_role:
@@ -19,6 +28,12 @@
 
     - name: Configure Uptime Kuma.
       ansible.builtin.include_tasks: tasks/uptime-kuma.yml
+
+    - name: Configure Grafana.
+      ansible.builtin.include_tasks: tasks/grafana.yml
+
+    - name: Configure Kanidm.
+      ansible.builtin.include_tasks: tasks/kanidm.yml
 
     - name: Configure Homepage.
       ansible.builtin.include_tasks: tasks/homepage.yml

@@ -1,0 +1,20 @@
+---
+# Kanidm has no wildcard redirect URLs, so the oauth2-proxy-<site> client must
+# list the login callback of every service with auth: true. Each deploy sends
+# them all; Kanidm ignores the ones it already has. A callback stays when its
+# service loses auth: true, until removed by hand (see the SSO docs).
+# Runs on the machine running the deploy, which reaches auth.5am.cloud over the
+# tailnet. no_log: the requests carry the API token (drop it to debug).
+- name: Register the login callbacks in Kanidm.
+  ansible.builtin.uri:
+    url: "https://auth.5am.cloud/v1/oauth2/oauth2-proxy-{{ site }}/_attr/oauth2_rs_origin"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ kanidm_sync_token }}"
+    body_format: json
+    body: ["https://{{ item.name }}.{{ item.domain }}/oauth2/callback"]
+  loop: "{{ services | selectattr('auth', 'defined') | selectattr('auth') | list }}"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true

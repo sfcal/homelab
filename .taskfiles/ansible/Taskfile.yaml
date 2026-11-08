@@ -41,7 +41,7 @@ tasks:
         vars: { PLAYBOOK_PATH: infrastructure/monitoring/deploy.yml }
 
   deploy-dashboard:
-    desc: Deploy Homepage and Uptime Kuma on the OVH VPS (ENV=ovh)
+    desc: Deploy the OVH VPS - Homepage, Uptime Kuma, Grafana, Kanidm (ENV=ovh)
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/dashboard/deploy.yml }

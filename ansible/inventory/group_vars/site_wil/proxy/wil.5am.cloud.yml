@@ -1,11 +1,5 @@
 ---
 wil_services:
-  # Authelia login page for *.wil.5am.cloud (container next to Caddy)
-  - name: auth
-    backend_host: authelia
-    backend_port: 9091
-    proxied: true
-
   # Infrastructure
   # Step-CA: ACME clients and the container's own healthcheck use
   # https://ca.wil.5am.cloud:9000 directly, so this is a plain A record.
@@ -36,11 +30,6 @@ wil_services:
     auth: true
 
   # Monitoring
-  - name: grafana
-    backend_host: 10.2.20.30
-    backend_port: 3000
-    proxied: true
-    auth: true
   - name: prometheus
     backend_host: 10.2.20.30
     backend_port: 9090

@@ -119,7 +119,7 @@ nav:
       - infrastructure/networking/index.md
       - DNS (BIND9): infrastructure/networking/dns.md
       - Reverse Proxy (Caddy): infrastructure/networking/proxy.md
-      - Single Sign-On (Authelia): infrastructure/networking/sso.md
+      - Single Sign-On (Kanidm): infrastructure/networking/sso.md
       - Tailscale: infrastructure/networking/tailscale.md
       - UniFi Gateway: infrastructure/networking/unifi.md
     - Certificate Authority: infrastructure/ca/index.md

@@ -36,11 +36,24 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 |-----|-------|------|
 | Birdle | `ghcr.io/sfcal/new-birdle` | 8091 |
 | Bookstack | `lscr.io/linuxserver/bookstack` | 8074 |
+| iSponsorBlockTV | `ghcr.io/dmunozv04/isponsorblocktv` | — |
 | Kasm | `lscr.io/linuxserver/kasm` | 4443 |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
 | Website | `ghcr.io/sfcal/samuel.computer` | 8090 |
+
+### iSponsorBlockTV
+
+[iSponsorBlockTV](https://github.com/dmunozv04/iSponsorBlockTV) (ldn, on the `web` VM) skips SponsorBlock segments and ads on YouTube TV apps. It has no web UI and only needs to reach youtube.com, so it has no port or proxy entry. Paired TVs and settings are in `/var/lib/isponsorblocktv/data/config.json` on the VM, written by the setup wizard, not by Ansible; a rebuilt VM needs its TVs paired again. Until a TV is paired the container exits every 10 seconds and restarts.
+
+To pair a TV (also to add another one or change settings), open YouTube on the TV, go to Settings → Link with TV code, then on the VM:
+
+```bash
+cd /opt/isponsorblocktv
+docker compose run --rm isponsorblocktv setup      # setup-cli for plain prompts
+docker compose restart
+```
 
 ## Infrastructure Services
 
@@ -48,8 +61,8 @@ Infrastructure services have dedicated playbooks rather than using the data-driv
 
 | Service | Docs |
 |---------|------|
-| BIND9, Caddy, Authelia, DDNS, Tailscale | [Networking](networking/index.md) |
-| Prometheus, Grafana, Homepage | [Monitoring](monitoring/index.md) (Homepage on the OVH VPS) |
+| BIND9, Caddy, oauth2-proxy, DDNS, Tailscale | [Networking](networking/index.md) |
+| Prometheus, Grafana, Homepage | [Monitoring](monitoring/index.md) (Grafana and Homepage on the OVH VPS) |
 | Step-CA | [Certificate Authority](ca/index.md) |
 
 ## How It Works

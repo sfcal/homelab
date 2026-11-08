@@ -1,5 +1,0 @@
----
-# Grafana
-grafana_admin_user: admin
-# grafana_admin_password — stored in site_wil/secrets.sops.yml
-grafana_url: "https://grafana.wil.5am.cloud"

@@ -77,6 +77,10 @@
   tags: ['kosync', 'applications']
 
 - import_playbook: deploy-app.yml
+  vars: { app_name: isponsorblocktv }
+  tags: ['isponsorblocktv', 'applications']
+
+- import_playbook: deploy-app.yml
   vars: { app_name: website }
   tags: ['website', 'applications']
 

@@ -178,6 +178,8 @@ services:
       - port=3003
       - logLevel=info
       - NODE_ARGS=--log-both
+      # No login of its own: Caddy's SSO gate (auth: true) is in front of it.
+      - authenticationMethod=disabled
     ports:
       - "3003:3003"
     volumes:
@@ -258,21 +260,6 @@ services:
       - "5690:5690"
     volumes:
       - {{ media_stack_data_path }}/wizarr:/data
-    networks:
-      - media
-
-  dispatcharr:
-    image: {{ dispatcharr_image }}
-    container_name: dispatcharr
-    restart: unless-stopped
-    mem_limit: 2g
-    mem_reservation: 1g
-    environment:
-      - TZ={{ system_timezone }}
-    ports:
-      - "9191:9191"
-    volumes:
-      - {{ media_stack_data_path }}/dispatcharr:/data
     networks:
       - media
 

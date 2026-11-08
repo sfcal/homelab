@@ -2,67 +2,66 @@
 # One dashboard for both sites, on the OVH VPS. Widgets reach each site's LAN
 # over the tailnet (the VPS accepts the sites' subnet routes).
 
-# Grafana panels from each site's "System Activity" dashboard
-# (monitoring/files/dashboards/system_activity.json). The iframes load Grafana
-# by IP: the grafana.<site> names are behind Authelia, whose cookie a browser
-# won't send to a frame inside this page.
+# Grafana panels from the "System Activity" dashboard
+# (dashboard/files/grafana/dashboards/system_activity.json), from the Grafana
+# on this VPS; var-ds picks the site's Prometheus.
 - System Activity (wil):
     - CPU:
-        href: https://grafana.wil.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-wil
         widget:
           type: iframe
           name: cpu-wil
-          src: http://10.2.20.30:3000/d-solo/system-activity?panelId=1&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-wil&panelId=1&theme=dark&hideLogo=true
 
     - Memory:
-        href: https://grafana.wil.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-wil
         widget:
           type: iframe
           name: memory-wil
-          src: http://10.2.20.30:3000/d-solo/system-activity?panelId=2&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-wil&panelId=2&theme=dark&hideLogo=true
 
     - Network:
-        href: https://grafana.wil.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-wil
         widget:
           type: iframe
           name: network-wil
-          src: http://10.2.20.30:3000/d-solo/system-activity?panelId=3&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-wil&panelId=3&theme=dark&hideLogo=true
 
     - Disk I/O:
-        href: https://grafana.wil.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-wil
         widget:
           type: iframe
           name: disk-wil
-          src: http://10.2.20.30:3000/d-solo/system-activity?panelId=4&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-wil&panelId=4&theme=dark&hideLogo=true
 
 - System Activity (ldn):
     - CPU:
-        href: https://grafana.ldn.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
         widget:
           type: iframe
           name: cpu-ldn
-          src: http://10.3.20.30:3000/d-solo/system-activity?panelId=1&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=1&theme=dark&hideLogo=true
 
     - Memory:
-        href: https://grafana.ldn.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
         widget:
           type: iframe
           name: memory-ldn
-          src: http://10.3.20.30:3000/d-solo/system-activity?panelId=2&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=2&theme=dark&hideLogo=true
 
     - Network:
-        href: https://grafana.ldn.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
         widget:
           type: iframe
           name: network-ldn
-          src: http://10.3.20.30:3000/d-solo/system-activity?panelId=3&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=3&theme=dark&hideLogo=true
 
     - Disk I/O:
-        href: https://grafana.ldn.5am.cloud/d/system-activity
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
         widget:
           type: iframe
           name: disk-ldn
-          src: http://10.3.20.30:3000/d-solo/system-activity?panelId=4&theme=dark&hideLogo=true
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=4&theme=dark&hideLogo=true
 
 - Media Management:
     - Sonarr:
@@ -169,11 +168,6 @@
         href: https://tunarr.5am.video
         siteMonitor: http://10.2.0.5:8000
 
-    - Dispatcharr:
-        icon: dispatcharr.png
-        href: https://dispatcharr.5am.video
-        siteMonitor: http://10.2.0.5:9191
-
     - Wizarr:
         icon: wizarr.png
         href: https://wizarr.5am.video
@@ -263,12 +257,13 @@
         href: https://netboot.ldn.5am.cloud
         siteMonitor: http://10.3.20.60:3000
 
-# Grafana and Prometheus run on each site's monitoring VM
+# Prometheus runs on each site's monitoring VM
 - Monitoring (wil):
+    # On this VPS, in Homepage's compose project; one Grafana for both sites
     - Grafana:
         icon: grafana.png
-        href: https://grafana.wil.5am.cloud
-        siteMonitor: http://10.2.20.30:3000
+        href: http://dashboard:3000
+        siteMonitor: http://grafana:3000
 
     - Prometheus:
         icon: prometheus.png
@@ -290,11 +285,6 @@
           slug: default
 
 - Monitoring (ldn):
-    - Grafana:
-        icon: grafana.png
-        href: https://grafana.ldn.5am.cloud
-        siteMonitor: http://10.3.20.30:3000
-
     - Prometheus:
         icon: prometheus.png
         href: https://prometheus.ldn.5am.cloud

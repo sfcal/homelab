@@ -17,5 +17,24 @@ homepage_allowed_hosts: "dashboard.tail1e494e.ts.net,dashboard"
 
 # renovate: datasource=docker
 uptime_kuma_image: "louislam/uptime-kuma:2.5.9"
+# Caddy is built from networking/templates/Dockerfile.j2, pinned there.
+
+# --- Grafana ---
+# One Grafana for both sites, tailnet only: http://dashboard:3000 (tailscale
+# serve in front of 127.0.0.1:3000). Prometheus stays on each site's monitoring
+# VM; Grafana reads both over the tailnet. Anyone on the tailnet can view;
+# sign in as admin to edit.
+# grafana_admin_password — site_ovh/secrets.sops.yml (section infra_dashboard)
+
 # renovate: datasource=docker
-caddy_image: "caddy:2.11.9"
+grafana_image: "grafana/grafana:13.3.0"
+grafana_admin_user: admin
+grafana_url: "http://dashboard:3000"
+
+# --- Kanidm ---
+# One login for both sites, tailnet only: https://auth.5am.cloud. Upgrades go
+# one minor version at a time and can't be undone, so Renovate doesn't
+# automerge this image (renovate.json).
+
+# renovate: datasource=docker
+kanidm_image: "kanidm/server:1.12.0"

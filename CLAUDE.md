@@ -201,14 +201,16 @@ services: >-
 ```
 A manual entry that points at another site's registry app can't read that site's registry: it takes the host from the inventory (`backend_host: "{{ groups['app_kosync'] | first }}"`, not a copied IP) and repeats the port, with a comment at both ends (`kosync` in `site_wil/proxy/5am.cloud.yml` and in `site_ldn/apps.yml`); a change to that app then needs a networking deploy at that site too.
 
-### Single Sign-On (Authelia)
+### Single Sign-On (Kanidm)
 
-Authelia (login page) and oauth2-proxy (login check) run next to Caddy on each networking VM (`tasks/authelia.yml`, one compose project in `/opt/authelia`, state in `/var/lib/authelia`). See `docs/infrastructure/networking/sso.md`.
-- `auth: true` on a service entry (or inside a registry `proxy:` block) wraps it in the Caddyfile's `(login)` block: Caddy asks oauth2-proxy, which sends the browser to Authelia (OpenID Connect) and back. Works on any domain. Browser UIs only: leave it off anything apps, devices or scripts reach by hostname (Plex, KOSync, MicroBin) and off public sites
-- A service entry named `auth` (backend `authelia:9091`) is the site's login page; one per site: `auth.wil.5am.cloud`, `auth.ldn.5am.cloud`. Never add a login page on another domain
-- Authelia's client `redirect_uris` and oauth2-proxy's cookie domains are generated from the flagged services, so flagging a service needs only a networking deploy
-- Secrets per site in the `infra_networking` section of `group_vars/site_<env>/secrets.sops.yml` (names listed in `infra_networking/authelia.yml`)
-- Kasm stays unflagged: it logs in through Authelia itself as a second OpenID Connect client (`kasm` in `authelia-configuration.yml.j2`; its side lives in Kasm's database, values in the SSO docs)
+Kanidm on the OVH VPS (dashboard playbook, `https://auth.5am.cloud`) is the one login for both sites, reachable only over the tailnet (`tailscale serve --tcp=443`, never a public listener or a Cloudflare record). Each networking VM runs oauth2-proxy next to Caddy as the login check (`tasks/oauth2-proxy.yml`, `/opt/oauth2-proxy`). See `docs/infrastructure/networking/sso.md`.
+- `auth: true` on a service entry (or inside a registry `proxy:` block) wraps it in the Caddyfile's `(login)` block: Caddy asks oauth2-proxy, which sends the browser to Kanidm (OpenID Connect, client `oauth2-proxy-<site>`) and back. Works on any domain. Browser UIs only: leave it off anything apps, devices or scripts reach by hostname (Plex, KOSync, MicroBin) and off public sites
+- Kanidm has no wildcard redirect URLs: `tasks/kanidm_redirects.yml` registers every flagged service's callback in each networking deploy, before Caddy, sent from the deploy machine (it must reach auth.5am.cloud), so flagging a service needs only a networking deploy; unflagging leaves the callback until removed by hand
+- `auth.5am.cloud` is a record in wil's BIND (`site_wil/proxy/5am.cloud.yml`) pointing at `sites.ovh.tailnet_ip`; hosts that don't use BIND pin it (oauth2-proxy's container with `extra_hosts`, the Proxmox hosts in `/etc/hosts`)
+- People, groups and clients live in Kanidm's database, managed with the `kanidm` CLI as `idm_admin`, whose password is not kept (`kanidmd recover-account`); not kanidm-provision
+- Secrets per site in the `infra_networking` section of `group_vars/site_<env>/secrets.sops.yml` (names listed in `infra_networking/oauth2-proxy.yml`)
+- Proxmox (realm `sso`) and Kasm (client `kasm`, PKCE off) log in to Kanidm directly; their side lives in Proxmox and in Kasm's database, values in the SSO docs
+- Kanidm upgrades go one minor version at a time and can't be rolled back, so Renovate never automerges `kanidm/server`
 
 ## Adding New Services
 
