@@ -38,7 +38,9 @@ system_timezone: "{{ sites[site].tz }}"
 #   host_header     (optional) - "upstream": adds Host header override
 #   encode          (optional) - encoding type, e.g. "gzip"
 #   read_buffer     (optional) - transport read buffer size in bytes
-#   auth            (optional) - true: Caddy asks oauth2-proxy, which signs the user in
+#   no_service_worker (optional) - true: Caddy serves a do-nothing /serviceworker.js
+#                                in place of the backend's (Kasm; see proxy docs)
+#   auth         (optional) - true: Caddy asks oauth2-proxy, which signs the user in
 #                                with Kanidm (auth.5am.cloud), before proxying. Works on any domain.
 
 # Registry-derived entries.

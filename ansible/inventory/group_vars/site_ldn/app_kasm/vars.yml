@@ -1,0 +1,8 @@
+---
+# --- Kasm ---
+# The LinuxServer image on the work VM (playbooks/apps/kasm). The Kasm agent
+# on the OVH VPS (site_ovh/app_kasm_agent/vars.yml) stays at the same version.
+# renovate: datasource=docker
+kasm_image: "lscr.io/linuxserver/kasm:1.18.1"
+kasm_port: 4443
+kasm_wizard_port: 3001

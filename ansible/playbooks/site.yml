@@ -62,7 +62,11 @@
 - import_playbook: apps/hermes/deploy.yml
   tags: ['hermes', 'applications']
 
-# 10. Kasm agent (Deluge, OVH VPS)
+# 10. Kasm (work VM, ldn)
+- import_playbook: apps/kasm/deploy.yml
+  tags: ['kasm', 'applications']
+
+# 11. Kasm agent (Deluge, OVH VPS)
 - import_playbook: apps/kasm-agent/deploy.yml
   tags: ['kasm-agent', 'applications']
 
@@ -86,7 +90,7 @@
 
 - import_playbook: deploy-app.yml
   vars: { app_name: work }
-  tags: ['work', 'microbin', 'kasm', 'restreamer', 'applications']
+  tags: ['work', 'microbin', 'restreamer', 'ignis', 'applications']
 
 # --- Hypervisor ---
 - import_playbook: infrastructure/proxmox/deploy.yml

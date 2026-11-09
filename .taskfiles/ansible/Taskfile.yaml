@@ -108,6 +108,12 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/hermes/deploy.yml }
 
+  deploy-kasm:
+    desc: Deploy Kasm and build its workspace images (ENV=ldn)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/kasm/deploy.yml }
+
   deploy-kasm-agent:
     desc: Deploy the Kasm agent on the OVH VPS (ENV=ovh)
     cmds:

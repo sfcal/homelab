@@ -35,6 +35,13 @@
 {% for service in services if service.domain == domain.name and service.proxied | default(false) and service.enabled | default(true) %}
         @{{ service.name }} host {{ service.name }}.{{ domain.name }}
         handle @{{ service.name }} {
+{% if service.no_service_worker | default(false) %}
+{#      Answer the backend's /serviceworker.js with a worker that only takes
+        over from it and handles nothing: Kasm's proxies every navigation, and
+        Firefox stops a service worker 30 s into a download it is passing on. #}
+                header /serviceworker.js Content-Type "application/javascript"
+                respond /serviceworker.js `self.addEventListener("install", () => self.skipWaiting());` 200
+{% endif %}
 {% if service.auth | default(false) %}
                 import login {
 {% endif %}

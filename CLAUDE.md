@@ -175,11 +175,12 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
          domain: wil.5am.cloud
          proxied: true           # required; true=Caddy proxy, false=DNS direct
          # Optional passthrough: tls_skip_verify, forward_headers,
-         # host_header, encode, read_buffer, auth, dns, enabled, backend_port
+         # host_header, encode, read_buffer, no_service_worker, auth, dns,
+         # enabled, backend_port
    ```
    Multi-service apps nest sub-services with their own `proxy:` blocks (see `apps.work.*`). Apps without a `proxy:` block get no DNS/proxy entry.
 
-2. **Manual per-domain files** (`group_vars/site_<env>/proxy/<domain>.yml`, in the folder of the site that is primary for the domain) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (Wolf, RomM). Same fields, plus explicit `backend_host`/`backend_port`:
+2. **Manual per-domain files** (`group_vars/site_<env>/proxy/<domain>.yml`, in the folder of the site that is primary for the domain) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (Wolf, RomM), Kasm. Same fields, plus explicit `backend_host`/`backend_port`:
    ```yaml
    - name: vm                 # Subdomain
      backend_host: 10.2.20.7  # Backend IP
@@ -211,6 +212,7 @@ Kanidm on the OVH VPS (dashboard playbook, `https://auth.5am.cloud`) is the one 
 - Secrets per site in the `infra_networking` section of `group_vars/site_<env>/secrets.sops.yml` (names listed in `infra_networking/oauth2-proxy.yml`)
 - Proxmox (realm `sso`) and Kasm (client `kasm`, PKCE off) log in to Kanidm directly; their side lives in Proxmox and in Kasm's database, values in the SSO docs
 - Kanidm upgrades go one minor version at a time and can't be rolled back, so Renovate never automerges `kanidm/server`
+- Password reset by email: `kanidm-mail-sender` (dashboard compose, `kanidm_tools_image`, kept at the server's version; Renovate groups the two) sends Kanidm's mail queue through Fastmail as `noreply@5am.cloud`; its token and the Fastmail login are in `site_ovh/secrets.sops.yml`. Its service account, each person's `mail` and the login page's Recover Account switch (`set-allow-account-recovery`, needs `admin`, not idm_admin) live in Kanidm's database. Test sending with the sender's `-t`: `message-queue send-test-message` is refused in 1.12.0
 
 ## Adding New Services
 

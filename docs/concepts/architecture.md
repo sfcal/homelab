@@ -75,8 +75,9 @@ Taskfile.yaml               Root task runner entry point
 | Home Assistant | `app_homeassistant` | Home automation |
 | Birdle | `app_birdle` | Bird identification game |
 | Bookstack | `app_bookstack` | Wiki/documentation |
+| Ignis | `app_work` | Obsidian in the browser |
 | iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
-| Kasm | `app_work` | Browser-based desktops |
+| Kasm | `app_kasm` | Browser-based desktops |
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
 | MicroBin | `app_work` | Pastebin |
 | Restreamer | `app_work` | Video streaming relay |

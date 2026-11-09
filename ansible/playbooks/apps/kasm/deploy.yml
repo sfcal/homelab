@@ -1,0 +1,30 @@
+---
+# ldn's Kasm: the LinuxServer image on the work VM, with Kasm's own Docker
+# daemon inside the container. Workspace images are built from files/.
+- name: Deploy Kasm
+  hosts: app_kasm
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
+
+  tasks:
+    - name: Deploy Kasm via docker_service role.
+      ansible.builtin.include_role:
+        name: docker_service
+      vars:
+        service_name: kasm
+        service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        service_images:
+          - "{{ kasm_image }}"
+
+    - name: Build the workspace images.
+      ansible.builtin.include_tasks: tasks/images.yml
+      vars:
+        # The folders in files/ that hold a Dockerfile
+        kasm_workspace_images: >-
+          {{ query('community.general.filetree', playbook_dir ~ '/files')
+             | selectattr('state', 'eq', 'file') | map(attribute='path')
+             | select('match', '^[^/]+/Dockerfile$') | map('dirname') | list }}

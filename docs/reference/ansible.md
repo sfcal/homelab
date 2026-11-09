@@ -79,6 +79,7 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 | `ntp/deploy.yml` | `infra_ntp` | Chrony |
 | `monitoring/deploy.yml` | `infra_monitoring` | Prometheus |
 | `dashboard/deploy.yml` | `infra_dashboard` | Tailscale, Grafana, Homepage, Uptime Kuma (OVH VPS) |
+| `apps/kasm/deploy.yml` | `app_kasm` | Kasm on the work VM (ldn), workspace images from `files/` |
 | `apps/kasm-agent/deploy.yml` | `app_kasm_agent` | Second Kasm agent for Deluge (OVH VPS) |
 | `netboot/deploy.yml` | `infra_netboot` | netboot.xyz |
 | `proxmox/deploy.yml` | `infra_proxmox` | SR-IOV GPU VFs and PCI mappings on the hypervisor (no `common` role: it is not an Ubuntu VM) |

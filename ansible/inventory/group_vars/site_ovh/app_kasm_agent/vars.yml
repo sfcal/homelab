@@ -3,7 +3,7 @@
 # A second Docker agent for ldn's Kasm (work VM 10.3.20.50, LinuxServer image).
 # Kasm places the Deluge workspace here; the other container workspaces are
 # restricted to the work VM's agent in Kasm's admin (its database, not here).
-# Must match the Kasm version on the work VM (site_ldn/apps.yml, apps.work.kasm).
+# Must match the Kasm version on the work VM (site_ldn/app_kasm/vars.yml, kasm_image).
 kasm_agent_version: "1.18.1"
 # sha256 of kasm_release_1.18.1.tar.gz. Its install.sh and agent files are the
 # same as the release inside the work VM's Kasm container (checked 2026-11-07).
@@ -14,7 +14,7 @@ kasm_agent_manager: "10.3.20.50"
 
 # Kasm reaches the agent at the VPS's tailnet address (the ldn UDM routes it
 # to ldn-gateway). The installer uses one port for the agent and for Kasm, so
-# it is Kasm's (apps.work.kasm.port). Dropped on the public interface.
+# it is Kasm's (kasm_port). Dropped on the public interface.
 kasm_agent_public_hostname: "100.116.40.99"
 kasm_agent_port: 4443
 

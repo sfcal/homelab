@@ -69,17 +69,6 @@ apps:
         name: bin
         domain: ldn.5am.cloud
         proxied: true
-    kasm:
-      # renovate: datasource=docker
-      image: "lscr.io/linuxserver/kasm:1.18.1"
-      port: 4443
-      wizard_port: 3001
-      proxy:
-        name: kasm
-        domain: ldn.5am.cloud
-        proxied: true
-        tls_skip_verify: true
-        forward_headers: true
     restreamer:
       # renovate: datasource=docker
       image: "datarhei/restreamer:latest"
@@ -88,6 +77,15 @@ apps:
       srt_port: 6000
       proxy:
         name: restreamer
+        domain: ldn.5am.cloud
+        proxied: true
+        auth: true
+    ignis:
+      # renovate: datasource=docker
+      image: "nobbe/ignis:0.9.0"
+      port: 8082
+      proxy:
+        name: ignis
         domain: ldn.5am.cloud
         proxied: true
         auth: true

@@ -49,6 +49,11 @@ video_services:
     backend_port: 11011
     proxied: true
     auth: true
+  - name: houndarr
+    backend_host: 10.2.0.5
+    backend_port: 8877
+    proxied: true
+    auth: true
   - name: tdarr
     backend_host: 10.2.0.5
     backend_port: 8265

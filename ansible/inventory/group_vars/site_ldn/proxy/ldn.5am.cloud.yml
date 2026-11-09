@@ -43,6 +43,16 @@ ldn_services:
 
   # Apps (registry apps live in site_ldn/apps.yml)
 
+  # Kasm (custom playbook: playbooks/apps/kasm); port is kasm_port
+  - name: kasm
+    backend_host: 10.3.20.50
+    backend_port: 4443
+    proxied: true
+    tls_skip_verify: true
+    forward_headers: true
+    # Kasm's service worker cuts Firefox downloads off after 30 s
+    no_service_worker: true
+
   # Cloud gaming (custom playbook: playbooks/apps/gaming)
   - name: roms
     backend_host: 10.3.20.55

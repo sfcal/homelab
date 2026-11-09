@@ -17,6 +17,7 @@ task --list-all
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
 | `task ansible:deploy-monitoring ENV=wil` | Prometheus |
 | `task ansible:deploy-dashboard ENV=ovh` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
+| `task ansible:deploy-kasm ENV=ldn` | Kasm on the work VM, and its custom workspace images |
 | `task ansible:deploy-kasm-agent ENV=ovh` | Kasm agent for Deluge on the OVH VPS |
 | `task ansible:deploy-netboot ENV=wil` | netboot.xyz PXE re-imaging |
 | `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |

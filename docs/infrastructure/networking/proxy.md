@@ -223,6 +223,20 @@ read_buffer: 8192
 
 ---
 
+#### `no_service_worker`
+
+Caddy answers the backend's `/serviceworker.js` itself, with a worker that replaces the backend's and handles no requests. Set on Kasm: its service worker passes every page navigation through itself, downloads included, and Firefox stops a service worker after 30 s idle even mid-download, so any download from a Kasm session that takes longer than 30 s fails. The backend loses only what its worker did (Kasm: an offline page). Browsers pick up the new worker the next time they open a page of the site.
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+```yaml
+no_service_worker: true
+```
+
+---
+
 #### `auth`
 
 Require a login before proxying. Caddy checks for a session first and sends the browser to the site's [login page](sso.md) if there is none. Works for a service on any domain.
@@ -308,7 +322,7 @@ kasm:
 - **`backend_host` is derived** — the first inventory host of the app's `host_group`. If the group has no hosts in the inventory, the render fails loudly rather than silently dropping the entry.
 - **`backend_port` defaults to the sibling `port`** — set `backend_port` inside the `proxy:` block to override it.
 - **`name`, `domain`, and `proxied` are required** — `proxied` has no default in the zone template.
-- **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `auth`, `dns`, and `enabled` behave exactly as in manual entries.
+- **Optional fields pass through unchanged** — `tls_skip_verify`, `forward_headers`, `host_header`, `encode`, `read_buffer`, `no_service_worker`, `auth`, `dns`, and `enabled` behave exactly as in manual entries.
 
 Apps without a `proxy:` block get no DNS record and no Caddy entry.
 

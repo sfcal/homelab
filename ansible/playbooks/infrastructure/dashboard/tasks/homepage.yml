@@ -36,8 +36,8 @@
     mode: "0600"
 
 # `compose up` recreates only services whose definition/image changed. Starts
-# Uptime Kuma, Caddy, Grafana and Kanidm too (tasks/uptime-kuma.yml,
-# grafana.yml, kanidm.yml).
+# Uptime Kuma, Caddy, Grafana, Kanidm and its mail sender too
+# (tasks/uptime-kuma.yml, grafana.yml, kanidm.yml).
 - name: Ensure Homepage, Uptime Kuma, Caddy, Grafana and Kanidm are running.
   community.docker.docker_compose_v2:
     project_src: /opt/dashboard

@@ -28,6 +28,18 @@ Terraria (wil) and Wolf with RomM (ldn) share one playbook on the `app_gaming` h
 
 Hermes Agent (ldn) has its own playbook, which also installs Claude Code and the Claude subscription plugin in the container. Deploy with `task ansible:deploy-hermes ENV=ldn`; see [Hermes Agent](hermes.md).
 
+## Kasm
+
+Kasm (ldn, on the `work` VM, `https://kasm.ldn.5am.cloud`) is the LinuxServer image, which runs Kasm's own Docker daemon inside the container. Its state is under `/var/lib/kasm/`. Deploy with `task ansible:deploy-kasm ENV=ldn`.
+
+Custom workspace images live in `ansible/playbooks/apps/kasm/files/`, one folder per image with a `Dockerfile` (folder names lowercase: they become the image name). Each deploy copies them to `/opt/kasm/images/` and builds every folder inside Kasm's Docker as `localhost/<folder>:latest`, pulling newer base images first. To use one, add a workspace with that image name and restrict it to the work VM's agent (`85a6c3`): the VPS agent ([Kasm Agent](kasm-agent.md)) doesn't have it. The work VM's agent prunes images in Aggressive mode: within 30 s it deletes any image no workspace uses, so save the workspace first, then deploy.
+
+### Deluge
+
+The Deluge workspace runs `localhost/deluge:latest` (`files/deluge/`) on the work VM, with no volume mappings. When a torrent finishes, Deluge's Execute plugin runs `torrent-archive`, which writes it as one uncompressed `<torrent name>.zip` into `~/Downloads`, so Kasm's download panel can fetch it in one go (written as `.zip.part` first, then renamed; `zip -0`, since media doesn't compress). Torrents download to `~/torrents`. Both folders, and Deluge's settings, last only as long as the session: fetch the archives before ending it. The settings come from the image (`core.conf`, `execute.conf`), which Kasm copies into each new session's home; mapping `~/.config` to a host folder would overwrite what's saved there each time. The base stays on the Kasm server's version. Deluge 2.0.3 with libtorrent 2.0 logs a harmless `KeyError: 'disk.num_blocks_cache_hits'` every few seconds.
+
+Workspace settings (Kasm's admin, not this repo): Docker Image `localhost/deluge:latest`, Docker Registry empty, Restrict Image to Kasm Agent `85a6c3`, Volume Mappings `{}`.
+
 ## Data-Driven Apps
 
 Most applications use the shared `deploy-app.yml` playbook and are defined in the registry of the site that hosts them, `ansible/inventory/group_vars/site_<env>/apps.yml`. See [Deploy a Service](../guides/deploy-service.md) for the full workflow.
@@ -36,12 +48,16 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 |-----|-------|------|
 | Birdle | `ghcr.io/sfcal/new-birdle` | 8091 |
 | Bookstack | `lscr.io/linuxserver/bookstack` | 8074 |
+| Ignis (Obsidian) | `nobbe/ignis` | 8082 |
 | iSponsorBlockTV | `ghcr.io/dmunozv04/isponsorblocktv` | — |
-| Kasm | `lscr.io/linuxserver/kasm` | 4443 |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
 | Website | `ghcr.io/sfcal/samuel.computer` | 8090 |
+
+### Ignis
+
+[Ignis](https://github.com/Nystik-gh/ignis) (ldn, on the `work` VM) runs Obsidian in the browser at `https://ignis.ldn.5am.cloud`, behind the Kanidm login: it has no login of its own. Everything it keeps is on the VM's own disk under `/var/lib/work/ignis/`: `vaults/` (one folder per vault, plain Markdown), `data/` (Ignis settings and sync state) and `obsidian-app/` (the Obsidian download, fetched again when missing). A rebuilt VM starts with no vaults.
 
 ### iSponsorBlockTV
 

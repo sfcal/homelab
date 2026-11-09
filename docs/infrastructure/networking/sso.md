@@ -16,6 +16,7 @@ The login is a gate in front of a service, not a replacement for its own login: 
 | Kanidm | OVH VPS, in the dashboard compose project: config `/opt/dashboard/kanidm/server.toml`, state `/var/lib/dashboard/kanidm` |
 | `auth.5am.cloud` | `100.116.40.99`, the VPS's tailnet address. `tailscale serve --tcp=443` passes it to the VPS's Caddy on `127.0.0.1:8443`, which proxies to Kanidm |
 | oauth2-proxy | Each networking VM, `/opt/oauth2-proxy`, client `oauth2-proxy-<site>` |
+| kanidm-mail-sender | OVH VPS, next to Kanidm: sends its mail through Fastmail as `noreply@5am.cloud` ([Password Reset by Email](#password-reset-by-email)) |
 
 The name is in wil's BIND (zone `5am.cloud`, copied to ldn) and in the tailnet's split DNS, never in Cloudflare. The VPS's public address closes any connection for it.
 
@@ -25,8 +26,11 @@ The name is in wil's BIND (zone `5am.cloud`, copied to ldn) and in the tailnet's
 |------|---------|
 | `ansible/playbooks/infrastructure/dashboard/tasks/kanidm.yml` | Kanidm on the VPS: folders, `server.toml`, backend certificate, tailnet address |
 | `ansible/playbooks/infrastructure/dashboard/templates/kanidm-server.toml.j2` | Kanidm's settings: domain, backups |
+| `ansible/playbooks/infrastructure/dashboard/templates/kanidm-mail-sender.toml.j2` | The mail sender's settings: sender address, Fastmail |
+| `ansible/playbooks/infrastructure/dashboard/templates/kanidm-client.toml.j2` | How the mail sender reaches Kanidm |
 | `ansible/playbooks/infrastructure/dashboard/files/Caddyfile` | The `auth.5am.cloud` site (Cloudflare DNS-01 certificate) |
-| `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | `kanidm_image` |
+| `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | `kanidm_image`, `kanidm_tools_image` |
+| `ansible/inventory/group_vars/site_ovh/secrets.sops.yml` | The mail sender's token and Fastmail login (section `infra_kanidm_email`) |
 | `ansible/playbooks/infrastructure/networking/tasks/oauth2-proxy.yml` | oauth2-proxy deployment |
 | `ansible/playbooks/infrastructure/networking/templates/oauth2-proxy.env.j2` | oauth2-proxy settings |
 | `ansible/playbooks/infrastructure/networking/tasks/kanidm_redirects.yml` | Registers each flagged service's login callback in Kanidm |
@@ -63,6 +67,10 @@ kanidm person create <user> "<Display Name>"
 ```
 
 ```bash
+kanidm person update <user> --mail <address>
+```
+
+```bash
 kanidm group add-members sso_users <user>
 ```
 
@@ -70,11 +78,35 @@ kanidm group add-members sso_users <user>
 kanidm person credential create-reset-token <user> --ttl 86400
 ```
 
-Send them the link or QR code. It lasts 24 hours and opens only from a site LAN or the tailnet. They set a password there, and a TOTP code or a passkey if they like. For a forgotten password, run the last command again.
+Send them the link or QR code. It lasts 24 hours and opens only from a site LAN or the tailnet. They set a password there, and a TOTP code or a passkey if they like. For a forgotten password they use **Recover Account** on the login page ([Password Reset by Email](#password-reset-by-email)), or you run the last command again.
 
 A password alone is enough: `idm_all_persons` has `credential-type-minimum` set to `any`, where Kanidm's default asks for a second factor. To require one, set it back with `kanidm group account-policy credential-type-minimum idm_all_persons mfa`.
 
 Every member of `sso_users` can open every flagged service; there are no per-user rules. Proxmox and Kasm keep their own permissions: create the Proxmox user and role on each host as in [Proxmox](#proxmox), and add the Kasm user to Administrators after their first login as in [Kasm](#kasm).
+
+## Password Reset by Email
+
+**Recover Account** on the login page asks for an email address. When it matches a person's address in Kanidm, Kanidm emails them a reset link from `noreply@5am.cloud`. The page answers the same either way, so it gives away no addresses. The link lasts an hour and, like the login, opens only from a site LAN or the tailnet. To email someone a link yourself (this one lasts 24 hours):
+
+```bash
+kanidm person credential send-reset-token <user> --ttl 86400
+```
+
+Kanidm only queues the mail. `kanidm-mail-sender`, next to Kanidm in the dashboard compose project, checks the queue every 5 seconds and sends through Fastmail (`smtps://smtp.fastmail.com`), logged in with an app password that has SMTP access only. `5am.cloud` is a domain in that Fastmail account, with `noreply@5am.cloud` as an alias and Fastmail's SPF and DKIM records in Cloudflare.
+
+These parts live in Kanidm's database:
+
+- each person's address: `kanidm person update <user> --mail <address>`
+- service account `mail-sender`, a member of `idm_message_senders` and nothing else, with a read-write API token (`kanidm_mail_sender_token`): `kanidm service-account create mail-sender "Mail Sender" idm_admins`, `kanidm group add-members idm_message_senders mail-sender`, `kanidm service-account api-token generate mail-sender "mail sender" --readwrite`
+- the **Recover Account** link: `kanidm system domain set-allow-account-recovery true`, as `admin`, because `idm_admin` can't change domain settings (`admin` has no stored password either: `kanidmd recover-account admin`, then `kanidm login -D admin`)
+
+`kanidm system message-queue list` shows each message as `queued`, or with the time it went out. To test sending on its own, the mail sender can mail any address; it ends with `Success!` (`kanidm system message-queue send-test-message` is refused in 1.12.0, even for `admin`):
+
+```bash
+ssh ubuntu@dashboard sudo docker exec -e RUST_LOG=info kanidm-mail-sender /sbin/kanidm-mail-sender -c /etc/kanidm/config -m /etc/kanidm/mail-sender -t <address>
+```
+
+The sender logs only warnings and errors (`RUST_LOG=warn`), so its log stays empty while all is well.
 
 ## Protect a Service
 
@@ -161,7 +193,7 @@ Kasm's own login page is at `https://kasm.ldn.5am.cloud/#/staticlogin`. It is th
 
 ## Upgrades and Backups
 
-- Renovate opens a pull request for `kanidm/server` but never merges it. Upgrade one minor version at a time and never back: run `ssh ubuntu@dashboard sudo docker exec kanidm kanidmd domain upgrade-check`, deploy the dashboard with the new tag (`task ansible:deploy-dashboard ENV=ovh`), and move the CLI alias to the same tag.
+- Renovate opens one pull request for `kanidm/server` and `kanidm/tools` (the mail sender) but never merges it. Upgrade one minor version at a time and never back: run `ssh ubuntu@dashboard sudo docker exec kanidm kanidmd domain upgrade-check`, deploy the dashboard with the new tag (`task ansible:deploy-dashboard ENV=ovh`), and move the CLI alias to the same tag.
 - Kanidm backs up its database every night at 22:00 UTC and keeps the last 7, in `/var/lib/dashboard/kanidm/backups` on the VPS. Nothing copies them elsewhere yet.
 - Kanidm's domain, `auth.5am.cloud`, is permanent: changing it breaks passkeys and every client's tokens.
 
@@ -181,6 +213,8 @@ Kasm's own login page is at `https://kasm.ldn.5am.cloud/#/staticlogin`. It is th
 **`auth.5am.cloud` does not resolve** — on a LAN it comes from the site's BIND; away from home, from the tailnet's split DNS route. Hosts that use neither need a pin: the Proxmox hosts have the `/etc/hosts` line, and oauth2-proxy's container has it in `extra_hosts`.
 
 **Kasm's login ends in `Internal Error`** — Kasm's log has the reason: `ssh 10.3.20.50 'docker exec kasm docker logs --since 10m kasm_api 2>&1' | grep -E 'Failed to find|\(invalid_'`. `Failed to find groups attribute` means Groups Attribute is not empty. `The authorization code has already been used` means the error page was reloaded: start again from the login page.
+
+**No reset email arrives** — `kanidm system message-queue list` shows whether Kanidm queued it. Nothing queued: the address typed is not the person's `mail`, or **Recover Account** is off. Still `queued`: the mail sender is down or Fastmail refused it: `ssh ubuntu@dashboard sudo docker logs kanidm-mail-sender`.
 
 **Check a client secret without a login** — send Kanidm's token endpoint a fake code with the client's ID and secret. `401` means the secret is wrong; `400` with `invalid_request` means the secret is right and only the code was rejected.
 

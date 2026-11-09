@@ -17,21 +17,6 @@ services:
       - MICROBIN_HIDE_FOOTER=true
       - MICROBIN_MAX_FILE_SIZE_UNENCRYPTED_MB={{ apps.work.microbin.max_file_size_mb | default(2048) }}
 
-  kasm:
-    image: {{ apps.work.kasm.image }}
-    container_name: kasm
-    privileged: true
-    restart: unless-stopped
-    ports:
-      - "{{ apps.work.kasm.port }}:{{ apps.work.kasm.port }}"
-      - "{{ apps.work.kasm.wizard_port }}:3000"
-    environment:
-      - KASM_PORT={{ apps.work.kasm.port }}
-      - DOCKER_MTU=1500
-    volumes:
-      - "/var/lib/work/kasm/data:/opt"
-      - "/var/lib/work/kasm/docker:/var/lib/docker"
-
   restreamer:
     image: {{ apps.work.restreamer.image }}
     container_name: restreamer
@@ -46,11 +31,18 @@ services:
       - /var/lib/work/restreamer/config:/core/config
       - /var/lib/work/restreamer/data:/core/data
 
-# Kasm runs its own Docker daemon inside the container and uses
-# 172.17-172.19.0.0/16 internally. Pin this project's network outside
-# Docker's default pool so the outer and inner subnets never overlap.
-networks:
-  default:
-    ipam:
-      config:
-        - subnet: 10.90.0.0/24
+  # Obsidian in the browser. No login of its own: use it through Caddy, which
+  # puts the Kanidm login in front (auth: true). Files are owned by uid 1000
+  # (sfcal), the image's default PUID/PGID.
+  ignis:
+    image: {{ apps.work.ignis.image }}
+    container_name: ignis
+    restart: unless-stopped
+    ports:
+      - "{{ apps.work.ignis.port }}:8080"
+    environment:
+      - WS_ORIGINS=https://{{ apps.work.ignis.proxy.name }}.{{ apps.work.ignis.proxy.domain }}
+    volumes:
+      - /var/lib/work/ignis/vaults:/vaults
+      - /var/lib/work/ignis/data:/app/data
+      - /var/lib/work/ignis/obsidian-app:/app/obsidian-app

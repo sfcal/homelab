@@ -1,0 +1,22 @@
+#!/bin/bash
+# Deluge Execute plugin, "Torrent Complete" event.
+# Args: $1=torrent id  $2=torrent name  $3=folder containing it
+set -euo pipefail
+
+name="$2"
+dir="$3"
+out_dir="${ARCHIVE_DIR:-$HOME/Downloads}"
+out="$out_dir/$name.zip"
+
+# Already archived (e.g. event re-fired after a recheck)
+[[ -e "$out" ]] && exit 0
+
+# Store-only zip (-0: media doesn't compress); write under a temp name so the
+# Kasm download widget never shows a half-written archive as finished. zip
+# adds to an existing archive, so start from scratch; a failed zip (disk full)
+# doesn't leave its partial file behind.
+trap 'rm -f -- "$out.part"' ERR
+rm -f -- "$out.part"
+cd -- "$dir"
+zip -q -r -0 "$out.part" -- "$name"
+mv -- "$out.part" "$out"

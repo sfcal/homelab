@@ -1,0 +1,6 @@
+# Managed by Ansible (infrastructure/dashboard). How kanidm-mail-sender reaches
+# Kanidm: directly on the compose network, not through Caddy. Kanidm's own
+# certificate there is short-lived (tasks/kanidm.yml), so it isn't checked,
+# the same as on Caddy's hop.
+uri = "https://kanidm:8443"
+verify_ca = false

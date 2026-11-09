@@ -110,6 +110,32 @@
         href: https://cleanuparr.5am.video
         siteMonitor: http://10.2.0.5:11011
 
+    # Houndarr's read-only widget endpoint; its API key (Settings > Admin >
+    # API key) opens nothing else
+    - Houndarr:
+        icon: houndarr.png
+        href: https://houndarr.5am.video
+        siteMonitor: http://10.2.0.5:8877/api/health
+        widget:
+          type: customapi
+          url: http://10.2.0.5:8877/api/v1/widget
+          refreshInterval: 30000
+          mappings:
+            - field: totals.eligible
+              label: Eligible
+              format: number
+            - field: totals.gated
+              label: Gated
+              format: number
+            - field: totals.unreleased
+              label: Unreleased
+              format: number
+            - field: totals.searches_7d
+              label: Searches (7d)
+              format: number
+          headers:
+            X-Api-Key: {% raw %}{{HOMEPAGE_VAR_HOUNDARR_KEY}}{% endraw %}
+
 - Downloads:
     - SABnzbd:
         icon: sabnzbd.png

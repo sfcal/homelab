@@ -17,6 +17,7 @@ services:
       - HOMEPAGE_VAR_PROWLARR_KEY={{ homepage_prowlarr_key }}
       - HOMEPAGE_VAR_SABNZBD_KEY={{ homepage_sabnzbd_key }}
       - HOMEPAGE_VAR_PLEX_KEY={{ homepage_plex_key }}
+      - HOMEPAGE_VAR_HOUNDARR_KEY={{ homepage_houndarr_key }}
     # Localhost only (the VPS has a public IP); `tailscale serve` is the way in
     ports:
       - "127.0.0.1:3002:3000"
@@ -72,6 +73,22 @@ services:
     volumes:
       - /var/lib/dashboard/kanidm:/data
       - /opt/dashboard/kanidm/server.toml:/data/server.toml:ro
+
+  # Sends the mail Kanidm queues (password reset links) through Fastmail, as
+  # noreply@5am.cloud. Reaches Kanidm as kanidm:8443. Refuses to run as root.
+  kanidm-mail-sender:
+    image: {{ kanidm_tools_image }}
+    container_name: kanidm-mail-sender
+    restart: unless-stopped
+    user: "65534:65534"
+    command: /sbin/kanidm-mail-sender -c /etc/kanidm/config -m /etc/kanidm/mail-sender
+    # Warnings and errors only: at info it logs every 5-second queue check,
+    # and Docker keeps this host's logs with no size limit
+    environment:
+      - RUST_LOG=warn
+    volumes:
+      - /opt/dashboard/kanidm/client.toml:/etc/kanidm/config:ro
+      - /opt/dashboard/kanidm/mail-sender.toml:/etc/kanidm/mail-sender:ro
 
   # Public: Uptime Kuma's badges only (files/Caddyfile). Bound to the public
   # address: `tailscale serve` already holds ports 80 and 443 on the tailnet

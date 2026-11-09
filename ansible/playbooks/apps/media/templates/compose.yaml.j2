@@ -211,6 +211,28 @@ services:
     networks:
       - media
 
+  # searches missing/cutoff-unmet items a few at a time (Sonarr/Radarr only search new RSS posts)
+  houndarr:
+    image: {{ houndarr_image }}
+    container_name: houndarr
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 128m
+    depends_on:
+      - sonarr
+      - radarr
+    environment:
+      - PGID={{ media_stack_pgid }}
+      - PUID={{ media_stack_puid }}
+      - TZ={{ system_timezone }}
+      - HOUNDARR_SECURE_COOKIES=true
+    ports:
+      - "8877:8877"
+    volumes:
+      - {{ media_stack_data_path }}/houndarr:/data
+    networks:
+      - media
+
   tdarr-server:
     image: {{ tdarr_image }}
     container_name: tdarr-server
@@ -227,7 +249,6 @@ services:
       - webUIPort=8265
       - internalNode=true
       - inContainer=true
-      - ffmpegVersion=6
       - nodeName=TdarrServer
     ports:
       - "8265:8265"
@@ -238,7 +259,8 @@ services:
       - {{ media_stack_data_path }}/tdarr/logs:/app/logs
       - {{ media_stack_data_path }}/tdarr/data:/app/data
       - /mnt/data/media:/media
-      - /dev/shm/tdarr:/temp
+      # on disk, not /dev/shm: tmpfs counts against mem_limit, a big transcode OOM-kills Tdarr
+      - {{ media_stack_data_path }}/tdarr/temp:/temp
     devices:
       - /dev/dri:/dev/dri
     networks:

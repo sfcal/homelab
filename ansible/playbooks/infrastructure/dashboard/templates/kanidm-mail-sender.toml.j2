@@ -1,0 +1,13 @@
+# Managed by Ansible (infrastructure/dashboard). kanidm-mail-sender sends the
+# mail Kanidm queues (password reset links) as noreply@5am.cloud, through
+# Fastmail with an app password. Secrets: site_ovh/secrets.sops.yml.
+token = "{{ kanidm_mail_sender_token }}"
+# The sender's name and the start of each subject line
+instance_display_name = "5am.cloud"
+# Links in the mail point here, so they open only from the tailnet or a LAN
+instance_url = "https://auth.5am.cloud"
+mail_from_address = "noreply@5am.cloud"
+mail_reply_to_address = "noreply@5am.cloud"
+mail_relay = "smtps://smtp.fastmail.com"
+mail_username = "{{ kanidm_mail_username }}"
+mail_password = "{{ kanidm_mail_password }}"

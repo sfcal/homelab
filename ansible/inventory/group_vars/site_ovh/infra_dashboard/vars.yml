@@ -38,3 +38,9 @@ grafana_url: "http://dashboard:3000"
 
 # renovate: datasource=docker
 kanidm_image: "kanidm/server:1.12.0"
+# kanidm-mail-sender, which emails password reset links. Keep it at the
+# server's version: Renovate moves both in one pull request.
+# kanidm_mail_sender_token, kanidm_mail_username, kanidm_mail_password:
+# site_ovh/secrets.sops.yml (section infra_kanidm_email)
+# renovate: datasource=docker
+kanidm_tools_image: "kanidm/tools:1.12.0"

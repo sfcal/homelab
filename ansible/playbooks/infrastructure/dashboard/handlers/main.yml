@@ -29,6 +29,13 @@
     services:
       - kanidm
 
+- name: Restart kanidm-mail-sender
+  community.docker.docker_compose_v2:
+    project_src: /opt/dashboard
+    state: restarted
+    services:
+      - kanidm-mail-sender
+
 # Compose builds Caddy's image only when it's missing: rebuild it when its
 # Dockerfile changes.
 - name: Rebuild caddy

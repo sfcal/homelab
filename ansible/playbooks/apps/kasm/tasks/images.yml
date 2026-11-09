@@ -1,0 +1,36 @@
+---
+# Kasm workspace images: every folder in files/ with a Dockerfile is built
+# inside Kasm's own Docker (not the VM's) as localhost/<folder>:latest. Nothing
+# can be pulled from the localhost/ registry, so Kasm keeps the local build.
+# Only the work VM's agent has these images: restrict their workspaces to it.
+# The agent prunes images no workspace uses within 30 s (Aggressive mode), so
+# save a new image's workspace in Kasm before its first deploy.
+- name: Copy the workspace image build files.
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/files/"
+    dest: /opt/kasm/images/
+    mode: preserve
+    directory_mode: "0755"
+
+- name: Wait for Kasm's Docker.
+  ansible.builtin.command: docker exec kasm docker info
+  register: kasm_docker_info
+  until: kasm_docker_info.rc == 0
+  retries: 30
+  delay: 5
+  changed_when: false
+  when: kasm_workspace_images | length > 0
+
+# The container has no buildx, so this is Docker's classic builder. --pull
+# picks up new base images; an unchanged build keeps its image ID.
+- name: Build the workspace images.
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      before=$(docker exec kasm docker images --no-trunc -q localhost/{{ item }}:latest)
+      docker exec kasm docker build --pull -q -t localhost/{{ item }}:latest /images/{{ item }} >/dev/null
+      after=$(docker exec kasm docker images --no-trunc -q localhost/{{ item }}:latest)
+      [ "$before" = "$after" ] || echo changed
+  register: kasm_image_build
+  changed_when: "'changed' in kasm_image_build.stdout"
+  loop: "{{ kasm_workspace_images }}"

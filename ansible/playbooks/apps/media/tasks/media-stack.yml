@@ -28,11 +28,13 @@
     - "{{ media_stack_data_path }}/pulsarr"
     - "{{ media_stack_data_path }}/pulsarr/data"
     - "{{ media_stack_data_path }}/cleanuparr"
+    - "{{ media_stack_data_path }}/houndarr"
     - "{{ media_stack_data_path }}/tdarr"
     - "{{ media_stack_data_path }}/tdarr/server"
     - "{{ media_stack_data_path }}/tdarr/configs"
     - "{{ media_stack_data_path }}/tdarr/logs"
     - "{{ media_stack_data_path }}/tdarr/data"
+    - "{{ media_stack_data_path }}/tdarr/temp"
 
 - name: Create tmpfs mount directories.
   ansible.builtin.file:
@@ -42,7 +44,6 @@
   loop:
     - /dev/shm/plex
     - /dev/shm/tunarr
-    - /dev/shm/tdarr
 
 - name: Deploy compose.yaml.
   ansible.builtin.template:

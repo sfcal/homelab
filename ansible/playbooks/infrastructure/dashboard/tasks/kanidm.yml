@@ -23,6 +23,21 @@
   notify:
     - Restart kanidm
 
+# kanidm-mail-sender runs as nobody (compose.yaml.j2), which may read these but
+# not change them. mail-sender.toml holds its token and the SMTP password.
+- name: Deploy kanidm-mail-sender's config.
+  ansible.builtin.template:
+    src: "templates/kanidm-{{ item }}.j2"
+    dest: "/opt/dashboard/kanidm/{{ item }}"
+    owner: root
+    group: "65534"
+    mode: "0640"
+  loop:
+    - mail-sender.toml
+    - client.toml
+  notify:
+    - Restart kanidm-mail-sender
+
 # Certificate for the Caddy -> Kanidm hop, made once. It expires after 5 days,
 # which doesn't matter: Caddy doesn't verify this hop, and Kanidm starts and
 # serves with an expired one (tested with 1.12.0).
