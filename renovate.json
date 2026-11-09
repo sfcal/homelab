@@ -58,11 +58,12 @@
       "automergeType": "pr"
     },
     {
-      "description": "Pin pulsarr to 0.x (no v1 exists on Docker Hub)",
+      "description": "Keep kasm below 1.100: its Dec 2022 tags (1.120.2022xxxx) sort above the real 1.1x versions. Never automerge: a new image doesn't upgrade Kasm until the in-app update is run from the wizard",
       "matchPackageNames": [
-        "lakker/pulsarr"
+        "lscr.io/linuxserver/kasm"
       ],
-      "allowedVersions": "<1.0.0"
+      "allowedVersions": "<1.100.0",
+      "automerge": false
     },
     {
       "description": "kosync mixes 2- and 3-part tags (v2.1, v2.1.1); docker versioning would never offer v2.2/v3.0 from a 3-part pin",
@@ -103,5 +104,6 @@
   "schedule": [
     "before 6am every weekday"
   ],
-  "minimumReleaseAge": "1 day"
+  "minimumReleaseAge": "1 day",
+  "minimumReleaseAgeBehaviour": "timestamp-optional"
 }
