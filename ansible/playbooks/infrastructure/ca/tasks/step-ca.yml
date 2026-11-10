@@ -56,6 +56,74 @@
   delay: 3
   until: step_ca_health.status == 200
 
+# --- Chain from the YubiKey root ---
+# files/root_ca.crt is the one root for every site (task ca:root-init) and
+# files/intermediate_ca_<site>.crt is this site's intermediate, signed by it
+# (task ca:sign-intermediate, which also leaves the new key on the CA as
+# secrets/intermediate_ca_key.new). Nothing is switched unless the key on the
+# CA matches the certificate. A site with no signed intermediate yet keeps the
+# chain step-ca made for itself on first start.
+- name: Install the chain signed by the YubiKey root.
+  when: (playbook_dir + '/files/intermediate_ca_' + site + '.crt') is file
+  block:
+    - name: Create the staging directory for the chain.
+      ansible.builtin.file:
+        path: "/var/lib/step-ca/data/chain"
+        state: directory
+        owner: "{{ step_ca_uid }}"
+        group: "{{ step_ca_gid }}"
+        mode: "0755"
+
+    - name: Stage the root and this site's intermediate.
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "/var/lib/step-ca/data/chain/{{ item.dest }}"
+        owner: "{{ step_ca_uid }}"
+        group: "{{ step_ca_gid }}"
+        mode: "0644"
+      loop:
+        - { src: "files/root_ca.crt", dest: "root_ca.crt" }
+        - { src: "files/intermediate_ca_{{ site }}.crt", dest: "intermediate_ca.crt" }
+
+    - name: Switch to the staged chain once the intermediate key matches it.
+      ansible.builtin.command:
+        argv:
+          - docker
+          - exec
+          - step-ca
+          - sh
+          - -ec
+          - |
+            cd /home/step
+            key=secrets/intermediate_ca_key
+            pub() { step crypto key public --password-file secrets/password "$1"; }
+            want=$(step crypto key public chain/intermediate_ca.crt)
+            if [ -f $key.new ] && [ "$(pub $key.new)" = "$want" ]; then
+              mv $key.new $key
+              echo switched
+            fi
+            if [ "$(pub $key)" != "$want" ]; then
+              echo "The intermediate key on this CA does not match files/intermediate_ca_{{ site }}.crt: run task ca:sign-intermediate ENV={{ site }} again." >&2
+              exit 1
+            fi
+            for c in root_ca intermediate_ca; do
+              if ! cmp -s chain/$c.crt certs/$c.crt; then
+                cp chain/$c.crt certs/$c.crt
+                echo switched
+              fi
+            done
+            # The old self-made root is no longer the root: drop its key.
+            rm -f secrets/root_ca_key
+            fp=$(step certificate fingerprint certs/root_ca.crt)
+            if [ "$(jq -r .fingerprint config/defaults.json)" != "$fp" ]; then
+              jq --arg fp "$fp" '.fingerprint = $fp' config/defaults.json > config/defaults.json.tmp
+              mv config/defaults.json.tmp config/defaults.json
+              echo switched
+            fi
+      register: ca_chain_switch
+      changed_when: "'switched' in ca_chain_switch.stdout"
+      notify: Restart step-ca
+
 - name: Configure certificate duration claims.
   ansible.builtin.shell:
     cmd: >

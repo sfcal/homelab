@@ -1,6 +1,198 @@
 ---
-# One dashboard for both sites, on the OVH VPS. Widgets reach each site's LAN
-# over the tailnet (the VPS accepts the sites' subnet routes).
+# One dashboard for all three sites, on the OVH VPS. Widgets and status checks
+# reach each site's LAN over the tailnet (the VPS accepts the sites' subnet
+# routes).
+#
+# Four tabs; the layout in settings.yaml puts each group below on its tab:
+#   Overview       every service as a small card: icon, link, status dot
+#   wil, ldn, ovh  the site in full: Grafana panels and cards with widgets
+#
+# Homepage shows a group on one tab only, so every service is written twice:
+# a small card under Overview and its full card under its site. Group names
+# must be unique across the file, hence "(wil)", "(ldn)" and "(ovh)".
+#
+# A small card's link ends in "/" and its full card's doesn't. Quick launch
+# (start typing on the page) lists both cards, and two entries with the same
+# name and the same link make it show results that no longer match.
+
+# --- Overview ---
+
+- Media:
+    - Plex:
+        icon: plex.png
+        href: https://plex.5am.video/
+        siteMonitor: http://10.2.0.5:32400/identity
+
+    - Sonarr:
+        icon: sonarr.png
+        href: https://sonarr.5am.video/
+        siteMonitor: http://10.2.0.5:8989
+
+    - Radarr:
+        icon: radarr.png
+        href: https://radarr.5am.video/
+        siteMonitor: http://10.2.0.5:7878
+
+    - Bazarr:
+        icon: bazarr.png
+        href: https://bazarr.5am.video/
+        siteMonitor: http://10.2.0.5:6767
+
+    - Prowlarr:
+        icon: prowlarr.png
+        href: https://prowlarr.5am.video/
+        siteMonitor: http://10.2.0.5:9696
+
+    - SABnzbd:
+        icon: sabnzbd.png
+        href: https://sabnzbd.5am.video/
+        siteMonitor: http://10.2.0.5:8080
+
+    - Tdarr:
+        icon: tdarr.png
+        href: https://tdarr.5am.video/
+        siteMonitor: http://10.2.0.5:8265
+
+    - Frigate:
+        icon: frigate.png
+        href: https://frigate.5am.video/
+        siteMonitor: http://10.2.0.5:5000
+
+    - Tunarr:
+        icon: tunarr.png
+        href: https://tunarr.5am.video/
+        siteMonitor: http://10.2.0.5:8000
+
+    - Wizarr:
+        icon: wizarr.png
+        href: https://wizarr.5am.video/
+        siteMonitor: http://10.2.0.5:5690
+
+    - Pulsarr:
+        icon: pulsarr.png
+        href: https://pulsarr.5am.video/
+        siteMonitor: http://10.2.0.5:3003/health
+
+    - Cleanuparr:
+        icon: cleanuparr.png
+        href: https://cleanuparr.5am.video/
+        siteMonitor: http://10.2.0.5:11011
+
+    - Houndarr:
+        icon: houndarr.png
+        href: https://houndarr.5am.video/
+        siteMonitor: http://10.2.0.5:8877/api/health
+
+- Apps:
+    - Website:
+        icon: mdi-web
+        href: https://samuel.5am.video/
+        siteMonitor: http://10.2.20.45:8090
+
+    - Birdle:
+        icon: mdi-bird
+        href: https://birdle.sfc.al/
+        siteMonitor: http://10.2.20.45:8091
+
+    - Kasm:
+        icon: kasm.png
+        href: https://kasm.ldn.5am.cloud/
+        siteMonitor: https://10.3.20.50:4443
+
+    - MicroBin:
+        icon: microbin.png
+        href: https://bin.ldn.5am.cloud/
+        siteMonitor: http://10.3.20.50:8081
+
+    - Restreamer:
+        icon: restreamer.png
+        href: https://restreamer.ldn.5am.cloud/
+        siteMonitor: http://10.3.20.50:8710
+
+    - Ignis:
+        icon: obsidian.png
+        href: https://ignis.ldn.5am.cloud/
+        siteMonitor: http://10.3.20.50:8082
+
+    - RomM:
+        icon: romm.png
+        href: https://roms.ldn.5am.cloud/
+        siteMonitor: http://10.3.20.55:8085
+
+    # Wolf has no web page; the check is Moonlight's server-info endpoint
+    - Wolf:
+        icon: mdi-controller
+        siteMonitor: http://10.3.20.55:47989/serverinfo
+
+    # No status dot: KOSync answers 412 to a check without KOReader's Accept
+    # header. Its health is on the ldn tab.
+    - KOSync:
+        icon: koreader.png
+        href: https://kosync.ldn.5am.cloud/
+
+- Infrastructure:
+    - Proxmox (wil):
+        icon: proxmox.png
+        href: https://vm.wil.5am.cloud/
+        siteMonitor: https://10.2.20.7:8006
+
+    - PBS:
+        icon: proxmox-backup-server.png
+        href: https://pbs.wil.5am.cloud/
+        siteMonitor: https://10.2.10.99:8007
+
+    - TrueNAS:
+        icon: truenas.png
+        href: https://nas.wil.5am.cloud/
+        siteMonitor: http://10.2.0.100:80
+
+    - KVM (wil):
+        icon: mdi-monitor-dashboard
+        href: https://kvm.wil.5am.cloud/
+        siteMonitor: https://10.2.0.78:443
+
+    - Proxmox (ldn):
+        icon: proxmox.png
+        href: https://vm.ldn.5am.cloud/
+        siteMonitor: https://10.3.20.10:8006
+
+    - KVM (ldn):
+        icon: mdi-monitor-dashboard
+        href: https://kvm.ldn.5am.cloud/
+        siteMonitor: http://10.3.30.227:80
+
+    - Netboot:
+        icon: netboot.png
+        href: https://netboot.ldn.5am.cloud/
+        siteMonitor: http://10.3.20.60:3000
+
+    - Kanidm:
+        icon: kanidm.png
+        href: https://auth.5am.cloud/
+        siteMonitor: https://kanidm:8443/status
+
+- Monitoring:
+    - Grafana:
+        icon: grafana.png
+        href: http://dashboard:3000/
+        siteMonitor: http://grafana:3000
+
+    - Uptime Kuma:
+        icon: uptime-kuma.png
+        href: http://dashboard:3001/
+        siteMonitor: http://uptime-kuma:3001
+
+    - Prometheus (wil):
+        icon: prometheus.png
+        href: https://prometheus.wil.5am.cloud/
+        siteMonitor: http://10.2.20.30:9090
+
+    - Prometheus (ldn):
+        icon: prometheus.png
+        href: https://prometheus.ldn.5am.cloud/
+        siteMonitor: http://10.3.20.30:9090
+
+# --- wil ---
 
 # Grafana panels from the "System Activity" dashboard
 # (dashboard/files/grafana/dashboards/system_activity.json), from the Grafana
@@ -33,35 +225,6 @@
           type: iframe
           name: disk-wil
           src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-wil&panelId=4&theme=light&hideLogo=true
-
-- System Activity (ldn):
-    - CPU:
-        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
-        widget:
-          type: iframe
-          name: cpu-ldn
-          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=1&theme=light&hideLogo=true
-
-    - Memory:
-        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
-        widget:
-          type: iframe
-          name: memory-ldn
-          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=2&theme=light&hideLogo=true
-
-    - Network:
-        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
-        widget:
-          type: iframe
-          name: network-ldn
-          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=3&theme=light&hideLogo=true
-
-    - Disk I/O:
-        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
-        widget:
-          type: iframe
-          name: disk-ldn
-          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=4&theme=light&hideLogo=true
 
 - Media Management:
     - Sonarr:
@@ -197,6 +360,7 @@
         icon: plex.png
         description: Media server
         href: https://plex.5am.video
+        siteMonitor: http://10.2.0.5:32400/identity
         widget:
           type: plex
           url: http://10.2.0.5:32400
@@ -223,7 +387,6 @@
         href: https://wizarr.5am.video
         siteMonitor: http://10.2.0.5:5690
 
-# Per-site groups: wil, then ldn
 - Apps (wil):
     - Website:
         icon: mdi-web
@@ -236,6 +399,95 @@
         description: Bird identification game
         href: https://birdle.sfc.al
         siteMonitor: http://10.2.20.45:8091
+
+- Infrastructure (wil):
+    - Proxmox:
+        icon: proxmox.png
+        description: Hypervisor
+        href: https://vm.wil.5am.cloud
+        siteMonitor: https://10.2.20.7:8006
+
+    - PBS:
+        icon: proxmox-backup-server.png
+        description: Backups
+        href: https://pbs.wil.5am.cloud
+        siteMonitor: https://10.2.10.99:8007
+
+    - TrueNAS:
+        icon: truenas.png
+        description: NAS
+        href: https://nas.wil.5am.cloud
+        siteMonitor: http://10.2.0.100:80
+
+    - KVM:
+        icon: mdi-monitor-dashboard
+        description: Remote console
+        href: https://kvm.wil.5am.cloud
+        siteMonitor: https://10.2.0.78:443
+
+# Prometheus runs on the site's monitoring VM. The node exporters after it are
+# the targets of prometheus_node_targets in
+# site_wil/infra_monitoring/prometheus.yml.
+- Monitoring (wil):
+    - Prometheus:
+        icon: prometheus.png
+        description: Metrics
+        href: https://prometheus.wil.5am.cloud
+        siteMonitor: http://10.2.20.30:9090
+        widget:
+          type: prometheus
+          url: http://10.2.20.30:9090
+          highlight:
+            targets_down:
+              numeric:
+                - {level: good, when: eq, value: 0}
+                - {level: warn, when: gt, value: 0}
+
+{% for target, role in [('10.2.20.30:9100', 'Monitoring VM'), ('10.2.0.5:9100', 'Media VM'), ('10.2.20.53:9100', 'Networking VM'), ('10.2.20.45:9100', 'Web VM')] %}
+    - {{ target.split(':')[0] }}:
+        icon: prometheus.png
+        description: {{ role }}
+        siteMonitor: http://{{ target }}
+        widget:
+          type: prometheusmetric
+          url: http://10.2.20.30:9090
+          metrics:
+            - label: CPU Usage
+              query: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle", instance="{{ target }}"}[5m])) * 100)
+              format:
+                type: percent
+{% endfor %}
+
+# --- ldn ---
+
+- System Activity (ldn):
+    - CPU:
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
+        widget:
+          type: iframe
+          name: cpu-ldn
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=1&theme=light&hideLogo=true
+
+    - Memory:
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
+        widget:
+          type: iframe
+          name: memory-ldn
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=2&theme=light&hideLogo=true
+
+    - Network:
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
+        widget:
+          type: iframe
+          name: network-ldn
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=3&theme=light&hideLogo=true
+
+    - Disk I/O:
+        href: http://dashboard:3000/d/system-activity?var-ds=prometheus-ldn
+        widget:
+          type: iframe
+          name: disk-ldn
+          src: http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-ldn&panelId=4&theme=light&hideLogo=true
 
 - Apps (ldn):
     - Kasm:
@@ -255,6 +507,12 @@
         description: Live streaming
         href: https://restreamer.ldn.5am.cloud
         siteMonitor: http://10.3.20.50:8710
+
+    - Ignis:
+        icon: obsidian.png
+        description: Obsidian in the browser
+        href: https://ignis.ldn.5am.cloud
+        siteMonitor: http://10.3.20.50:8082
 
     - RomM:
         icon: romm.png
@@ -288,25 +546,6 @@
                 - {level: good, when: equals, value: OK}
                 - {level: danger, when: equals, value: OK, negate: true}
 
-- Infrastructure (wil):
-    - Proxmox:
-        icon: proxmox.png
-        description: Hypervisor
-        href: https://vm.wil.5am.cloud
-        siteMonitor: https://10.2.20.7:8006
-
-    - TrueNAS:
-        icon: truenas.png
-        description: NAS
-        href: https://nas.wil.5am.cloud
-        siteMonitor: http://10.2.0.100:80
-
-    - KVM:
-        icon: mdi-monitor-dashboard
-        description: Remote console
-        href: https://kvm.wil.5am.cloud
-        siteMonitor: https://10.2.0.78:443
-
 - Infrastructure (ldn):
     - Proxmox:
         icon: proxmox.png
@@ -326,46 +565,8 @@
         href: https://netboot.ldn.5am.cloud
         siteMonitor: http://10.3.20.60:3000
 
-# Prometheus runs on each site's monitoring VM
-- Monitoring (wil):
-    # On this VPS, in Homepage's compose project; one Grafana for both sites
-    - Grafana:
-        icon: grafana.png
-        description: Dashboards
-        href: http://dashboard:3000
-        siteMonitor: http://grafana:3000
-
-    - Prometheus:
-        icon: prometheus.png
-        description: Metrics
-        href: https://prometheus.wil.5am.cloud
-        siteMonitor: http://10.2.20.30:9090
-        widget:
-          type: prometheus
-          url: http://10.2.20.30:9090
-          highlight:
-            targets_down:
-              numeric:
-                - {level: good, when: eq, value: 0}
-                - {level: warn, when: gt, value: 0}
-
-    # On this VPS, in Homepage's compose project; the widget reads the
-    # `default` status page
-    - Uptime Kuma:
-        icon: uptime-kuma.png
-        description: Uptime checks
-        href: http://dashboard:3001
-        siteMonitor: http://uptime-kuma:3001
-        widget:
-          type: uptimekuma
-          url: http://uptime-kuma:3001
-          slug: default
-          highlight:
-            down:
-              numeric:
-                - {level: good, when: eq, value: 0}
-                - {level: danger, when: gt, value: 0}
-
+# Node exporters: the targets of prometheus_node_targets in
+# site_ldn/infra_monitoring/prometheus.yml.
 - Monitoring (ldn):
     - Prometheus:
         icon: prometheus.png
@@ -381,24 +582,6 @@
                 - {level: good, when: eq, value: 0}
                 - {level: warn, when: gt, value: 0}
 
-# Same targets as prometheus_node_targets in site_<site>/infra_monitoring/prometheus.yml
-- Node Exporters (wil):
-{% for target, role in [('10.2.20.30:9100', 'Monitoring VM'), ('10.2.0.5:9100', 'Media VM'), ('10.2.20.53:9100', 'Networking VM'), ('10.2.20.45:9100', 'Web VM')] %}
-    - {{ target.split(':')[0] }}:
-        icon: prometheus.png
-        description: {{ role }}
-        siteMonitor: http://{{ target }}
-        widget:
-          type: prometheusmetric
-          url: http://10.2.20.30:9090
-          metrics:
-            - label: CPU Usage
-              query: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle", instance="{{ target }}"}[5m])) * 100)
-              format:
-                type: percent
-{% endfor %}
-
-- Node Exporters (ldn):
 {% for target, role in [('10.3.20.30:9100', 'Monitoring VM'), ('10.3.20.53:9100', 'Networking VM'), ('10.3.20.70:9100', 'Web VM'), ('10.3.20.55:9100', 'Gaming VM')] %}
     - {{ target.split(':')[0] }}:
         icon: prometheus.png
@@ -413,3 +596,38 @@
               format:
                 type: percent
 {% endfor %}
+
+# --- ovh ---
+
+# The VPS's own services, in Homepage's compose project: the status checks
+# and the widget reach them by container name.
+- Services (ovh):
+    # One Grafana for both sites
+    - Grafana:
+        icon: grafana.png
+        description: Dashboards
+        href: http://dashboard:3000
+        siteMonitor: http://grafana:3000
+
+    # The widget reads the `default` status page
+    - Uptime Kuma:
+        icon: uptime-kuma.png
+        description: Uptime checks
+        href: http://dashboard:3001
+        siteMonitor: http://uptime-kuma:3001
+        widget:
+          type: uptimekuma
+          url: http://uptime-kuma:3001
+          slug: default
+          highlight:
+            down:
+              numeric:
+                - {level: good, when: eq, value: 0}
+                - {level: danger, when: gt, value: 0}
+
+    # One login for both sites
+    - Kanidm:
+        icon: kanidm.png
+        description: Single sign-on
+        href: https://auth.5am.cloud
+        siteMonitor: https://kanidm:8443/status

@@ -162,7 +162,7 @@ Keep `root@pam`. It is the way in through `https://<host-ip>:8006` when Kanidm o
 
 ## Proxmox Backup Server
 
-WIL's backup server (`10.2.20.75`, `https://pbs.wil.5am.cloud`) logs in the same way: realm `sso` (the default realm), client `pbs-wil`, `pbs` keeps `auth: true`. It resolves `auth.5am.cloud` through wil's BIND, so it needs no `/etc/hosts` line. The client was created as `idm_admin`:
+WIL's backup server (`10.2.10.99`, a container on the NAS; `https://pbs.wil.5am.cloud`) logs in the same way: realm `sso` (the default realm), client `pbs-wil`, `pbs` keeps `auth: true`. Its resolver does not know `auth.5am.cloud` either, so it has the same `/etc/hosts` line as the Proxmox hosts. The client was created as `idm_admin`:
 
 ```bash
 kanidm system oauth2 create pbs-wil "Proxmox Backup (wil)" https://pbs.wil.5am.cloud
@@ -183,20 +183,20 @@ kanidm system oauth2 prefer-short-username pbs-wil
 Its secret is `kanidm_pbs_client_secret` in WIL's secrets. The realm, with the key piped from there:
 
 ```bash
-sops decrypt --extract '["kanidm_pbs_client_secret"]' ansible/inventory/group_vars/site_wil/secrets.sops.yml | ssh root@10.2.20.75 'key=$(cat); proxmox-backup-manager openid create sso --issuer-url https://auth.5am.cloud/oauth2/openid/pbs-wil --client-id pbs-wil --client-key "$key" --username-claim preferred_username --autocreate false --default true'
+sops decrypt --extract '["kanidm_pbs_client_secret"]' ansible/inventory/group_vars/site_wil/secrets.sops.yml | ssh root@10.2.10.99 'key=$(cat); proxmox-backup-manager openid create sso --issuer-url https://auth.5am.cloud/oauth2/openid/pbs-wil --client-id pbs-wil --client-key "$key" --username-claim preferred_username --autocreate false --default true'
 ```
 
 Then each user, made an admin:
 
 ```bash
-ssh root@10.2.20.75 proxmox-backup-manager user create <user>@sso
+ssh root@10.2.10.99 proxmox-backup-manager user create <user>@sso
 ```
 
 ```bash
-ssh root@10.2.20.75 proxmox-backup-manager acl update / Admin --auth-id <user>@sso
+ssh root@10.2.10.99 proxmox-backup-manager acl update / Admin --auth-id <user>@sso
 ```
 
-Keep `root@pam`: it is the way in through `https://10.2.20.75:8007` when Kanidm or Caddy is down. Proxmox VE and backup clients reach PBS by IP and fingerprint, not through the `pbs` name, so the gate does not affect them.
+Keep `root@pam`: it is the way in through `https://10.2.10.99:8007` when Kanidm or Caddy is down. Proxmox VE and backup clients reach PBS by IP and fingerprint, not through the `pbs` name, so the gate does not affect them.
 
 ## Kasm
 
@@ -248,7 +248,7 @@ Kasm's own login page is at `https://kasm.ldn.5am.cloud/#/staticlogin`. It is th
 
 **Every flagged service answers `502` after a deploy** — oauth2-proxy is not running: `ssh <networking-ip> docker ps`, then `docker logs oauth2-proxy`. It must reach `auth.5am.cloud`, which the container's `extra_hosts` pins to the VPS.
 
-**`auth.5am.cloud` does not resolve** — on a LAN it comes from the site's BIND; away from home, from the tailnet's split DNS route. Hosts that use neither need a pin: the Proxmox hosts have the `/etc/hosts` line, and oauth2-proxy's container has it in `extra_hosts`.
+**`auth.5am.cloud` does not resolve** — on a LAN it comes from the site's BIND; away from home, from the tailnet's split DNS route. Hosts that use neither need a pin: the Proxmox hosts and the backup server have the `/etc/hosts` line, and oauth2-proxy's container has it in `extra_hosts`.
 
 **Kasm's login ends in `Internal Error`** — Kasm's log has the reason: `ssh 10.3.20.50 'docker exec kasm docker logs --since 10m kasm_api 2>&1' | grep -E 'Failed to find|\(invalid_'`. `Failed to find groups attribute` means Groups Attribute is not empty. `The authorization code has already been used` means the error page was reloaded: start again from the login page.
 

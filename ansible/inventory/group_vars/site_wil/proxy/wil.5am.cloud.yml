@@ -14,7 +14,7 @@ wil_services:
     tls_skip_verify: true
     auth: true
   - name: pbs
-    backend_host: 10.2.20.75
+    backend_host: 10.2.10.99
     backend_port: 8007
     proxied: true
     tls_skip_verify: true

@@ -192,6 +192,18 @@ div:has(> .information-widget-resource) + div {
   font-weight: 600;
 }
 
+/* --- Rows --- */
+/* Five cards across (columns: 5 in settings.yaml) get too narrow in a
+   window under 1280px: names run into the status dot and a card's third
+   tile is cut off. Four across there. The widths are Homepage's own
+   breakpoints (64rem = 1024px, 80rem = 1280px), in its units, so the two
+   switch together at any zoom or font size. */
+@media (min-width: 64rem) and (width < 80rem) {
+  .services-list.lg\:grid-cols-5 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* --- Section headers --- */
 .service-group-name,
 .bookmark-group-name {

@@ -7,6 +7,11 @@ vars:
   CA_PORT: '9000'
   DEFAULT_DURATION: '8760h'
   OUTPUT_DIR: 'inventory/group_vars/site_{{.ENV}}/infra_ca'
+  # Root CA: its key lives only on the YubiKey (PIV slot 9c)
+  PKI_DIR: 'playbooks/infrastructure/ca/files'
+  ROOT_NAME: '5am Root CA'
+  ROOT_KEY: 'yubikey:slot-id=9c'
+  ROOT_KMS: 'yubikey:?pin-prompt'
 
 tasks:
   sign:
@@ -39,6 +44,56 @@ tasks:
       - scp {{.CA_USER}}@{{.CA_HOST}}:/opt/step-ca/root_ca.crt {{.OUTPUT_DIR}}/root_ca.crt
       - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo rm -f /tmp/{{.CSR_BASENAME}} /tmp/{{.CERT_NAME}}.crt && sudo docker exec {{.CA_CONTAINER}} rm -f /tmp/{{.CSR_BASENAME}} /tmp/{{.CERT_NAME}}.crt"
       - echo ">>> Done! Certificate saved to {{.OUTPUT_DIR}}/{{.CERT_NAME}}.crt"
+
+  root-init:
+    dir: '{{.ROOT_DIR}}/ansible'
+    desc: "Create the root key on the YubiKey and its certificate (once; change the PIN and PUK first)"
+    interactive: true
+    preconditions:
+      - sh: test ! -f {{.PKI_DIR}}/root_ca.crt
+        msg: "{{.PKI_DIR}}/root_ca.crt exists: the root is already made, and making it again destroys its key."
+      - sh: ykman piv info >/dev/null
+        msg: "No YubiKey found. Plug it in (needs ykman)."
+      - sh: "! ykman piv keys info 9c >/dev/null 2>&1"
+        msg: "PIV slot 9c on the YubiKey already holds a key."
+    cmds:
+      - echo ">>> Creating the root key on the YubiKey (P-384, PIN and touch for every signature)..."
+      - step kms create --kty EC --crv P384 --pin-policy ALWAYS --touch-policy ALWAYS '{{.ROOT_KEY}}'
+      - echo ">>> Signing the root certificate. Enter the PIN when asked, then touch the key when it blinks."
+      - step certificate create '{{.ROOT_NAME}}' {{.PKI_DIR}}/root_ca.crt --profile root-ca --not-after 175200h --kms '{{.ROOT_KMS}}' --key '{{.ROOT_KEY}}'
+      - step kms certificate --import {{.PKI_DIR}}/root_ca.crt '{{.ROOT_KEY}}'
+      - echo ">>> Replacing the default management key with a random one kept on the YubiKey behind the PIN..."
+      - ykman piv access change-management-key --generate --protect
+      - step certificate inspect --short {{.PKI_DIR}}/root_ca.crt
+
+  sign-intermediate:
+    dir: '{{.ROOT_DIR}}/ansible'
+    desc: "Make a new intermediate key on the site's CA and sign it with the YubiKey root (then deploy-ca)"
+    interactive: true
+    vars:
+      CA_HOST:
+        sh: ansible 'infra_ca:&site_{{.ENV}}' -i {{.HOSTS_FILE}} --list-hosts 2>/dev/null | awk 'NR == 2 {print $1}'
+      SITE_CIDR:
+        sh: ansible localhost -i {{.HOSTS_FILE}} -m debug -a 'msg={{"{{"}} sites.{{.ENV}}.cidr {{"}}"}}' 2>/dev/null | awk -F'"' '/"msg"/ {print $4}'
+      CSR:
+        sh: echo "${TMPDIR:-/tmp}/intermediate_ca_{{.ENV}}.csr"
+      CERT: '{{.PKI_DIR}}/intermediate_ca_{{.ENV}}.crt'
+    preconditions:
+      - sh: test -f {{.PKI_DIR}}/root_ca.crt
+        msg: "No root yet. Run task ca:root-init first."
+      - sh: test -n "{{.CA_HOST}}" && test -n "{{.SITE_CIDR}}"
+        msg: "No CA host or LAN range for ENV={{.ENV}}."
+    cmds:
+      - echo ">>> Creating a new intermediate key on {{.CA_HOST}} (it never leaves the CA)..."
+      - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker exec {{.CA_CONTAINER}} step certificate create '{{.ENV | upper}} Homelab CA Intermediate CA' /tmp/intermediate_ca.csr /home/step/secrets/intermediate_ca_key.new --csr --force --password-file=/home/step/secrets/password"
+      - ssh -T {{.CA_USER}}@{{.CA_HOST}} "sudo docker exec {{.CA_CONTAINER}} cat /tmp/intermediate_ca.csr" > "{{.CSR}}"
+      - echo ">>> Signing for {{.ENV}}.5am.cloud and {{.SITE_CIDR}}. Enter the PIN when asked, then touch the key when it blinks."
+      - step certificate sign --template {{.PKI_DIR}}/intermediate.tpl --set domain={{.ENV}}.5am.cloud --set cidr={{.SITE_CIDR}} --not-after 43800h --kms '{{.ROOT_KMS}}' "{{.CSR}}" {{.PKI_DIR}}/root_ca.crt '{{.ROOT_KEY}}' > {{.CERT}}.tmp
+      - step certificate verify {{.CERT}}.tmp --roots {{.PKI_DIR}}/root_ca.crt
+      - mv {{.CERT}}.tmp {{.CERT}}
+      - rm -f "{{.CSR}}"
+      - step certificate inspect --short {{.CERT}}
+      - echo ">>> Signed. Now run task ansible:deploy-ca ENV={{.ENV}}"
 
   root:
     dir: '{{.ROOT_DIR}}/ansible'

@@ -9,19 +9,38 @@ Step-CA provides a private certificate authority for issuing internal TLS certif
 
 ```mermaid
 graph TD
-    StepCA[Step-CA Server]
-    Service1[Service A]
-    Service2[Service B]
-    RootCert[Root CA Certificate]
+    Root[5am Root CA<br/>key on the YubiKey]
+    WIL[WIL intermediate<br/>wil.5am.cloud, 10.2.0.0/16]
+    LDN[LDN intermediate<br/>ldn.5am.cloud, 10.3.0.0/16]
+    Service1[Services at wil]
+    Service2[Services at ldn]
 
-    StepCA -->|issues cert| Service1
-    StepCA -->|issues cert| Service2
-    StepCA -->|exports| RootCert
-    RootCert -->|trusted by| Service1
-    RootCert -->|trusted by| Service2
+    Root -->|signs| WIL
+    Root -->|signs| LDN
+    WIL -->|issues certs| Service1
+    LDN -->|issues certs| Service2
 ```
 
-Step-CA initializes on first run with a root CA certificate and an admin provisioner. Services request certificates via the ACME protocol or the `step` CLI. The root CA certificate is exported and can be distributed to clients for trust.
+There is one root for both sites. Its key was generated on a YubiKey (PIV slot 9c) and cannot be copied off it; every signature needs the PIN and a touch. There is no backup: if the YubiKey is lost, the intermediates keep working until they expire, but a new root has to be made and trusted everywhere.
+
+Each site's Step-CA holds an intermediate signed by that root. The intermediate carries name constraints, so it can only issue for its own site's domain (`<site>.5am.cloud` and anything under it), its LAN range and `127.0.0.1`. Step-CA refuses other names, and clients reject such a certificate even if one were made with a stolen intermediate key. Services request certificates via the ACME protocol or the `step` CLI. Devices only need to trust the one root, `ansible/playbooks/infrastructure/ca/files/root_ca.crt`.
+
+### Root and intermediates
+
+Needs `ykman`, `step` and the `step-kms-plugin` on the machine with the YubiKey.
+
+```bash
+# Once, ever: change the PIN and PUK, then make the root on the YubiKey
+ykman piv access change-pin
+ykman piv access change-puk
+task ca:root-init
+
+# Per site, and again before an intermediate expires (5 years)
+task ca:sign-intermediate ENV=wil
+task ansible:deploy-ca ENV=wil
+```
+
+`ca:sign-intermediate` makes a new intermediate key on the site's CA (it never leaves the VM), signs it on the YubiKey and saves the certificate as `files/intermediate_ca_<site>.crt`. The deploy installs the root and the intermediate, switches to the new key only if it matches the certificate, deletes the key of the root Step-CA made for itself on first start, and restarts the CA. A site with no signed intermediate in `files/` keeps Step-CA's self-made chain.
 
 ## File Locations
 
@@ -31,6 +50,9 @@ Step-CA initializes on first run with a root CA certificate and an admin provisi
 | `playbooks/infrastructure/ca/tasks/step-ca.yml` | Installation and configuration task |
 | `playbooks/infrastructure/ca/templates/compose.yaml.j2` | Docker Compose service definition |
 | `playbooks/infrastructure/ca/handlers/main.yml` | Container lifecycle handlers |
+| `playbooks/infrastructure/ca/files/root_ca.crt` | The root certificate (public) |
+| `playbooks/infrastructure/ca/files/intermediate_ca_<site>.crt` | Each site's intermediate certificate (public) |
+| `playbooks/infrastructure/ca/files/intermediate.tpl` | Template for intermediates (name constraints) |
 | `inventory/group_vars/site_<env>/infra_ca/vars.yml` | Per-environment CA variables |
 | `inventory/group_vars/site_<env>/secrets.sops.yml` | Encrypted provisioner password (section `infra_ca`) |
 

@@ -85,8 +85,8 @@ graph TD
 | `playbooks/infrastructure/dashboard/files/grafana/provisioning/` | Grafana datasources (each site's Prometheus) and dashboard provider |
 | `playbooks/infrastructure/dashboard/files/grafana/dashboards/` | Grafana dashboards (JSON) |
 | `playbooks/infrastructure/dashboard/files/Caddyfile` | Public site: Uptime Kuma's badges only |
-| `playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2` | Homepage services dashboard |
-| `playbooks/infrastructure/dashboard/templates/homepage/bookmarks.yaml.j2` | Homepage bookmarks |
+| `playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2` | Homepage service cards, for all four tabs |
+| `playbooks/infrastructure/dashboard/templates/homepage/bookmarks.yaml.j2` | Homepage bookmarks (none) |
 | `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme, tabs and layout |
 | `playbooks/infrastructure/dashboard/templates/homepage/widgets.yaml.j2` | Homepage widgets |
 | `playbooks/infrastructure/dashboard/files/homepage/custom.css` | Homepage colours, type and card styles |
@@ -251,18 +251,31 @@ Homepage is configured via four YAML template files and a stylesheet:
 
 | File | Purpose |
 |----------|---------|
-| `services.yaml.j2` | Service cards with status widgets (Grafana graphs, media, apps, infrastructure, monitoring, node exporters) |
-| `bookmarks.yaml.j2` | Quick links (TrueNAS, Proxmox) |
-| `settings.yaml.j2` | Theme (light, gray), status dots, tabs (Overview, Media, Apps), group icons, layout (row style, column counts) |
+| `services.yaml.j2` | Service cards: a small card per service for the Overview tab, and the full cards with widgets for the site tabs (Grafana graphs, media, apps, infrastructure, monitoring) |
+| `bookmarks.yaml.j2` | Empty: every link is a card on the Overview tab. The file stays, because Homepage writes its example bookmarks when it is missing |
+| `settings.yaml.j2` | Theme (light, gray), status dots, tabs (Overview, wil, ldn, ovh), group icons, layout (row style, column counts) |
 | `widgets.yaml.j2` | Global widgets (the VPS's resources, search bar, datetime) |
 | `files/homepage/custom.css` | The look: the layout of a dashboard shared in [Homepage's "Share your homepage" thread](https://github.com/gethomepage/homepage/discussions/473#discussioncomment-18831380) in the colours of [samuel.computer](https://samuel.computer) (sky page, frosted-glass header, white cards, olive accents, Inter) |
 
+The dashboard has four tabs:
+
+| Tab | Shows |
+|-----|-------|
+| Overview | Every service of all three sites as a small card (icon, link, status dot), in the groups Media, Apps, Infrastructure and Monitoring. Opens first |
+| wil | wil in full: System Activity graphs, the media stack's cards with their widgets, apps, infrastructure, Prometheus and the node exporters |
+| ldn | The same for ldn |
+| ovh | The VPS's own services: Grafana, Uptime Kuma, Kanidm |
+
 `services.yaml.j2` is plain Homepage YAML; edit it directly. These parts are less obvious:
 
-- **Per-site groups:** System Activity, Apps, Infrastructure, Monitoring and Node Exporters appear once per site, named `(wil)` and `(ldn)`. A new group needs a matching entry in the `layout` of `settings.yaml.j2`, with the `tab` it belongs on; a group left out of `layout` shows on every tab.
+- **Two cards per service:** Homepage shows a group on one tab only, so each service is written twice: a small card (`icon`, `href`, `siteMonitor`) in an Overview group, and its full card (with `description` and widgets) in its site's group. Change a link or a status URL in both.
+- **Links:** a small card's `href` ends in `/` and its full card's doesn't. Quick launch (start typing on the page) lists both cards, and two entries with the same name and the same link make it show results that no longer match what was typed.
+- **Group names** are unique across the file, because Homepage finds a card by its group's name. That is why most groups on the site tabs carry their site: `Apps (wil)`, `Apps (ldn)`, `Services (ovh)`. A new group needs a matching entry in the `layout` of `settings.yaml.j2`, with the `tab` it belongs on; a group left out of `layout` shows on every tab.
+- **Status dots:** `siteMonitor` requests the URL from the VPS and counts any answer up to 403 as up. KOSync's small card has none: it answers 412 to a request without KOReader's `Accept` header, so only its full card checks it, with a `customapi` widget that sends the header.
 - **Tile colours:** a widget's `highlight` rules mark tiles good, warn or danger, and `custom.css` tints them lime, orange or pink (Homepage's own tints lose to the tile background). Used for Prometheus targets down, Uptime Kuma sites down, Tdarr errors, Prowlarr failed grabs and KOSync health.
-- **System Activity** shows the four panels of the System Activity Grafana dashboard once per site, in iframes from `http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-<site>&panelId=1` to `4`, in Grafana's light theme (`theme=light`). `var-ds` picks the site's Prometheus. Grafana allows anonymous viewing and embedding. The time range and refresh interval come from the dashboard JSON.
-- **Node Exporters** lists the targets of each site's `prometheus_node_targets` by hand; add a node there too.
+- **System Activity** shows the four panels of the System Activity Grafana dashboard on each site's tab, in iframes from `http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-<site>&panelId=1` to `4`, in Grafana's light theme (`theme=light`). `var-ds` picks the site's Prometheus. Grafana allows anonymous viewing and embedding. The time range and refresh interval come from the dashboard JSON.
+- **Node exporters** follow Prometheus in each site's Monitoring group: the targets of the site's `prometheus_node_targets`, listed by hand; add a node there too.
+- **Five cards in a row** (`columns: 5`: the Overview groups and the Monitoring groups) become four in a window 1024px to 1279px wide, where five are too narrow (`custom.css`). Narrower windows get Homepage's own two in a row, then one.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
 <small>**Sources:** `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2)</small>
@@ -348,10 +361,10 @@ These variables apply to all monitoring containers:
     task ansible:deploy-monitoring ENV=wil
     ```
 
-### Add a Homepage service widget
+### Add a service to Homepage
 
 1. Edit `ansible/playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2`
-2. Add a new service entry under the appropriate section
+2. Add the service twice: its full card (description, widget) to a group of its site, and a small card (`icon`, `href` ending in `/`, `siteMonitor`) to the matching Overview group
 3. If the service requires an API key, add the key to the `infra_dashboard` section of `group_vars/site_ovh/secrets.sops.yml` and pass it through `dashboard/templates/compose.yaml.j2`
 4. Deploy:
 

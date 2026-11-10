@@ -19,7 +19,7 @@ Caddy handles certificate issuance, renewal, and OCSP stapling automatically.
 
 ## Private CA (Step-CA)
 
-[Step-CA](../infrastructure/ca/index.md) provides a private certificate authority for internal services that need TLS but aren't behind Caddy.
+[Step-CA](../infrastructure/ca/index.md) provides a private certificate authority for internal services that need TLS but aren't behind Caddy. Both sites chain to one root whose key is on a YubiKey; each site's CA can only issue for its own `<site>.5am.cloud` names and LAN addresses.
 
 ### Check CA Health
 
@@ -28,6 +28,8 @@ task ca:health ENV=wil
 ```
 
 ### Fetch the Root Certificate
+
+The root is the same for both sites and is in the repo: `ansible/playbooks/infrastructure/ca/files/root_ca.crt`. To fetch the copy a CA is serving:
 
 ```bash
 task ca:root ENV=wil

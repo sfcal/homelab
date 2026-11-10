@@ -7,78 +7,90 @@ color: gray
 headerStyle: clean
 statusStyle: dot
 useEqualHeights: true
-# Groups are shown on the tab named here; the first tab opens by default.
+# Groups are shown on the tab named here, in this order; the first tab opens
+# by default. A group left out of this list shows on every tab.
 layout:
-  # --- Overview ---
+  # --- Overview: every service as a small card ---
+  Media:
+    tab: Overview
+    icon: mdi-filmstrip-box-multiple
+    style: row
+    columns: 5
+  Apps:
+    tab: Overview
+    icon: mdi-apps
+    style: row
+    columns: 5
+  Infrastructure:
+    tab: Overview
+    icon: mdi-server
+    style: row
+    columns: 5
+  Monitoring:
+    tab: Overview
+    icon: mdi-pulse
+    style: row
+    columns: 5
+  # --- wil ---
   System Activity (wil):
-    tab: Overview
+    tab: wil
     icon: mdi-chart-areaspline
     style: row
     columns: 4
-  System Activity (ldn):
-    tab: Overview
-    icon: mdi-chart-areaspline
-    style: row
-    columns: 4
-  Infrastructure (wil):
-    tab: Overview
-    icon: mdi-server
-    style: row
-    columns: 3
-  Infrastructure (ldn):
-    tab: Overview
-    icon: mdi-server
-    style: row
-    columns: 3
-  Monitoring (wil):
-    tab: Overview
-    icon: mdi-pulse
-    style: row
-    columns: 3
-  Monitoring (ldn):
-    tab: Overview
-    icon: mdi-pulse
-    style: row
-    columns: 3
-  Node Exporters (wil):
-    tab: Overview
-    icon: mdi-chip
-    style: row
-    columns: 4
-  Node Exporters (ldn):
-    tab: Overview
-    icon: mdi-chip
-    style: row
-    columns: 4
-  # --- Media ---
   Media Management:
-    tab: Media
+    tab: wil
     icon: mdi-filmstrip-box-multiple
     style: row
     columns: 4
   Downloads:
-    tab: Media
+    tab: wil
     icon: mdi-download
     style: row
     columns: 2
   Media Processing:
-    tab: Media
+    tab: wil
     icon: mdi-movie-cog
     style: row
     columns: 3
-  # --- Apps ---
   Apps (wil):
-    tab: Apps
+    tab: wil
     icon: mdi-apps
     style: row
     columns: 3
+  Infrastructure (wil):
+    tab: wil
+    icon: mdi-server
+    style: row
+    columns: 4
+  Monitoring (wil):
+    tab: wil
+    icon: mdi-pulse
+    style: row
+    columns: 5
+  # --- ldn ---
+  System Activity (ldn):
+    tab: ldn
+    icon: mdi-chart-areaspline
+    style: row
+    columns: 4
   Apps (ldn):
-    tab: Apps
+    tab: ldn
     icon: mdi-apps
     style: row
+    columns: 4
+  Infrastructure (ldn):
+    tab: ldn
+    icon: mdi-server
+    style: row
     columns: 3
-  Bookmarks:
-    tab: Apps
-    icon: mdi-bookmark-multiple
+  Monitoring (ldn):
+    tab: ldn
+    icon: mdi-pulse
+    style: row
+    columns: 5
+  # --- ovh ---
+  Services (ovh):
+    tab: ovh
+    icon: mdi-cloud
     style: row
     columns: 3
