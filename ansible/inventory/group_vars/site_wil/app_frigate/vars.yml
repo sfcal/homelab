@@ -19,4 +19,4 @@ frigate_retain_days: 36500
 
 # Container image (base image for multi-stage build)
 # renovate: datasource=docker
-frigate_image: "ghcr.io/blakeblackshear/frigate:0.16.4"
+frigate_image: "ghcr.io/blakeblackshear/frigate:0.18.2"
