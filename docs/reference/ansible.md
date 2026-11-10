@@ -31,7 +31,6 @@ task ansible:ping ENV=wil
 | `deploy-netboot` | netboot.xyz PXE re-imaging |
 | `deploy-proxmox` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
-| `deploy-homeassistant` | Home Assistant |
 | `deploy-frigate` | Frigate NVR |
 | `deploy-gaming` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `deploy-hermes` | Hermes Agent, Claude Code and the Claude subscription plugin |
@@ -109,7 +108,6 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 | App | Reason for Custom Playbook |
 |-----|---------------------------|
 | Media stack | NFS mount, complex multi-container setup |
-| Home Assistant | Custom configuration management |
 | Frigate | NFS mount, dedicated compose/config tasks |
 | Gaming | Stacks selected per environment (Terraria; Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |
 | Hermes Agent | Installs Claude Code, the Claude subscription plugin and the `plex-fix` skill inside the running container |

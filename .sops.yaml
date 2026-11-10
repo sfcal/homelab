@@ -1,10 +1,4 @@
 creation_rules:
-  - path_regex: kubernetes/.*\.sops\.ya?ml
-    encrypted_regex: "^(data|stringData)$"
-    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
-  - path_regex: kubernetes/.*secrets?\.ya?ml
-    encrypted_regex: "^(data|stringData)$"
-    age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: terraform/.*\.tfvars
     age: age14kkq0ymnjz35dsu4mq6jvc3ne2n9vxf64aynxne7y6k7kd0ndplqlyu6m8
   - path_regex: packer/.*\.pkrvars\.hcl

@@ -87,6 +87,17 @@
       ],
       "groupName": "kanidm",
       "automerge": false
+    },
+    {
+      "description": "Images the deploy workflow can't roll out (docs/guides/gitops.md: the CAs, networking, Hermes, the ovh VPS): open the PR, never automerge. Merge it when you deploy by hand, so main never says a version that isn't running",
+      "matchFileNames": [
+        "ansible/inventory/group_vars/site_*/infra_ca/**",
+        "ansible/inventory/group_vars/site_*/infra_networking/**",
+        "ansible/inventory/group_vars/site_*/app_hermes/**",
+        "ansible/inventory/group_vars/site_ovh/**",
+        "ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2"
+      ],
+      "automerge": false
     }
   ],
   "customManagers": [
@@ -113,6 +124,10 @@
   "schedule": [
     "before 6am every weekday"
   ],
+  "automergeSchedule": [
+    "before 6am every weekday"
+  ],
+  "platformAutomerge": false,
   "minimumReleaseAge": "1 day",
   "minimumReleaseAgeBehaviour": "timestamp-optional"
 }

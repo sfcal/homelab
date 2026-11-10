@@ -10,10 +10,3 @@ monitoring_group: root
 # Container images
 # renovate: datasource=docker
 prometheus_image: "prom/prometheus:v3.16.0"
-# renovate: datasource=docker
-node_exporter_image: "prom/node-exporter:v1.12.1"
-
-# Directories to back up (relative to /var/lib/monitoring)
-backup_targets:
-  - prometheus
-  - uptime-kuma

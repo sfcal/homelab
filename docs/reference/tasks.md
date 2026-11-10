@@ -19,10 +19,9 @@ task --list-all
 | `task ansible:deploy-dashboard ENV=ovh` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
 | `task ansible:deploy-kasm ENV=ldn` | Kasm on the work VM, and its custom workspace images |
 | `task ansible:deploy-kasm-agent ENV=ovh` | Kasm agent for Deluge on the OVH VPS |
-| `task ansible:deploy-netboot ENV=wil` | netboot.xyz PXE re-imaging |
+| `task ansible:deploy-netboot ENV=ldn` | netboot.xyz PXE re-imaging |
 | `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |
-| `task ansible:deploy-homeassistant ENV=wil` | Home Assistant |
 | `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
 | `task ansible:deploy-gaming ENV=ldn` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
 | `task ansible:deploy-hermes ENV=ldn` | Hermes Agent, Claude Code and the Claude subscription plugin |
@@ -40,7 +39,9 @@ task --list-all
 | `task terraform:plan-vm ENV=wil VM=<key>` | Show the plan for a specific VM |
 | `task terraform:destroy ENV=wil` | Destroy all VMs |
 | `task terraform:destroy-vm ENV=wil VM=<key>` | Destroy a specific VM |
-| `task terraform:clean ENV=wil` | Clean `.terraform`, state, and lock files |
+| `task terraform:clean ENV=wil` | Remove the plugin cache (`.terraform`); the state file stays |
+
+Each command decrypts the site's `terraform.tfvars.sops` for itself (`sops exec-file`), so no plain-text `terraform.tfvars` has to sit in the folder.
 
 ## Packer
 
@@ -49,9 +50,10 @@ task --list-all
 | `task packer:build-ubuntu ENV=wil` | Build Ubuntu Server template |
 | `task packer:build-ubuntu-desktop ENV=wil` | Build Ubuntu Desktop template (Ubuntu Server install plus GNOME and KasmVNC) |
 | `task packer:build-debian ENV=wil` | Build Debian Bookworm template |
-| `task packer:build-netboot ENV=wil` | Build Netboot VM template |
 | `task packer:build-windows ENV=ldn` | Build Windows template (UEFI/TPM, unattended install) |
 | `task packer:clean` | Clean packer logs and downloaded ISOs |
+
+A build decrypts `credentials.<env>.pkrvars.hcl.sops` for the one `packer build` command, the same way.
 
 ## CA
 
@@ -75,20 +77,19 @@ Bootstrap for the GitHub Actions deploy workflow — see [GitOps Deploys](../gui
 
 | Command | Description |
 |---------|-------------|
-| `task docker:exe` | Build the homelab execution environment container |
+| `task docker:ipxe-builder` | Build the custom iPXE ISO for the Haivision template (`packer:build-haivision` runs it first) |
 
 ## Other
 
 | Command | Description |
 |---------|-------------|
-| `task tui` | Launch the homelab management TUI |
 | `task --list-all` | List all available tasks |
 
 ## Variables
 
 | Variable | Used By | Default | Description |
 |----------|---------|---------|-------------|
-| `ENV` | All | `ldn` | Target environment (e.g., `wil`, `ldn`) |
+| `ENV` | All | — | Target site (`wil`, `ldn`, `ovh`). Required: there is no default |
 | `VM` | Terraform | — | VM key from `vms.auto.tfvars` |
 | `APP` | Ansible | — | App name from `apps.yml` |
 | `CSR` | CA | — | Path to certificate signing request |
@@ -98,6 +99,6 @@ Bootstrap for the GitHub Actions deploy workflow — see [GitOps Deploys](../gui
 
 **"task: Task not found"** — Check the exact task name with `task --list-all`. Namespace and command are separated by `:`.
 
-**Wrong environment** — `ENV` defaults to `ldn` (production). Always pass `ENV=wil` (or your environment) explicitly.
+**"Pass ENV=<site>"** — `ENV` has no default. A task that needs it stops before it runs anything when `ENV` is missing; add `ENV=wil`, `ENV=ldn` or `ENV=ovh`.
 
 **Ansible timeout** — Add `-vvv` for verbose output: edit the task in `.taskfiles/ansible/Taskfile.yaml` and add `-vvv` to `EXTRA_ARGS`.

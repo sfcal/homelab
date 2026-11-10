@@ -2,54 +2,69 @@ version: '3'
 
 vars:
   ENV_DIR: 'environments/{{.ENV}}'
+  # The site's credentials (terraform.tfvars.sops: Proxmox token, SSH key) are
+  # decrypted for the one command and handed to it as a var file ({}), so no
+  # plain-text terraform.tfvars has to sit in the folder.
+  WITH_SECRETS: 'sops exec-file --filename terraform.tfvars terraform.tfvars.sops'
 
 tasks:
   deploy:
-    desc: Deploy all infrastructure for {{.ENV}} environment
+    desc: Deploy all VMs of the site (ENV=<site>)
     dir: '{{.ROOT_DIR}}/terraform'
+    preconditions:
+      - &need_env { sh: 'test -n "{{.ENV}}"', msg: 'Pass ENV=<site>, e.g. ENV=wil' }
     cmds:
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform apply -auto-approve
+      - cd {{.ENV_DIR}} && {{.WITH_SECRETS}} 'terraform apply -var-file={} -auto-approve'
 
   deploy-vm:
-    desc: Deploy specific VM for {{.ENV}} environment (requires VM=vm-key)
+    desc: Deploy one VM of the site (ENV=<site> VM=<key>)
     dir: '{{.ROOT_DIR}}/terraform'
+    requires: { vars: [VM] }
+    preconditions: [*need_env]
     cmds:
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform apply -target='module.infrastructure.module.vms["{{.VM}}"]' -auto-approve
+      - cd {{.ENV_DIR}} && {{.WITH_SECRETS}} "terraform apply -var-file={} -target='module.infrastructure.module.vms[\"{{.VM}}\"]' -auto-approve"
 
   plan:
-    desc: Show Terraform plan for {{.ENV}} environment (no changes applied)
+    desc: Show the Terraform plan for the site, nothing applied (ENV=<site>)
     dir: '{{.ROOT_DIR}}/terraform'
+    preconditions: [*need_env]
     cmds:
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform plan
+      - cd {{.ENV_DIR}} && {{.WITH_SECRETS}} 'terraform plan -var-file={}'
 
   plan-vm:
-    desc: Show Terraform plan for specific VM in {{.ENV}} environment (requires VM=vm-key)
+    desc: Show the Terraform plan for one VM of the site (ENV=<site> VM=<key>)
     dir: '{{.ROOT_DIR}}/terraform'
+    requires: { vars: [VM] }
+    preconditions: [*need_env]
     cmds:
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform plan -target='module.infrastructure.module.vms["{{.VM}}"]'
+      - cd {{.ENV_DIR}} && {{.WITH_SECRETS}} "terraform plan -var-file={} -target='module.infrastructure.module.vms[\"{{.VM}}\"]'"
 
   destroy:
-    desc: Destroy all VMs and infrastructure for {{.ENV}} environment
+    desc: Destroy all VMs of the site (ENV=<site>)
     dir: '{{.ROOT_DIR}}/terraform'
+    preconditions: [*need_env]
     prompt: "This will DESTROY all VMs in the '{{.ENV}}' environment. Are you sure?"
     cmds:
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform destroy -auto-approve
+      - cd {{.ENV_DIR}} && {{.WITH_SECRETS}} 'terraform destroy -var-file={} -auto-approve'
 
   destroy-vm:
-    desc: Destroy specific VM for {{.ENV}} environment (requires VM=vm-key)
+    desc: Destroy one VM of the site (ENV=<site> VM=<key>)
     dir: '{{.ROOT_DIR}}/terraform'
+    requires: { vars: [VM] }
+    preconditions: [*need_env]
     prompt: "This will DESTROY VM '{{.VM}}' in the '{{.ENV}}' environment. Are you sure?"
     cmds:
       - cd {{.ENV_DIR}} && terraform init
-      - cd {{.ENV_DIR}} && terraform destroy -target='module.infrastructure.module.vms["{{.VM}}"]' -auto-approve
+      - cd {{.ENV_DIR}} && {{.WITH_SECRETS}} "terraform destroy -var-file={} -target='module.infrastructure.module.vms[\"{{.VM}}\"]' -auto-approve"
 
   clean:
-    desc: Clean up Terraform plugin cache for {{.ENV}} environment
+    desc: Remove the site's Terraform plugin cache, .terraform (ENV=<site>)
     dir: '{{.ROOT_DIR}}/terraform'
+    preconditions: [*need_env]
     cmds:
       - rm -rf {{.ENV_DIR}}/.terraform

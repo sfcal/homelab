@@ -10,7 +10,6 @@ Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ans
 ansible/                    Playbooks, roles, one inventory for both sites (ansible/inventory)
 terraform/                  VM provisioning with per-environment tfvars and state
 packer/                     VM template building (Ubuntu, Debian)
-docker/                     Docker execution environment
 .taskfiles/                 Modular Taskfile configs (ansible, terraform, packer, ca, docker)
 docs/                       MkDocs documentation site
 Taskfile.yaml               Root task runner entry point
@@ -18,7 +17,7 @@ Taskfile.yaml               Root task runner entry point
 
 ## Task Commands
 
-All operations go through `task`. Pattern: `task <namespace>:<operation> ENV=<environment>`
+All operations go through `task`. Pattern: `task <namespace>:<operation> ENV=<environment>`. `ENV` has no default: a task that needs it stops with "Pass ENV=<site>" when it is missing.
 
 ```
 task ansible:deploy-<service> ENV=wil    # Deploy a service
@@ -100,8 +99,9 @@ Paths are hard-coded (no base-path variables); keep new templates on the same sp
 
 SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
 - `*.sops.yml` — encrypted ansible vars: one file per site, `ansible/inventory/group_vars/site_<env>/secrets.sops.yml`, with a `# --- <group> ---` section for each group that reads them (encrypted to master + that site's CI key; ovh has no CI key yet, so master only)
-- `*.tfvars` — encrypted terraform vars (credentials)
-- `*.pkrvars.hcl` — encrypted packer vars
+- `terraform.tfvars.sops` — encrypted terraform vars (credentials), one per `terraform/environments/<env>/`
+- `credentials.<env>.pkrvars.hcl.sops` — encrypted packer credentials
+- The terraform and packer tasks decrypt these for the one command (`sops exec-file ... -var-file={}`); no plain-text `terraform.tfvars` or `credentials.<env>.pkrvars.hcl` is needed
 - `.env` files — encrypted docker env files
 - Never commit decrypted secrets. Decrypted temps match `**/.decrypted~*`
 
@@ -151,7 +151,9 @@ sops decrypt ansible/inventory/group_vars/site_wil/secrets.sops.yml
 ## GitOps Deploys (CI)
 
 Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically via `.github/workflows/deploy.yml` (GitHub-hosted runner → Tailscale `tag:ci` → `deploy` user). See `docs/guides/gitops.md`.
-- Auto-deploy allowlist lives in `.github/scripts/deploy-plan.sh` (`PLAYBOOK_FOR`); keep it in sync with the host pattern in `ansible/playbooks/ci-access.yml` and `TARGET_PATTERN` in `.taskfiles/ci/Taskfile.yaml`
+- Auto-deploy allowlist lives in `.github/scripts/deploy-plan.sh` (`PLAYBOOK_FOR`); keep it in sync with the host pattern in `ansible/playbooks/ci-access.yml` (`task ci:known-hosts` reads its hosts from that playbook)
+- Renovate never automerges image bumps CI can't deploy (`matchFileNames` rule in `renovate.json`: `infra_ca`, `infra_networking`, `app_hermes`, `site_ovh/`, Caddy's `Dockerfile.j2`); a group that pins an image and stays off the allowlist belongs in that rule. Automerges happen before 06:00 UTC on weekdays (`automergeSchedule`)
+- One deploy run at a time (workflow-level `concurrency` in `deploy.yml`), so a run never plans from a `deploy/<env>` tag the run before it is about to move
 - Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
 - Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
@@ -222,6 +224,6 @@ For a data-driven (registry) app:
 3. Add host group to `ansible/inventory/hosts.ini` under `[app_<service>]` and `[apps:children]`, and the host under its `[site_<env>]` group
 4. Add import to `ansible/playbooks/site.yml` (uses `deploy-app.yml` with `app_name`)
 5. Deploy: `task ansible:deploy-app APP=<service> ENV=<env>`, then `task ansible:deploy-networking ENV=<env>` for the DNS/proxy entry
-6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`
+6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`. Prometheus scrapes node-exporter on every host under `[site_<env>]` (`prometheus_node_targets` is derived from the inventory), so the next monitoring deploy picks the VM up
 
 Non-catalog services (third-party devices, dedicated-playbook stacks) get manual proxy entries in `group_vars/site_<env>/proxy/<domain>.yml` instead of a `proxy:` block.

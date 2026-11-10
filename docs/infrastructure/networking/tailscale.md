@@ -121,8 +121,10 @@ Split DNS entries in the Tailscale admin console route domain queries to the cor
     ```yaml
     tailscale_mode: "subnet_router"
     tailscale_auth_key: "{{ tailscale_auth_key_secret }}"
-    tailscale_advertise_routes:
-      - "10.2.0.0/16"
+    # The site's LAN from sites.yml, plus the subnets of VPN clients enabled on this VM
+    tailscale_advertise_routes: >-
+      {{ [sites[site].cidr]
+         + (vpn_clients | default([]) | selectattr('enabled') | map(attribute='routed_subnets') | flatten) }}
     tailscale_accept_dns: false
     tailscale_accept_routes: true
     ```

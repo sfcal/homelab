@@ -17,12 +17,9 @@ Install these on your local machine:
 ```bash
 # Task runner (required)
 brew install go-task
-
-# Infrastructure tools (run inside Docker execution environment)
-task docker:exe
 ```
 
-The Docker execution environment bundles Terraform, Ansible, Packer, and SOPS. Alternatively, install them directly:
+Then install the tools the tasks call:
 
 | Tool | Purpose |
 |------|---------|

@@ -157,11 +157,10 @@ Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandm
 |-----------|------|-------------|---------|
 | `prometheus_image` | `string` | Docker image for Prometheus | (per-env) |
 | `prometheus_retention` | `string` | Metrics data retention period | `"30d"` |
-| `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`) | (per-env) |
+| `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`): every host of the site in the inventory (`[site_<env>]`) on `:9100`, without the Proxmox host | (derived) |
 | `prometheus_chrony_targets` | `list[string]` | chrony_exporter endpoints (PTP grandmaster, `:9123`) | `[]` |
 | `prometheus_gpsd_targets` | `list[string]` | gpsd exporter endpoints (PTP grandmaster, `:9015`) | `[]` |
 | `prometheus_ptp_node_targets` | `list[string]` | PTP grandmaster node_exporter endpoints (job `node`, `:9100`) | `[]` |
-| `node_exporter_image` | `string` | Docker image for Node Exporter sidecar | (per-env) |
 
 <small>**Sources:** `ansible/inventory/group_vars/site_<env>/infra_monitoring/prometheus.yml` · `ansible/inventory/group_vars/site_<env>/infra_monitoring/containers.yml`</small>
 
@@ -274,7 +273,7 @@ The dashboard has four tabs:
 - **Status dots:** `siteMonitor` requests the URL from the VPS and counts any answer up to 403 as up. KOSync's small card has none: it answers 412 to a request without KOReader's `Accept` header, so only its full card checks it, with a `customapi` widget that sends the header.
 - **Tile colours:** a widget's `highlight` rules mark tiles good, warn or danger, and `custom.css` tints them lime, orange or pink (Homepage's own tints lose to the tile background). Used for Prometheus targets down, Uptime Kuma sites down, Tdarr errors, Prowlarr failed grabs and KOSync health.
 - **System Activity** shows the four panels of the System Activity Grafana dashboard on each site's tab, in iframes from `http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-<site>&panelId=1` to `4`, in Grafana's light theme (`theme=light`). `var-ds` picks the site's Prometheus. Grafana allows anonymous viewing and embedding. The time range and refresh interval come from the dashboard JSON.
-- **Node exporters** follow Prometheus in each site's Monitoring group: the targets of the site's `prometheus_node_targets`, listed by hand; add a node there too.
+- **Node exporters** follow Prometheus in each site's Monitoring group: four VMs per site, listed by hand in `services.yaml.j2`. Prometheus itself scrapes every host of the site (`prometheus_node_targets`); a new VM gets a tile only when it is added to that list.
 - **Five cards in a row** (`columns: 5`: the Overview groups and the Monitoring groups) become four in a window 1024px to 1279px wide, where five are too narrow (`custom.css`). Narrower windows get Homepage's own two in a row, then one.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
@@ -327,19 +326,14 @@ These variables apply to all monitoring containers:
 |-----------|------|-------------|---------|
 | `monitoring_uid` | `string` | Container file ownership UID | `"1000"` |
 | `monitoring_gid` | `string` | Container file ownership GID | `"1000"` |
-| `backup_targets` | `list[string]` | Service directories under `/var/lib/monitoring/` to back up | (per-env) |
 
 ## Common Tasks
 
 ### Add a new Prometheus scrape target
 
-1. Edit `ansible/inventory/group_vars/site_<env>/infra_monitoring/prometheus.yml`:
+Node exporter targets come from the inventory: every host under `[site_<env>]` in `ansible/inventory/hosts.ini` is scraped on `:9100` (the Packer template installs node-exporter on every clone). A host that is in the inventory but down shows as a target that is down.
 
-    ```yaml
-    prometheus_node_targets:
-      # ... existing targets
-      - "10.2.20.60:9100"   # new VM
-    ```
+1. Add the host to `[site_<env>]` (and to its role group) in `ansible/inventory/hosts.ini`. For an exporter that is not node-exporter, add its endpoint to the matching list in `ansible/inventory/group_vars/site_<env>/infra_monitoring/prometheus.yml` instead.
 
 2. Deploy:
 

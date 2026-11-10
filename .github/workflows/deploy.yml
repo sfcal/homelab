@@ -24,6 +24,18 @@ on:
 permissions:
   contents: read
 
+# One deploy run at a time. A run plans from the deploy/<env> tags, so it must
+# not plan while the run before it is still deploying and moving them: two
+# merges minutes apart used to deploy the same targets twice. A run that skips
+# the plan (one of your own pushes) gets a group to itself, so it never takes
+# the place of a deploy that is waiting its turn.
+concurrency:
+  group: >-
+    ${{ (github.event_name == 'workflow_dispatch' ||
+    github.event.head_commit.author.email == '29139614+renovate[bot]@users.noreply.github.com')
+    && 'deploy' || format('deploy-skipped-{0}', github.run_id) }}
+  cancel-in-progress: false
+
 jobs:
   plan:
     # Automatic deploys are for Renovate's merges only; deploy your own commits

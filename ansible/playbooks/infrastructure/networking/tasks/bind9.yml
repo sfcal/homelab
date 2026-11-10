@@ -14,10 +14,15 @@
     owner: bind
     group: bind
     mode: 0644
+    # Checked before it replaces the live file: a config named would refuse
+    # stops the play here and DNS keeps running on the old one.
+    validate: named-checkconf %s
   notify:
-    - Check bind9 config
     - Restart bind9
 
+# The serial is the time of the deploy, so the zone files change on every run:
+# reload them (no restart, the resolver cache stays). -i local is the check
+# named itself runs when it loads a zone (no lookups of outside names).
 - name: Deploy BIND9 zone files per domain.
   ansible.builtin.template:
     src: "templates/domain.zone.j2"
@@ -25,12 +30,12 @@
     owner: bind
     group: bind
     mode: 0644
+    validate: "named-checkzone -i local {{ current_domain.name }} %s"
   loop: "{{ domains }}"
   loop_control:
     loop_var: current_domain
   notify:
-    - Check bind9 config
-    - Restart bind9
+    - Reload bind9
 
 - name: Deploy BIND9 reverse zone.
   ansible.builtin.template:
@@ -39,9 +44,9 @@
     owner: bind
     group: bind
     mode: 0644
+    validate: "named-checkzone -i local {{ dns_reverse_zone }} %s"
   notify:
-    - Check bind9 config
-    - Restart bind9
+    - Reload bind9
 
 - name: Ensure BIND9 is running and enabled.
   ansible.builtin.service:

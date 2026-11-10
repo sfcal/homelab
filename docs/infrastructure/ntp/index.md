@@ -40,6 +40,8 @@ The Chrony server synchronizes with multiple upstream NTP sources and acts as a 
 | WIL | `10.2.20.123` | `time.wil.5am.cloud` |
 | LDN | `10.3.20.123` | `time.ldn.5am.cloud` |
 
+These are the addresses set aside for a time server. Neither is in the inventory at the moment (wil's VM is gone), so `[infra_ntp]` is empty and `deploy-ntp` matches no host. To bring one back, add its address under `[infra_ntp]` and its `[site_<env>]` group in `ansible/inventory/hosts.ini`.
+
 ## Deployment
 
 ```bash

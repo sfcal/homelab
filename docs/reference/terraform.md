@@ -113,14 +113,13 @@ vms = {
 |-----|------|------|----|-------|--------|------|------|
 | `networking` | networking | 1000 | 10.2.20.53 | 2 | 4GB | 50G | infrastructure |
 | `ca_server` | ca | 1003 | 10.2.20.9 | 1 | 4GB | 20G | infrastructure |
-| `ntp_server` | ntp | 1002 | 10.2.20.123 | 1 | 1GB | 20G | infrastructure |
 | `monitoring_server` | monitoring | 1107 | 10.2.20.30 | 1 | 8GB | 50G | infrastructure |
 | `web_server` | web | 1109 | 10.2.20.45 | 2 | 4GB | 20G | application |
 | `games_server` | games | 1111 | 10.2.20.50 | 1 | 8GB | 50G | application |
 
 ## Implementation Details
 
-- **Provider** — [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs), pinned in `versions.tf`. It takes the endpoint and API token from the same `terraform.tfvars` variables (`proxmox_api_url` without `/api2/json`, `<token id>=<secret>`).
+- **Provider** — [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs), pinned in `versions.tf`. It takes the endpoint and API token from the variables in the site's `terraform.tfvars.sops` (`proxmox_api_url` without `/api2/json`, `<token id>=<secret>`), which each task decrypts for its one command (`sops exec-file`).
 - **Full clones** — VMs are full clones, not linked. Independent of templates after creation. The template is looked up by name on every plan, so a missing or duplicated template name fails the plan (it never destroys anything).
 - **Cloud-init** — Static IP via the `initialization` block (`ipconfig0: ip=<address>/24,gw=<gateway>`, drive on `ide0`). Assumes /24 subnets. bpg keeps cloud-init values of the template that the module does not set, such as a `cipassword` set by hand on the template; telmate removed them.
 - **State** — Per-environment state files at `terraform/environments/<env>/terraform.tfstate`. Import a VM with `terraform import 'module.infrastructure.module.vms["<key>"].proxmox_virtual_environment_vm.vm' <node>/<vmid>`.
@@ -132,6 +131,6 @@ vms = {
 
 **"VMID already exists"** — Another VM uses that ID. Check `qm list` or the existing entries in `vms.auto.tfvars`.
 
-**State out of sync** — If a VM was deleted outside Terraform, clean state with `task terraform:clean ENV=wil` and redeploy.
+**State out of sync** — If a VM was deleted outside Terraform, it is still in the state. Drop it with `terraform state rm 'module.infrastructure.module.vms["<key>"]'` in `terraform/environments/<env>/` and redeploy. (`task terraform:clean` only removes the plugin cache.)
 
-**Provider authentication error** — Verify Proxmox API credentials in the encrypted `terraform.tfvars` file. Decrypt with `sops terraform/environments/<env>/terraform.tfvars`.
+**Provider authentication error** — Verify the Proxmox API credentials in the encrypted `terraform.tfvars.sops`. Open it with `sops terraform/environments/<env>/terraform.tfvars.sops`. The tasks decrypt it themselves and pass it with `-var-file`, which wins over a plain-text `terraform.tfvars` left in the folder, so that copy is no longer needed.

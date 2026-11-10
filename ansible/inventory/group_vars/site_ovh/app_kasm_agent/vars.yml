@@ -9,13 +9,14 @@ kasm_agent_version: "1.18.1"
 # same as the release inside the work VM's Kasm container (checked 2026-11-07).
 kasm_agent_release_sha256: "83d3b1d61a32f283b1b8e415ee4d1bbb02184930d00f6885f9799e001e677135"
 
-# The agent registers with Kasm on the work VM, over the tailnet
-kasm_agent_manager: "10.3.20.50"
+# The agent registers with Kasm on the work VM (the app_kasm host), over the
+# tailnet
+kasm_agent_manager: "{{ groups['app_kasm'] | first }}"
 
-# Kasm reaches the agent at the VPS's tailnet address (the ldn UDM routes it
-# to ldn-gateway). The installer uses one port for the agent and for Kasm, so
-# it is Kasm's (kasm_port). Dropped on the public interface.
-kasm_agent_public_hostname: "100.116.40.99"
+# Kasm reaches the agent at the VPS's tailnet address (sites.yml; the ldn UDM
+# routes it to ldn-gateway). The installer uses one port for the agent and for
+# Kasm, so it is Kasm's (kasm_port). Dropped on the public interface.
+kasm_agent_public_hostname: "{{ sites.ovh.tailnet_ip }}"
 kasm_agent_port: 4443
 
 # Custom workspace images (folders of playbooks/apps/kasm/files/) built in the

@@ -3,13 +3,16 @@ version: '3'
 vars:
   TEMPLATE: '{{.TEMPLATE | default "base"}}'
   ENV_VAR_FILE: 'environments/{{.ENV}}/ubuntu-variables.pkrvars.hcl'
-  CRED_VAR_FILE: 'environments/{{.ENV}}/credentials.{{.ENV}}.pkrvars.hcl'
+  # Encrypted; the build task decrypts it for the one packer command
+  CRED_VAR_FILE: 'environments/{{.ENV}}/credentials.{{.ENV}}.pkrvars.hcl.sops'
 
 tasks:
   # Generic build task
   build:
     desc: Build a template
     dir: '{{.ROOT_DIR}}/packer'
+    preconditions:
+      - { sh: 'test -n "{{.ENV}}"', msg: 'Pass ENV=<site>, e.g. ENV=wil' }
     vars:
       # Set defaults based on DISTRO
       TEMPLATE_PREFIX: '{{.TEMPLATE_PREFIX | default "ubuntu-server"}}'
@@ -22,11 +25,12 @@ tasks:
       - echo "Using credential vars {{.CRED_VAR_FILE}}"
       - echo "===================================="
       - packer init {{.TEMPLATE_FILE}}
+      # sops decrypts the credentials for this one command and hands them over
+      # as a var file ({}), so no plain-text copy has to sit in the folder.
+      # Packer tells a var file's format from its name, hence --filename.
       - |
-        PACKER_LOG=1 packer build \
-          -var-file="{{.CRED_VAR_FILE}}" \
-          -var-file="{{.VAR_FILE}}" \
-          "{{.TEMPLATE_FILE}}"
+        sops exec-file --filename credentials.pkrvars.hcl "{{.CRED_VAR_FILE}}" \
+          'PACKER_LOG=1 packer build -var-file={} -var-file="{{.VAR_FILE}}" "{{.TEMPLATE_FILE}}"'
 
   # Distribution-specific tasks
   build-ubuntu:
@@ -45,14 +49,6 @@ tasks:
         vars:
           TEMPLATE_PREFIX: debian-bookworm
           VAR_FILE: 'environments/{{.ENV}}/debian-variables.pkrvars.hcl'
-
-  build-netboot:
-    desc: Build Debian template
-    cmds:
-      - task: build
-        vars:
-          TEMPLATE_PREFIX: netboot-vm
-          VAR_FILE: 'environments/{{.ENV}}/netboot-variables.pkrvars.hcl'
 
   build-ubuntu-efi:
     desc: Build Ubuntu UEFI/Q35 template (also GPU-passthrough capable)

@@ -29,20 +29,20 @@ A complete infrastructure-as-code solution for managing a home server environmen
 This repository supports multiple environments with location-based naming:
 
 - **WIL**: Development/testing environment
-- **NYC**: Production environment
+- **LDN**: Production environment
 
 Each environment can have its own configuration while sharing common base components.
 
 ### Network Structure
 ```
-🏗️ WIL Development Environment                      🏢 NYC Production Environment
-UDM Pro WIL - 10.2.x.x Network                       UDM Pro NYC - 10.1.x.x Network
-├── 🔵 VLAN 1 - Infrastructure (10.2.0.0/24)        ├── 🔵 VLAN 1 - Infrastructure (10.1.0.0/24)
-├── 🟢 VLAN 10 - Storage (10.2.10.0/24)             ├── 🟢 VLAN 10 - Storage (10.1.10.0/24)
-├── 🔴 VLAN 20 - Virtual Machines (10.2.20.0/24)    ├── 🔴 VLAN 20 - Virtual Machines (10.1.20.0/24)
-├── 🟠 VLAN 30 - Servers Misc (10.2.30.0/24)        ├── 🟠 VLAN 30 - PTP Devices (10.1.50.0/24)
-├── 🟣 VLAN 200 - Wired Devices (10.2.200.0/24)     ├── 🟣 VLAN 200 - Wired Devices (10.1.200.0/24)
-├── 🟣 VLAN 230 - Wireless Devices (10.2.230.0/24)  └── 🟣 VLAN 230 - Wireless Devices (10.1.230.0/24)
+🏗️ WIL Development Environment                      🏢 LDN Production Environment
+UDM Pro WIL - 10.2.x.x Network                       UDM Pro LDN - 10.3.x.x Network
+├── 🔵 VLAN 1 - Infrastructure (10.2.0.0/24)        ├── 🔵 VLAN 1 - Infrastructure (10.3.0.0/24)
+├── 🟢 VLAN 10 - Storage (10.2.10.0/24)             ├── 🔴 VLAN 20 - Virtual Machines (10.3.20.0/24)
+├── 🔴 VLAN 20 - Virtual Machines (10.2.20.0/24)    └── 🟠 VLAN 30 - Servers Misc (10.3.30.0/24)
+├── 🟠 VLAN 30 - Servers Misc (10.2.30.0/24)
+├── 🟣 VLAN 200 - Wired Devices (10.2.200.0/24)
+├── 🟣 VLAN 230 - Wireless Devices (10.2.230.0/24)
 └── 🟣 VLAN 245 - IoT Devices (10.2.245.0/24)
 ```
 ![Network](docs/assets/network.drawio.svg)
@@ -183,7 +183,6 @@ hl task packer:build TEMPLATE=base ENV=dev
 # Build other templates as needed
 # hl task packer:build-ubuntu ENV=dev
 # hl task packer:build-debian ENV=dev
-# hl task packer:build-netboot ENV=dev
 ```
 </details>
 

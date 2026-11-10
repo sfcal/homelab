@@ -105,4 +105,4 @@ task ansible:ping ENV=wil
 
 **Can't SSH after provisioning** — Cloud-init may still be running. Wait 30 seconds, then retry. Verify the IP is correct and the VM is on the right network bridge.
 
-**State conflict** — If a VM was manually deleted, Terraform state is stale. Run `task terraform:clean ENV=wil` and redeploy.
+**State conflict** — If a VM was deleted by hand, it is still in the Terraform state. Drop it there with `terraform state rm 'module.infrastructure.module.vms["<key>"]'` in `terraform/environments/<env>/`, then redeploy. (`task terraform:clean` only removes the plugin cache.)

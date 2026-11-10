@@ -71,6 +71,22 @@ Ansible automatically decrypts `*.sops.yml` files in `group_vars/` via the `comm
 {{ my_secret_variable }}
 ```
 
+### Terraform and Packer Credentials
+
+The Proxmox tokens live in `terraform/environments/<env>/terraform.tfvars.sops` and `packer/environments/<env>/credentials.<env>.pkrvars.hcl.sops`. The Terraform and Packer tasks decrypt them for the one command and pass them as a var file (`sops exec-file ... -var-file={}`), so nothing is decrypted by hand and no plain-text copy has to stay in the folder.
+
+```bash
+# Change a value (decrypts in-editor, re-encrypts on save)
+sops terraform/environments/wil/terraform.tfvars.sops
+
+# New environment: fill in the example, encrypt it, delete the plain text
+cd terraform/environments/<env>
+cp ../wil/terraform.tfvars.example terraform.tfvars    # then edit it
+sops encrypt terraform.tfvars > terraform.tfvars.sops && rm terraform.tfvars
+```
+
+Packer works the same way, from `credentials.<env>.pkrvars.hcl` to `credentials.<env>.pkrvars.hcl.sops`.
+
 ### Rotating the Age Key
 
 1. Generate a new Age key

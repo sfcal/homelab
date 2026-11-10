@@ -8,7 +8,6 @@ packer/environments/*/.decrypted~*
 docker/*/.decrypted~*
 
 # ansible
-ansible/kubeconfig
 ansible/collections/
 
 # packer
@@ -16,11 +15,6 @@ packer/environments/*/credentials.*.pkrvars.hcl
 packer/downloaded_iso_path
 packer/packer.log
 packer/iso/
-
-# kubernetes
-kubernetes/infrastructure/cert-manager/issuers/cloudflare-token-secret.yaml
-kubernetes/infrastructure/traefik/dashboard/secret-dashboard.yaml
-kubernetes/apps/homelab/kube-prometheus-stack/grafana-admin-secret.yaml
 
 # terraform
 terraform/**/.terraform/*

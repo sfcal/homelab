@@ -5,9 +5,13 @@ tailscale_mode: "subnet_router"
 # tailscale_auth_key — stored in site_wil/secrets.sops.yml
 # Generate: Tailscale Admin -> Settings -> Keys -> Generate auth key (Reusable + Pre-approved)
 
-# Routes to advertise to the Tailscale network
-tailscale_advertise_routes:
-  - "10.2.0.0/16"
+# Routes to advertise to the Tailscale network: the site's LAN (sites.yml), then
+# the subnets of every VPN client enabled on this VM (vpn_clients.yml; none
+# while ldn holds the Haivision session). New routes must be approved in the
+# Tailscale admin console.
+tailscale_advertise_routes: >-
+  {{ [sites[site].cidr]
+     + (vpn_clients | default([]) | selectattr('enabled') | map(attribute='routed_subnets') | flatten) }}
 
 # Accept routes from other subnet routers (enables cross-site routing)
 tailscale_accept_routes: true

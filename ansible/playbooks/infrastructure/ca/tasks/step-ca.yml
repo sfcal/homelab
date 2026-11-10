@@ -124,29 +124,45 @@
       changed_when: "'switched' in ca_chain_switch.stdout"
       notify: Restart step-ca
 
+# The two tasks below replace ca.json only when their setting isn't in it yet
+# (jq compares its result with the file), so a deploy that changes nothing
+# leaves the CA running instead of restarting it.
 - name: Configure certificate duration claims.
   ansible.builtin.shell:
-    cmd: >
+    cmd: |
+      set -e
+      cd /var/lib/step-ca/data/config
       jq '.authority.claims = {
         "minTLSCertDuration": "5m",
         "maxTLSCertDuration": "{{ step_ca_max_cert_duration | default('17520h') }}",
         "defaultTLSCertDuration": "{{ step_ca_default_cert_duration | default('720h') }}"
-      }' /var/lib/step-ca/data/config/ca.json > /var/lib/step-ca/data/config/ca.json.tmp
-      && mv /var/lib/step-ca/data/config/ca.json.tmp /var/lib/step-ca/data/config/ca.json
-      && chown {{ step_ca_uid }}:{{ step_ca_gid }} /var/lib/step-ca/data/config/ca.json
+      }' ca.json > ca.json.tmp
+      if jq -e --slurpfile new ca.json.tmp '. == $new[0]' ca.json > /dev/null; then
+        rm ca.json.tmp
+      else
+        mv ca.json.tmp ca.json
+        chown {{ step_ca_uid }}:{{ step_ca_gid }} ca.json
+        echo changed
+      fi
   register: ca_claims_update
-  changed_when: ca_claims_update.rc == 0
+  changed_when: "'changed' in ca_claims_update.stdout"
   notify: Restart step-ca
 
 - name: Add ACME provisioner.
   ansible.builtin.shell:
-    cmd: >
-      jq 'if any(.authority.provisioners[]?; .type == "ACME") then . else .authority.provisioners += [{"type": "ACME", "name": "acme"}] end'
-      /var/lib/step-ca/data/config/ca.json > /var/lib/step-ca/data/config/ca.json.tmp
-      && mv /var/lib/step-ca/data/config/ca.json.tmp /var/lib/step-ca/data/config/ca.json
-      && chown {{ step_ca_uid }}:{{ step_ca_gid }} /var/lib/step-ca/data/config/ca.json
+    cmd: |
+      set -e
+      cd /var/lib/step-ca/data/config
+      jq 'if any(.authority.provisioners[]?; .type == "ACME") then . else .authority.provisioners += [{"type": "ACME", "name": "acme"}] end' ca.json > ca.json.tmp
+      if jq -e --slurpfile new ca.json.tmp '. == $new[0]' ca.json > /dev/null; then
+        rm ca.json.tmp
+      else
+        mv ca.json.tmp ca.json
+        chown {{ step_ca_uid }}:{{ step_ca_gid }} ca.json
+        echo changed
+      fi
   register: ca_acme_update
-  changed_when: ca_acme_update.rc == 0
+  changed_when: "'changed' in ca_acme_update.stdout"
   notify: Restart step-ca
 
 - name: Flush handlers to apply config changes.

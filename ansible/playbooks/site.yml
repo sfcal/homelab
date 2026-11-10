@@ -46,27 +46,23 @@
 - import_playbook: apps/media/deploy.yml
   tags: ['media', 'applications']
 
-# 6. Home Assistant
-- import_playbook: apps/homeassistant/deploy.yml
-  tags: ['homeassistant', 'applications']
-
-# 7. Frigate NVR
+# 6. Frigate NVR
 - import_playbook: apps/frigate/deploy.yml
   tags: ['frigate', 'applications']
 
-# 8. Gaming (Terraria, Wolf & RomM)
+# 7. Gaming (Terraria, Wolf & RomM)
 - import_playbook: apps/gaming/deploy.yml
   tags: ['gaming', 'terraria', 'wolf', 'romm', 'applications']
 
-# 9. Hermes Agent
+# 8. Hermes Agent
 - import_playbook: apps/hermes/deploy.yml
   tags: ['hermes', 'applications']
 
-# 10. Kasm (work VM, ldn)
+# 9. Kasm (work VM, ldn)
 - import_playbook: apps/kasm/deploy.yml
   tags: ['kasm', 'applications']
 
-# 11. Kasm agent (Deluge, OVH VPS)
+# 10. Kasm agent (Deluge, OVH VPS)
 - import_playbook: apps/kasm-agent/deploy.yml
   tags: ['kasm-agent', 'applications']
 

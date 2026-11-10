@@ -27,7 +27,8 @@ graph LR
 - **Trigger** — `push` to `main` touching `group_vars`, *and* the head commit is authored by `renovate[bot]`. Your own commits are never auto-deployed; use `task ansible:deploy-*` or **Run workflow**.
 - **Plan** — diffs `group_vars` between the environment's tag `deploy/<env>` (last successful deploy) and the pushed commit. Because the base is the last *successful* deploy, a run that was cancelled, superseded or failed is picked up by the next one. A changed file counts for an environment when it's in `site_<env>/` or in the folder of a group with hosts there; other sites' folders are skipped, and files moved without changes don't count.
 - **Targets** — only the allowlist below is ever auto-deployed. Anything else that changed is listed in the run summary as "deploy manually".
-- **Order** — wil first, ldn only if wil didn't fail (no manual approval). One target at a time per environment; runs queue per environment.
+- **What Renovate merges** — image bumps CI can't deploy are never automerged (`matchFileNames` rule in `renovate.json`: `infra_ca`, `infra_networking`, `app_hermes`, everything under `site_ovh/`, and Caddy's `Dockerfile.j2`). Their PRs stay open until you merge them and deploy by hand, so `main` never names a version that isn't running. Everything else automerges before 06:00 UTC on weekdays (`automergeSchedule`), the same window in which Renovate opens PRs, so the deploys land then too.
+- **Order** — wil first, ldn only if wil didn't fail (no manual approval). One target at a time, and one run at a time: a run waits for the one before it, so it plans from `deploy/<env>` tags that are up to date. If more runs pile up behind it, GitHub keeps only the newest waiting; that one covers the others' changes, because the plan starts from the last successful deploy.
 - **Compose** — playbooks apply image bumps with `compose up` (`state: present`), which recreates only the services whose image or definition changed.
 - **Note** — a playbook always deploys the whole current state of `main` for its stack. Anything you pushed but didn't deploy for that stack goes out too.
 
@@ -42,7 +43,7 @@ graph LR
 | `site_<env>/infra_monitoring/` | `infrastructure/monitoring/deploy.yml` |
 | `site_<env>/infra_netboot/` | `infrastructure/netboot/deploy.yml` |
 
-Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/`, `site_<env>/proxy/`, and other files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` / `TARGET_PATTERN` in the CI Taskfile.
+Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/`, `site_<env>/proxy/`, and other files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes` isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` (`task ci:known-hosts` reads its hosts from that playbook). A group that pins an image and stays off the allowlist also belongs in the no-automerge rule in `renovate.json`.
 
 ## Security model
 

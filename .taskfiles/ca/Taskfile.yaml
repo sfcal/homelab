@@ -28,6 +28,7 @@ tasks:
         sh: basename "{{.CSR}}"
       CERT_NAME: '{{.CSR_BASENAME | replace ".csr" ""}}'
     preconditions:
+      - &need_env { sh: 'test -n "{{.ENV}}"', msg: 'Pass ENV=<site>, e.g. ENV=wil' }
       - sh: test -n "{{.CSR}}"
         msg: "CSR is required. Usage: task ca:sign CSR=path/to/file.csr [DURATION=8760h]"
       - sh: test -f "{{.CSR_ABS}}"
@@ -79,6 +80,7 @@ tasks:
         sh: echo "${TMPDIR:-/tmp}/intermediate_ca_{{.ENV}}.csr"
       CERT: '{{.PKI_DIR}}/intermediate_ca_{{.ENV}}.crt'
     preconditions:
+      - *need_env
       - sh: test -f {{.PKI_DIR}}/root_ca.crt
         msg: "No root yet. Run task ca:root-init first."
       - sh: test -n "{{.CA_HOST}}" && test -n "{{.SITE_CIDR}}"
@@ -101,6 +103,7 @@ tasks:
     vars:
       CA_HOST:
         sh: ansible 'infra_ca:&site_{{.ENV}}' -i {{.HOSTS_FILE}} --list-hosts 2>/dev/null | awk 'NR == 2 {print $1}'
+    preconditions: [*need_env]
     cmds:
       - mkdir -p {{.OUTPUT_DIR}}
       - scp {{.CA_USER}}@{{.CA_HOST}}:/opt/step-ca/root_ca.crt {{.OUTPUT_DIR}}/root_ca.crt
@@ -112,5 +115,6 @@ tasks:
     vars:
       CA_HOST:
         sh: ansible 'infra_ca:&site_{{.ENV}}' -i {{.HOSTS_FILE}} --list-hosts 2>/dev/null | awk 'NR == 2 {print $1}'
+    preconditions: [*need_env]
     cmds:
       - curl -sk https://{{.CA_HOST}}:{{.CA_PORT}}/health | python3 -m json.tool

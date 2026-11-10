@@ -6,14 +6,13 @@ version: '3'
 vars:
   CI_DIR: '{{.HOME}}/.config/homelab-ci/{{.ENV}}'
   GH_REPO: sfcal/homelab
-  # Hosts CI deploys to; keep in sync with ansible/playbooks/ci-access.yml.
-  TARGET_PATTERN: 'apps:infra_monitoring:infra_netboot'
 
 tasks:
   keys:
     desc: Generate the env's CI SSH + age keys, wire them in, re-encrypt its secrets (ENV=<env>)
     dir: '{{.ROOT_DIR}}'
     preconditions:
+      - &need_env { sh: 'test -n "{{.ENV}}"', msg: 'Pass ENV=<site>, e.g. ENV=wil' }
       - sh: command -v ssh-keygen && command -v age-keygen && command -v sops
         msg: needs ssh-keygen, age-keygen and sops on PATH
     cmds:
@@ -27,10 +26,13 @@ tasks:
   known-hosts:
     desc: Record host keys of the hosts CI deploys to (ENV=<env>; run from the LAN or tailnet)
     dir: '{{.ROOT_DIR}}/ansible'
+    preconditions: [*need_env]
     cmds:
+      # The hosts are the ones playbooks/ci-access.yml targets at this site
+      # (its `hosts:` pattern is the one list of hosts CI may log in to).
       - >-
-        ansible '{{.TARGET_PATTERN}}' -i inventory/hosts.ini --limit 'site_{{.ENV}}' --list-hosts 2>/dev/null
-        | awk 'NR > 1 {print $1}' | sort -u
+        ansible-playbook -i inventory/hosts.ini --limit 'site_{{.ENV}}' playbooks/ci-access.yml --list-hosts 2>/dev/null
+        | awk '/^ +hosts \(/ {found = 1; next} found && NF {print $1}' | sort -u
         | xargs ssh-keyscan -T 5 -t ed25519 2>/dev/null | sort > 'inventory/known_hosts/{{.ENV}}'
       - test -s 'inventory/known_hosts/{{.ENV}}'
       - cat 'inventory/known_hosts/{{.ENV}}'
@@ -39,6 +41,7 @@ tasks:
     desc: Create the GitHub environment and upload its SSH + age secrets with gh (ENV=<env>)
     dir: '{{.ROOT_DIR}}'
     preconditions:
+      - *need_env
       - sh: command -v gh
         msg: needs the GitHub CLI (gh), logged in with admin on {{.GH_REPO}}
       - sh: test -f '{{.CI_DIR}}/id_ed25519' && test -f '{{.CI_DIR}}/age.txt'

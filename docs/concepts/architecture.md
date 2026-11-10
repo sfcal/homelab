@@ -48,8 +48,6 @@ task ansible:deploy-media ENV=wil        # 5. Applications
 ansible/                    Playbooks, roles, one inventory for both sites
 terraform/                  VM provisioning with per-environment tfvars
 packer/                     VM template definitions (Ubuntu, Debian)
-docker/                     Docker execution environment
-tui/                        Terminal UI for interactive management
 .taskfiles/                 Modular Taskfile configs per tool
 docs/                       This documentation site
 Taskfile.yaml               Root task runner entry point
@@ -63,7 +61,7 @@ Taskfile.yaml               Root task runner entry point
 |---------|-----------|----------|---------|
 | BIND9, Caddy, oauth2-proxy, Tailscale, DDNS | `infra_networking` | 10.2.20.53 | DNS, reverse proxy, VPN |
 | Step-CA | `infra_ca` | 10.2.20.9 | Private certificate authority |
-| Chrony | `infra_ntp` | 10.2.20.123 | NTP time synchronization |
+| Chrony | `infra_ntp` | none at the moment (was 10.2.20.123) | NTP time synchronization |
 | Prometheus | `infra_monitoring` | 10.2.20.30 | Metrics |
 | Grafana, Homepage | `infra_dashboard` | 135.148.219.216 (OVH VPS, tailnet only) | Metrics dashboards and service dashboard for both sites |
 
@@ -72,9 +70,7 @@ Taskfile.yaml               Root task runner entry point
 | Service | Host Group | Purpose |
 |---------|-----------|---------|
 | Media stack (Plex, *arr) | `app_mediastack` | Media management and streaming |
-| Home Assistant | `app_homeassistant` | Home automation |
 | Birdle | `app_birdle` | Bird identification game |
-| Bookstack | `app_bookstack` | Wiki/documentation |
 | Ignis | `app_work` | Obsidian in the browser |
 | iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
 | Kasm | `app_kasm` | Browser-based desktops |

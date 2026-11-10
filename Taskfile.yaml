@@ -1,7 +1,11 @@
 version: '3'
 
+# ENV=<site> (wil, ldn or ovh) has no default. The ENV line below only hands
+# the value from the command line on to the included Taskfiles; every task
+# that reads it checks it first (`preconditions`), so a forgotten ENV stops
+# the task instead of running against a site you didn't name.
 vars:
-  ENV: '{{.ENV | default "ldn"}}'
+  ENV: '{{.ENV}}'
   ROOT_DIR: '{{.PWD}}'
 
 includes:
@@ -11,15 +15,9 @@ includes:
   docker: .taskfiles/docker
   packer: .taskfiles/packer
   terraform: .taskfiles/terraform
-  
+
 tasks:
   default:
     desc: Show available tasks
     cmds:
       - task --list
-
-  tui:
-    desc: Launch the homelab management TUI
-    dir: '{{.ROOT_DIR}}/tui'
-    cmds:
-      - python -m homelab_tui

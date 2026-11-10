@@ -65,7 +65,7 @@ Terraform and Packer have a directory per environment. Ansible has one inventory
     └── environments/
         ├── wil/
         │   ├── ubuntu-variables.pkrvars.hcl
-        │   └── credentials.wil.pkrvars.hcl  # Encrypted
+        │   └── credentials.wil.pkrvars.hcl.sops  # Encrypted
         └── ldn/
     ```
 
@@ -96,7 +96,7 @@ To add a site, or move a site's DNS server or zones, edit its row, then deploy n
 
 ## How `ENV=` Works
 
-The root `Taskfile.yaml` defines `ENV` as a variable (defaults to `ldn`). Terraform and Packer use it to resolve paths; Ansible uses it to limit the run to the site's group:
+`ENV` names the site and has no default: a task that reads it stops with "Pass ENV=<site>" when it is missing. Terraform and Packer use it to resolve paths; Ansible uses it to limit the run to the site's group:
 
 ```yaml
 # .taskfiles/ansible/Taskfile.yaml
@@ -134,12 +134,12 @@ task ansible:ping ENV=ldn    # Pings LDN hosts
 
 - Group variables (`group_vars/site_<env>/`, including the app registry and proxy lists)
 - VM definitions (`vms.auto.tfvars`)
-- Secrets (`secrets.sops.yml`, `credentials.*.pkrvars.hcl`)
+- Secrets (`secrets.sops.yml`, `terraform.tfvars.sops`, `credentials.*.pkrvars.hcl.sops`)
 - Terraform state (`terraform.tfstate`)
 
 ## Troubleshooting
 
-**Wrong environment deployed** — Double-check `ENV=` in your command. The default is `ldn` (production), not `wil`. Run `task ansible:ping ENV=<env>` to verify you're targeting the right hosts.
+**Wrong environment deployed** — Double-check `ENV=` in your command (there is no default). Run `task ansible:ping ENV=<env>` to verify you're targeting the right hosts.
 
 **Missing environment directory** — Each new environment needs a `[site_<env>]` group in `ansible/inventory/hosts.ini`, a row in `group_vars/all/sites.yml`, a `group_vars/site_<env>/` folder (with `site: <env>` in its `vars.yml`, and an `apps.yml`, at least `apps: {}`, which the Taskfile passes to `deploy-app` and `deploy-all`), and a `terraform/environments/<env>/` directory with the required files.
 

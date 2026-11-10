@@ -14,9 +14,6 @@ task packer:build-ubuntu-desktop ENV=wil
 # Build Debian Bookworm template
 task packer:build-debian ENV=wil
 
-# Build Netboot VM template
-task packer:build-netboot ENV=wil
-
 # Build Windows template (needs the Windows and virtio-win ISOs on Proxmox, see below)
 task packer:build-windows ENV=ldn
 
@@ -67,7 +64,7 @@ packer/
     │   ├── ubuntu-desktop-variables.pkrvars.hcl  # Ubuntu Desktop build variables
     │   ├── debian-variables.pkrvars.hcl     # Debian build variables
     │   ├── windows-variables.pkrvars.hcl    # Windows build variables
-    │   └── credentials.wil.pkrvars.hcl      # Proxmox API tokens (encrypted)
+    │   └── credentials.wil.pkrvars.hcl.sops # Proxmox API tokens (encrypted)
     └── ldn/
 ```
 
@@ -146,12 +143,14 @@ Proxmox API credentials (and, for the Windows template, the `ssh_password` of th
 
 ```bash
 # Edit credentials
-sops packer/environments/wil/credentials.wil.pkrvars.hcl
+sops packer/environments/wil/credentials.wil.pkrvars.hcl.sops
 ```
+
+A build decrypts the file for the one `packer build` command (`sops exec-file`), so no plain-text `credentials.<env>.pkrvars.hcl` is needed.
 
 ## Troubleshooting
 
-**401 Unauthorized** — The Proxmox API token is invalid or lacks permissions. Verify the token in `credentials.<env>.pkrvars.hcl` (decrypt with `sops`). The token needs `VM.Allocate`, `VM.Clone`, `Datastore.AllocateSpace`, and related permissions.
+**401 Unauthorized** — The Proxmox API token is invalid or lacks permissions. Verify the token in `credentials.<env>.pkrvars.hcl.sops` (open it with `sops`). The token needs `VM.Allocate`, `VM.Clone`, `Datastore.AllocateSpace`, and related permissions.
 
 **Template name conflict** — A template with the same name already exists. Delete the old template from Proxmox first: `qm destroy <vmid>`.
 

@@ -54,6 +54,8 @@ For each domain, the `domain.zone.j2` template generates:
 - Serial number from the current epoch (auto-increments on each deploy)
 - TTL of 300 seconds (5 minutes)
 
+Because of the serial, the zone files change on every deploy; BIND reloads them (`rndc reload`) and is restarted only when `named.conf` itself changes. Each file is checked before it replaces the live one, `named.conf` with `named-checkconf` and a zone with `named-checkzone`: a file BIND would refuse fails the deploy at that task and DNS keeps running on the old one.
+
 === "WIL"
 
     ```yaml
@@ -284,10 +286,10 @@ dig AXFR 5am.video @10.2.20.53
 
 ## Troubleshooting
 
-**Service not resolving** — Check BIND9 is running: `ssh <networking-ip> docker logs bind9`. Verify the service has an entry in the correct domain file under `group_vars/site_<env>/proxy/` (or a `proxy:` block on the app's entry in `group_vars/site_<env>/apps.yml`) and redeploy: `task ansible:deploy-networking ENV=wil`.
+**Service not resolving** — Check BIND9 is running: `ssh <networking-ip> systemctl status named`. Verify the service has an entry in the correct domain file under `group_vars/site_<env>/proxy/` (or a `proxy:` block on the app's entry in `group_vars/site_<env>/apps.yml`) and redeploy: `task ansible:deploy-networking ENV=wil`.
 
 **Wrong IP returned** — If a proxied service resolves to `backend_host` instead of `reverse_proxy_ip`, check that `proxied: true` is set. If a non-proxied service resolves to the Caddy IP, check that `proxied: false` is set.
 
 **Zone transfer not working** — Verify Tailscale connectivity between sites. Check that `dns_transfer_clients` (derived from `group_vars/all/sites.yml`) includes the remote DNS server IP and the CGNAT range. Test with `dig AXFR <zone> @<primary-dns>`.
 
-**Serial number not incrementing** — Zone serials use the current epoch. If BIND9 doesn't pick up changes, restart the container: `ssh <networking-ip> docker restart bind9`.
+**Serial number not incrementing** — Zone serials use the current epoch. If BIND9 doesn't pick up changes, reload it: `ssh <networking-ip> sudo rndc reload`.

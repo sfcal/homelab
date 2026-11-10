@@ -12,7 +12,7 @@ git clone git@github.com:sfcal/homelab.git
 cd homelab
 ```
 
-Set your environment (defaults to `dev`):
+Set your environment once for the shell, or pass `ENV=` to every task (there is no default):
 
 ```bash
 export ENV=wil
@@ -85,7 +85,7 @@ curl -k https://wil.5am.cloud
 
 ## Troubleshooting
 
-**Packer build fails with 401** — Check Proxmox API token credentials in `packer/environments/wil/credentials.wil.pkrvars.hcl`. Ensure the token has `VM.Allocate` and `Datastore.AllocateSpace` permissions.
+**Packer build fails with 401** — Check Proxmox API token credentials in `packer/environments/wil/credentials.wil.pkrvars.hcl.sops` (open it with `sops`). Ensure the token has `VM.Allocate` and `Datastore.AllocateSpace` permissions.
 
 **Terraform can't find template** — The template name must match what Packer created. Check with `qm list` on the Proxmox host. Template names follow the pattern `ubuntu-server-<env>-base`.
 

@@ -77,7 +77,7 @@ The task file performs these steps in order:
 4. Starts the Step-CA container
 5. Waits 10 seconds for initialization
 6. Runs a health check against `https://127.0.0.1:9000/health`
-7. Configures certificate duration claims in `ca.json` via `jq`
+7. Sets the certificate duration claims and the ACME provisioner in `ca.json` via `jq` (rewritten, and the CA restarted, only when a value differs)
 8. Exports the root CA certificate to `/opt/step-ca/root_ca.crt`
 9. Displays status output
 
@@ -151,7 +151,7 @@ ssh sfcal@10.2.20.9 cat /opt/step-ca/root_ca.crt
     task ansible:deploy-ca ENV=wil
     ```
 
-The task applies duration changes to `ca.json` via `jq` on each run.
+The task compares `ca.json` with these values on each run. It rewrites the file and restarts the CA only when they differ, so a deploy that changes nothing leaves the CA running.
 
 ### Restart the CA
 
