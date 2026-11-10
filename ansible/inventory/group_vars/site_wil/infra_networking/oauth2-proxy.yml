@@ -9,4 +9,5 @@ oauth2_proxy_image: "quay.io/oauth2-proxy/oauth2-proxy:v7.15.6"
 
 # Stored in site_wil/secrets.sops.yml:
 #   oauth2_proxy_cookie_secret,
-#   kanidm_oauth2_proxy_client_secret, kanidm_sync_token, kanidm_proxmox_client_secret
+#   kanidm_oauth2_proxy_client_secret, kanidm_sync_token, kanidm_proxmox_client_secret,
+#   kanidm_pbs_client_secret

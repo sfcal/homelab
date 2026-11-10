@@ -1,8 +1,9 @@
 ---
-# Kasm workspace images: every folder in files/ with a Dockerfile is built
-# inside Kasm's own Docker (not the VM's) as localhost/<folder>:latest. Nothing
-# can be pulled from the localhost/ registry, so Kasm keeps the local build.
-# Only the work VM's agent has these images: restrict their workspaces to it.
+# Kasm workspace images: each folder of files/ named in kasm_workspace_images
+# is built inside Kasm's own Docker (not the VM's) as localhost/<folder>:latest.
+# Nothing can be pulled from the localhost/ registry, so Kasm keeps the local
+# build. Only the work VM's agent has these images: restrict their workspaces
+# to it (the VPS agent builds its own list, playbooks/apps/kasm-agent).
 # The agent prunes images no workspace uses within 30 s (Aggressive mode), so
 # save a new image's workspace in Kasm before its first deploy.
 - name: Copy the workspace image build files.

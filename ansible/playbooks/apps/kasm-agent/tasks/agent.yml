@@ -35,12 +35,14 @@
     daemon_reload: true
 
 # --- Agent ---
-# Lab VMs get Docker from the Packer template; the VPS doesn't.
+# Lab VMs get Docker from the Packer template; the VPS doesn't. buildx is
+# for the workspace image builds (tasks/images.yml).
 - name: Install Docker.
   ansible.builtin.apt:
     name:
       - docker.io
       - docker-compose-v2
+      - docker-buildx
     state: present
 
 - name: Create the Kasm download directory.

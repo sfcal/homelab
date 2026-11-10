@@ -6,3 +6,7 @@
 kasm_image: "lscr.io/linuxserver/kasm:1.18.1"
 kasm_port: 4443
 kasm_wizard_port: 3001
+
+# Custom workspace images (folders of playbooks/apps/kasm/files/) built on the
+# work VM. Deluge's is built on the VPS (site_ovh/app_kasm_agent/vars.yml).
+kasm_workspace_images: []

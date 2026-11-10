@@ -25,6 +25,16 @@
   notify:
     - Restart homepage
 
+# Colours, type and card styles. Copied, not templated: "{#" in CSS would
+# open a Jinja comment. Homepage reads it on every request, so no restart.
+- name: Deploy Homepage stylesheet.
+  ansible.builtin.copy:
+    src: files/homepage/custom.css
+    dest: /opt/dashboard/homepage/custom.css
+    owner: "1000"
+    group: "1000"
+    mode: "0644"
+
 # Holds the API keys and the Cloudflare token, and the VPS is on the internet:
 # root only.
 - name: Deploy compose.yaml.

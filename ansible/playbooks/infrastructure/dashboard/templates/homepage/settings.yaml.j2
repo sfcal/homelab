@@ -1,45 +1,84 @@
 ---
 title: 5am.video
-theme: dark
-color: slate
+# Colours, type and card styles come from custom.css (files/homepage/); gray
+# is the neutral ramp under it.
+theme: light
+color: gray
 headerStyle: clean
+statusStyle: dot
+useEqualHeights: true
+# Groups are shown on the tab named here; the first tab opens by default.
 layout:
+  # --- Overview ---
   System Activity (wil):
+    tab: Overview
+    icon: mdi-chart-areaspline
     style: row
     columns: 4
   System Activity (ldn):
+    tab: Overview
+    icon: mdi-chart-areaspline
     style: row
     columns: 4
-  Media Management:
-    style: row
-    columns: 4
-  Downloads:
-    style: row
-    columns: 1
-  Media Processing:
-    style: row
-    columns: 3
-  Apps (wil):
-    style: row
-    columns: 3
-  Apps (ldn):
-    style: row
-    columns: 3
   Infrastructure (wil):
+    tab: Overview
+    icon: mdi-server
     style: row
     columns: 3
   Infrastructure (ldn):
+    tab: Overview
+    icon: mdi-server
     style: row
     columns: 3
   Monitoring (wil):
+    tab: Overview
+    icon: mdi-pulse
     style: row
     columns: 3
   Monitoring (ldn):
+    tab: Overview
+    icon: mdi-pulse
     style: row
     columns: 3
   Node Exporters (wil):
+    tab: Overview
+    icon: mdi-chip
     style: row
     columns: 4
   Node Exporters (ldn):
+    tab: Overview
+    icon: mdi-chip
     style: row
     columns: 4
+  # --- Media ---
+  Media Management:
+    tab: Media
+    icon: mdi-filmstrip-box-multiple
+    style: row
+    columns: 4
+  Downloads:
+    tab: Media
+    icon: mdi-download
+    style: row
+    columns: 2
+  Media Processing:
+    tab: Media
+    icon: mdi-movie-cog
+    style: row
+    columns: 3
+  # --- Apps ---
+  Apps (wil):
+    tab: Apps
+    icon: mdi-apps
+    style: row
+    columns: 3
+  Apps (ldn):
+    tab: Apps
+    icon: mdi-apps
+    style: row
+    columns: 3
+  Bookmarks:
+    tab: Apps
+    icon: mdi-bookmark-multiple
+    style: row
+    columns: 3

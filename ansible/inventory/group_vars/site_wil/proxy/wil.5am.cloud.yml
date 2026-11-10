@@ -13,6 +13,12 @@ wil_services:
     proxied: true
     tls_skip_verify: true
     auth: true
+  - name: pbs
+    backend_host: 10.2.20.75
+    backend_port: 8007
+    proxied: true
+    tls_skip_verify: true
+    auth: true
   - name: nas
     backend_host: 10.2.0.100
     backend_port: 80

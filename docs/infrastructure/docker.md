@@ -32,13 +32,20 @@ Hermes Agent (ldn) has its own playbook, which also installs Claude Code and the
 
 Kasm (ldn, on the `work` VM, `https://kasm.ldn.5am.cloud`) is the LinuxServer image, which runs Kasm's own Docker daemon inside the container. Its state is under `/var/lib/kasm/`. Deploy with `task ansible:deploy-kasm ENV=ldn`.
 
-Custom workspace images live in `ansible/playbooks/apps/kasm/files/`, one folder per image with a `Dockerfile` (folder names lowercase: they become the image name). Each deploy copies them to `/opt/kasm/images/` and builds every folder inside Kasm's Docker as `localhost/<folder>:latest`, pulling newer base images first. To use one, add a workspace with that image name and restrict it to the work VM's agent (`85a6c3`): the VPS agent ([Kasm Agent](kasm-agent.md)) doesn't have it. The work VM's agent prunes images in Aggressive mode: within 30 s it deletes any image no workspace uses, so save the workspace first, then deploy.
+Custom workspace images live in `ansible/playbooks/apps/kasm/files/`, one folder per image with a `Dockerfile` (folder names lowercase: they become the image name). Each image is built on one machine only, the one whose agent runs its workspace, listed in `kasm_workspace_images`:
+
+| Machine | List | Built by | Agent |
+|---------|------|----------|-------|
+| work VM | `site_ldn/app_kasm/vars.yml` (none now) | `task ansible:deploy-kasm ENV=ldn`, inside Kasm's Docker | `85a6c3` |
+| OVH VPS | `site_ovh/app_kasm_agent/vars.yml` (`deluge`) | `task ansible:deploy-kasm-agent ENV=ovh`, in the VPS's Docker ([Kasm Agent](kasm-agent.md)) | `a67ee6` |
+
+Each deploy copies the build files over and builds `localhost/<folder>:latest`, pulling newer base images first. To use one, add a workspace with that image name and restrict it to that machine's agent: the other agent doesn't have the image. To move one, move its name to the other list, change the workspace's agent, then deploy the machine that now builds it. Agents prune images in Aggressive mode: within 30 s they delete any image no workspace of theirs uses, so save the workspace first, then deploy.
 
 ### Deluge
 
-The Deluge workspace runs `localhost/deluge:latest` (`files/deluge/`) on the work VM, with no volume mappings. When a torrent finishes, Deluge's Execute plugin runs `torrent-archive`, which writes it as one uncompressed `<torrent name>.zip` into `~/Downloads`, so Kasm's download panel can fetch it in one go (written as `.zip.part` first, then renamed; `zip -0`, since media doesn't compress). Torrents download to `~/torrents`. Both folders, and Deluge's settings, last only as long as the session: fetch the archives before ending it. The settings come from the image (`core.conf`, `execute.conf`), which Kasm copies into each new session's home; mapping `~/.config` to a host folder would overwrite what's saved there each time. The base stays on the Kasm server's version. Deluge 2.0.3 with libtorrent 2.0 logs a harmless `KeyError: 'disk.num_blocks_cache_hits'` every few seconds.
+The Deluge workspace runs `localhost/deluge:latest` (`files/deluge/`) on the OVH VPS agent, so torrent traffic leaves from the VPS's IP, with no volume mappings. When a torrent finishes, Deluge's Execute plugin runs `torrent-archive`, which writes it as one uncompressed `<torrent name>.zip` into `~/Downloads`, so Kasm's download panel can fetch it in one go (written as `.zip.part` first, then renamed; `zip -0`, since media doesn't compress). Torrents download to `~/torrents`. Both folders, and Deluge's settings, last only as long as the session: fetch the archives before ending it. The settings come from the image (`core.conf`, `execute.conf`), which Kasm copies into each new session's home; mapping `~/.config` to a host folder would overwrite what's saved there each time. The base stays on the Kasm server's version. Deluge 2.0.3 with libtorrent 2.0 logs a harmless `KeyError: 'disk.num_blocks_cache_hits'` every few seconds.
 
-Workspace settings (Kasm's admin, not this repo): Docker Image `localhost/deluge:latest`, Docker Registry empty, Restrict Image to Kasm Agent `85a6c3`, Volume Mappings `{}`.
+Workspace settings (Kasm's admin, not this repo): Docker Image `localhost/deluge:latest`, Docker Registry empty, Restrict Image to Kasm Agent `a67ee6` (the VPS), Volume Mappings `{}`.
 
 ## Data-Driven Apps
 

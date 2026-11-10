@@ -18,4 +18,9 @@ kasm_agent_manager: "10.3.20.50"
 kasm_agent_public_hostname: "100.116.40.99"
 kasm_agent_port: 4443
 
+# Custom workspace images (folders of playbooks/apps/kasm/files/) built in the
+# VPS's Docker, for the workspaces restricted to this agent in Kasm's admin
+kasm_workspace_images:
+  - deluge
+
 # kasm_manager_token — site_ovh/secrets.sops.yml (section app_kasm_agent)

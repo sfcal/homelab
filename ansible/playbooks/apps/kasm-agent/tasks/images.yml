@@ -1,0 +1,30 @@
+---
+# Kasm workspace images for this agent: each folder of the Kasm playbook's
+# files/ named in kasm_workspace_images is built in the VPS's Docker as
+# localhost/<folder>:latest. Nothing can be pulled from the localhost/
+# registry, so the agent keeps the local build. Restrict their workspaces to
+# this agent in Kasm's admin, and save the workspace before the first deploy:
+# the agent prunes images no workspace uses.
+- name: Copy the workspace image build files.
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../kasm/files/{{ item }}"
+    dest: /opt/kasm-agent/images/
+    mode: preserve
+    directory_mode: "0755"
+  loop: "{{ kasm_workspace_images }}"
+
+# BuildKit (docker-buildx), not the classic builder: the classic builder keeps
+# each step as an untagged image, and the agent's prune deleted one mid-build.
+# --pull picks up new base images; an unchanged build keeps its image ID
+# (no provenance attestation: it records each build and changes the ID).
+- name: Build the workspace images.
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      before=$(docker images --no-trunc -q localhost/{{ item }}:latest)
+      docker build --pull --provenance=false -q -t localhost/{{ item }}:latest /opt/kasm-agent/images/{{ item }} >/dev/null
+      after=$(docker images --no-trunc -q localhost/{{ item }}:latest)
+      [ "$before" = "$after" ] || echo changed
+  register: kasm_image_build
+  changed_when: "'changed' in kasm_image_build.stdout"
+  loop: "{{ kasm_workspace_images }}"

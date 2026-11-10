@@ -210,7 +210,7 @@ Kanidm on the OVH VPS (dashboard playbook, `https://auth.5am.cloud`) is the one 
 - `auth.5am.cloud` is a record in wil's BIND (`site_wil/proxy/5am.cloud.yml`) pointing at `sites.ovh.tailnet_ip`; hosts that don't use BIND pin it (oauth2-proxy's container with `extra_hosts`, the Proxmox hosts in `/etc/hosts`)
 - People, groups and clients live in Kanidm's database, managed with the `kanidm` CLI as `idm_admin`, whose password is not kept (`kanidmd recover-account`); not kanidm-provision
 - Secrets per site in the `infra_networking` section of `group_vars/site_<env>/secrets.sops.yml` (names listed in `infra_networking/oauth2-proxy.yml`)
-- Proxmox (realm `sso`) and Kasm (client `kasm`, PKCE off) log in to Kanidm directly; their side lives in Proxmox and in Kasm's database, values in the SSO docs
+- Proxmox and wil's PBS (realm `sso`, clients `proxmox-<site>`, `pbs-wil`) and Kasm (client `kasm`, PKCE off) log in to Kanidm directly; their side lives in Proxmox, PBS and Kasm's database, values in the SSO docs
 - Kanidm upgrades go one minor version at a time and can't be rolled back, so Renovate never automerges `kanidm/server`
 - Password reset by email: `kanidm-mail-sender` (dashboard compose, `kanidm_tools_image`, kept at the server's version; Renovate groups the two) sends Kanidm's mail queue through Fastmail as `noreply@5am.cloud`; its token and the Fastmail login are in `site_ovh/secrets.sops.yml`. Its service account, each person's `mail` and the login page's Recover Account switch (`set-allow-account-recovery`, needs `admin`, not idm_admin) live in Kanidm's database. Test sending with the sender's `-t`: `message-queue send-test-message` is refused in 1.12.0
 

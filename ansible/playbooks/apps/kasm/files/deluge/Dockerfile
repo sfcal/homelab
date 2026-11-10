@@ -14,7 +14,7 @@ RUN apt-get update \
 ENV HOME=/home/kasm-default-profile
 WORKDIR $HOME
 
-# No COPY --chmod: Kasm's Docker builds with the classic builder (no buildx)
+# No COPY --chmod: the work VM's Kasm Docker builds with the classic builder (no buildx)
 COPY torrent-archive /usr/local/bin/torrent-archive
 COPY core.conf execute.conf $HOME/.config/deluge/
 RUN chmod 755 /usr/local/bin/torrent-archive \

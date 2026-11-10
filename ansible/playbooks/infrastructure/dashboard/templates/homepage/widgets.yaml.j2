@@ -1,4 +1,12 @@
 ---
+# Reads the host Homepage runs on (this VPS), not its container
+- resources:
+    label: dashboard VPS
+    cpu: true
+    memory: true
+    disk: /
+    uptime: true
+
 - search:
     provider: google
     target: _blank

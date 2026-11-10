@@ -87,8 +87,9 @@ graph TD
 | `playbooks/infrastructure/dashboard/files/Caddyfile` | Public site: Uptime Kuma's badges only |
 | `playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2` | Homepage services dashboard |
 | `playbooks/infrastructure/dashboard/templates/homepage/bookmarks.yaml.j2` | Homepage bookmarks |
-| `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme and layout |
+| `playbooks/infrastructure/dashboard/templates/homepage/settings.yaml.j2` | Homepage theme, tabs and layout |
 | `playbooks/infrastructure/dashboard/templates/homepage/widgets.yaml.j2` | Homepage widgets |
+| `playbooks/infrastructure/dashboard/files/homepage/custom.css` | Homepage colours, type and card styles |
 | `inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | Images, allowed hosts, Grafana admin user and URL |
 | `inventory/group_vars/site_wil/proxy/ext.5am.cloud.yml` | wil's BIND record for `uptime.ext.5am.cloud` |
 | `inventory/group_vars/site_ovh/infra_dashboard/tailscale.yml` | Tailscale client settings |
@@ -246,19 +247,21 @@ The VPS joins the tailnet as a client named `dashboard` that accepts the sites' 
 
 ### Dashboard Configuration
 
-Homepage is configured via four YAML template files:
+Homepage is configured via four YAML template files and a stylesheet:
 
-| Template | Purpose |
+| File | Purpose |
 |----------|---------|
 | `services.yaml.j2` | Service cards with status widgets (Grafana graphs, media, apps, infrastructure, monitoring, node exporters) |
 | `bookmarks.yaml.j2` | Quick links (TrueNAS, Proxmox) |
-| `settings.yaml.j2` | Theme (dark, slate), layout (row style, column counts) |
-| `widgets.yaml.j2` | Global widgets (search bar, datetime) |
+| `settings.yaml.j2` | Theme (light, gray), status dots, tabs (Overview, Media, Apps), group icons, layout (row style, column counts) |
+| `widgets.yaml.j2` | Global widgets (the VPS's resources, search bar, datetime) |
+| `files/homepage/custom.css` | The look: the layout of a dashboard shared in [Homepage's "Share your homepage" thread](https://github.com/gethomepage/homepage/discussions/473#discussioncomment-18831380) in the colours of [samuel.computer](https://samuel.computer) (sky page, frosted-glass header, white cards, olive accents, Inter) |
 
-`services.yaml.j2` is plain Homepage YAML; edit it directly. Four parts are less obvious:
+`services.yaml.j2` is plain Homepage YAML; edit it directly. These parts are less obvious:
 
-- **Per-site groups:** System Activity, Apps, Infrastructure, Monitoring and Node Exporters appear once per site, named `(wil)` and `(ldn)`. A new group needs a matching entry in the `layout` of `settings.yaml.j2`.
-- **System Activity** shows the four panels of the System Activity Grafana dashboard once per site, in iframes from `http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-<site>&panelId=1` to `4`. `var-ds` picks the site's Prometheus. Grafana allows anonymous viewing and embedding. The time range and refresh interval come from the dashboard JSON.
+- **Per-site groups:** System Activity, Apps, Infrastructure, Monitoring and Node Exporters appear once per site, named `(wil)` and `(ldn)`. A new group needs a matching entry in the `layout` of `settings.yaml.j2`, with the `tab` it belongs on; a group left out of `layout` shows on every tab.
+- **Tile colours:** a widget's `highlight` rules mark tiles good, warn or danger, and `custom.css` tints them lime, orange or pink (Homepage's own tints lose to the tile background). Used for Prometheus targets down, Uptime Kuma sites down, Tdarr errors, Prowlarr failed grabs and KOSync health.
+- **System Activity** shows the four panels of the System Activity Grafana dashboard once per site, in iframes from `http://dashboard:3000/d-solo/system-activity?var-ds=prometheus-<site>&panelId=1` to `4`, in Grafana's light theme (`theme=light`). `var-ds` picks the site's Prometheus. Grafana allows anonymous viewing and embedding. The time range and refresh interval come from the dashboard JSON.
 - **Node Exporters** lists the targets of each site's `prometheus_node_targets` by hand; add a node there too.
 - **SABnzbd** has two widgets: Homepage's `sabnzbd` widget (speed, queue) and a `customapi` widget that reads the download totals for today, this week, this month and all time from SABnzbd's `server_stats` API once a minute.
 
