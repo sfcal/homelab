@@ -35,24 +35,6 @@ vms = {
     ssh_user       = "sfcal"
   }
 
-  games_server = {
-    name           = "games"
-    description    = "game Server"
-    proxmox_node   = "proxmox"
-    vmid           = 1111
-    template_name  = "ubuntu-server-wil-base"
-    ip_address     = "10.2.20.50"
-    gateway        = "10.2.20.1"
-    nameserver     = "10.2.20.53"
-    cores          = 1
-    memory         = 8192
-    disk_size      = "50G"
-    storage_pool   = "local-lvm"
-    network_bridge = "vmbr0"
-    tags           = "application"
-    ssh_user       = "sfcal"
-  }
-
   ca_server = {
     name           = "ca"
     description    = "Certificate Authority (Step-CA)"
@@ -68,24 +50,6 @@ vms = {
     storage_pool   = "local-lvm"
     network_bridge = "vmbr0"
     tags           = "infrastructure"
-    ssh_user       = "sfcal"
-  }
-
-  web_server = {
-    name           = "web"
-    description    = "personal site"
-    proxmox_node   = "proxmox"
-    vmid           = 1109
-    template_name  = "ubuntu-server-wil-base"
-    ip_address     = "10.2.20.45"
-    gateway        = "10.2.20.1"
-    nameserver     = "10.2.20.53"
-    cores          = 2
-    memory         = 4096
-    disk_size      = "20G"
-    storage_pool   = "local-lvm"
-    network_bridge = "vmbr0"
-    tags           = "application"
     ssh_user       = "sfcal"
   }
 }

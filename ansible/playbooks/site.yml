@@ -50,9 +50,9 @@
 - import_playbook: apps/frigate/deploy.yml
   tags: ['frigate', 'applications']
 
-# 7. Gaming (Terraria, Wolf & RomM)
+# 7. Gaming (Wolf & RomM)
 - import_playbook: apps/gaming/deploy.yml
-  tags: ['gaming', 'terraria', 'wolf', 'romm', 'applications']
+  tags: ['gaming', 'wolf', 'romm', 'applications']
 
 # 8. Hermes Agent
 - import_playbook: apps/hermes/deploy.yml
@@ -69,20 +69,12 @@
 # --- Apps (data-driven) ---
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: birdle }
-  tags: ['birdle', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: kosync }
   tags: ['kosync', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: isponsorblocktv }
   tags: ['isponsorblocktv', 'applications']
-
-- import_playbook: deploy-app.yml
-  vars: { app_name: website }
-  tags: ['website', 'applications']
 
 - import_playbook: deploy-app.yml
   vars: { app_name: work }

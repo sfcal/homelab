@@ -84,16 +84,6 @@
         siteMonitor: http://10.2.0.5:8877/api/health
 
 - Apps:
-    - Website:
-        icon: mdi-web
-        href: https://samuel.5am.video/
-        siteMonitor: http://10.2.20.45:8090
-
-    - Birdle:
-        icon: mdi-bird
-        href: https://birdle.sfc.al/
-        siteMonitor: http://10.2.20.45:8091
-
     - Kasm:
         icon: kasm.png
         href: https://kasm.ldn.5am.cloud/
@@ -387,19 +377,6 @@
         href: https://wizarr.5am.video
         siteMonitor: http://10.2.0.5:5690
 
-- Apps (wil):
-    - Website:
-        icon: mdi-web
-        description: Personal site
-        href: https://samuel.5am.video
-        siteMonitor: http://10.2.20.45:8090
-
-    - Birdle:
-        icon: mdi-bird
-        description: Bird identification game
-        href: https://birdle.sfc.al
-        siteMonitor: http://10.2.20.45:8091
-
 - Infrastructure (wil):
     - Proxmox:
         icon: proxmox.png
@@ -443,7 +420,7 @@
                 - {level: good, when: eq, value: 0}
                 - {level: warn, when: gt, value: 0}
 
-{% for target, role in [('10.2.20.30:9100', 'Monitoring VM'), ('10.2.0.5:9100', 'Media VM'), ('10.2.20.53:9100', 'Networking VM'), ('10.2.20.45:9100', 'Web VM')] %}
+{% for target, role in [('10.2.20.30:9100', 'Monitoring VM'), ('10.2.0.5:9100', 'Media VM'), ('10.2.20.53:9100', 'Networking VM')] %}
     - {{ target.split(':')[0] }}:
         icon: prometheus.png
         description: {{ role }}

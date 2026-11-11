@@ -141,7 +141,7 @@ Compose templates read these via `apps.work.<svc>.*`.
 | Prefix | Purpose | Example |
 |--------|---------|---------|
 | `infra_*` | Infrastructure services | `infra_networking`, `infra_ca` |
-| `app_*` | Applications | `app_mediastack`, `app_birdle` |
+| `app_*` | Applications | `app_mediastack`, `app_kosync` |
 | `site_*` | Sites; every host is in one | `site_wil`, `site_ldn` |
 
 Parent groups: `[infrastructure:children]` and `[apps:children]` aggregate all groups of each type.

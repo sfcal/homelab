@@ -73,7 +73,7 @@ DNS (BIND9 with DDNS), Reverse Proxy (Caddy), Tailscale subnet router
 <details>
 <summary>🌐 Applications</summary>
 
-Personal website, Birdle (bird identification game), Terraria game server, KOReader sync server (kosync)
+KOReader sync server (kosync)
 
 </details>
 
@@ -282,9 +282,7 @@ hl task ansible:deploy-monitoring ENV=dev   # Prometheus
 
 # Applications
 hl task ansible:deploy-media ENV=dev        # Full media stack
-hl task ansible:deploy-website ENV=dev      # Personal website
-hl task ansible:deploy-birdle ENV=dev       # Birdle game
-hl task ansible:deploy-gaming ENV=dev       # Terraria, Wolf, RomM
+hl task ansible:deploy-gaming ENV=dev       # Wolf, RomM
 
 # Utilities
 hl task ansible:ping ENV=dev               # Test connectivity

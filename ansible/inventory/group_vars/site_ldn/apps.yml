@@ -16,7 +16,7 @@
 # will split-brain against the group_vars copy.
 #
 # Required fields:
-#   host_group: inventory group name (e.g., app_website); must have at least one
+#   host_group: inventory group name (e.g., app_kosync); must have at least one
 #               host in the inventory if any proxy block exists
 #   image: primary container image (all `*image` keys are pre-pulled)
 #

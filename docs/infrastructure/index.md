@@ -18,5 +18,5 @@ task ansible:deploy-monitoring ENV=wil   # 4. Metrics and dashboards
 3. [**Time Server**](ntp/index.md) — NTP synchronization (Chrony)
 4. [**Monitoring**](monitoring/index.md) — Metrics (Prometheus), dashboards (Grafana and Homepage, on the OVH VPS), uptime (Uptime Kuma)
 5. [**Docker Services**](docker.md) — Container definitions and compose templates
-6. [**Gaming**](gaming.md) — Terraria server (wil); Wolf (Moonlight streaming) and RomM on the GPU VM (ldn)
+6. [**Gaming**](gaming.md) — Wolf (Moonlight streaming) and RomM on the GPU VM (ldn)
 7. [**Hermes Agent**](hermes.md) — AI agent on the Claude subscription (ldn)

@@ -70,7 +70,6 @@ Taskfile.yaml               Root task runner entry point
 | Service | Host Group | Purpose |
 |---------|-----------|---------|
 | Media stack (Plex, *arr) | `app_mediastack` | Media management and streaming |
-| Birdle | `app_birdle` | Bird identification game |
 | Ignis | `app_work` | Obsidian in the browser |
 | iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
 | Kasm | `app_kasm` | Browser-based desktops |
@@ -79,8 +78,6 @@ Taskfile.yaml               Root task runner entry point
 | Restreamer | `app_work` | Video streaming relay |
 | Wolf | `app_gaming` | Moonlight game streaming (Intel Arc Pro B50 SR-IOV VF) |
 | RomM | `app_gaming` | ROM manager |
-| Website | `app_website` | Personal website |
-| Terraria | `app_gaming` | Game server |
 | Hermes Agent | `app_hermes` | AI agent on the Claude subscription |
 
 ## Key Design Decisions

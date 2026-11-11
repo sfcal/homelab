@@ -93,7 +93,7 @@ tasks:
         vars: { PLAYBOOK_PATH: apps/frigate/deploy.yml }
 
   deploy-gaming:
-    desc: Deploy gaming stacks (Terraria, Wolf, RomM)
+    desc: Deploy gaming stacks (Wolf, RomM)
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/gaming/deploy.yml }

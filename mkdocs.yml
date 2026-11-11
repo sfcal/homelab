@@ -126,7 +126,7 @@ nav:
     - Time Server: infrastructure/ntp/index.md
     - Monitoring: infrastructure/monitoring/index.md
     - Docker Services: infrastructure/docker.md
-    - Gaming (Terraria, Wolf, RomM): infrastructure/gaming.md
+    - Gaming (Wolf, RomM): infrastructure/gaming.md
     - Hermes Agent: infrastructure/hermes.md
     - Kasm Agent (OVH VPS): infrastructure/kasm-agent.md
 

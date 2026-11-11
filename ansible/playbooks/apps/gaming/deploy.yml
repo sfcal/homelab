@@ -1,5 +1,5 @@
 ---
-- name: Deploy Gaming (Terraria, Wolf, RomM)
+- name: Deploy Gaming (Wolf, RomM)
   hosts: app_gaming
   become: true
 
@@ -13,7 +13,7 @@
         name: common
 
   tasks:
-    # Game data (worlds, ROM library) is local to the VM unless
+    # Game data (the ROM library) is local to the VM unless
     # group_vars/site_<site>/app_gaming/ sets gaming_nfs: true; it then mounts
     # the site's nfs_mounts (group_vars/site_<site>/nfs.yml). Not gated on
     # nfs_mounts itself: wil's media mount reaches every wil host.
@@ -23,11 +23,7 @@
       when: gaming_nfs | default(false)
 
     # Each stack is deployed only where group_vars/site_<site>/app_gaming/vars.yml
-    # defines its image: Terraria on wil, RomM and Wolf on ldn.
-    - name: Configure Terraria.
-      ansible.builtin.include_tasks: tasks/terraria.yml
-      when: terraria_image is defined
-
+    # defines its image: RomM and Wolf, both on ldn.
     - name: Configure RomM.
       ansible.builtin.include_tasks: tasks/romm.yml
       when: romm_image is defined

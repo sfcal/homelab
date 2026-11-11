@@ -47,7 +47,7 @@ Network ranges: wil=10.2.x.x, ldn=10.3.x.x, ovh=none (VPS 135.148.219.216, tailn
 ### Naming
 - All variables: `snake_case`
 - Ansible groups: `infra_*` (infrastructure), `app_*` (applications)
-- Terraform VM keys: `snake_case` (e.g., `networking`, `ca_server`, `games_server`)
+- Terraform VM keys: `snake_case` (e.g., `networking`, `ca_server`, `monitoring_server`)
 - Files/directories: `snake_case` with hyphens for app names (e.g., `media-stack`)
 - Domains: lowercase dot-separated (5am.video, wil.5am.cloud)
 

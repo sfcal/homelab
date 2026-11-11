@@ -22,7 +22,7 @@ Deploy with `task ansible:deploy-media ENV=wil`.
 
 ## Gaming
 
-Terraria (wil) and Wolf with RomM (ldn) share one playbook on the `app_gaming` host; each environment gets the stacks its group_vars define. Deploy with `task ansible:deploy-gaming ENV=<env>`; see [Gaming](gaming.md).
+Wolf and RomM (ldn) share one playbook on the `app_gaming` host; an environment gets the stacks its group_vars define. Deploy with `task ansible:deploy-gaming ENV=<env>`; see [Gaming](gaming.md).
 
 ## Hermes Agent
 
@@ -53,14 +53,11 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 
 | App | Image | Port |
 |-----|-------|------|
-| Birdle | `ghcr.io/sfcal/new-birdle` | 8091 |
-| Bookstack | `lscr.io/linuxserver/bookstack` | 8074 |
 | Ignis (Obsidian) | `nobbe/ignis` | 8082 |
 | iSponsorBlockTV | `ghcr.io/dmunozv04/isponsorblocktv` | — |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
-| Website | `ghcr.io/sfcal/samuel.computer` | 8090 |
 
 ### Ignis
 

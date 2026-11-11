@@ -16,7 +16,7 @@
 # will split-brain against the group_vars copy.
 #
 # Required fields:
-#   host_group: inventory group name (e.g., app_website); must have at least one
+#   host_group: inventory group name (e.g., app_kosync); must have at least one
 #               host in the inventory if any proxy block exists
 #   image: primary container image (all `*image` keys are pre-pulled)
 #
@@ -35,23 +35,6 @@
 # double-quoted, and keep the `# renovate: datasource=docker` comment
 # directly above the key line.
 
-apps:
-  birdle:
-    host_group: app_birdle
-    # renovate: datasource=docker
-    image: "ghcr.io/sfcal/new-birdle:latest"
-    port: 8091
-    proxy:
-      name: birdle
-      domain: sfc.al
-      proxied: true
-
-  website:
-    host_group: app_website
-    # renovate: datasource=docker
-    image: "ghcr.io/sfcal/samuel.computer:latest"
-    port: 8090
-    proxy:
-      name: samuel
-      domain: 5am.video
-      proxied: true
+# wil has no registry apps at the moment. The empty map stays: the Taskfile and
+# CI pass this file with -e @ for deploy-app and deploy-all.
+apps: {}

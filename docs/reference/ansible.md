@@ -12,7 +12,7 @@ task ansible:deploy-all ENV=wil
 task ansible:deploy-networking ENV=wil
 
 # Deploy a data-driven app
-task ansible:deploy-app ENV=wil APP=birdle
+task ansible:deploy-app ENV=ldn APP=kosync
 
 # Test connectivity
 task ansible:ping ENV=wil
@@ -32,7 +32,7 @@ task ansible:ping ENV=wil
 | `deploy-proxmox` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
 | `deploy-frigate` | Frigate NVR |
-| `deploy-gaming` | Gaming stacks defined for the environment: Terraria (wil), Wolf and RomM (ldn) |
+| `deploy-gaming` | Gaming stacks: Wolf and RomM (ldn) |
 | `deploy-hermes` | Hermes Agent, Claude Code and the Claude subscription plugin |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts of the site |
@@ -88,14 +88,14 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 Most applications use the shared `deploy-app.yml` playbook. Apps are defined in the registry of the site that hosts them, `ansible/inventory/group_vars/site_<env>/apps.yml`:
 
 ```yaml
-birdle:
-  host_group: app_birdle
+kosync:
+  host_group: app_kosync
   # renovate: datasource=docker
-  image: "ghcr.io/sfcal/new-birdle:latest"
-  port: 8091
+  image: "koreader/kosync:v2.1.1"
+  port: 17200
   proxy:
-    name: birdle
-    domain: sfc.al
+    name: kosync
+    domain: ldn.5am.cloud
     proxied: true
 ```
 
@@ -109,7 +109,7 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 |-----|---------------------------|
 | Media stack | NFS mount, complex multi-container setup |
 | Frigate | NFS mount, dedicated compose/config tasks |
-| Gaming | Stacks selected per environment (Terraria; Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |
+| Gaming | Stacks selected per environment (Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |
 | Hermes Agent | Installs Claude Code, the Claude subscription plugin and the `plex-fix` skill inside the running container |
 
 ## Roles
@@ -146,7 +146,7 @@ ansible/
 │   │   ├── netboot/deploy.yml
 │   │   └── proxmox/deploy.yml       # Hypervisor: SR-IOV GPU VFs, PCI mappings
 │   └── apps/
-│       ├── birdle/templates/compose.yaml.j2
+│       ├── kosync/templates/compose.yaml.j2
 │       ├── media/deploy.yml
 │       └── ... (one directory per app)
 ├── roles/
@@ -163,7 +163,7 @@ ansible/
 
 **Connection refused** — Verify the VM is running and the IP in `hosts.ini` is correct. Test with `ssh sfcal@<ip>`.
 
-**"No hosts matched"** — The host group in the playbook doesn't match any group in `hosts.ini`, or none of its hosts are in the site group `ENV=` picks (`site_<env>`). Check group names match (e.g., `infra_networking`, `app_birdle`).
+**"No hosts matched"** — The host group in the playbook doesn't match any group in `hosts.ini`, or none of its hosts are in the site group `ENV=` picks (`site_<env>`). Check group names match (e.g., `infra_networking`, `app_kosync`).
 
 **Handler not triggered** — Handlers only run when a task reports `changed`. If you need to force a restart, use `--force-handlers` or run the service command directly.
 

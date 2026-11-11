@@ -114,8 +114,6 @@ vms = {
 | `networking` | networking | 1000 | 10.2.20.53 | 2 | 4GB | 50G | infrastructure |
 | `ca_server` | ca | 1003 | 10.2.20.9 | 1 | 4GB | 20G | infrastructure |
 | `monitoring_server` | monitoring | 1107 | 10.2.20.30 | 1 | 8GB | 50G | infrastructure |
-| `web_server` | web | 1109 | 10.2.20.45 | 2 | 4GB | 20G | application |
-| `games_server` | games | 1111 | 10.2.20.50 | 1 | 8GB | 50G | application |
 
 ## Implementation Details
 

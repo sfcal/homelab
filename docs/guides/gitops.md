@@ -71,8 +71,6 @@ Grants are additive and `"src": ["*"]` matches tagged devices, so the default al
   // CI deploy targets (keep in sync with ansible/playbooks/ci-access.yml)
   "wil-media":      "10.2.0.5",   // media stack + frigate
   "wil-monitoring": "10.2.20.30",
-  "wil-web":        "10.2.20.45", // website, birdle
-  "wil-gaming":     "10.2.20.50",
   "ldn-monitoring": "10.3.20.30",
   "ldn-work":       "10.3.20.50",
   "ldn-gaming":     "10.3.20.55",
@@ -95,7 +93,7 @@ Grants are additive and `"src": ["*"]` matches tagged devices, so the default al
   {
     "src": ["tag:ci"],
     "dst": [
-      "wil-media", "wil-monitoring", "wil-web", "wil-gaming",
+      "wil-media", "wil-monitoring",
       "ldn-monitoring", "ldn-work", "ldn-gaming", "ldn-netboot", "ldn-kosync",
     ],
     "ip": ["tcp:22"],
@@ -152,7 +150,7 @@ Optional variables (repo- or environment-level):
 
 ### 4. Test
 
-**Actions → Deploy → Run workflow**, env `wil`, target `playbook:infrastructure/monitoring/deploy.yml` (or `app:website`). Once that's green, Renovate merges deploy wil on their own.
+**Actions → Deploy → Run workflow**, env `wil`, target `playbook:infrastructure/monitoring/deploy.yml`. Once that's green, Renovate merges deploy wil on their own.
 
 ### 5. Enable ldn
 

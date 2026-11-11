@@ -1,14 +1,12 @@
-# Gaming (Terraria, Wolf, RomM)
+# Gaming (Wolf, RomM)
 
-One playbook, `ansible/playbooks/apps/gaming/deploy.yml`, deploys every game stack on an environment's `app_gaming` host. A stack runs only where that environment's `group_vars/site_<env>/app_gaming/vars.yml` defines its image (`terraria_image`, `romm_image`, `wolf_image`), so the same command deploys different stacks per environment:
+One playbook, `ansible/playbooks/apps/gaming/deploy.yml`, deploys every game stack on an environment's `app_gaming` host. A stack runs only where that environment's `group_vars/site_<env>/app_gaming/vars.yml` defines its image (`romm_image`, `wolf_image`). Both run at ldn:
 
 | Environment | VM | Stacks |
 |-------------|----|--------|
-| wil | `games` (`10.2.20.50`, VM 1111) | [Terraria](#terraria) |
 | ldn | `gaming` (`10.3.20.55`, VM 3005) | [Wolf and RomM](#wolf-and-romm) |
 
 ```bash
-task ansible:deploy-gaming ENV=wil   # Terraria
 task ansible:deploy-gaming ENV=ldn   # Wolf and RomM
 ```
 
@@ -19,24 +17,13 @@ To run a stack in another environment, copy its vars into that environment's `gr
 | Path | Purpose |
 |------|---------|
 | `ansible/playbooks/apps/gaming/deploy.yml` | Playbook (group `app_gaming`) |
-| `ansible/playbooks/apps/gaming/templates/terraria-compose.yaml.j2` | Terraria server |
 | `ansible/playbooks/apps/gaming/templates/wolf-compose.yaml.j2` | Wolf container (matches the upstream quickstart compose) |
 | `ansible/playbooks/apps/gaming/templates/wolf-config.toml.j2` | Wolf `config.toml` (version 7), seeded once |
 | `ansible/playbooks/apps/gaming/templates/romm-compose.yaml.j2` | RomM and MariaDB |
 | `ansible/playbooks/apps/gaming/templates/romm-config.yml.j2` | RomM library layout |
 | `ansible/playbooks/apps/gaming/files/85-wolf.rules` | Upstream udev rules (`/dev/uinput`, `/dev/uhid`, virtual pads off the host seat) |
-| `ansible/inventory/group_vars/site_wil/app_gaming/vars.yml` | Terraria image, paths, world settings |
-| `ansible/inventory/group_vars/site_wil/secrets.sops.yml` | Terraria join password (`terraria_server_password`) |
 | `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml` | Wolf and RomM images, paths, render node |
 | `ansible/inventory/group_vars/site_ldn/secrets.sops.yml` | RomM database, auth and IGDB secrets (section `app_gaming`) |
-
-## Terraria
-
-A dedicated Terraria server (`ryshe/terraria`) on port 7777, with no DNS or proxy entry.
-
-- Compose lives in `/opt/games-server` and the world in `/var/lib/games-server/terraria/worlds` (`terraria_deploy_path`, `terraria_data_path`), the paths it had as the `games-server` registry app. To rename them, run `docker compose down` in the old directory and move the world first: the container is always named `terraria`, so a second compose project would clash with the running one.
-- The image tag floats (`latest`), so every deploy pulls it and recreates the container when a newer image arrived.
-- World settings (`terraria_worldname`, `terraria_worldsize`, `terraria_difficulty`, `terraria_seed`, ...) become server flags in `terraria-compose.yaml.j2`. An empty `terraria_server_password` runs an open server.
 
 ## Wolf and RomM
 
