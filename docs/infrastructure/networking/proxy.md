@@ -40,6 +40,16 @@ Only services with `proxied: true` and `enabled: true` (default) generate Caddy 
 }
 ```
 
+## Applying Changes
+
+A networking deploy that changes the Caddyfile reloads Caddy, it does not restart it (handler `Reload caddy`: `caddy reload` inside the container, fed the new file):
+
+- No request is refused, and the ones in flight finish on the old config.
+- Open websockets (Kasm desktops, Proxmox consoles, live views) are closed and reconnect.
+- A Caddyfile that Caddy refuses fails the deploy at that handler, with Caddy's message naming the line. The old config keeps serving: fix the entry and deploy again.
+
+The container itself restarts only when its image or `compose.yaml` changes (handler `Rebuild caddy`). The proxy is then away for a moment, or for up to 10 seconds if a long request (a stream, a download) is in flight: Caddy waits for it and Docker stops waiting after 10 seconds.
+
 ## TLS Certificate Management
 
 Caddy obtains wildcard certificates for each domain using the Cloudflare DNS-01 ACME challenge. This means:
@@ -475,3 +485,5 @@ Set `enabled: false` on the service entry (for registry apps, inside the `proxy:
 **Service accessible via IP but not hostname** — The DNS record is missing or pointing to the wrong IP. Check with `dig <service>.<domain> @10.2.20.53` and verify the service entry in the domain file (or the app's `proxy:` block in `apps.yml` for registry apps).
 
 **Headers not forwarded** — Ensure `forward_headers: true` is set on the service entry and redeploy networking.
+
+**Deploy fails at `Reload caddy`** — Caddy refused the new Caddyfile and is still serving the old one. The error names the line of `/opt/caddy/Caddyfile` on the networking VM; fix the service entry it came from and redeploy networking.

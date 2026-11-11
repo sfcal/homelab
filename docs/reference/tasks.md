@@ -49,7 +49,6 @@ Each command decrypts the site's `terraform.tfvars.sops` for itself (`sops exec-
 |---------|-------------|
 | `task packer:build-ubuntu ENV=wil` | Build Ubuntu Server template |
 | `task packer:build-ubuntu-desktop ENV=wil` | Build Ubuntu Desktop template (Ubuntu Server install plus GNOME and KasmVNC) |
-| `task packer:build-debian ENV=wil` | Build Debian Bookworm template |
 | `task packer:build-windows ENV=ldn` | Build Windows template (UEFI/TPM, unattended install) |
 | `task packer:clean` | Clean packer logs and downloaded ISOs |
 

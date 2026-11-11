@@ -11,9 +11,6 @@ task packer:build-ubuntu ENV=wil
 # Build Ubuntu Desktop template
 task packer:build-ubuntu-desktop ENV=wil
 
-# Build Debian Bookworm template
-task packer:build-debian ENV=wil
-
 # Build Windows template (needs the Windows and virtio-win ISOs on Proxmox, see below)
 task packer:build-windows ENV=ldn
 
@@ -27,8 +24,6 @@ task packer:clean
 |----------|------|-------------|
 | Ubuntu Server | `ubuntu-server-base.pkr.hcl` | Ubuntu Server with Docker, Node Exporter, Lazydocker, mDNS (avahi) |
 | Ubuntu Desktop | `ubuntu-desktop-base.pkr.hcl` | Ubuntu Server install with `ubuntu-desktop-minimal` on top (GNOME, no browser), KasmVNC, NAS share at `/mnt/data`, mDNS (avahi); no Docker or Node Exporter |
-| Debian Bookworm | `debian-bookworm-base.pkr.hcl` | Debian base with Docker |
-| Netboot | — | PXE boot template |
 | Windows | `windows-base.pkr.hcl` | Windows 11 (or Server) for one-off VMs: UEFI + TPM 2.0, unattended install, virtio-win guest tools (drivers, QEMU and SPICE agents), Remote Desktop on, console clipboard |
 
 Templates produce images named `<template>-<env>-base` (e.g., `ubuntu-server-wil-base`).
@@ -51,7 +46,6 @@ packer/
 ├── templates/
 │   ├── ubuntu-server-base.pkr.hcl      # Ubuntu template definition
 │   ├── ubuntu-desktop-base.pkr.hcl     # Ubuntu Desktop template definition
-│   ├── debian-bookworm-base.pkr.hcl    # Debian template definition
 │   └── windows-base.pkr.hcl            # Windows template definition
 ├── files/windows/
 │   ├── autounattend.xml.pkrtpl         # Windows answer file (rendered by the template)
@@ -62,7 +56,6 @@ packer/
     ├── wil/
     │   ├── ubuntu-variables.pkrvars.hcl     # Ubuntu build variables
     │   ├── ubuntu-desktop-variables.pkrvars.hcl  # Ubuntu Desktop build variables
-    │   ├── debian-variables.pkrvars.hcl     # Debian build variables
     │   ├── windows-variables.pkrvars.hcl    # Windows build variables
     │   └── credentials.wil.pkrvars.hcl.sops # Proxmox API tokens (encrypted)
     └── ldn/

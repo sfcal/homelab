@@ -40,7 +40,7 @@
     group: root
     mode: "0644"
   notify:
-    - Restart caddy
+    - Reload caddy
 
 - name: Ensure Caddy is running.
   community.docker.docker_compose_v2:

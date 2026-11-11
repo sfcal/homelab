@@ -9,7 +9,7 @@ Infrastructure-as-Code homelab on Proxmox. Uses Terraform (VM provisioning), Ans
 ```
 ansible/                    Playbooks, roles, one inventory for both sites (ansible/inventory)
 terraform/                  VM provisioning with per-environment tfvars and state
-packer/                     VM template building (Ubuntu, Debian)
+packer/                     VM template building (Ubuntu, Windows)
 .taskfiles/                 Modular Taskfile configs (ansible, terraform, packer, ca, docker)
 docs/                       MkDocs documentation site
 Taskfile.yaml               Root task runner entry point
@@ -156,6 +156,7 @@ Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically 
 - One deploy run at a time (workflow-level `concurrency` in `deploy.yml`), so a run never plans from a `deploy/<env>` tag the run before it is about to move
 - Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
+- The sites' Caddy is reloaded, not restarted, when its Caddyfile changes (`Reload caddy` in the networking handlers feeds the file to `caddy reload` on stdin: the single-file bind mount still shows the old file). Requests in flight finish, websockets reconnect, a refused Caddyfile fails the deploy and the old config keeps serving
 - Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
 - Each site's sops file (`group_vars/site_<env>/secrets.sops.yml`) is encrypted to master + that site's CI age key (`.sops.yaml`, `# ci:<env>` rules), so every CI ansible run must keep `--limit site_<env>`: without it Ansible tries to decrypt the other site's file and fails
 - The planner maps a changed file to a site: `site_<env>/<group>/` and the folders of groups with hosts at the site count for it, `site_<env>/apps.yml` deploys only the apps whose entry changed; files moved unchanged don't count

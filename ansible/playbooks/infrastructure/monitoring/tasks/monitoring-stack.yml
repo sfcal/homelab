@@ -7,11 +7,13 @@
     group: "{{ monitoring_group }}"
     mode: "0755"
   loop:
-    # Rendered config under /opt, container state under /var/lib.
+    # Rendered config under /opt, container state under /var/lib. Prometheus's
+    # data directory is made by the next task, owned by the user Prometheus
+    # runs as: listed here too, its owner flipped to root and back on every
+    # deploy.
     - "/opt/monitoring"
     - "/opt/monitoring/prometheus"
     - "/var/lib/monitoring"
-    - "/var/lib/monitoring/prometheus"
     - "/var/lib/monitoring/uptime-kuma"
 
 - name: Set ownership on Prometheus data directory.

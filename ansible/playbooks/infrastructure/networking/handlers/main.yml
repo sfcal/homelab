@@ -25,10 +25,20 @@
     build: always
     state: present
 
-- name: Restart caddy
-  community.docker.docker_compose_v2:
-    project_src: "/opt/caddy"
-    state: restarted
+# A reload, not a restart: Caddy swaps the config in place, so no request is
+# refused and the ones in flight finish on the old config (open websockets are
+# closed and reconnect). A Caddyfile that Caddy refuses fails here and the old
+# config keeps serving. The file goes in on stdin: the container's bind mount
+# still shows the Caddyfile from before the template task replaced it. Only a
+# Caddy that is not listening yet gets another try ("Rebuild caddy" may have
+# started it a moment ago).
+- name: Reload caddy
+  ansible.builtin.shell: docker exec -i caddy caddy reload --adapter caddyfile --config - < /opt/caddy/Caddyfile
+  register: caddy_reload
+  changed_when: true
+  retries: 5
+  delay: 3
+  until: caddy_reload.rc == 0 or 'connection refused' not in caddy_reload.stderr
 
 - name: Restart openvpn clients
   ansible.builtin.service:

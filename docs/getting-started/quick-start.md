@@ -28,9 +28,6 @@ task packer:build-ubuntu ENV=wil
 
 This creates a cloud-init-enabled Ubuntu Server template with Docker, Node Exporter, and Lazydocker pre-installed.
 
-!!! tip
-    Debian templates are also available: `task packer:build-debian ENV=wil`
-
 ## 3. Provision VMs
 
 Deploy all VMs defined in `terraform/environments/wil/vms.auto.tfvars`:

@@ -182,7 +182,6 @@ hl task packer:build TEMPLATE=base ENV=dev
 
 # Build other templates as needed
 # hl task packer:build-ubuntu ENV=dev
-# hl task packer:build-debian ENV=dev
 ```
 </details>
 

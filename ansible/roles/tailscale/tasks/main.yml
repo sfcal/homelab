@@ -131,6 +131,32 @@
     or ts_backend_state != 'Running'
     or tailscale_force_reauth | default(false)
 
+# --- Keep the settings in step on later runs ---
+# `tailscale up` above runs only when the node is not connected, so on its own
+# a changed var (a new entry in tailscale_advertise_routes, say) never reaches
+# a node that has already joined. Read the node's settings and change them
+# when they differ from the vars.
+- name: Read Tailscale settings.
+  ansible.builtin.command: tailscale debug prefs
+  register: ts_prefs
+  changed_when: false
+
+- name: Apply changed Tailscale settings.
+  ansible.builtin.command: >-
+    tailscale set
+    --advertise-routes={{ ts_routes | join(',') }}
+    --accept-routes={{ tailscale_accept_routes | lower }}
+    --accept-dns={{ tailscale_accept_dns | lower }}
+    --hostname={{ tailscale_hostname }}
+  vars:
+    ts_live: "{{ ts_prefs.stdout | from_json }}"
+    ts_routes: "{{ tailscale_advertise_routes if tailscale_mode == 'subnet_router' else [] }}"
+  when: >-
+    (ts_live.AdvertiseRoutes | default([], true) | sort) != (ts_routes | sort)
+    or ts_live.RouteAll != tailscale_accept_routes
+    or ts_live.CorpDNS != tailscale_accept_dns
+    or ts_live.Hostname != tailscale_hostname
+
 - name: Display Tailscale status.
   ansible.builtin.command: tailscale status
   register: ts_final_status

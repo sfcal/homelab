@@ -122,6 +122,11 @@ resource "proxmox_virtual_environment_vm" "vm" {
       # without this an imported VM (or a renamed template) plans as
       # destroy + recreate.
       clone,
+      # Login keys only matter at creation too. A change here makes the
+      # provider rewrite the VM's cloud-init drive and reboot the VM, and on
+      # that boot cloud-init sets the VM up as a new instance (new SSH host
+      # keys by default). Give a running VM a new key in authorized_keys.
+      initialization[0].user_account[0].keys,
     ]
   }
 }

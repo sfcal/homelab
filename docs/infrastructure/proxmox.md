@@ -55,12 +55,14 @@ Expect `0b:00.0` on `xe`, `0b:00.1` to `0b:00.3` on `vfio-pci`, and no `checks` 
 
 The GPU VM `game_server` is defined in `terraform/environments/ldn/vms.auto.tfvars` with `bios = "ovmf"`, `machine = "q35"` and `pci_mapping`. `work_server` keeps `bios` and `machine` but no longer maps a VF; VMs 118 and 121 are hand-made clones outside Terraform, given their VF with `qm set <vmid> --hostpci0 mapping=b50-vfN,pcie=1`. The provider is bpg/proxmox (`proxmox_virtual_environment_vm`). The module sets `rombar = true` on the mapped device because bpg sends `rombar=0` when it is left out. On apply the provider also starts a stopped VM (`started` defaults to true), so a stopped GPU VM is started and needs its VF free.
 
-Since November 2026 the ldn state holds all eight ldn VMs as `proxmox_virtual_environment_vm` (imported when the provider changed from telmate). A VM made outside Terraform is imported with `<node>/<vmid>` as the ID:
+Since November 2026 the ldn state holds all eight ldn VMs as `proxmox_virtual_environment_vm` (imported when the provider changed from telmate), and the wil state holds wil's three (`networking`, `ca_server`, `monitoring_server`; wil's node is named `proxmox`). A VM made outside Terraform is imported with `<node>/<vmid>` as the ID. The import needs the site's variables, decrypted for the one command the way the tasks do it:
 
 ```bash
 cd terraform/environments/ldn
-terraform import 'module.infrastructure.module.vms["<key>"].proxmox_virtual_environment_vm.vm' pve-ldn/<vmid>
-terraform plan
+sops exec-file --filename terraform.tfvars terraform.tfvars.sops \
+  'terraform import -var-file={} "module.infrastructure.module.vms[\"<key>\"].proxmox_virtual_environment_vm.vm" pve-ldn/<vmid>'
 ```
 
-The VM module ignores `clone` changes so an imported VM does not plan as a replacement. Always read the plan before applying (`task terraform:deploy ENV=ldn` applies with `-auto-approve`): anything marked `forces replacement` would destroy the VM.
+Then read the plan from the repo root: `task terraform:plan ENV=ldn`. An import changes only the state file, never the VM.
+
+The VM module ignores `clone` changes so an imported VM does not plan as a replacement, and changes to the login keys (`ssh_public_key`): on an existing VM the provider would rewrite the cloud-init drive and reboot the VM, which then sets itself up as a new instance (new SSH host keys). wil's three VMs were made with one key and have the second in `authorized_keys`. Always read the plan before applying (`task terraform:deploy ENV=ldn` applies with `-auto-approve`): anything marked `forces replacement` would destroy the VM.

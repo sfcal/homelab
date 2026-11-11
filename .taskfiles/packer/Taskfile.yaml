@@ -41,15 +41,6 @@ tasks:
           TEMPLATE_PREFIX: ubuntu-server
           VAR_FILE: 'environments/{{.ENV}}/ubuntu-variables.pkrvars.hcl'
 
-
-  build-debian:
-    desc: Build Debian template
-    cmds:
-      - task: build
-        vars:
-          TEMPLATE_PREFIX: debian-bookworm
-          VAR_FILE: 'environments/{{.ENV}}/debian-variables.pkrvars.hcl'
-
   build-ubuntu-efi:
     desc: Build Ubuntu UEFI/Q35 template (also GPU-passthrough capable)
     cmds:

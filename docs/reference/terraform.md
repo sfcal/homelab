@@ -119,8 +119,8 @@ vms = {
 
 - **Provider** — [bpg/proxmox](https://registry.terraform.io/providers/bpg/proxmox/latest/docs), pinned in `versions.tf`. It takes the endpoint and API token from the variables in the site's `terraform.tfvars.sops` (`proxmox_api_url` without `/api2/json`, `<token id>=<secret>`), which each task decrypts for its one command (`sops exec-file`).
 - **Full clones** — VMs are full clones, not linked. Independent of templates after creation. The template is looked up by name on every plan, so a missing or duplicated template name fails the plan (it never destroys anything).
-- **Cloud-init** — Static IP via the `initialization` block (`ipconfig0: ip=<address>/24,gw=<gateway>`, drive on `ide0`). Assumes /24 subnets. bpg keeps cloud-init values of the template that the module does not set, such as a `cipassword` set by hand on the template; telmate removed them.
-- **State** — Per-environment state files at `terraform/environments/<env>/terraform.tfstate`. Import a VM with `terraform import 'module.infrastructure.module.vms["<key>"].proxmox_virtual_environment_vm.vm' <node>/<vmid>`.
+- **Cloud-init** — Static IP via the `initialization` block (`ipconfig0: ip=<address>/24,gw=<gateway>`, drive on `ide0`). Assumes /24 subnets. bpg keeps cloud-init values of the template that the module does not set, such as a `cipassword` set by hand on the template; telmate removed them. The login keys (`ssh_public_key` in `terraform.tfvars.sops`) are written when a VM is created and ignored afterwards: add a key to a running VM in its `authorized_keys`.
+- **State** — Per-environment state files at `terraform/environments/<env>/terraform.tfstate` (not in git). Both sites have one. To import a VM made outside Terraform, see [Proxmox — Terraform notes](../infrastructure/proxmox.md#terraform-notes).
 - **QEMU agent** — Enabled on all VMs (installed in Packer templates).
 
 ## Troubleshooting

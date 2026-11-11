@@ -60,8 +60,7 @@ Terraform and Packer have a directory per environment. Ansible has one inventory
     ```
     packer/
     ├── templates/
-    │   ├── ubuntu-server-base.pkr.hcl   # Ubuntu template
-    │   └── debian-bookworm-base.pkr.hcl # Debian template
+    │   └── ubuntu-server-base.pkr.hcl   # Ubuntu template
     └── environments/
         ├── wil/
         │   ├── ubuntu-variables.pkrvars.hcl

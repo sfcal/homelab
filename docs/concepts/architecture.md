@@ -13,7 +13,7 @@ graph LR
 
 | Stage | Tool | What It Does |
 |-------|------|-------------|
-| 1. Templates | Packer | Builds cloud-init-enabled Ubuntu/Debian images on Proxmox |
+| 1. Templates | Packer | Builds cloud-init-enabled Ubuntu images (and a Windows one) on Proxmox |
 | 2. Provisioning | Terraform | Clones templates into VMs with static IPs, CPU, memory, disk |
 | 3. Configuration | Ansible | Installs packages, deploys Docker Compose services, configures networking |
 | 4. Runtime | Docker Compose | Runs all application containers |
@@ -47,7 +47,7 @@ task ansible:deploy-media ENV=wil        # 5. Applications
 ```
 ansible/                    Playbooks, roles, one inventory for both sites
 terraform/                  VM provisioning with per-environment tfvars
-packer/                     VM template definitions (Ubuntu, Debian)
+packer/                     VM template definitions (Ubuntu, Windows)
 .taskfiles/                 Modular Taskfile configs per tool
 docs/                       This documentation site
 Taskfile.yaml               Root task runner entry point

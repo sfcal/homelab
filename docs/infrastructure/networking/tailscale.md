@@ -50,6 +50,8 @@ graph LR
 
 All variables are set in the host or group vars for machines running Tailscale. Defaults are defined in `ansible/roles/tailscale/defaults/main.yml`.
 
+The role joins a node with `tailscale up` once. On every later deploy it reads the node's settings (`tailscale debug prefs`) and, when the routes, `tailscale_accept_routes`, `tailscale_accept_dns` or `tailscale_hostname` differ from the vars, applies them with `tailscale set`. A settings change needs no re-authentication.
+
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
 | `tailscale_mode` | `string` | `"client"` or `"subnet_router"` (advertises routes, enables IP forwarding) | `"client"` |
@@ -136,6 +138,13 @@ Split DNS entries in the Tailscale admin console route domain queries to the cor
     ```
 
 3. Approve the advertised routes in the [Tailscale admin console](https://login.tailscale.com/admin/machines)
+
+### Change the advertised routes
+
+`tailscale_advertise_routes` is derived: the site's `cidr` in `group_vars/all/sites.yml`, plus the `routed_subnets` of every VPN client enabled on the VM (`vpn_clients.yml`). Change the source, then:
+
+1. Deploy networking at that site: `task ansible:deploy-networking ENV=<env>`. The task "Apply changed Tailscale settings" reports `changed` when the node's routes differed.
+2. Approve any new route in the [Tailscale admin console](https://login.tailscale.com/admin/machines). A removed route needs no approval.
 
 ### Add a new site
 
