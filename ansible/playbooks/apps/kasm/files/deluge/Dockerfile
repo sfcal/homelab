@@ -1,7 +1,7 @@
 # Deluge that zips each finished torrent into ~/Downloads, so Kasm's download
 # panel can fetch it as one file. Keep the base at the Kasm server's version
 # (kasm_image in site_ldn/app_kasm/vars.yml), not newer.
-FROM kasmweb/deluge:1.18.0-rolling-weekly
+FROM kasmweb/deluge:1.19.0-rolling-weekly
 USER root
 
 RUN apt-get update \
