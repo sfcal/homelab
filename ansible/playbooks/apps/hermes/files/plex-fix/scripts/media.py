@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 USAGE = """commands:
@@ -23,7 +24,9 @@ USAGE = """commands:
   releases movie|episode <id> replacements that should import (slow, searches every indexer)
   grab movie|episode <guid> <indexerId>
   fail movie|episode <historyId>  block a grabbed release and search again
-  search movie|episode <id>   automatic search, for a title with no file"""
+  search movie|episode <id>   automatic search, for a title with no file
+  lookup movie|series <text>  titles not yet added (gives tmdbId/tvdbId)
+  add movie|series <tmdbId|tvdbId>  add with the library's usual profile/folder and start searching"""
 
 HOST = "10.2.0.5"
 APPS = {
@@ -226,8 +229,64 @@ def search(kind, item_id):
     show({"started": arr(kind, "/command", body).get("name")})
 
 
+def app_for(kind):
+    if kind not in ("movie", "series"):
+        sys.exit("kind must be movie or series")
+    return "movie" if kind == "movie" else "episode"
+
+
+def lookup(kind, text):
+    """Titles not yet added: candidates from Radarr/Sonarr's metadata lookup."""
+    app = app_for(kind)
+    path = "/movie/lookup?term=" if kind == "movie" else "/series/lookup?term="
+    items = arr(app, path + urllib.parse.quote(text), timeout=60)
+    show([{"title": i["title"], "year": i.get("year"), "network": i.get("network") or i.get("studio"),
+           "seasons": len([s for s in i.get("seasons", []) if s.get("seasonNumber")]) or None,
+           "status": i.get("status"), "alreadyAdded": bool(i.get("id")),
+           ("tmdbId" if kind == "movie" else "tvdbId"): i.get("tmdbId" if kind == "movie" else "tvdbId")}
+          for i in items[:8]])
+
+
+def most_used(items, key):
+    counts = {}
+    for i in items:
+        counts[i.get(key)] = counts.get(i.get(key), 0) + 1
+    return max(counts, key=counts.get) if counts else None
+
+
+def add(kind, ext_id):
+    """Add a movie or series using the profile and root folder the library already uses most, then search."""
+    app = app_for(kind)
+    idkey = "tmdbId" if kind == "movie" else "tvdbId"
+    found = arr(app, f"/{'movie' if kind == 'movie' else 'series'}/lookup?term={'tmdb' if kind == 'movie' else 'tvdb'}:{int(ext_id)}", timeout=60)
+    if not found:
+        sys.exit(f"nothing found for {idkey} {ext_id}")
+    item = found[0]
+    if item.get("id"):
+        show({"alreadyAdded": item["title"], "id": item["id"]})
+        return
+    existing = arr(app, "/movie" if kind == "movie" else "/series", timeout=60)
+    profile = most_used(existing, "qualityProfileId") or arr(app, "/qualityprofile")[0]["id"]
+    roots = arr(app, "/rootfolder")
+    used_root = most_used([{"r": os.path.dirname(e.get("path", "").rstrip("/"))} for e in existing], "r")
+    root = next((r["path"] for r in roots if r["path"].rstrip("/") == (used_root or "").rstrip("/")), roots[0]["path"])
+    body = {**item, "qualityProfileId": profile, "rootFolderPath": root, "monitored": True}
+    if kind == "movie":
+        body["minimumAvailability"] = "released"
+        body["addOptions"] = {"searchForMovie": True}
+    else:
+        body["languageProfileId"] = most_used(existing, "languageProfileId") or 1
+        body["seasonFolder"] = True
+        body["seasons"] = [{**s, "monitored": True} for s in item.get("seasons", [])]
+        body["addOptions"] = {"monitor": "all", "searchForMissingEpisodes": True}
+    r = arr(app, "/movie" if kind == "movie" else "/series", body, timeout=60)
+    show({"added": r.get("title"), "year": r.get("year"), "id": r.get("id"), "path": r.get("path"),
+          "qualityProfileId": profile, "searchStarted": True})
+
+
 COMMANDS = {"playing": playing, "recent": recent, "find": find, "episodes": episodes, "file": file_cmd,
-            "history": history, "queue": queue, "releases": releases, "grab": grab, "fail": fail, "search": search}
+            "history": history, "queue": queue, "releases": releases, "grab": grab, "fail": fail, "search": search,
+            "lookup": lookup, "add": add}
 
 if __name__ == "__main__":
     args = sys.argv[1:]

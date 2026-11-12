@@ -1,8 +1,12 @@
 # Proxmox Hosts (SR-IOV GPU)
 
-The hypervisor is managed by `ansible/playbooks/infrastructure/proxmox/deploy.yml`, group `infra_proxmox`. Its one job: create the Intel Arc Pro B50's SR-IOV virtual functions (VFs) at every boot, before Proxmox starts the VMs that use them.
+The hypervisors are managed by `ansible/playbooks/infrastructure/proxmox/deploy.yml`, group `infra_proxmox`: wil's host (`10.2.20.7`) and pve-ldn (`10.3.20.10`), both reached as `root`. The play does two things:
+
+- **On both hosts** it installs node-exporter (Debian's package `prometheus-node-exporter`, which enables and starts its own service on port 9100), so the site's Prometheus has the host's CPU, memory and disks and the alert rules cover it (see [Monitoring](monitoring/index.md#node-exporters)). Deploy the site's monitoring afterwards; the host is a scrape target because it is in `[site_<env>]`.
+- **On pve-ldn only** it creates the Intel Arc Pro B50's SR-IOV virtual functions (VFs) at every boot, before Proxmox starts the VMs that use them. These tasks run where `b50_num_vfs` is set, and the rest of this page is about them.
 
 ```bash
+task ansible:deploy-proxmox ENV=wil
 task ansible:deploy-proxmox ENV=ldn
 ```
 

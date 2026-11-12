@@ -21,7 +21,7 @@ All operations go through `task`. Pattern: `task <namespace>:<operation> ENV=<en
 
 ```
 task ansible:deploy-<service> ENV=wil    # Deploy a service
-task ansible:deploy-proxmox ENV=ldn      # Proxmox host: SR-IOV GPU VFs + PCI mappings (group infra_proxmox)
+task ansible:deploy-proxmox ENV=ldn      # Proxmox hosts (group infra_proxmox): node-exporter; on pve-ldn SR-IOV GPU VFs + PCI mappings
 task terraform:deploy ENV=wil            # Deploy all VMs
 task terraform:deploy-vm ENV=wil VM=key  # Deploy specific VM
 task packer:build-ubuntu ENV=wil         # Build VM template
@@ -123,6 +123,7 @@ SOPS with AGE encryption. Key at `~/.config/sops/age/keys.txt`.
 | VM module | `terraform/modules/vm/main.tf` |
 | Master playbook | `ansible/playbooks/site.yml` |
 | SOPS config | `.sops.yaml` |
+| Alert rules | `ansible/playbooks/infrastructure/dashboard/files/grafana/provisioning/alerting/alerting.yml` |
 | Deploy workflow | `.github/workflows/deploy.yml` |
 | Deploy target planner | `.github/scripts/deploy-plan.sh` |
 
@@ -160,6 +161,15 @@ Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically 
 - Never add `--diff`/`-v` to CI runs; rendered templates contain decrypted secrets
 - Each site's sops file (`group_vars/site_<env>/secrets.sops.yml`) is encrypted to master + that site's CI age key (`.sops.yaml`, `# ci:<env>` rules), so every CI ansible run must keep `--limit site_<env>`: without it Ansible tries to decrypt the other site's file and fails
 - The planner maps a changed file to a site: `site_<env>/<group>/` and the folders of groups with hosts at the site count for it, `site_<env>/apps.yml` deploys only the apps whose entry changed; files moved unchanged don't count
+
+## Alerts (Grafana)
+
+Grafana on the VPS checks both sites' Prometheus once a minute and mails alerts. See `docs/infrastructure/monitoring/index.md` (Alerting).
+- Rules, the email contact point and the notification policy are one provisioned file: `ansible/playbooks/infrastructure/dashboard/files/grafana/provisioning/alerting/alerting.yml`. A rule reads one datasource, so every rule is written twice (group `wil`, group `ldn`): change both
+- Mail goes through Fastmail as `noreply@5am.cloud` with the login of Kanidm's mail sender (`GF_SMTP_*` in the dashboard compose) to `grafana_alert_email` in `site_ovh/secrets.sops.yml`. The contact point reads it as `$ALERT_EMAIL`, so the address stays out of the repo
+- Grafana exits at start on a file it can't read (a bad duration is enough), and a dashboard deploy restarts it: after changing the file, start a local `grafana/grafana` container of the VPS's version with it first, and check http://dashboard:3000/alerting/list after the deploy
+- What the rules see: node-exporter on every host under `[site_<env>]`, the Proxmox hosts included (Debian's package, `infrastructure/proxmox`), plus the VPS in ldn's Prometheus (Ubuntu's package on `127.0.0.1:9100`, put on the tailnet by `tailscale serve`; `dashboard/tasks/node-exporter.yml`). Install the exporter before the monitoring deploy that adds the target: a target that doesn't answer raises Target down after 5 minutes
+- `blackbox-exporter` on each monitoring VM requests every proxied name of `services` once a minute (job `blackbox`; the loop in `prometheus.yml.j2` is the Caddyfile's): DNS, Caddy and the certificate. A new proxied name is checked after the next monitoring deploy
 
 ## Proxy & DNS Service Definitions
 

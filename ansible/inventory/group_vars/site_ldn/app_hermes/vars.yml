@@ -1,6 +1,8 @@
 ---
 # renovate: datasource=docker
 hermes_image: "nousresearch/hermes-agent:v0.23.1"
+# renovate: datasource=docker
+hermes_webui_image: "ghcr.io/nesquena/hermes-webui:0.52.544"
 
 # --- fastmail-triage ---
 hermes_fastmail_deliver: telegram

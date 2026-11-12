@@ -26,7 +26,19 @@ docker exec -it hermes hermes model           # Change the model (the first depl
 docker exec -it hermes hermes gateway setup   # Connect Telegram, Discord and so on
 ```
 
-No ports are published, so there is no web UI and no DNS or Caddy entry. The agent's terminal and file tools run inside the container as UID 10000, with no access to the Docker socket.
+The agent's terminal and file tools run inside the container as UID 10000, with no access to the Docker socket.
+
+## Web UI
+
+[Hermes WebUI](https://github.com/nesquena/hermes-webui) is a second container in the same compose project, at <https://hermes.ldn.5am.cloud> behind the [login](networking/sso.md). It shows the same chats, skills, scheduled jobs and memory as the agent, because both containers mount `/var/lib/hermes/data` at `/opt/data`.
+
+A chat typed in the browser runs in the `hermes` container, not in the web UI's (`HERMES_WEBUI_CHAT_BACKEND=gateway`): the web UI passes it to the agent's API server on port 8642, which only the compose network can reach. So browser chats use the same Claude login, plugin, skills and tools as Telegram, and draw from the same usage limits. The API server's key is the `API_SERVER_KEY` line in `/var/lib/hermes/data/.env`; both containers read it from there.
+
+- **Login:** the web UI has no password of its own. Caddy's login check covers the name, but port 8787 on the VM answers anyone on the ldn network without it. Set a password under Settings > System if that matters.
+- **Agent code:** the web UI reads the agent's code from the agent image itself (an image mount in the compose file), so it follows `hermes_image`. Each time its container is created it copies that code and installs the agent's Python packages, which takes a few minutes; the page answers once that's done (`docker logs -f hermes-webui`).
+- **Package overrides:** the agent's packages only install with the version overrides in its own `pyproject.toml` (`[tool.uv]`), which the web UI's installer doesn't read. The compose file's `command` copies that list to a file for `uv` (`UV_OVERRIDE`) before the web UI starts. Without it the container restarts in a loop with "No solution found when resolving dependencies".
+- **Versions:** the web UI's authors test each release against the agent release of the same date, so merge Renovate's `hermes_image` and `hermes_webui_image` bumps together where you can.
+- **Its own files:** `/var/lib/hermes/data/webui`.
 
 ## Telegram
 
@@ -93,7 +105,7 @@ Nous Research labels the plugin experimental. Hermes' built-in `anthropic` provi
 
 Run `task ansible:deploy-hermes ENV=ldn` to update everything:
 
-- **Hermes** — Renovate bumps `hermes_image`, but `app_hermes` isn't on the [auto-deploy allowlist](../guides/gitops.md#auto-deploy-allowlist), so the VM doesn't change until you deploy.
+- **Hermes and the web UI** — Renovate bumps `hermes_image` and `hermes_webui_image`, but `app_hermes` isn't on the [auto-deploy allowlist](../guides/gitops.md#auto-deploy-allowlist), so the VM doesn't change until you deploy.
 - **Skills** — each deploy copies the repo's skills over the VM's. Hermes can edit its own skills as it learns, and a deploy overwrites those edits, so copy any you want to keep into the repo first. `docker exec hermes hermes curator ledger` lists them, and earlier versions are in `/var/lib/hermes/data/.curator_backups/blobs`. `fastmail-triage` is locked, so Hermes can't edit it.
 - **Claude Code and the plugin** — each deploy moves both to their current release. They live in the data directory, so a new image keeps them. Claude Code doesn't update itself here, because the plugin turns that off.
 
@@ -102,11 +114,12 @@ Run `task ansible:deploy-hermes ENV=ldn` to update everything:
 | Path | Purpose |
 |------|---------|
 | `ansible/playbooks/apps/hermes/deploy.yml` | Playbook (group `app_hermes`) |
-| `ansible/playbooks/apps/hermes/templates/compose.yaml.j2` | Hermes container |
+| `ansible/playbooks/apps/hermes/templates/compose.yaml.j2` | Hermes and web UI containers |
 | `ansible/playbooks/apps/hermes/files/plex-fix/` | The `plex-fix` skill and its helper script |
 | `ansible/playbooks/apps/hermes/files/fastmail-triage/` | The `fastmail-triage` skill, its public defaults and design notes |
 | `ansible/playbooks/apps/hermes/tests/` | Offline tests for `fastmail-triage` |
-| `ansible/inventory/group_vars/site_ldn/app_hermes/vars.yml` | Hermes image and where the email report goes |
+| `ansible/inventory/group_vars/site_ldn/app_hermes/vars.yml` | Hermes and web UI images, and where the email report goes |
+| `ansible/inventory/group_vars/site_ldn/proxy/ldn.5am.cloud.yml` | DNS and Caddy entry `hermes` for the web UI |
 | `ansible/inventory/group_vars/site_ldn/secrets.sops.yml` | Section `app_hermes`: Radarr, Sonarr and Plex keys, and your addresses and private protection lists for `fastmail-triage` (`hermes_fastmail_site_config`) |
 | `terraform/environments/ldn/vms.auto.tfvars` | VM definition (`hermes_server`) |
 | `/opt/hermes` on the VM | `compose.yaml` |

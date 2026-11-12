@@ -9,6 +9,13 @@
     services:
       - prometheus
 
+- name: Restart blackbox-exporter
+  community.docker.docker_compose_v2:
+    project_src: "/opt/monitoring"
+    state: restarted
+    services:
+      - blackbox-exporter
+
 - name: Restart monitoring-stack
   community.docker.docker_compose_v2:
     project_src: "/opt/monitoring"

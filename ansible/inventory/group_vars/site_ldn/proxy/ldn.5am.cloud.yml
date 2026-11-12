@@ -43,6 +43,13 @@ ldn_services:
 
   # Apps (registry apps live in site_ldn/apps.yml)
 
+  # Hermes web UI (custom playbook: playbooks/apps/hermes)
+  - name: hermes
+    backend_host: 10.3.20.80
+    backend_port: 8787
+    proxied: true
+    auth: true
+
   # Kasm (custom playbook: playbooks/apps/kasm); port is kasm_port
   - name: kasm
     backend_host: 10.3.20.50

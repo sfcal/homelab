@@ -13,6 +13,7 @@
     # deploy.
     - "/opt/monitoring"
     - "/opt/monitoring/prometheus"
+    - "/opt/monitoring/blackbox"
     - "/var/lib/monitoring"
     - "/var/lib/monitoring/uptime-kuma"
 
@@ -33,6 +34,16 @@
     mode: "0644"
   notify:
     - Restart prometheus
+
+- name: Deploy blackbox-exporter configuration.
+  ansible.builtin.copy:
+    src: files/blackbox.yml
+    dest: "/opt/monitoring/blackbox/blackbox.yml"
+    owner: "{{ monitoring_user }}"
+    group: "{{ monitoring_group }}"
+    mode: "0644"
+  notify:
+    - Restart blackbox-exporter
 
 - name: Deploy compose.yaml.
   ansible.builtin.template:

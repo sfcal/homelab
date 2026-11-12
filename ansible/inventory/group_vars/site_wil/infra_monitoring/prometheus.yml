@@ -4,8 +4,8 @@ prometheus_retention: "30d"
 
 # Prometheus scrape targets: node-exporter on every host of the site, taken
 # from the inventory ([site_wil]), so a new VM is scraped after the next
-# monitoring deploy. The Packer template installs it on every clone and the
-# media VM runs it as a container; a Proxmox host has none and is left out.
+# monitoring deploy. The Packer template installs it on every clone, the
+# media VM runs it as a container and the Proxmox host gets Debian's package
+# (infrastructure/proxmox).
 prometheus_node_targets: >-
-  {{ groups['site_' ~ site] | reject('in', groups['infra_proxmox'])
-     | map('regex_replace', '$', ':9100') | list }}
+  {{ groups['site_' ~ site] | map('regex_replace', '$', ':9100') | list }}

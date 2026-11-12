@@ -25,3 +25,19 @@ services:
       - /opt/monitoring/prometheus:/etc/prometheus:ro
       - /var/lib/monitoring/prometheus:/prometheus
     user: "{{ monitoring_uid }}:{{ monitoring_gid }}"
+
+  # Requests every name the site's Caddy serves, the way a browser on the LAN
+  # does: the site's DNS, Caddy and its certificate. Prometheus reads the
+  # results (job 'blackbox' in prometheus.yml.j2). No published port: only
+  # Prometheus asks it, as blackbox-exporter:9115.
+  blackbox-exporter:
+    image: {{ blackbox_exporter_image }}
+    container_name: blackbox-exporter
+    restart: unless-stopped
+    mem_limit: 128m
+    networks:
+      - monitoring
+    command:
+      - '--config.file=/etc/blackbox/blackbox.yml'
+    volumes:
+      - /opt/monitoring/blackbox:/etc/blackbox:ro

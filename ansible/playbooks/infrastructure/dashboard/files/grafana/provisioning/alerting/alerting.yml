@@ -1,0 +1,396 @@
+apiVersion: 1
+
+# Alerts for both sites, sent by email. Provisioned like the datasources and
+# dashboards: Grafana reads this file when it starts (the playbook restarts it
+# when the file changes), and what it creates can't be edited in the UI.
+#
+# Mail goes out through Fastmail (GF_SMTP_* in templates/compose.yaml.j2) to
+# grafana_alert_email (site_ovh/secrets.sops.yml), which arrives here as the
+# environment variable ALERT_EMAIL.
+
+contactPoints:
+  - orgId: 1
+    name: email
+    receivers:
+      - uid: email
+        type: email
+        settings:
+          addresses: $ALERT_EMAIL
+
+# One mail when an alert starts, one when it ends, and a reminder once a day
+# while it lasts. Alerts of the same rule share a mail.
+policies:
+  - orgId: 1
+    receiver: email
+    group_by: [grafana_folder, alertname]
+    repeat_interval: 24h
+
+# A rule reads one datasource, so every rule is written once per site: group
+# `wil` reads prometheus-wil, group `ldn` reads prometheus-ldn. Change a rule
+# in both groups.
+#
+# In each rule, A is the Prometheus query (one number per host or target) and
+# B is the test on it. The rule fires for every series where B has held for as
+# long as `for`. While a site's Prometheus can't be reached its rules keep the
+# state they had (KeepLast), and only "Prometheus unreachable" fires.
+groups:
+  - orgId: 1
+    name: wil
+    folder: Alerts
+    interval: 1m
+    rules:
+      # The query can't fail the test: this rule fires only when the query
+      # itself fails or returns nothing.
+      - uid: wil-prometheus-unreachable
+        title: Prometheus unreachable (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: vector(1)
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 1}
+        for: 5m
+        noDataState: Alerting
+        execErrState: Alerting
+        labels: {site: wil}
+        annotations:
+          summary: Grafana on the VPS cannot query wil's Prometheus (10.2.20.30:9090). The site, its tailnet link or the monitoring VM is down.
+
+      - uid: wil-target-down
+        title: Target down (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: up
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 1}
+        for: 5m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: '{{ $labels.instance }} ({{ $labels.job }}) has not answered Prometheus for 5 minutes.'
+
+      - uid: wil-disk-full
+        title: Disk almost full (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: 100 * (1 - node_filesystem_avail_bytes{fstype=~"ext4|xfs|btrfs|zfs|nfs4"} / node_filesystem_size_bytes)
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A > 85}
+        for: 15m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: '{{ $labels.instance }}: {{ $labels.mountpoint }} is {{ printf "%.0f" $values.A.Value }}% full.'
+
+      - uid: wil-memory-full
+        title: Memory almost full (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A > 90}
+        for: 15m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: '{{ $labels.instance }}: {{ printf "%.0f" $values.A.Value }}% of memory in use for 15 minutes.'
+
+      # Fires at once and ends 15 minutes after the last kill
+      - uid: wil-oom-kills
+        title: Out-of-memory kills (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: increase(node_vmstat_oom_kill[15m])
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A > 0}
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: '{{ $labels.instance }}: the kernel killed {{ printf "%.0f" $values.A.Value }} processes that ran out of memory in the last 15 minutes.'
+
+      - uid: wil-clock-unsynced
+        title: Clock not synchronised (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: node_timex_sync_status
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 1}
+        for: 15m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: "{{ $labels.instance }}: the clock has not been synchronised to a time server for 15 minutes."
+
+      # The names the site's Caddy serves, requested once a minute from the
+      # monitoring VM (job 'blackbox' in the site's Prometheus). A is the HTTP
+      # status of the last request. 0 is no answer at all: the name didn't
+      # resolve, Caddy didn't answer or its certificate was refused.
+      - uid: wil-name-not-answering
+        title: Name not answering (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: probe_http_status_code
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 100 || $A >= 500}
+        for: 5m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: '{{ $labels.instance }} has not answered properly for 5 minutes (status {{ printf "%.0f" $values.A.Value }}). 0: no answer at all (DNS, Caddy or the certificate). 502: Caddy answers, the service behind it does not.'
+
+      # Caddy renews a certificate weeks before it runs out, so this fires
+      # only when renewal has been failing.
+      - uid: wil-certificate-expiring
+        title: Certificate expiring (wil)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-wil
+            model:
+              refId: A
+              instant: true
+              expr: (probe_ssl_earliest_cert_expiry - time()) / 86400
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 7}
+        for: 1h
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: wil}
+        annotations:
+          summary: '{{ $labels.instance }}: the certificate runs out in {{ printf "%.0f" $values.A.Value }} days and has not been renewed.'
+
+  - orgId: 1
+    name: ldn
+    folder: Alerts
+    interval: 1m
+    rules:
+      - uid: ldn-prometheus-unreachable
+        title: Prometheus unreachable (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: vector(1)
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 1}
+        for: 5m
+        noDataState: Alerting
+        execErrState: Alerting
+        labels: {site: ldn}
+        annotations:
+          summary: Grafana on the VPS cannot query ldn's Prometheus (10.3.20.30:9090). The site, its tailnet link or the monitoring VM is down.
+
+      - uid: ldn-target-down
+        title: Target down (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: up
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 1}
+        for: 5m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: '{{ $labels.instance }} ({{ $labels.job }}) has not answered Prometheus for 5 minutes.'
+
+      - uid: ldn-disk-full
+        title: Disk almost full (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: 100 * (1 - node_filesystem_avail_bytes{fstype=~"ext4|xfs|btrfs|zfs|nfs4"} / node_filesystem_size_bytes)
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A > 85}
+        for: 15m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: '{{ $labels.instance }}: {{ $labels.mountpoint }} is {{ printf "%.0f" $values.A.Value }}% full.'
+
+      - uid: ldn-memory-full
+        title: Memory almost full (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A > 90}
+        for: 15m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: '{{ $labels.instance }}: {{ printf "%.0f" $values.A.Value }}% of memory in use for 15 minutes.'
+
+      - uid: ldn-oom-kills
+        title: Out-of-memory kills (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: increase(node_vmstat_oom_kill[15m])
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A > 0}
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: '{{ $labels.instance }}: the kernel killed {{ printf "%.0f" $values.A.Value }} processes that ran out of memory in the last 15 minutes.'
+
+      - uid: ldn-clock-unsynced
+        title: Clock not synchronised (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: node_timex_sync_status
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 1}
+        for: 15m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: "{{ $labels.instance }}: the clock has not been synchronised to a time server for 15 minutes."
+
+      # The names the site's Caddy serves, requested once a minute from the
+      # monitoring VM (job 'blackbox' in the site's Prometheus). A is the HTTP
+      # status of the last request. 0 is no answer at all: the name didn't
+      # resolve, Caddy didn't answer or its certificate was refused.
+      - uid: ldn-name-not-answering
+        title: Name not answering (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: probe_http_status_code
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 100 || $A >= 500}
+        for: 5m
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: '{{ $labels.instance }} has not answered properly for 5 minutes (status {{ printf "%.0f" $values.A.Value }}). 0: no answer at all (DNS, Caddy or the certificate). 502: Caddy answers, the service behind it does not.'
+
+      # Caddy renews a certificate weeks before it runs out, so this fires
+      # only when renewal has been failing.
+      - uid: ldn-certificate-expiring
+        title: Certificate expiring (ldn)
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: {from: 600, to: 0}
+            datasourceUid: prometheus-ldn
+            model:
+              refId: A
+              instant: true
+              expr: (probe_ssl_earliest_cert_expiry - time()) / 86400
+          - refId: B
+            datasourceUid: __expr__
+            model: {refId: B, type: math, expression: $A < 7}
+        for: 1h
+        noDataState: OK
+        execErrState: KeepLast
+        labels: {site: ldn}
+        annotations:
+          summary: '{{ $labels.instance }}: the certificate runs out in {{ printf "%.0f" $values.A.Value }} days and has not been renewed.'

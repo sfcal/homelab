@@ -15,12 +15,12 @@ task --list-all
 | `task ansible:deploy-networking ENV=wil` | DNS, reverse proxy, Tailscale |
 | `task ansible:deploy-ca ENV=wil` | Step-CA certificate authority |
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
-| `task ansible:deploy-monitoring ENV=wil` | Prometheus |
+| `task ansible:deploy-monitoring ENV=wil` | Prometheus and blackbox-exporter |
 | `task ansible:deploy-dashboard ENV=ovh` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
 | `task ansible:deploy-kasm ENV=ldn` | Kasm on the work VM, and its custom workspace images |
 | `task ansible:deploy-kasm-agent ENV=ovh` | Kasm agent for Deluge on the OVH VPS |
 | `task ansible:deploy-netboot ENV=ldn` | netboot.xyz PXE re-imaging |
-| `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
+| `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: node-exporter; on pve-ldn SR-IOV GPU VFs, PCI resource mappings |
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |
 | `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
 | `task ansible:deploy-gaming ENV=ldn` | Gaming stacks: Wolf and RomM (ldn) |

@@ -10,3 +10,5 @@ monitoring_group: root
 # Container images
 # renovate: datasource=docker
 prometheus_image: "prom/prometheus:v3.16.0"
+# renovate: datasource=docker
+blackbox_exporter_image: "prom/blackbox-exporter:v0.29.1"

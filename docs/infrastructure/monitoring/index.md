@@ -1,6 +1,6 @@
 # Monitoring
 
-The monitoring stack provides metrics collection, visualization, a service dashboard, and external uptime monitoring. Prometheus runs as a Docker container on a dedicated VM in each environment; Grafana, Homepage and Uptime Kuma run once for both sites on an OVH VPS outside the lab (see [Grafana](#grafana) and [Homepage](#homepage)).
+The monitoring stack provides metrics collection, visualization, alerts by email, a service dashboard, and external uptime monitoring. Prometheus runs as a Docker container on a dedicated VM in each environment; Grafana, Homepage and Uptime Kuma run once for both sites on an OVH VPS outside the lab (see [Grafana](#grafana) and [Homepage](#homepage)).
 
 !!! note "Deployment order"
     Monitoring deploys after [Networking](../networking/index.md), [Step-CA](../ca/index.md), and [NTP](../ntp/index.md). It is the last infrastructure service to deploy before applications.
@@ -11,6 +11,7 @@ The monitoring stack provides metrics collection, visualization, a service dashb
 graph TD
     subgraph Monitoring VM
         Prometheus[Prometheus]
+        Blackbox[blackbox-exporter]
     end
 
     subgraph Dashboard VPS
@@ -21,12 +22,15 @@ graph TD
     end
 
     subgraph Targets
-        NE1[Node Exporter\nmonitoring VM]
-        NE2[Node Exporter\nmedia-stack]
-        NE3[Node Exporter\nnetworking]
+        NE1[Node Exporter\nevery VM]
+        NE2[Node Exporter\nProxmox host]
+        NE3[Node Exporter\ndashboard VPS, from ldn]
+        Names[Proxied names\nDNS, Caddy, certificates]
     end
 
     NE1 & NE2 & NE3 -->|metrics| Prometheus
+    Blackbox -->|one request a minute| Names
+    Blackbox -->|results| Prometheus
     Grafana -->|datasource, over the tailnet| Prometheus
     Homepage -->|widgets, over the tailnet| Prometheus
     Homepage -->|panels| Grafana
@@ -35,8 +39,9 @@ graph TD
     GitHub[GitHub README] -->|badge images| Caddy
 ```
 
-- **Prometheus** scrapes node exporters across all VMs for system metrics
-- **Grafana** visualizes metrics from both sites' Prometheus with dashboards
+- **Prometheus** scrapes a node exporter on every host of its site for system metrics: the VMs, the Proxmox host and, from ldn, the dashboard VPS
+- **blackbox-exporter** requests every name the site's Caddy serves once a minute, which checks the site's DNS, Caddy and its certificates in one go
+- **Grafana** visualizes metrics from both sites' Prometheus with dashboards, and mails an alert when a rule on them fires (see [Alerting](#alerting))
 - **Homepage** provides a service dashboard with status widgets and quick links
 - **Uptime Kuma** checks services from outside the lab and serves the README's status badges
 
@@ -45,6 +50,7 @@ graph TD
 | Component | Image | Port | Purpose |
 |-----------|-------|------|---------|
 | Prometheus | `prom/prometheus` | 9090 | Metrics collection and storage |
+| blackbox-exporter | `prom/blackbox-exporter` | 9115 (inside the compose network only) | Requests each proxied name for Prometheus |
 | Grafana | `grafana/grafana` | 3000 (127.0.0.1 on the dashboard VPS) | Metrics visualization |
 | Homepage | `ghcr.io/gethomepage/homepage` | 3002 (127.0.0.1 on the dashboard VPS) | Service dashboard |
 | Uptime Kuma | `louislam/uptime-kuma` | 3001 (127.0.0.1 on the dashboard VPS) | Uptime checks, README badges |
@@ -69,6 +75,7 @@ graph TD
 | `playbooks/infrastructure/monitoring/tasks/monitoring-stack.yml` | Deployment task |
 | `playbooks/infrastructure/monitoring/templates/compose.yaml.j2` | Docker Compose definition |
 | `playbooks/infrastructure/monitoring/templates/prometheus.yml.j2` | Prometheus scrape config |
+| `playbooks/infrastructure/monitoring/files/blackbox.yml` | blackbox-exporter's one module: an HTTPS request, redirects not followed |
 | `playbooks/infrastructure/monitoring/handlers/main.yml` | Container lifecycle handlers |
 | `inventory/group_vars/site_<env>/infra_monitoring/` | Per-environment variables |
 
@@ -76,12 +83,14 @@ graph TD
 
 | File | Purpose |
 |------|---------|
-| `playbooks/infrastructure/dashboard/deploy.yml` | Playbook: Tailscale, Docker, Uptime Kuma, Grafana, Homepage |
+| `playbooks/infrastructure/dashboard/deploy.yml` | Playbook: Tailscale, Docker, node-exporter, Uptime Kuma, Grafana, Homepage |
+| `playbooks/infrastructure/dashboard/tasks/node-exporter.yml` | node-exporter on the VPS (Ubuntu's package, localhost only), tailnet port 9100 |
 | `playbooks/infrastructure/dashboard/tasks/uptime-kuma.yml` | Uptime Kuma and Caddy directories, Caddyfile, tailnet port 3001 |
 | `playbooks/infrastructure/dashboard/tasks/grafana.yml` | Grafana directories, provisioning and dashboards, tailnet port 3000 |
 | `playbooks/infrastructure/dashboard/tasks/homepage.yml` | Homepage config, starts the compose project |
 | `playbooks/infrastructure/dashboard/templates/compose.yaml.j2` | Docker Compose definition (Homepage, Uptime Kuma, Grafana, Caddy) |
 | `playbooks/infrastructure/dashboard/files/grafana/provisioning/` | Grafana datasources (each site's Prometheus) and dashboard provider |
+| `playbooks/infrastructure/dashboard/files/grafana/provisioning/alerting/alerting.yml` | Alert rules for both sites, the email contact point and the notification policy |
 | `playbooks/infrastructure/dashboard/files/grafana/dashboards/` | Grafana dashboards (JSON) |
 | `playbooks/infrastructure/dashboard/files/Caddyfile` | Public site: Uptime Kuma's badges only |
 | `playbooks/infrastructure/dashboard/templates/homepage/services.yaml.j2` | Homepage service cards, for all four tabs |
@@ -92,7 +101,7 @@ graph TD
 | `inventory/group_vars/site_ovh/infra_dashboard/vars.yml` | Images, allowed hosts, Grafana admin user and URL |
 | `inventory/group_vars/site_wil/proxy/ext.5am.cloud.yml` | wil's BIND record for `uptime.ext.5am.cloud` |
 | `inventory/group_vars/site_ovh/infra_dashboard/tailscale.yml` | Tailscale client settings |
-| `inventory/group_vars/site_ovh/secrets.sops.yml` | Widget API keys and Grafana admin password (section `infra_dashboard`) |
+| `inventory/group_vars/site_ovh/secrets.sops.yml` | Widget API keys, Grafana admin password and the address alerts are mailed to (section `infra_dashboard`) |
 
 ## Deployment
 
@@ -107,7 +116,7 @@ The task file:
 
 1. Creates the directory structure: rendered config under `/opt/monitoring/`, Prometheus state under `/var/lib/monitoring/`
 2. Sets ownership to `monitoring_uid:monitoring_gid`
-3. Deploys Prometheus configuration
+3. Deploys Prometheus configuration and blackbox-exporter's
 4. Deploys Docker Compose file
 5. Starts all containers and removes any that are no longer in `compose.yaml`
 
@@ -115,7 +124,35 @@ The task file:
 
 ## Prometheus
 
-Prometheus scrapes metrics from node exporters running on infrastructure and application VMs.
+Prometheus scrapes metrics from the node exporter on every host of its site, and the results of blackbox-exporter's requests.
+
+### Node exporters
+
+Every host under `[site_<env>]` in the inventory is scraped on `:9100`. Where node-exporter comes from depends on the host:
+
+| Host | node-exporter is |
+|------|------------------|
+| VMs cloned from the Packer template | Installed by the template (a binary in `/usr/local/bin`, unit `node-exporter`) |
+| wil's media VM | A container in the media stack's compose project |
+| Proxmox hosts | Debian's package `prometheus-node-exporter`, installed by `task ansible:deploy-proxmox` (see [Proxmox Hosts](../proxmox.md)) |
+| Dashboard VPS | Ubuntu's package, installed by the dashboard playbook (`tasks/node-exporter.yml`) |
+
+The VPS has no Prometheus of its own, so ldn's scrapes it, at its tailnet address (`sites.ovh.tailnet_ip`), and the alert rules for ldn's hosts cover it: an alert about the VPS arrives as an ldn alert for `100.116.40.99:9100`. The VPS has a public address and no firewall of its own, so its node-exporter listens on `127.0.0.1:9100` only (`/etc/default/prometheus-node-exporter`, written before the package is installed, because the package starts the service at once on every address) and `tailscale serve --tcp=9100` puts it on the tailnet. wil's Prometheus can't take this job: wil's VMs can't open a connection to the VPS's tailnet address (their router drops it).
+
+Install node-exporter on a host before the monitoring deploy that adds it as a target. A target that doesn't answer raises *Target down* after 5 minutes.
+
+### Checks through the proxy
+
+Homepage's status dots and the node exporters reach every backend by IP address, so they stay green when the site's DNS, Caddy or a certificate fails. blackbox-exporter closes that gap. It runs next to Prometheus on the monitoring VM and, once a minute, requests `https://<name>.<domain>/` for every name the site's Caddy serves, resolving it through the site's BIND like any browser on the LAN. The list is the Caddyfile's: every entry of `services` with `proxied: true`, so a new proxied name is checked after the next monitoring deploy. ldn's also requests `https://auth.5am.cloud` (`prometheus_blackbox_targets`), the login page that Kanidm serves on the VPS.
+
+Redirects are not followed (`files/blackbox.yml`). A name behind the login answers `302` without its backend being asked, which still shows that DNS, Caddy and the certificate work; a name without the login (Plex, KOSync, Kasm, MicroBin) answers from its backend. The alert rules read two of the results:
+
+| Metric | Meaning |
+|--------|---------|
+| `probe_http_status_code` | The HTTP status. `0` is no answer at all: the name didn't resolve, Caddy didn't answer or its certificate was refused. `502` is Caddy answering for a backend that is down |
+| `probe_ssl_earliest_cert_expiry` | When the certificate runs out (Unix time) |
+
+In Prometheus the job is `blackbox` and `instance` is the name (`https://plex.5am.video`); the address scraped is always `blackbox-exporter:9115`. `up` for this job says whether blackbox-exporter answered, not the name.
 
 ### Scrape Configuration
 
@@ -134,12 +171,12 @@ scrape_configs:
   - job_name: 'node-exporter'
     static_configs:
       - targets:
-          - 'localhost:9100'
+          - '10.2.20.7:9100'
           - '10.2.0.5:9100'
           # ... all node targets
 ```
 
-Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandmaster's exporters (deployed by the `ptp-experiments` repo's `monitoring` role). Each renders only when its per-environment target list is non-empty; currently only LDN defines them. The `node` job is kept separate from `node-exporter` because the Chrony dashboard's CPU-temperature panel selects `job="node"` unscoped.
+The `blackbox` job follows (see [Checks through the proxy](#checks-through-the-proxy)). Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandmaster's exporters (deployed by the `ptp-experiments` repo's `monitoring` role). Each renders only when its per-environment target list is non-empty; currently only LDN defines them. The `node` job is kept separate from `node-exporter` because the Chrony dashboard's CPU-temperature panel selects `job="node"` unscoped.
 
 ### Container Configuration
 
@@ -156,7 +193,9 @@ Three additional jobs — `chrony`, `gpsd`, and `node` — scrape the PTP grandm
 |-----------|------|-------------|---------|
 | `prometheus_image` | `string` | Docker image for Prometheus | (per-env) |
 | `prometheus_retention` | `string` | Metrics data retention period | `"30d"` |
-| `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`): every host of the site in the inventory (`[site_<env>]`) on `:9100`, without the Proxmox host | (derived) |
+| `blackbox_exporter_image` | `string` | Docker image for blackbox-exporter | (per-env) |
+| `prometheus_node_targets` | `list[string]` | Node exporter endpoints to scrape (`host:port`): every host of the site in the inventory (`[site_<env>]`) on `:9100`; ldn's list ends with the dashboard VPS's tailnet address | (derived) |
+| `prometheus_blackbox_targets` | `list[string]` | Addresses blackbox-exporter requests besides the site's proxied names (ldn: `https://auth.5am.cloud`) | `[]` |
 | `prometheus_chrony_targets` | `list[string]` | chrony_exporter endpoints (PTP grandmaster, `:9123`) | `[]` |
 | `prometheus_gpsd_targets` | `list[string]` | gpsd exporter endpoints (PTP grandmaster, `:9015`) | `[]` |
 | `prometheus_ptp_node_targets` | `list[string]` | PTP grandmaster node_exporter endpoints (job `node`, `:9100`) | `[]` |
@@ -197,6 +236,29 @@ Dashboards are provisioned from files — any JSON dropped into `playbooks/infra
 
 A new dashboard either binds to one site's uid or gets a datasource variable (type `datasource`, query `prometheus`) and uses `${<variable>}` as each panel's datasource uid.
 
+### Alerting
+
+Grafana checks both sites once a minute and sends mail when something is wrong. It runs on the VPS, outside both sites, so it also notices when a whole site stops answering. Nothing watches the VPS itself, by choice (it is hosted at OVH): while it is down, no alert is sent.
+
+The rules, the contact point and the notification policy are provisioned from one file, `files/grafana/provisioning/alerting/alerting.yml`. They show in Grafana under **Alerting** (**http://dashboard:3000/alerting/list** lists what is firing) and can't be edited there: change the file and deploy. Grafana stops at start when it can't read the file (a misspelt duration is enough; its log says `Failed to provision alerting`), so open that page after a deploy.
+
+| Rule | Fires when |
+|------|------------|
+| Prometheus unreachable | Grafana has not been able to query the site's Prometheus for 5 minutes: the site, its tailnet link or the monitoring VM is down |
+| Target down | A scrape target has not answered Prometheus for 5 minutes |
+| Disk almost full | A filesystem (ext4, xfs, btrfs, zfs or NFS) has been more than 85% full for 15 minutes |
+| Memory almost full | A host has used more than 90% of its memory for 15 minutes |
+| Out-of-memory kills | The kernel killed a process that ran out of memory in the last 15 minutes |
+| Clock not synchronised | A host's clock has not been synchronised to a time server for 15 minutes |
+| Name not answering | A name the site's Caddy serves has given no answer, or a `5xx` status, for 5 minutes (see [Checks through the proxy](#checks-through-the-proxy)) |
+| Certificate expiring | A certificate runs out in less than 7 days. Caddy renews weeks before that, so renewal has been failing |
+
+A rule reads one datasource, so every rule is written twice in the file: in the group `wil` (datasource `prometheus-wil`) and in the group `ldn` (`prometheus-ldn`). Change a rule in both groups. In a rule, `A` is the Prometheus query, which returns one number per host or target, and `B` is the test on it (`$A > 85`). The rule fires for every host or target where the test has held for as long as `for`.
+
+While a site's Prometheus can't be reached, its other rules keep the state they had (`execErrState: KeepLast`), so a site that goes down sends one mail, not one per rule.
+
+**Mail.** One mail when an alert starts, one when it ends, and a reminder once a day while it lasts (`repeat_interval`). Alerts of the same rule share a mail. Grafana sends through Fastmail as `noreply@5am.cloud`, with the same login as Kanidm's mail sender (`GF_SMTP_*` in `compose.yaml.j2`), to `grafana_alert_email`. The contact point reads that address from the environment variable `ALERT_EMAIL`, so it is not in the repository. Links in a mail open `http://dashboard:3000`, so they work on the tailnet only.
+
 ### Container Configuration
 
 - **Memory:** 1GB limit, 256MB reservation
@@ -213,6 +275,7 @@ A new dashboard either binds to one site's uid or gets a datasource variable (ty
 | `grafana_admin_user` | `string` | Admin username for the web UI | `"admin"` |
 | `grafana_admin_password` | `string` | Admin password (SOPS-encrypted, `site_ovh/secrets.sops.yml`); only applied when Grafana creates its database | (required) |
 | `grafana_url` | `string` | Root URL for links in notifications and dashboards | `http://dashboard:3000` |
+| `grafana_alert_email` | `string` | Address alerts are mailed to (SOPS-encrypted, `site_ovh/secrets.sops.yml`) | (required) |
 
 <small>**Sources:** `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/files/grafana/provisioning/datasources/datasources.yml`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/files/grafana/provisioning/datasources/datasources.yml)</small>
 
@@ -353,6 +416,17 @@ Node exporter targets come from the inventory: every host under `[site_<env>]` i
     ```bash
     task ansible:deploy-monitoring ENV=wil
     ```
+
+### Add or change an alert rule
+
+1. Edit `ansible/playbooks/infrastructure/dashboard/files/grafana/provisioning/alerting/alerting.yml`. For a new rule, copy an existing one in the group `wil`, give it a new `uid` and `title`, and set its query (`expr`), its test (`expression`) and `for`. Then make the same change in the group `ldn`.
+2. Deploy; the playbook restarts Grafana, which reads the file when it starts:
+
+    ```bash
+    task ansible:deploy-dashboard ENV=ovh
+    ```
+
+3. Check that the page http://dashboard:3000/alerting/list loads and lists the rule with health `ok`. If Grafana doesn't answer, the file has a mistake: `sudo docker logs grafana` on the VPS names the rule and the field.
 
 ### Add a service to Homepage
 

@@ -26,6 +26,9 @@
       ansible.builtin.include_role:
         name: tailscale
 
+    - name: Configure node-exporter.
+      ansible.builtin.include_tasks: tasks/node-exporter.yml
+
     - name: Configure Uptime Kuma.
       ansible.builtin.include_tasks: tasks/uptime-kuma.yml
 

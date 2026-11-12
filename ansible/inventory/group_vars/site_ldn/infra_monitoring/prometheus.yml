@@ -4,11 +4,20 @@ prometheus_retention: "30d"
 
 # Prometheus scrape targets: node-exporter on every host of the site, taken
 # from the inventory ([site_ldn]), so a new VM is scraped after the next
-# monitoring deploy. The Packer template installs it on every clone; the
-# Proxmox host has none and is left out.
+# monitoring deploy. The Packer template installs it on every clone and the
+# Proxmox host gets Debian's package (infrastructure/proxmox).
+# Last comes the dashboard VPS (site ovh), which has no Prometheus of its own:
+# its node-exporter answers on its tailnet address (dashboard/tasks/
+# node-exporter.yml). Scraped from here only: wil's VMs can't reach that
+# address (their router drops the connection).
 prometheus_node_targets: >-
-  {{ groups['site_' ~ site] | reject('in', groups['infra_proxmox'])
-     | map('regex_replace', '$', ':9100') | list }}
+  {{ (groups['site_' ~ site] | map('regex_replace', '$', ':9100') | list)
+     + [sites.ovh.tailnet_ip ~ ':9100'] }}
+
+# Names blackbox-exporter requests besides the site's proxied services (see
+# prometheus.yml.j2): the login page, which Kanidm serves on the VPS.
+prometheus_blackbox_targets:
+  - "https://auth.5am.cloud"
 
 # PTP grandmaster exporters (ptp-experiments roles/monitoring, native
 # systemd units on the timeserver). The 'node' job is kept separate from
@@ -17,7 +26,6 @@ prometheus_chrony_targets:
   - "10.3.30.123:9123"
   - "10.3.30.11:9123"   # CM1 GPS/PPS test server (temporary)
   - "10.3.30.12:9123"   # time1 NTP-only Pi, no GPS (temporary)
-  - "10.3.20.157:9123"  # VM NTP server, stage 1 (temporary)
 prometheus_gpsd_targets:
   - "10.3.30.123:9015"
   - "10.3.30.11:9015"   # CM1 (temporary)

@@ -1,39 +1,53 @@
 ---
 # Runs on the hypervisor itself (not an Ubuntu VM), so the common role is
-# skipped. Creates the Intel Arc Pro B50's SR-IOV VFs now and at every boot,
-# before pve-guests starts the VMs that map them (hostpciN: mapping=b50-vfN).
+# skipped.
 - name: Configure Proxmox Hosts
   hosts: infra_proxmox
   become: true
 
   tasks:
-    - name: Install the VF creation script.
-      ansible.builtin.template:
-        src: templates/sriov.sh.j2
-        dest: /usr/local/sbin/sriov-b50
-        mode: "0755"
+    # Metrics for the site's Prometheus, which scrapes every host of the site
+    # on :9100. Debian's package starts and enables the service by itself. The
+    # lab VMs get node-exporter from the Packer template instead.
+    - name: Install node-exporter.
+      ansible.builtin.apt:
+        name: prometheus-node-exporter
+        install_recommends: false
+        state: present
 
-    - name: Install the systemd unit.
-      ansible.builtin.template:
-        src: templates/sriov.service.j2
-        dest: /etc/systemd/system/sriov-b50.service
-        mode: "0644"
+    # pve-ldn only (b50_num_vfs, site_ldn/infra_proxmox). Creates the Intel Arc
+    # Pro B50's SR-IOV VFs now and at every boot, before pve-guests starts the
+    # VMs that map them (hostpciN: mapping=b50-vfN).
+    - name: Create the B50's SR-IOV VFs.
+      when: b50_num_vfs is defined
+      block:
+        - name: Install the VF creation script.
+          ansible.builtin.template:
+            src: templates/sriov.sh.j2
+            dest: /usr/local/sbin/sriov-b50
+            mode: "0755"
 
-    - name: Enable and start the unit (creates the VFs now; no reboot needed).
-      ansible.builtin.systemd_service:
-        name: sriov-b50.service
-        enabled: true
-        state: started
-        daemon_reload: true
+        - name: Install the systemd unit.
+          ansible.builtin.template:
+            src: templates/sriov.service.j2
+            dest: /etc/systemd/system/sriov-b50.service
+            mode: "0644"
 
-    - name: Run the check Proxmox performs on PCI mappings at VM start.
-      ansible.builtin.command: pvesh get /cluster/mapping/pci --check-node {{ ansible_facts['hostname'] }} --output-format json
-      register: pci_mapping_check
-      changed_when: false
+        - name: Enable and start the unit (creates the VFs now; no reboot needed).
+          ansible.builtin.systemd_service:
+            name: sriov-b50.service
+            enabled: true
+            state: started
+            daemon_reload: true
 
-    - name: Fail if a mapping no longer matches the hardware.
-      ansible.builtin.assert:
-        that: pci_mapping_check.stdout | from_json | selectattr('checks', 'defined') | map(attribute='checks') | flatten | length == 0
-        fail_msg: >-
-          Fix these in Datacenter > Resource Mappings (or delete mappings the card can no longer provide):
-          {{ pci_mapping_check.stdout | from_json | selectattr('checks', 'defined') | map(attribute='id') | list }}
+        - name: Run the check Proxmox performs on PCI mappings at VM start.
+          ansible.builtin.command: pvesh get /cluster/mapping/pci --check-node {{ ansible_facts['hostname'] }} --output-format json
+          register: pci_mapping_check
+          changed_when: false
+
+        - name: Fail if a mapping no longer matches the hardware.
+          ansible.builtin.assert:
+            that: pci_mapping_check.stdout | from_json | selectattr('checks', 'defined') | map(attribute='checks') | flatten | length == 0
+            fail_msg: >-
+              Fix these in Datacenter > Resource Mappings (or delete mappings the card can no longer provide):
+              {{ pci_mapping_check.stdout | from_json | selectattr('checks', 'defined') | map(attribute='id') | list }}

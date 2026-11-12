@@ -25,6 +25,9 @@ uptime_kuma_image: "louislam/uptime-kuma:2.5.9"
 # VM; Grafana reads both over the tailnet. Anyone on the tailnet can view;
 # sign in as admin to edit.
 # grafana_admin_password — site_ovh/secrets.sops.yml (section infra_dashboard)
+# Alerts (dashboard/files/grafana/provisioning/alerting/alerting.yml) are
+# mailed to grafana_alert_email (same section) through the Fastmail login of
+# Kanidm's mail sender (kanidm_mail_username, kanidm_mail_password).
 
 # renovate: datasource=docker
 grafana_image: "grafana/grafana:13.3.0"

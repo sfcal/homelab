@@ -43,3 +43,28 @@ scrape_configs:
           - '{{ target }}'
 {% endfor %}
 {% endif %}
+
+  # Every name the site's Caddy serves (the loop is the Caddyfile's), requested
+  # by blackbox-exporter (compose.yaml.j2) once a minute. A request shows
+  # whether the name resolves, Caddy answers and its certificate is valid.
+  # `instance` is the name; the address scraped is blackbox-exporter's.
+  - job_name: 'blackbox'
+    scrape_interval: 1m
+    metrics_path: /probe
+    params:
+      module: [http]
+    static_configs:
+      - targets:
+{% for service in services if service.proxied | default(false) and service.enabled | default(true) %}
+          - 'https://{{ service.name }}.{{ service.domain }}'
+{% endfor %}
+{% for target in prometheus_blackbox_targets | default([]) %}
+          - '{{ target }}'
+{% endfor %}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

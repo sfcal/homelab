@@ -1,0 +1,11 @@
+# Managed by Ansible (infrastructure/monitoring). One way to check a name: a
+# single HTTPS request, redirects not followed. A name behind the login
+# answers 302 without its backend being asked, which still shows that DNS,
+# Caddy and the certificate work. The alert rules read the status code
+# (probe_http_status_code), so the codes counted as valid here don't matter.
+modules:
+  http:
+    prober: http
+    http:
+      follow_redirects: false
+      preferred_ip_protocol: ip4

@@ -19,6 +19,7 @@
         service_compose_template: "{{ playbook_dir }}/templates/compose.yaml.j2"
         service_images:
           - "{{ hermes_image }}"
+          - "{{ hermes_webui_image }}"
 
     - name: Wait for Hermes to set up its data directory.
       ansible.builtin.wait_for:

@@ -26,10 +26,10 @@ task ansible:ping ENV=wil
 | `deploy-networking` | BIND9, Caddy, oauth2-proxy, DDNS, Tailscale |
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
-| `deploy-monitoring` | Prometheus |
+| `deploy-monitoring` | Prometheus and blackbox-exporter |
 | `deploy-dashboard` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
 | `deploy-netboot` | netboot.xyz PXE re-imaging |
-| `deploy-proxmox` | Proxmox hosts: SR-IOV GPU VFs, PCI resource mappings |
+| `deploy-proxmox` | Proxmox hosts: node-exporter; on pve-ldn SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
 | `deploy-frigate` | Frigate NVR |
 | `deploy-gaming` | Gaming stacks: Wolf and RomM (ldn) |
@@ -81,7 +81,7 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 | `apps/kasm/deploy.yml` | `app_kasm` | Kasm on the work VM (ldn), workspace images from `files/` |
 | `apps/kasm-agent/deploy.yml` | `app_kasm_agent` | Second Kasm agent for Deluge (OVH VPS) |
 | `netboot/deploy.yml` | `infra_netboot` | netboot.xyz |
-| `proxmox/deploy.yml` | `infra_proxmox` | SR-IOV GPU VFs and PCI mappings on the hypervisor (no `common` role: it is not an Ubuntu VM) |
+| `proxmox/deploy.yml` | `infra_proxmox` | node-exporter on both hypervisors; SR-IOV GPU VFs and PCI mappings on pve-ldn (no `common` role: they are not Ubuntu VMs) |
 
 ### Data-Driven Apps
 

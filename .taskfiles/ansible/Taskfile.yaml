@@ -67,7 +67,7 @@ tasks:
         vars: { PLAYBOOK_PATH: infrastructure/netboot/deploy.yml }
 
   deploy-proxmox:
-    desc: Configure Proxmox hosts (SR-IOV GPU VFs at boot)
+    desc: Configure Proxmox hosts (node-exporter; pve-ldn's SR-IOV GPU VFs at boot)
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/proxmox/deploy.yml }

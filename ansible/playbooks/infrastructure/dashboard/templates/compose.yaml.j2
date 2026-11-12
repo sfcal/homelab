@@ -56,6 +56,15 @@ services:
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      # Alert mail (files/grafana/provisioning/alerting): sent through Fastmail
+      # as noreply@5am.cloud with the login Kanidm's mail sender uses, to
+      # ALERT_EMAIL, which the contact point in alerting.yml reads
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.fastmail.com:465
+      - GF_SMTP_USER={{ kanidm_mail_username }}
+      - GF_SMTP_PASSWORD={{ kanidm_mail_password }}
+      - GF_SMTP_FROM_ADDRESS=noreply@5am.cloud
+      - ALERT_EMAIL={{ grafana_alert_email }}
     ports:
       - "127.0.0.1:3000:3000"
     volumes:

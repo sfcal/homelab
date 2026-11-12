@@ -1,0 +1,36 @@
+---
+# The VPS's own metrics (CPU, memory, disk). The VPS has no Prometheus: ldn's
+# scrapes it over the tailnet (site_ldn/infra_monitoring/prometheus.yml), so
+# the alert rules for ldn's hosts cover the VPS too.
+#
+# Ubuntu's package starts the service as soon as it is installed, on every
+# address. The VPS has a public one, so its settings go in first.
+- name: Keep node-exporter on localhost.
+  ansible.builtin.copy:
+    dest: /etc/default/prometheus-node-exporter
+    content: |
+      # Managed by Ansible (infrastructure/dashboard). Localhost only: the VPS
+      # has a public address. `tailscale serve` puts port 9100 on the tailnet.
+      ARGS="--web.listen-address=127.0.0.1:9100"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart node-exporter
+
+- name: Install node-exporter.
+  ansible.builtin.apt:
+    name: prometheus-node-exporter
+    install_recommends: false
+    state: present
+
+# node-exporter listens on 127.0.0.1 only; this forwards port 9100 of the
+# tailnet address to it. tailscaled keeps it across reboots.
+- name: Read tailscale serve config.
+  ansible.builtin.command: tailscale serve status --json
+  register: node_exporter_serve
+  changed_when: false
+
+- name: Serve node-exporter on the tailnet.
+  ansible.builtin.command: tailscale serve --bg --tcp=9100 tcp://127.0.0.1:9100
+  when: "'127.0.0.1:9100' not in node_exporter_serve.stdout"
