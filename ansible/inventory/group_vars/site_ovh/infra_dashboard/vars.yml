@@ -16,7 +16,7 @@ homepage_allowed_hosts: "dashboard.tail1e494e.ts.net,dashboard"
 # wil's BIND (site_wil/proxy/ext.5am.cloud.yml), both pointing at this VPS.
 
 # renovate: datasource=docker
-uptime_kuma_image: "louislam/uptime-kuma:2.5.9"
+uptime_kuma_image: "louislam/uptime-kuma:2.5.11"
 # Caddy is built from networking/templates/Dockerfile.j2, pinned there.
 
 # --- Grafana ---
