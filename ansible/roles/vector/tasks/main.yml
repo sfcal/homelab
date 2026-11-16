@@ -1,0 +1,43 @@
+---
+- name: Create Vector directories.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /opt/vector
+    - /var/lib/vector
+
+- name: Deploy Vector configuration.
+  ansible.builtin.template:
+    src: vector.yaml.j2
+    dest: /opt/vector/vector.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart vector
+
+- name: Deploy compose.yaml.
+  ansible.builtin.template:
+    src: compose.yaml.j2
+    dest: /opt/vector/compose.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+# Pulled here, not by `compose up`: Compose 5.4 labels a container whose
+# image it pulled itself differently, and recreates it on the next run.
+- name: Pull Vector's image.
+  community.docker.docker_image:
+    name: "{{ vector_image }}"
+    source: pull
+
+# `compose up` recreates the container only when its definition or image
+# changed.
+- name: Ensure Vector is running.
+  community.docker.docker_compose_v2:
+    project_src: /opt/vector
+    state: present

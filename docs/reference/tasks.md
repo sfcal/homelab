@@ -15,7 +15,8 @@ task --list-all
 | `task ansible:deploy-networking ENV=wil` | DNS, reverse proxy, Tailscale |
 | `task ansible:deploy-ca ENV=wil` | Step-CA certificate authority |
 | `task ansible:deploy-ntp ENV=wil` | Chrony NTP server |
-| `task ansible:deploy-monitoring ENV=wil` | Prometheus and blackbox-exporter |
+| `task ansible:deploy-monitoring ENV=wil` | Prometheus and blackbox-exporter; at wil also VictoriaLogs |
+| `task ansible:deploy-logging ENV=wil` | Log shipper (Vector, through the `common` role) on every VM of the site |
 | `task ansible:deploy-dashboard ENV=ovh` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
 | `task ansible:deploy-kasm ENV=ldn` | Kasm on the work VM, and its custom workspace images |
 | `task ansible:deploy-kasm-agent ENV=ovh` | Kasm agent for Deluge on the OVH VPS |

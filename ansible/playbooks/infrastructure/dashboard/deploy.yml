@@ -8,18 +8,21 @@
       ansible.builtin.import_tasks: handlers/main.yml
 
   pre_tasks:
-    - name: Include common prerequisites.
-      ansible.builtin.include_role:
-        name: common
-
-    # Lab VMs get Docker from the Packer template; the VPS doesn't. Here, so
-    # it's in place before tasks/kanidm.yml runs a container.
+    # Lab VMs get Docker from the Packer template; the VPS doesn't. First, so
+    # it's in place before the common role starts the log shipper
+    # (roles/vector), a container.
     - name: Install Docker.
       ansible.builtin.apt:
         name:
           - docker.io
           - docker-compose-v2
         state: present
+        update_cache: true
+        cache_valid_time: 1800
+
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
 
   tasks:
     - name: Configure Tailscale.

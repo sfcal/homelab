@@ -1,0 +1,17 @@
+---
+services:
+  # Sends this host's logs to VictoriaLogs (vector.yaml): what the containers
+  # print, read from Docker's socket, and the host's journal. Keep Docker's
+  # own hostname (no hostname:, no network_mode: host): Vector recognises its
+  # own container by it and leaves its own output out.
+  vector:
+    image: {{ vector_image }}
+    container_name: vector
+    restart: unless-stopped
+    mem_limit: 256m
+    volumes:
+      - /opt/vector/vector.yaml:/etc/vector/vector.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log/journal:/var/log/journal:ro
+      # Vector's bookmark in the journal
+      - /var/lib/vector:/var/lib/vector

@@ -22,6 +22,7 @@ All operations go through `task`. Pattern: `task <namespace>:<operation> ENV=<en
 ```
 task ansible:deploy-<service> ENV=wil    # Deploy a service
 task ansible:deploy-proxmox ENV=ldn      # Proxmox hosts (group infra_proxmox): node-exporter; on pve-ldn SR-IOV GPU VFs + PCI mappings
+task ansible:deploy-logging ENV=wil      # Log shipper (Vector, through the common role) on every VM of the site
 task terraform:deploy ENV=wil            # Deploy all VMs
 task terraform:deploy-vm ENV=wil VM=key  # Deploy specific VM
 task packer:build-ubuntu ENV=wil         # Build VM template
@@ -153,7 +154,7 @@ sops decrypt ansible/inventory/group_vars/site_wil/secrets.sops.yml
 
 Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically via `.github/workflows/deploy.yml` (GitHub-hosted runner → Tailscale `tag:ci` → `deploy` user). See `docs/guides/gitops.md`.
 - Auto-deploy allowlist lives in `.github/scripts/deploy-plan.sh` (`PLAYBOOK_FOR`); keep it in sync with the host pattern in `ansible/playbooks/ci-access.yml` (`task ci:known-hosts` reads its hosts from that playbook)
-- Renovate never automerges image bumps CI can't deploy (`matchFileNames` rule in `renovate.json`: `infra_ca`, `infra_networking`, `app_hermes`, `app_ignis`, `app_calibre`, `site_ovh/`, Caddy's `Dockerfile.j2`); a group that pins an image and stays off the allowlist belongs in that rule. Automerges happen before 06:00 UTC on weekdays (`automergeSchedule`)
+- Renovate never automerges image bumps CI can't deploy (`matchFileNames` rule in `renovate.json`: `infra_ca`, `infra_networking`, `app_hermes`, `app_ignis`, `app_calibre`, `site_ovh/`, `all/` (Vector, the log shipper), Caddy's `Dockerfile.j2`); a group that pins an image and stays off the allowlist belongs in that rule. Automerges happen before 06:00 UTC on weekdays (`automergeSchedule`)
 - One deploy run at a time (workflow-level `concurrency` in `deploy.yml`), so a run never plans from a `deploy/<env>` tag the run before it is about to move
 - Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
@@ -170,6 +171,17 @@ Grafana on the VPS checks both sites' Prometheus once a minute and mails alerts.
 - Grafana exits at start on a file it can't read (a bad duration is enough), and a dashboard deploy restarts it: after changing the file, start a local `grafana/grafana` container of the VPS's version with it first, and check http://dashboard:3000/alerting/list after the deploy
 - What the rules see: node-exporter on every host under `[site_<env>]`, the Proxmox hosts included (Debian's package, `infrastructure/proxmox`), plus the VPS in ldn's Prometheus (Ubuntu's package on `127.0.0.1:9100`, put on the tailnet by `tailscale serve`; `dashboard/tasks/node-exporter.yml`). Install the exporter before the monitoring deploy that adds the target: a target that doesn't answer raises Target down after 5 minutes
 - `blackbox-exporter` on each monitoring VM requests every proxied name of `services` once a minute (job `blackbox`; the loop in `prometheus.yml.j2` is the Caddyfile's): DNS, Caddy and the certificate. A new proxied name is checked after the next monitoring deploy
+
+## Logs (VictoriaLogs)
+
+Every VM's journal and every container's output, at both sites and on the VPS, are in one VictoriaLogs on wil's monitoring VM: `http://10.2.20.30:9428` (LANs and tailnet, no login, 30 days kept; `/select/vmui` in a browser). See `docs/infrastructure/monitoring/index.md` (Logs).
+- Read it with curl (LogsQL): `curl -s http://10.2.20.30:9428/select/logsql/query -d limit=50 --data-urlencode 'query={site="wil",host="media",container_name="sonarr"} _time:1h | fields _time, _msg'`. `limit` returns the newest lines. Keep `_time` in `fields`, and always give `fields`: a journal line has 20 to 40 otherwise
+- Every line has `site` (wil, ldn, ovh) and `host` (the hostname; the VPS is `{site="ovh"}`). `networking`, `ca` and `monitoring` exist at both lab sites: always give the site. Container lines have `container_name`, `image`, `stream` and `source_type:docker_logs`; journal lines have `source_type:journald` and journald's fields (`_SYSTEMD_UNIT`, `SYSLOG_IDENTIFIER`, `PRIORITY`), e.g. `{site="ldn",host="networking"} _SYSTEMD_UNIT:="named.service" _time:1h`
+- Words after the `{...}` filter search the message. blackbox-exporter logs an ERROR for every name that answers with a login redirect, so leave it out when looking for errors: `{site="wil",container_name!="blackbox-exporter"} error _time:15m`. What is sending: `_time:1h | stats by (site, host, source_type) count() lines`
+- The shipper is Vector, one container per host (`/opt/vector`), from `ansible/roles/vector`. The `common` role includes it, so every host whose playbook runs `common` has it and a new VM gets it with its first deploy. `task ansible:deploy-logging ENV=<site>` applies it to a whole site at once: run it after changing `vector_image` or the role
+- The role pulls Vector's image in a task of its own, before `compose up`: Compose 5.4 (ldn's VMs) labels a container whose image it pulled itself differently and recreates it on the next run
+- The store is the `victorialogs` service of the monitoring compose, rendered only where `victorialogs_image` is set (`site_wil/infra_monitoring/containers.yml`). `victorialogs_url` and `vector_image` are in `group_vars/all/vars.yml`
+- Not in it: the Proxmox hosts and the Mac mini (their playbooks skip `common`), `10.3.20.80` (in no role group), Kasm's inner containers, log files apps write themselves (`/var/log/kosync`, Steam Headless's journal), and what a container prints while Vector is stopped
 
 ## Proxy & DNS Service Definitions
 
@@ -235,6 +247,6 @@ For a data-driven (registry) app:
 3. Add host group to `ansible/inventory/hosts.ini` under `[app_<service>]` and `[apps:children]`, and the host under its `[site_<env>]` group
 4. Add import to `ansible/playbooks/site.yml` (uses `deploy-app.yml` with `app_name`)
 5. Deploy: `task ansible:deploy-app APP=<service> ENV=<env>`, then `task ansible:deploy-networking ENV=<env>` for the DNS/proxy entry
-6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`. Prometheus scrapes node-exporter on every host under `[site_<env>]` (`prometheus_node_targets` is derived from the inventory), so the next monitoring deploy picks the VM up
+6. If new VM needed: add to `terraform/environments/<env>/vms.auto.tfvars`. Prometheus scrapes node-exporter on every host under `[site_<env>]` (`prometheus_node_targets` is derived from the inventory), so the next monitoring deploy picks the VM up. The VM's first deploy also puts the log shipper on it (`common` includes `roles/vector`)
 
 Non-catalog services (third-party devices, dedicated-playbook stacks) get manual proxy entries in `group_vars/site_<env>/proxy/<domain>.yml` instead of a `proxy:` block.

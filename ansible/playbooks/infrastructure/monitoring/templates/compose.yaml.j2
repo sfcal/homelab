@@ -41,3 +41,25 @@ services:
       - '--config.file=/etc/blackbox/blackbox.yml'
     volumes:
       - /opt/monitoring/blackbox:/etc/blackbox:ro
+{% if victorialogs_image is defined %}
+
+  # The logs of every VM, the VPS and their containers (wil only: the site
+  # that sets victorialogs_image). Vector on each of them (roles/vector)
+  # sends to port 9428. Read it there too: /select/vmui in a browser,
+  # /select/logsql/query with curl. No login, like Prometheus. Docker makes
+  # the data directory on first start.
+  victorialogs:
+    image: {{ victorialogs_image }}
+    container_name: victorialogs
+    restart: unless-stopped
+    mem_limit: 1g
+    networks:
+      - monitoring
+    command:
+      - '-storageDataPath=/victoria-logs-data'
+      - '-retentionPeriod=30d'
+    ports:
+      - "9428:9428"
+    volumes:
+      - /var/lib/monitoring/victorialogs:/victoria-logs-data
+{% endif %}

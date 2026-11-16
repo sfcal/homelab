@@ -83,3 +83,16 @@ services: >-
       registry_services
     ) | selectattr('domain', 'in', sites[site].zones) | list
   }}
+
+# --- Logs ---
+# Every VM and the VPS send their logs to one VictoriaLogs: the
+# `victorialogs` service on wil's monitoring VM (victorialogs_image,
+# site_wil/infra_monitoring).
+victorialogs_url: "http://{{ groups['infra_monitoring'] | intersect(groups['site_wil']) | first }}:9428"
+
+# Vector, the log shipper on every VM and the VPS (roles/vector, included by
+# the common role). Keep the -debian image: it is the one with journalctl.
+# CI can't reach every host, so Renovate never automerges this file's pins
+# (renovate.json).
+# renovate: datasource=docker
+vector_image: "timberio/vector:0.61.0-debian"

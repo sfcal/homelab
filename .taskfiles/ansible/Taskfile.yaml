@@ -42,6 +42,12 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: infrastructure/monitoring/deploy.yml }
 
+  deploy-logging:
+    desc: Apply the log shipper (Vector, through the common role) to every VM of the site
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: infrastructure/logging/deploy.yml }
+
   deploy-dashboard:
     desc: Deploy the OVH VPS - Homepage, Uptime Kuma, Grafana, Kanidm (ENV=ovh)
     cmds:

@@ -26,7 +26,8 @@ task ansible:ping ENV=wil
 | `deploy-networking` | BIND9, Caddy, oauth2-proxy, DDNS, Tailscale |
 | `deploy-ca` | Step-CA certificate authority |
 | `deploy-ntp` | Chrony NTP server |
-| `deploy-monitoring` | Prometheus and blackbox-exporter |
+| `deploy-monitoring` | Prometheus and blackbox-exporter; at wil also VictoriaLogs |
+| `deploy-logging` | Log shipper (Vector, through the `common` role) on every VM of the site |
 | `deploy-dashboard` | Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS |
 | `deploy-netboot` | netboot.xyz PXE re-imaging |
 | `deploy-proxmox` | Proxmox hosts: node-exporter; on pve-ldn SR-IOV GPU VFs, PCI resource mappings |
@@ -65,7 +66,7 @@ Every playbook follows the same structure:
       ansible.builtin.include_tasks: tasks/<taskname>.yml
 ```
 
-The `common` role runs on every host first — it updates the apt cache and sets the timezone.
+The `common` role runs on every host first — it updates the apt cache, sets the timezone, and includes the `vector` role, which sends the host's logs to VictoriaLogs (see [Monitoring](../infrastructure/monitoring/index.md#logs)).
 
 ## Deployment Modes
 
@@ -84,6 +85,7 @@ Infrastructure services have dedicated playbooks in `ansible/playbooks/infrastru
 | `apps/kasm-agent/deploy.yml` | `app_kasm_agent` | Second Kasm agent for Deluge (OVH VPS) |
 | `netboot/deploy.yml` | `infra_netboot` | netboot.xyz |
 | `proxmox/deploy.yml` | `infra_proxmox` | node-exporter on both hypervisors; SR-IOV GPU VFs and PCI mappings on pve-ldn (no `common` role: they are not Ubuntu VMs) |
+| `logging/deploy.yml` | `infrastructure:apps` | Runs `common`, and with it the log shipper, on every VM of the site in one go |
 
 ### Data-Driven Apps
 
@@ -120,7 +122,8 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 
 | Role | Purpose |
 |------|---------|
-| `common` | Apt cache update, timezone configuration |
+| `common` | Apt cache update, timezone configuration, the log shipper (includes `vector`) |
+| `vector` | Log shipper: one Vector container that sends the host's journal and its containers' output to VictoriaLogs |
 | `docker_service` | Deploy Docker Compose service (create dir, template compose, pull images, start) |
 | `tailscale` | Install and configure Tailscale (client or subnet_router mode) |
 | `nfs_mount` | Mount NFS shares (used by apps with `nfs: true`) |
@@ -155,6 +158,7 @@ ansible/
 │       └── ... (one directory per app)
 ├── roles/
 │   ├── common/
+│   ├── vector/
 │   ├── docker_service/
 │   ├── tailscale/
 │   └── nfs_mount/

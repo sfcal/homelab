@@ -1,0 +1,7 @@
+---
+# vector.yaml is bind-mounted, so compose can't see its changes: restart the
+# container. Compose/image changes are applied by `state: present` in the tasks.
+- name: Restart vector
+  community.docker.docker_compose_v2:
+    project_src: /opt/vector
+    state: restarted

@@ -1,6 +1,6 @@
 # Monitoring
 
-The monitoring stack provides metrics collection, visualization, alerts by email, a service dashboard, and external uptime monitoring. Prometheus runs as a Docker container on a dedicated VM in each environment; Grafana, Homepage and Uptime Kuma run once for both sites on an OVH VPS outside the lab (see [Grafana](#grafana) and [Homepage](#homepage)).
+The monitoring stack provides metrics collection, visualization, alerts by email, a service dashboard, and external uptime monitoring. Prometheus runs as a Docker container on a dedicated VM in each environment; Grafana, Homepage and Uptime Kuma run once for both sites on an OVH VPS outside the lab (see [Grafana](#grafana) and [Homepage](#homepage)). Every VM also sends its logs to one VictoriaLogs on wil's monitoring VM (see [Logs](#logs)).
 
 !!! note "Deployment order"
     Monitoring deploys after [Networking](../networking/index.md), [Step-CA](../ca/index.md), and [NTP](../ntp/index.md). It is the last infrastructure service to deploy before applications.
@@ -51,6 +51,8 @@ graph TD
 |-----------|-------|------|---------|
 | Prometheus | `prom/prometheus` | 9090 | Metrics collection and storage |
 | blackbox-exporter | `prom/blackbox-exporter` | 9115 (inside the compose network only) | Requests each proxied name for Prometheus |
+| VictoriaLogs | `victoriametrics/victoria-logs` | 9428 (wil's monitoring VM only) | Stores every VM's logs and answers queries |
+| Vector | `timberio/vector` | none | On every VM and the VPS: sends the journal and the containers' output to VictoriaLogs |
 | Grafana | `grafana/grafana` | 3000 (127.0.0.1 on the dashboard VPS) | Metrics visualization |
 | Homepage | `ghcr.io/gethomepage/homepage` | 3002 (127.0.0.1 on the dashboard VPS) | Service dashboard |
 | Uptime Kuma | `louislam/uptime-kuma` | 3001 (127.0.0.1 on the dashboard VPS) | Uptime checks, README badges |
@@ -107,6 +109,7 @@ graph TD
 
 ```bash
 task ansible:deploy-monitoring ENV=wil
+task ansible:deploy-logging ENV=wil      # the log shipper (Vector) on every VM of the site
 task ansible:deploy-dashboard ENV=ovh    # Grafana, Homepage, Uptime Kuma and Kanidm on the OVH VPS (site ovh)
 ```
 
@@ -377,6 +380,91 @@ The monitor ID is the number at the end of its URL on the admin page (`/dashboar
 The badge proxy is Caddy built from `networking/templates/Dockerfile.j2` (the sites' build, with the Cloudflare DNS plugin that Kanidm's `auth.5am.cloud` certificate needs), and its version is pinned there.
 
 <small>**Sources:** `ansible/inventory/group_vars/site_ovh/infra_dashboard/vars.yml` · [`ansible/playbooks/infrastructure/dashboard/files/Caddyfile`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/dashboard/files/Caddyfile)</small>
+
+---
+
+## Logs
+
+Every VM's system journal, and everything its containers print, goes to one VictoriaLogs, so a problem on any host can be looked up in one place. Both sites and the VPS send to the same store.
+
+| Piece | Where | What it does |
+|-------|-------|--------------|
+| VictoriaLogs | wil's monitoring VM, port 9428. A service of the monitoring compose project (`/opt/monitoring`), data in `/var/lib/monitoring/victorialogs` | Keeps the logs for 30 days and answers queries |
+| Vector | One container on every VM and on the VPS (`/opt/vector`, its bookmark in `/var/lib/vector`) | Reads the other containers' output through the Docker socket and the host's journal, adds `site` and `host`, and sends the lines to VictoriaLogs |
+
+### Access
+
+**http://10.2.20.30:9428/select/vmui** in a browser, from either LAN or the tailnet. There is no login, as with Prometheus: anyone on the LANs or the tailnet can read every log, and can write to the store.
+
+### Reading logs
+
+Queries are written in [LogsQL](https://docs.victoriametrics.com/victorialogs/logsql/). From a shell:
+
+```bash
+curl -s http://10.2.20.30:9428/select/logsql/query -d limit=50 \
+  --data-urlencode 'query={site="wil",host="media",container_name="sonarr"} _time:1h | fields _time, _msg'
+```
+
+`limit=50` returns the newest 50 lines. Keep `_time` in `fields`, and give `fields` every time: a journal line carries 20 to 40 fields otherwise.
+
+| Field | On | Meaning |
+|-------|----|---------|
+| `site` | Every line | `wil`, `ldn` or `ovh` |
+| `host` | Every line | The hostname. `networking`, `ca` and `monitoring` exist at both lab sites, so give the site too |
+| `source_type` | Every line | `docker_logs` (a container printed it) or `journald` (the host's journal) |
+| `container_name`, `image`, `stream` | Container lines | The container, its image, `stdout` or `stderr` |
+| `_SYSTEMD_UNIT`, `SYSLOG_IDENTIFIER`, `PRIORITY` | Journal lines | journald's own fields, as they are in the journal |
+
+| To find | Query |
+|---------|-------|
+| One container | `{site="wil",container_name="caddy"} _time:1h` |
+| One host's journal | `{site="ldn",host="networking"} source_type:journald _time:1h` |
+| One unit | `{site="ldn",host="networking"} _SYSTEMD_UNIT:="named.service" _time:1h` |
+| A word, across a site | `{site="wil",container_name!="blackbox-exporter"} error _time:15m` |
+
+blackbox-exporter logs an `ERROR` for every name that answers with a login redirect (it wants a `2xx`; the alert rules read the status code instead), which is why the word search leaves it out.
+
+To see which hosts are sending, and how much:
+
+```bash
+curl -s http://10.2.20.30:9428/select/logsql/query \
+  --data-urlencode 'query=_time:1h | stats by (site, host, source_type) count() lines'
+```
+
+### How a host gets the shipper
+
+Vector is the role `ansible/roles/vector`, and the `common` role includes it. Every playbook for a VM runs `common` first, so every VM that is deployed has the shipper, and a new VM gets it with its first deploy. To apply it to a whole site in one go, for instance after changing `vector_image`:
+
+```bash
+task ansible:deploy-logging ENV=wil
+```
+
+Renovate opens a pull request for a new Vector version but never merges it itself, because CI can't reach every VM. Merge it, then run the task for each site.
+
+The role pulls Vector's image in a task of its own, before `compose up`. Compose 5.4, which ldn's VMs run, gives a container whose image it pulled itself a different image label, and would recreate it once more on the next run.
+
+### The store
+
+`victorialogs` is one more service in the monitoring compose template. It renders only where `victorialogs_image` is set, and only wil sets it, so ldn's monitoring VM does not run one. Logs are kept for 30 days (`-retentionPeriod` in the template). `victorialogs_url`, the address every Vector sends to, is worked out from the inventory in `group_vars/all/vars.yml`. To move the store, move the pin to the other site and change `site_wil` in `victorialogs_url`; the logs already stored stay behind.
+
+### Not covered
+
+- The Proxmox hosts and the Mac mini: their playbooks don't run `common`. The Proxmox hosts have no Docker, so they would need a different sender
+- `10.3.20.80`, which is in no role group
+- Kasm's inner containers (sessions, its API): they run in Kasm's own Docker inside the `kasm` container, and only that container's output is sent
+- Log files an app writes itself instead of printing: KOSync (`/var/log/kosync`), Steam Headless's own journal
+- Anything from before 2026-11-16, and what a container prints while Vector is stopped (its restarts and upgrades, the first seconds after a boot)
+- Docker's own `json-file` logs on each host still have no size limit
+
+### Configuration Reference
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `victorialogs_image` | `string` | Docker image for VictoriaLogs; set at the one site that runs it | `victoriametrics/victoria-logs:v1.54.0` (wil) |
+| `victorialogs_url` | `string` | Where every Vector sends: the monitoring VM of the site that runs VictoriaLogs, port 9428 | (derived) |
+| `vector_image` | `string` | Docker image for Vector. Keep the `-debian` variant: it is the one with `journalctl` | `timberio/vector:0.61.0-debian` |
+
+<small>**Sources:** `ansible/roles/vector/` · `ansible/inventory/group_vars/all/vars.yml` · `ansible/inventory/group_vars/site_wil/infra_monitoring/containers.yml` · [`ansible/playbooks/infrastructure/monitoring/templates/compose.yaml.j2`](https://github.com/sfcal/homelab/blob/main/ansible/playbooks/infrastructure/monitoring/templates/compose.yaml.j2)</small>
 
 ---
 

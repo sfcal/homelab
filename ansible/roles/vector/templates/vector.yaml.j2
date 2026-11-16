@@ -1,0 +1,38 @@
+# Managed by Ansible (roles/vector). Sends this host's logs to VictoriaLogs
+# on wil's monitoring VM (victorialogs_url).
+sources:
+  # What every container on this host prints, read from Docker. No bookmark:
+  # lines printed while Vector is stopped are not sent.
+  containers:
+    type: docker_logs
+
+  # The host's journal: kernel, systemd units, sshd, BIND on the networking
+  # VMs. Starts at "now" on the first run (since_now), then carries on from
+  # its bookmark in /var/lib/vector.
+  journal:
+    type: journald
+    journal_directory: /var/log/journal
+    since_now: true
+
+sinks:
+  victorialogs:
+    type: http
+    inputs: [containers, journal]
+    uri: "{{ victorialogs_url }}/insert/jsonline"
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    compression: gzip
+    healthcheck:
+      enabled: false
+    request:
+      headers:
+        VL-Msg-Field: message
+        VL-Time-Field: timestamp
+        VL-Stream-Fields: site,host,container_name
+        # Put on every line. `networking`, `ca` and `monitoring` are hostnames
+        # at both sites, so a host is always site + host.
+        VL-Extra-Fields: site={{ site }},host={{ ansible_facts['hostname'] }}
+        # Every Docker label of the container: dozens of fields per line
+        VL-Ignore-Fields: label.*

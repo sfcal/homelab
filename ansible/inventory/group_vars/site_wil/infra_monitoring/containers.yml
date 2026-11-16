@@ -12,3 +12,8 @@ monitoring_group: root
 prometheus_image: "prom/prometheus:v3.16.0"
 # renovate: datasource=docker
 blackbox_exporter_image: "prom/blackbox-exporter:v0.29.1"
+# VictoriaLogs, the one log store for every site. Only wil sets this, so only
+# wil's monitoring VM runs it (compose.yaml.j2). To move it, move this pin and
+# change victorialogs_url (group_vars/all/vars.yml).
+# renovate: datasource=docker
+victorialogs_image: "victoriametrics/victoria-logs:v1.54.0"

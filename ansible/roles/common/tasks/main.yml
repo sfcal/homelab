@@ -8,3 +8,9 @@
   community.general.timezone:
     name: "{{ system_timezone }}"
   when: (system_timezone is defined) and (system_timezone != "Your/Timezone")
+
+# Every host that runs this role sends its container output and journal to
+# VictoriaLogs on wil's monitoring VM (roles/vector).
+- name: Ship this host's logs.
+  ansible.builtin.include_role:
+    name: vector

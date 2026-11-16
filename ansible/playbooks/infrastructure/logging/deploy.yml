@@ -1,0 +1,13 @@
+---
+# Runs the `common` role, and with it the log shipper (roles/vector), on
+# every Ubuntu VM of the site in one go (ENV=ovh: the VPS): after changing
+# Vector's image or config. Every other playbook does the same for its own
+# hosts.
+- name: Deploy Log Shipping
+  hosts: infrastructure:apps
+  become: true
+
+  pre_tasks:
+    - name: Include common prerequisites.
+      ansible.builtin.include_role:
+        name: common
