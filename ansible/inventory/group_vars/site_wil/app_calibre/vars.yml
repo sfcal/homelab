@@ -1,0 +1,8 @@
+---
+# Calibre-Web Automated (the e-book library) runs on the Mac mini in a
+# container (OrbStack), with its own playbook: playbooks/apps/calibre.
+# renovate: datasource=docker
+calibre_image: "crocodilestick/calibre-web-automated:v4.0.8"
+# The port on the Mac. The proxy entry in site_ldn/proxy/ldn.5am.cloud.yml
+# repeats it: change both.
+calibre_port: 8083

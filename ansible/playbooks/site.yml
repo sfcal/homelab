@@ -58,13 +58,21 @@
 - import_playbook: apps/hermes/deploy.yml
   tags: ['hermes', 'applications']
 
-# 9. Kasm (work VM, ldn)
+# 9. Ignis (the Mac mini, wil)
+- import_playbook: apps/ignis/deploy.yml
+  tags: ['ignis', 'applications']
+
+# 10. Kasm (work VM, ldn)
 - import_playbook: apps/kasm/deploy.yml
   tags: ['kasm', 'applications']
 
-# 10. Kasm agent (Deluge, OVH VPS)
+# 11. Kasm agent (Deluge, OVH VPS)
 - import_playbook: apps/kasm-agent/deploy.yml
   tags: ['kasm-agent', 'applications']
+
+# 12. Calibre-Web Automated (the Mac mini, wil)
+- import_playbook: apps/calibre/deploy.yml
+  tags: ['calibre', 'applications']
 
 # --- Apps (data-driven) ---
 
@@ -77,12 +85,8 @@
   tags: ['isponsorblocktv', 'applications']
 
 - import_playbook: deploy-app.yml
-  vars: { app_name: calibre }
-  tags: ['calibre', 'applications']
-
-- import_playbook: deploy-app.yml
   vars: { app_name: work }
-  tags: ['work', 'microbin', 'restreamer', 'ignis', 'grist','applications']
+  tags: ['work', 'microbin', 'restreamer', 'grist','applications']
 
 # --- Hypervisor ---
 - import_playbook: infrastructure/proxmox/deploy.yml

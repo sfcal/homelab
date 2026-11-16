@@ -33,7 +33,9 @@ task ansible:ping ENV=wil
 | `deploy-media` | Plex and *arr stack |
 | `deploy-frigate` | Frigate NVR |
 | `deploy-gaming` | Gaming stacks: Steam Headless and RomM (ldn) |
-| `deploy-hermes` | Hermes Agent on the Mac mini (wil): Hermes, its web UI, Claude Code and the Claude subscription plugin |
+| `deploy-hermes` | Hermes Agent on the Mac mini (wil): the Hermes and web UI containers, Claude Code and the Claude subscription plugin |
+| `deploy-ignis` | Ignis on the Mac mini (wil) |
+| `deploy-calibre` | Calibre-Web Automated on the Mac mini (wil) |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts of the site |
 
@@ -110,7 +112,9 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 | Media stack | NFS mount, complex multi-container setup |
 | Frigate | NFS mount, dedicated compose/config tasks |
 | Gaming | Stacks selected per environment (Steam Headless and RomM), kernel modules and inotify limit, optional NFS |
-| Hermes Agent | Runs against the Mac mini as `smithers`, without root: updates Hermes, Claude Code, the plugin and the web UI, installs the skills, and sets up the gateway, web UI and node-exporter services |
+| Hermes Agent | Runs against the Mac mini as `smithers`, without root: starts the Hermes and web UI containers in OrbStack, updates Claude Code and the plugin, installs the skills, and sets up node-exporter on macOS itself |
+| Ignis | Runs against the Mac mini as `smithers`, without root: starts the Ignis container in OrbStack |
+| Calibre-Web Automated | Runs against the Mac mini as `smithers`, without root: starts its container in OrbStack |
 
 ## Roles
 

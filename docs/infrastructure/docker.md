@@ -26,7 +26,47 @@ Steam Headless and RomM (ldn) share one playbook on the `app_gaming` host; an en
 
 ## Hermes Agent
 
-Hermes Agent doesn't run in Docker: it is installed directly on the Mac mini in wil, and its own playbook keeps it up to date. Deploy with `task ansible:deploy-hermes ENV=wil`; see [Hermes Agent](hermes.md).
+Hermes Agent runs in two containers on the Mac mini in wil, in OrbStack, with its own playbook. Deploy with `task ansible:deploy-hermes ENV=wil`; see [Hermes Agent](hermes.md).
+
+## Ignis
+
+[Ignis](https://github.com/Nystik-gh/ignis) runs Obsidian in the browser at `https://ignis.wil.5am.cloud`, behind the Kanidm login: it has no login of its own. It is a container on the Mac mini in wil, in OrbStack next to [Hermes](hermes.md), with its own playbook. Deploy with `task ansible:deploy-ignis ENV=wil`.
+
+- **Vaults:** every folder under `/Users/smithers/ignis/vaults` on the Mac is a vault, plain Markdown. `Documents` is the `Documents` folder of the Mac's iCloud Drive, mounted read-only: Ignis shows it and can't change it.
+- **Other files:** `data/` (Ignis settings) and `obsidian-app/` (the Obsidian download, fetched again when missing), next to `vaults/`.
+- **iCloud:** what holds for Hermes's mount holds here too (see [Files on the Mac](hermes.md#files-on-the-mac)): macOS asks once on the Mac's screen, and a file still in iCloud is slow the first time it is read. A vault opens slowly until the Mac has downloaded its files.
+- **Vault root:** the compose file sets `VAULT_ROOT=/mnt/vaults`. At each start the image changes the owner of everything under its own `/vaults`, which would walk the whole iCloud folder.
+- **The port:** 8082 on the Mac answers anyone on the wil network without the login.
+- **Updates:** Renovate opens a PR for `ignis_image` and never merges it itself, because CI can't deploy to the Mac. Merge it when you deploy.
+
+## Calibre-Web Automated
+
+[Calibre-Web Automated](https://github.com/crocodilestick/Calibre-Web-Automated) is the e-book library at `https://books.ldn.5am.cloud`: browse, read and download in the browser, with Calibre inside the image for imports and conversions. It is a container on the Mac mini in wil, in OrbStack next to [Hermes](hermes.md), with its own playbook. Deploy with `task ansible:deploy-calibre ENV=wil`.
+
+- **The name:** `books` is on ldn's Caddy, which reaches the Mac over the site link (the entry is in `site_ldn/proxy/ldn.5am.cloud.yml`). Only the LANs and the tailnet reach ldn's Caddy. wil's answers from the internet, and this service has no Kanidm login in front. A change of the port needs a networking deploy at ldn.
+- **Login:** its own, with no `auth: true`, so e-readers can use the name: the OPDS catalog at `/opds` takes an account's username and password, and so do KOReader sync and Kobo sync (both off until turned on in its settings).
+- **The port:** 8083 on the Mac answers on the wil network and the tailnet without Caddy, at `http://10.2.0.10:8083`, with the same login.
+- **Shared folders:** its folders are the Mac's own, shared into the container, so the compose file sets `NETWORK_SHARE_MODE=true`: the SQLite files stay out of WAL mode, nothing changes owner at start, and the drop folder is looked into every few seconds.
+- **iCloud Books:** the `Documents/Books` folder of the Mac's iCloud Drive is mounted read-only at `/books` in the container. Calibre-Web Automated shows only its own library, so a book from there appears once a copy of it is put into `ingest/`. Never make `/books` the drop folder: that one deletes what it imports.
+- **Updates:** Renovate opens a PR for `calibre_image` and never merges it itself, because CI can't deploy to the Mac. Merge it when you deploy.
+
+Everything is under `/Users/smithers/calibre/` on the Mac's own disk:
+
+| Folder | Holds |
+|--------|-------|
+| `config/` | `app.db` (users and settings), `cwa.db`, logs, and `processed_books/`, a copy of every file it has imported |
+| `library/` | The Calibre library: `metadata.db` and one folder per author |
+| `ingest/` | Drop folder: a book copied here is imported within about 15 seconds, then deleted from here |
+
+To add books, use the upload button in the web page or copy files into `ingest/` (`scp book.epub smithers@10.2.0.10:calibre/ingest/`). Other formats are converted to EPUB on the way in.
+
+A new install has one account, `admin`, with the image's default password `admin123`: change it at the first login, under the account's profile. A password needs 8 characters with upper and lower case, a digit and a special character.
+
+Once a mail server is set up in its settings, the login form gains a **Forgot Password?** button, and in v4.0.8 pressing Enter in the form then sends that in place of **Login** ([upstream issue 1585](https://github.com/crocodilestick/Calibre-Web-Automated/issues/1585)): the account's password is replaced with a random one and mailed to its address. From then on click the Login button, and give `admin` a real address first (it starts as `admin@example.org`). Without a mail server the button is not there and Enter logs in. To set a password from the command line, for a locked-out account too:
+
+```bash
+ssh smithers@10.2.0.10 "~/.orbstack/bin/docker exec -e CALIBRE_DBPATH=/config -w /app/calibre-web-automated calibre-web-automated s6-setuidgid abc python3 cps.py -s '<user>:<new password>'"
+```
 
 ## Kasm
 
@@ -53,35 +93,11 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 
 | App | Image | Port |
 |-----|-------|------|
-| Calibre-Web Automated | `crocodilestick/calibre-web-automated` | 8083 |
 | Grist | `gristlabs/grist-oss` | 8484 |
-| Ignis (Obsidian) | `nobbe/ignis` | 8082 |
 | iSponsorBlockTV | `ghcr.io/dmunozv04/isponsorblocktv` | — |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
-
-### Calibre-Web Automated
-
-[Calibre-Web Automated](https://github.com/crocodilestick/Calibre-Web-Automated) (ldn, on the `web` VM) is the e-book library at `https://books.ldn.5am.cloud`: browse, read and download in the browser, with Calibre inside the image for imports and conversions. It has its own login and no `auth: true`, because e-readers use the same name: the OPDS catalog at `/opds` takes an account's username and password, and so do KOReader sync and Kobo sync (both off until turned on in its settings).
-
-Everything is under `/var/lib/calibre/` on the VM, owned by uid 1000 (`sfcal`):
-
-| Folder | Holds |
-|--------|-------|
-| `config/` | `app.db` (users and settings), `cwa.db`, logs, and `processed_books/`, a copy of every file it has imported |
-| `library/` | The Calibre library: `metadata.db` and one folder per author |
-| `ingest/` | Drop folder: a book copied here is imported within seconds, then deleted from here |
-
-To add books, use the upload button in the web page or copy files into `ingest/` (`scp book.epub 10.3.20.70:/var/lib/calibre/ingest/`). Other formats are converted to EPUB on the way in.
-
-A new install has one account, `admin`, with the image's default password `admin123`: change it at the first login, under the account's profile. A password needs 8 characters with upper and lower case, a digit and a special character.
-
-Once a mail server is set up in its settings, the login form gains a **Forgot Password?** button, and in v4.0.8 pressing Enter in the form then sends that in place of **Login** ([upstream issue 1585](https://github.com/crocodilestick/Calibre-Web-Automated/issues/1585)): the account's password is replaced with a random one and mailed to its address. From then on click the Login button, and give `admin` a real address first (it starts as `admin@example.org`). Without a mail server the button is not there and Enter logs in. To set a password from the VM, for a locked-out account too:
-
-```bash
-ssh 10.3.20.70 "docker exec -e CALIBRE_DBPATH=/config -w /app/calibre-web-automated calibre-web-automated s6-setuidgid abc python3 cps.py -s '<user>:<new password>'"
-```
 
 ### Grist
 
@@ -92,11 +108,7 @@ ssh 10.3.20.70 "docker exec -e CALIBRE_DBPATH=/config -w /app/calibre-web-automa
 - **Settings:** all of them are in the compose file, and `GRIST_IN_SERVICE` skips Grist's first-run wizard, so a rebuilt VM starts the same way, with no documents. The key that signs browser sessions is `grist_session_secret` in `site_ldn/secrets.sops.yml`.
 - **Getting data out:** a document's share menu exports it to Excel or CSV, or downloads the whole document as its `.grist` file. An Excel export holds the values, not the formulas.
 - **Scripts:** port 8484 on the VM answers Grist's [API](https://support.getgrist.com/rest-api/) without the Kanidm login, to a request that carries an API key (`Authorization: Bearer <key>`). Make the key in the web page: your picture → Account settings → Developer. It can do everything the account can. [Hermes](hermes.md#update-grist) updates tables this way.
-- **The port:** like Ignis's, it also lets anyone on the ldn network in as the one account, without the login.
-
-### Ignis
-
-[Ignis](https://github.com/Nystik-gh/ignis) (ldn, on the `work` VM) runs Obsidian in the browser at `https://ignis.ldn.5am.cloud`, behind the Kanidm login: it has no login of its own. Everything it keeps is on the VM's own disk under `/var/lib/work/ignis/`: `vaults/` (one folder per vault, plain Markdown), `data/` (Ignis settings and sync state) and `obsidian-app/` (the Obsidian download, fetched again when missing). A rebuilt VM starts with no vaults.
+- **The port:** it also lets anyone on the ldn network in as the one account, without the login.
 
 ### iSponsorBlockTV
 

@@ -1,7 +1,12 @@
 ---
-# Hermes runs on the Mac mini, installed directly on macOS. Nothing is pinned
-# here: each deploy moves Hermes, its web UI, Claude Code and the plugin to
-# their current release.
+# Hermes runs on the Mac mini in two containers (OrbStack). Merge the two
+# image bumps together where you can: each web UI release is tested against
+# the agent release of the same date. Claude Code and the plugin aren't
+# pinned: each deploy moves them to their current release.
+# renovate: datasource=docker
+hermes_image: "nousresearch/hermes-agent:v0.23.1"
+# renovate: datasource=docker
+hermes_webui_image: "ghcr.io/nesquena/hermes-webui:0.52.678"
 
 # --- fastmail-triage ---
 hermes_fastmail_deliver: telegram
@@ -12,8 +17,8 @@ hermes_fastmail_deliver: telegram
 hermes_grist_port: 8484
 
 # --- node-exporter ---
-# The Mac has no package for it: the playbook installs this release under
-# ~/.local/bin. The checksum is the darwin-arm64 line of the release's
-# sha256sums.txt.
+# Runs on macOS itself. The Mac has no package for it: the playbook installs
+# this release under ~/.local/bin. The checksum is the darwin-arm64 line of
+# the release's sha256sums.txt.
 hermes_node_exporter_version: "1.12.1"
 hermes_node_exporter_sha256: "35b246a34af55a8f0c3f11067f17aecf9836cfd4689bde364776b3a4ad3a84d6"

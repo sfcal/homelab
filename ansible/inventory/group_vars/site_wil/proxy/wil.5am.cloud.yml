@@ -60,3 +60,12 @@ wil_services:
     backend_port: 8787
     proxied: true
     auth: true
+
+  # Ignis on the Mac mini (custom playbook: playbooks/apps/ignis). The port
+  # repeats ignis_port in site_wil/app_ignis/vars.yml, and the compose
+  # template names this address in WS_ORIGINS: change them together.
+  - name: ignis
+    backend_host: 10.2.0.10
+    backend_port: 8082
+    proxied: true
+    auth: true

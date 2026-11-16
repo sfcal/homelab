@@ -89,10 +89,13 @@
       "automerge": false
     },
     {
-      "description": "Images the deploy workflow can't roll out (docs/guides/gitops.md: the CAs, networking, the ovh VPS): open the PR, never automerge. Merge it when you deploy by hand, so main never says a version that isn't running",
+      "description": "Images the deploy workflow can't roll out (docs/guides/gitops.md: the CAs, networking, Hermes, Ignis and Calibre-Web Automated on the Mac mini, the ovh VPS): open the PR, never automerge. Merge it when you deploy by hand, so main never says a version that isn't running",
       "matchFileNames": [
         "ansible/inventory/group_vars/site_*/infra_ca/**",
         "ansible/inventory/group_vars/site_*/infra_networking/**",
+        "ansible/inventory/group_vars/site_*/app_hermes/**",
+        "ansible/inventory/group_vars/site_*/app_ignis/**",
+        "ansible/inventory/group_vars/site_*/app_calibre/**",
         "ansible/inventory/group_vars/site_ovh/**",
         "ansible/playbooks/infrastructure/networking/templates/Dockerfile.j2"
       ],

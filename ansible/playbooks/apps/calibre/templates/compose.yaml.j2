@@ -1,24 +1,45 @@
 ---
+# Runs in OrbStack on the Mac mini. Deployed to /Users/smithers/calibre.
 services:
+  # The e-book library in the browser, with Calibre inside for imports and
+  # conversions. It has its own login.
   calibre-web-automated:
-    image: {{ apps[app_name].image }}
+    image: {{ calibre_image }}
     container_name: calibre-web-automated
     restart: unless-stopped
+    # OrbStack publishes this on the Mac's own address too: Caddy on ldn's
+    # networking VM reaches it at 10.2.0.10:{{ calibre_port }}
+    # (books.ldn.5am.cloud).
     ports:
-      - "{{ apps[app_name].port }}:8083"
+      - "{{ calibre_port }}:8083"
     environment:
-      # Owner of everything it writes: uid 1000 is sfcal on the VM. Unset, the
-      # image falls back to uid 911.
+      # The user inside the container. On the Mac the files belong to
+      # smithers either way.
       - PUID=1000
       - PGID=1000
       - TZ={{ system_timezone }}
+      # The folders below are the Mac's own, shared into the container. This
+      # keeps the SQLite files out of WAL mode, skips the change of owner at
+      # each start, and looks into the drop folder every few seconds instead
+      # of waiting for a signal that doesn't cross over from macOS.
+      - NETWORK_SHARE_MODE=true
     volumes:
       # Users and settings (app.db, cwa.db), logs, and a copy of every file it
       # has imported (processed_books).
-      - /var/lib/calibre/config:/config
+      - /Users/smithers/calibre/config:/config
       # The Calibre library: metadata.db and one folder per author. Created at
       # the first start; a library already here is used as it is.
-      - /var/lib/calibre/library:/calibre-library
+      - /Users/smithers/calibre/library:/calibre-library
       # Drop folder: a book put here is imported into the library, then
       # deleted from here.
-      - /var/lib/calibre/ingest:/cwa-book-ingest
+      - /Users/smithers/calibre/ingest:/cwa-book-ingest
+      # The Books folder of the Mac's iCloud Drive, read-only at /books. Never
+      # make it the drop folder: that one deletes what it imports. If the
+      # folder is missing (iCloud signed out) the container doesn't start,
+      # instead of Docker making an empty folder inside iCloud Drive.
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Books
+        target: /books
+        read_only: true
+        bind:
+          create_host_path: false

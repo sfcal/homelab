@@ -1,79 +1,95 @@
 ---
-# Hermes runs on the Mac mini in wil, installed directly on macOS as the user
-# smithers. Nothing here needs root, and the common role (apt) is skipped.
-# Done once by hand in Terminal on the Mac (docs/infrastructure/hermes.md):
-# install Hermes and Claude Code, `claude auth login`, the /opt/data link.
+# Hermes runs on the Mac mini in wil, in two containers that OrbStack runs as
+# the user smithers. Nothing here needs root, and the common role (apt) is
+# skipped. Done once by hand (docs/infrastructure/hermes.md): install
+# OrbStack at the Mac's desktop, and sign in to Claude in the container:
+#   docker exec -it -u hermes hermes claude auth login
 - name: Deploy Hermes Agent
   hosts: app_hermes
   become: false
 
-  # ssh gives a bare PATH. Hermes, Claude Code and the python3 link are in
-  # ~/.local/bin; the gateway service keeps the PATH it is installed with.
+  # ssh gives a bare PATH. OrbStack keeps docker under ~/.orbstack: its link
+  # at /var/run/docker.sock would need root.
   environment:
-    PATH: /Users/smithers/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+    PATH: /Users/smithers/.orbstack/bin:/usr/bin:/bin:/usr/sbin:/sbin
+    DOCKER_HOST: unix:///Users/smithers/.orbstack/run/docker.sock
 
   handlers:
     - name: Restart hermes
-      ansible.builtin.command: hermes gateway restart
-
-    - name: Restart hermes-webui
-      ansible.builtin.shell: launchctl kickstart -k gui/$(id -u)/cloud.5am.hermes-webui
+      community.docker.docker_compose_v2:
+        project_src: /Users/smithers/hermes
+        services:
+          - hermes
+        state: restarted
 
     - name: Restart node-exporter
       ansible.builtin.shell: launchctl kickstart -k gui/$(id -u)/cloud.5am.node-exporter
 
   tasks:
-    - name: Check that Hermes and Claude Code are installed.
-      ansible.builtin.stat:
-        path: "/Users/smithers/.local/bin/{{ item }}"
-      loop:
-        - hermes
-        - claude
-      register: hermes_installed
+    - name: Check that OrbStack is running.
+      ansible.builtin.command: docker info
+      register: hermes_docker
+      changed_when: false
+      failed_when: false
 
-    - name: Stop if either is missing.
+    - name: Stop if it isn't.
       ansible.builtin.assert:
-        that: hermes_installed.results | map(attribute='stat.exists') | min
+        that: hermes_docker.rc == 0
         fail_msg: >-
-          Install Hermes and Claude Code by hand first, in Terminal on the Mac
-          (docs/infrastructure/hermes.md).
+          Install OrbStack by hand first, at the Mac's desktop, and leave it
+          running (docs/infrastructure/hermes.md).
 
-    # Hermes's own jobs and the skills' scripts start `python3` and need 3.11
-    # or newer; macOS's is 3.9. Hermes keeps the Python it runs on under
-    # ~/.hermes/tools, in a folder named after the version, so this looks it
-    # up each time instead of linking to one version.
-    - name: Make python3 the Python Hermes installed for itself.
-      ansible.builtin.copy:
-        content: |
-          #!/bin/sh
-          exec "$(ls -d "$HOME"/.hermes/tools/python-*/bin/python3 | sort -V | tail -1)" "$@"
-        dest: /Users/smithers/.local/bin/python3
+    # The shared docker_service role isn't used: it writes to /opt as root.
+    - name: Create the folder for compose.yaml.
+      ansible.builtin.file:
+        path: /Users/smithers/hermes
+        state: directory
         mode: "0755"
 
-    # Nothing is pinned: each deploy moves Hermes, Claude Code, the plugin and
-    # the web UI to their current release. `hermes update` restarts the
-    # gateway itself when it installs something.
-    - name: Update Hermes.
-      ansible.builtin.command: hermes update
-      register: hermes_update
-      changed_when: "'up to date' not in hermes_update.stdout | lower"
+    - name: Create the data folder (it holds logins and keys).
+      ansible.builtin.file:
+        path: /Users/smithers/hermes/data
+        state: directory
+        mode: "0700"
 
-    - name: Update Claude Code.
-      ansible.builtin.command: claude update
+    - name: Write compose.yaml.
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        dest: /Users/smithers/hermes/compose.yaml
+        mode: "0644"
+
+    # No restart on a compose or image change: `compose up` pulls a missing
+    # image and recreates only the services whose definition changed.
+    - name: Start Hermes and the web UI.
+      community.docker.docker_compose_v2:
+        project_src: /Users/smithers/hermes
+        state: present
+
+    - name: Wait for Hermes to set up its data folder.
+      ansible.builtin.wait_for:
+        path: /Users/smithers/hermes/data/gateway.pid
+
+    # Claude Code and the plugin live in the data folder, so a new image
+    # keeps them. Each deploy moves both to their current release.
+    # npm 12 skips Claude Code's install step unless --allow-scripts names it.
+    - name: Install or update Claude Code.
+      ansible.builtin.command: >-
+        docker exec -u hermes hermes npm install -g --prefix /opt/data/.local
+        --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code@latest
       changed_when: false
 
     # First deploy only: `hermes model` can change the model afterwards.
     - name: Install the Claude subscription plugin and select it.
       ansible.builtin.shell:
         cmd: >-
-          hermes plugins install claude-subscription-directsdk &&
-          hermes config set model.provider claude-subscription-directsdk-experimental &&
-          hermes config set model.default claude-opus-5-5
-        creates: /Users/smithers/.hermes/plugins/claude-subscription-directsdk-experimental
+          docker exec hermes hermes plugins install claude-subscription-directsdk &&
+          docker exec hermes hermes config set model.provider claude-subscription-directsdk-experimental &&
+          docker exec hermes hermes config set model.default claude-opus-5-5
+        creates: /Users/smithers/hermes/data/plugins/claude-subscription-directsdk-experimental
       notify: Restart hermes
 
     - name: Update the Claude subscription plugin.
-      ansible.builtin.command: hermes plugins update claude-subscription-directsdk-experimental
+      ansible.builtin.command: docker exec hermes hermes plugins update claude-subscription-directsdk-experimental
       register: hermes_plugin_update
       changed_when: "'already at' not in hermes_plugin_update.stdout"
       notify: Restart hermes
@@ -81,14 +97,14 @@
     - name: Install the plex-fix skill.
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/plex-fix/"
-        dest: /Users/smithers/.hermes/skills/media/plex-fix/
+        dest: /Users/smithers/hermes/data/skills/media/plex-fix/
         mode: "0644"
         directory_mode: "0755"
       notify: Restart hermes
 
     - name: Give Hermes the Radarr, Sonarr and Plex credentials.
       ansible.builtin.lineinfile:
-        path: /Users/smithers/.hermes/.env
+        path: /Users/smithers/hermes/data/.env
         regexp: "^{{ item.name }}="
         line: "{{ item.name }}={{ item.value }}"
       loop:
@@ -101,14 +117,14 @@
     - name: Install the fastmail-triage skill.
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/fastmail-triage/"
-        dest: /Users/smithers/.hermes/skills/email/fastmail-triage/
+        dest: /Users/smithers/hermes/data/skills/email/fastmail-triage/
         mode: "0644"
         directory_mode: "0755"
       notify: Restart hermes
 
     - name: Create the fastmail-triage data directory.
       ansible.builtin.file:
-        path: /Users/smithers/.hermes/data/fastmail-triage
+        path: /Users/smithers/hermes/data/data/fastmail-triage
         state: directory
         mode: "0700"
 
@@ -117,7 +133,7 @@
     - name: Give fastmail-triage its private settings.
       ansible.builtin.copy:
         content: "{{ hermes_fastmail_site_config | to_nice_json }}\n"
-        dest: /Users/smithers/.hermes/data/fastmail-triage/site-config.json
+        dest: /Users/smithers/hermes/data/data/fastmail-triage/site-config.json
         mode: "0600"
       no_log: true
 
@@ -125,14 +141,15 @@
     # destination comes from group_vars.
     - name: Create or repair the fastmail-triage cron jobs.
       ansible.builtin.command: >-
-        python3 /Users/smithers/.hermes/skills/email/fastmail-triage/scripts/install.py
+        docker exec -u hermes hermes python3
+        /opt/data/skills/email/fastmail-triage/scripts/install.py
         --deliver {{ hermes_fastmail_deliver }}
       changed_when: false
 
     - name: Install the grist skill.
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/grist/"
-        dest: /Users/smithers/.hermes/skills/productivity/grist/
+        dest: /Users/smithers/hermes/data/skills/productivity/grist/
         mode: "0644"
         directory_mode: "0755"
       notify: Restart hermes
@@ -142,85 +159,33 @@
     # hand and stays on the Mac (see the docs).
     - name: Tell Hermes where Grist is.
       ansible.builtin.lineinfile:
-        path: /Users/smithers/.hermes/.env
+        path: /Users/smithers/hermes/data/.env
         regexp: "^GRIST_URL="
         line: "GRIST_URL=http://{{ groups['app_work'] | first }}:{{ hermes_grist_port }}"
-      notify: Restart hermes
-
-    # BlueBubbles posts each new iMessage to http://localhost:8645, and on this
-    # Mac "localhost" is ::1 first. Hermes listens on 127.0.0.1 only by
-    # default, so the post was refused and no text got an answer. "localhost"
-    # makes it listen on both loopback addresses, and nowhere else.
-    - name: Make the iMessage webhook listen on both loopback addresses.
-      ansible.builtin.lineinfile:
-        path: /Users/smithers/.hermes/.env
-        regexp: "^BLUEBUBBLES_WEBHOOK_HOST="
-        line: "BLUEBUBBLES_WEBHOOK_HOST=localhost"
       notify: Restart hermes
 
     # A seat belt, not a hard limit: it only sees terminal commands, and the
     # keys above can still delete anything.
     - name: Block delete calls to the media server.
       ansible.builtin.command: >-
-        hermes config set approvals.deny
+        docker exec hermes hermes config set approvals.deny
         '["*DELETE*10.2.0.5*", "*10.2.0.5*DELETE*"]'
       changed_when: false
 
-    # A LaunchAgent (~/Library/LaunchAgents/ai.hermes.gateway.plist): it runs
-    # while smithers is logged in, which unlocking the disk after a restart
-    # does.
-    - name: Install the gateway as a background service and start it.
-      ansible.builtin.command: hermes gateway install --if-missing
-      register: hermes_gateway_install
-      changed_when: "'already installed' not in hermes_gateway_install.stdout"
-
-    # --- Web UI ---
-    # Browser chat on port 8787. Turns run in the gateway (chat backend
-    # "gateway"), so Claude Code, the plugin and the skills are the same as
-    # over Telegram and iMessage.
-    - name: Get the web UI.
-      ansible.builtin.git:
-        repo: https://github.com/nesquena/hermes-webui.git
-        dest: /Users/smithers/hermes-webui
-        update: false
-
-    - name: Find the web UI's newest release.
-      ansible.builtin.shell:
-        cmd: git fetch --quiet --tags origin && git tag --list 'v*' --sort=-v:refname | head -1
-        chdir: /Users/smithers/hermes-webui
-      register: hermes_webui_release
-      changed_when: false
-
-    - name: Move the web UI to that release.
-      ansible.builtin.git:
-        repo: https://github.com/nesquena/hermes-webui.git
-        dest: /Users/smithers/hermes-webui
-        version: "{{ hermes_webui_release.stdout }}"
-      notify: Restart hermes-webui
-
-    - name: Create the web UI's state directory (its logs go here too).
-      ansible.builtin.file:
-        path: /Users/smithers/.hermes/webui
-        state: directory
-        mode: "0700"
-
-    - name: Install the web UI's service.
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/cloud.5am.hermes-webui.plist"
-        dest: /Users/smithers/Library/LaunchAgents/cloud.5am.hermes-webui.plist
-        mode: "0644"
-      notify: Restart hermes-webui
-
     # --- node-exporter ---
-    # wil's Prometheus scrapes every host of the site on :9100. macOS has no
+    # Runs on macOS itself, not in a container: it measures the Mac. wil's
+    # Prometheus scrapes every host of the site on :9100. macOS has no
     # package for it, so this is the project's own release. It answers while
     # smithers is logged in: a Mac that is off, asleep or waiting at the
     # unlock screen raises Target down.
-    - name: Create the folder for node-exporter's release.
+    - name: Create the folders for node-exporter's release and its link.
       ansible.builtin.file:
-        path: /Users/smithers/.local/share
+        path: "{{ item }}"
         state: directory
         mode: "0755"
+      loop:
+        - /Users/smithers/.local/share
+        - /Users/smithers/.local/bin
 
     - name: Download node-exporter.
       ansible.builtin.get_url:
@@ -249,25 +214,19 @@
         mode: "0644"
       notify: Restart node-exporter
 
-    # --- Services ---
-    # A service loaded over ssh lands in the background session (user/<uid>),
-    # where the login keychain is locked: Claude Code then finds no login and
-    # every chat fails with "no usable login". The desktop session (gui/<uid>)
-    # is where macOS itself loads them after a restart. The pause lets the old
-    # process exit, or the load fails.
-    - name: Run the three services in the desktop session.
+    # A service loaded over ssh lands in the background session (user/<uid>).
+    # The desktop session (gui/<uid>) is where macOS itself loads it after a
+    # restart, and where the restart handler looks for it. The pause lets the
+    # old process exit, or the load fails.
+    - name: Run node-exporter in the desktop session.
       ansible.builtin.shell: |
         uid=$(id -u)
-        if launchctl print user/$uid/{{ item }} >/dev/null 2>&1; then
-          launchctl bootout user/$uid/{{ item }} && echo moved
+        if launchctl print user/$uid/cloud.5am.node-exporter >/dev/null 2>&1; then
+          launchctl bootout user/$uid/cloud.5am.node-exporter && echo moved
           sleep 3
         fi
-        if ! launchctl print gui/$uid/{{ item }} >/dev/null 2>&1; then
-          launchctl bootstrap gui/$uid /Users/smithers/Library/LaunchAgents/{{ item }}.plist && echo started
+        if ! launchctl print gui/$uid/cloud.5am.node-exporter >/dev/null 2>&1; then
+          launchctl bootstrap gui/$uid /Users/smithers/Library/LaunchAgents/cloud.5am.node-exporter.plist && echo started
         fi
-      loop:
-        - ai.hermes.gateway
-        - cloud.5am.hermes-webui
-        - cloud.5am.node-exporter
-      register: hermes_services
-      changed_when: hermes_services.stdout != ""
+      register: hermes_node_exporter_service
+      changed_when: hermes_node_exporter_service.stdout != ""

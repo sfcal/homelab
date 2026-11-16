@@ -43,7 +43,7 @@ graph LR
 | `site_<env>/infra_monitoring/` | `infrastructure/monitoring/deploy.yml` |
 | `site_<env>/infra_netboot/` | `infrastructure/netboot/deploy.yml` |
 
-Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/`, `site_<env>/proxy/`, and other files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes` (the Mac mini) isn't on the allowlist either: deploy it by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` (`task ci:known-hosts` reads its hosts from that playbook). A group that pins an image and stays off the allowlist also belongs in the no-automerge rule in `renovate.json`.
+Never auto-deployed: `infra_ca`, `infra_networking`, `infra_ntp`, `infra_proxmox`, `all/`, `site_<env>/proxy/`, and other files directly in `site_<env>/`. CI has no SSH access to those hosts at all. `app_hermes`, `app_ignis` and `app_calibre` (the Mac mini) aren't on the allowlist either, so Renovate never merges their image bumps itself: deploy them by hand (see [Hermes Agent](../infrastructure/hermes.md)). To change the allowlist, edit `PLAYBOOK_FOR` in `deploy-plan.sh` **and** the host pattern in `playbooks/ci-access.yml` (`task ci:known-hosts` reads its hosts from that playbook). A group that pins an image and stays off the allowlist also belongs in the no-automerge rule in `renovate.json`.
 
 ## Security model
 

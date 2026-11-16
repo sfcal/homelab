@@ -24,9 +24,10 @@ HEAD_SHA=${HEAD_SHA:-$(git rev-parse HEAD)}
 
 # --- Auto-deploy allowlist: group -> playbook ---
 # Keep in sync with the host pattern in ansible/playbooks/ci-access.yml.
-# Anything else under group_vars (app_hermes, infra_ca, infra_networking,
-# infra_ntp, infra_proxmox, proxy/, all/, site_<env>/ files outside a group
-# sub-folder other than apps.yml) is reported but never auto-deployed.
+# Anything else under group_vars (app_hermes, app_ignis, app_calibre, infra_ca,
+# infra_networking, infra_ntp, infra_proxmox, proxy/, all/, site_<env>/ files
+# outside a group sub-folder other than apps.yml) is reported but never
+# auto-deployed.
 declare -A PLAYBOOK_FOR=(
   [app_mediastack]=apps/media/deploy.yml
   [app_frigate]=apps/frigate/deploy.yml

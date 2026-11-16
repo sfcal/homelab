@@ -1,0 +1,53 @@
+---
+# Ignis runs on the Mac mini in wil, in a container that OrbStack runs as the
+# user smithers, next to Hermes (playbooks/apps/hermes). Nothing here needs
+# root, and the common role (apt) is skipped. OrbStack is installed once by
+# hand (docs/infrastructure/hermes.md).
+- name: Deploy Ignis
+  hosts: app_ignis
+  become: false
+
+  # ssh gives a bare PATH. OrbStack keeps docker under ~/.orbstack: its link
+  # at /var/run/docker.sock would need root.
+  environment:
+    PATH: /Users/smithers/.orbstack/bin:/usr/bin:/bin:/usr/sbin:/sbin
+    DOCKER_HOST: unix:///Users/smithers/.orbstack/run/docker.sock
+
+  tasks:
+    - name: Check that OrbStack is running.
+      ansible.builtin.command: docker info
+      register: ignis_docker
+      changed_when: false
+      failed_when: false
+
+    - name: Stop if it isn't.
+      ansible.builtin.assert:
+        that: ignis_docker.rc == 0
+        fail_msg: >-
+          Install OrbStack by hand first, at the Mac's desktop, and leave it
+          running (docs/infrastructure/hermes.md).
+
+    # The shared docker_service role isn't used: it writes to /opt as root.
+    - name: Create the Ignis folders.
+      ansible.builtin.file:
+        path: "/Users/smithers/ignis/{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - ""
+        - vaults
+        - data
+        - obsidian-app
+
+    - name: Write compose.yaml.
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/compose.yaml.j2"
+        dest: /Users/smithers/ignis/compose.yaml
+        mode: "0644"
+
+    # `compose up` pulls a missing image and recreates the container only
+    # when its definition changed.
+    - name: Start Ignis.
+      community.docker.docker_compose_v2:
+        project_src: /Users/smithers/ignis
+        state: present

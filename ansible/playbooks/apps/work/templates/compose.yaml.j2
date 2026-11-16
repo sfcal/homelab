@@ -31,22 +31,6 @@ services:
       - /var/lib/work/restreamer/config:/core/config
       - /var/lib/work/restreamer/data:/core/data
 
-  # Obsidian in the browser. No login of its own: use it through Caddy, which
-  # puts the Kanidm login in front (auth: true). Files are owned by uid 1000
-  # (sfcal), the image's default PUID/PGID.
-  ignis:
-    image: {{ apps.work.ignis.image }}
-    container_name: ignis
-    restart: unless-stopped
-    ports:
-      - "{{ apps.work.ignis.port }}:8080"
-    environment:
-      - WS_ORIGINS=https://{{ apps.work.ignis.proxy.name }}.{{ apps.work.ignis.proxy.domain }}
-    volumes:
-      - /var/lib/work/ignis/vaults:/vaults
-      - /var/lib/work/ignis/data:/app/data
-      - /var/lib/work/ignis/obsidian-app:/app/obsidian-app
-
 {% set grist_host = apps.work.grist.proxy.name ~ '.' ~ apps.work.grist.proxy.domain %}
   # Spreadsheets kept as a small database: each document is one SQLite file in
   # /var/lib/work/grist/docs. No login of its own: use it through Caddy, which

@@ -1,0 +1,37 @@
+---
+# Runs in OrbStack on the Mac mini. Deployed to /Users/smithers/ignis.
+services:
+  # Obsidian in the browser. No login of its own: use it through Caddy, which
+  # puts the Kanidm login in front (auth: true on the entry in
+  # site_wil/proxy/wil.5am.cloud.yml).
+  ignis:
+    image: {{ ignis_image }}
+    container_name: ignis
+    restart: unless-stopped
+    # OrbStack publishes this on the Mac's own address too: Caddy on wil's
+    # networking VM reaches it at 10.2.0.10:{{ ignis_port }}.
+    ports:
+      - "{{ ignis_port }}:8080"
+    environment:
+      # The address in the browser. Ignis closes websockets from any other.
+      WS_ORIGINS: https://ignis.wil.5am.cloud
+      # Not the image's own /vaults: at each start the image changes the
+      # owner of everything under /vaults, which would walk the whole iCloud
+      # folder below.
+      VAULT_ROOT: /mnt/vaults
+    volumes:
+      # One folder per vault.
+      - /Users/smithers/ignis/vaults:/mnt/vaults
+      - /Users/smithers/ignis/data:/app/data
+      # The Obsidian download, fetched again when missing.
+      - /Users/smithers/ignis/obsidian-app:/app/obsidian-app
+      # The Documents folder of the Mac's iCloud Drive as the vault
+      # "Documents", read-only. If the folder is missing (iCloud signed out)
+      # the container doesn't start, instead of Docker making an empty folder
+      # inside iCloud Drive.
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents
+        target: /mnt/vaults/Documents
+        read_only: true
+        bind:
+          create_host_path: false

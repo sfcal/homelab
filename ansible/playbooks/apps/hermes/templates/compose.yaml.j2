@@ -1,0 +1,97 @@
+---
+# Runs in OrbStack on the Mac mini. Deployed to /Users/smithers/hermes; the
+# data folder next to it is /opt/data in both containers.
+services:
+  hermes:
+    image: {{ hermes_image }}
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    # Chromium for the browser tools needs more than Docker's 64 MB default.
+    shm_size: 1g
+    environment:
+      # The API server (8642, key in the data directory's .env) listens on the
+      # compose network so the web UI can reach it. The port is not published.
+      API_SERVER_HOST: 0.0.0.0
+      # Where the agent's file tools may write, as a colon-separated list.
+      # The image's own value is /opt/data alone; this adds the writable
+      # iCloud folder mounted below.
+      HERMES_WRITE_SAFE_ROOT: /opt/data:/mnt/icloud/Documents/Hermes
+    volumes:
+      - /Users/smithers/hermes/data:/opt/data
+      # The Documents folder of the Mac's iCloud Drive, read-only. Keep it
+      # outside /opt/data: at each start the image fixes the ownership of
+      # everything under /opt/data/home, and walking this folder there kept
+      # the gateway from starting. If the folder is missing (iCloud signed
+      # out) the container doesn't start, instead of Docker making an empty
+      # folder inside iCloud Drive.
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents
+        target: /mnt/icloud/Documents
+        read_only: true
+        bind:
+          create_host_path: false
+      # Documents/Hermes: the one folder in there that Hermes may write to.
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Hermes
+        target: /mnt/icloud/Documents/Hermes
+        bind:
+          create_host_path: false
+
+  # Browser chat. Turns run in the hermes container (chat backend "gateway"),
+  # so Claude Code, the plugin and the skills are the same as over Telegram.
+  hermes-webui:
+    image: {{ hermes_webui_image }}
+    container_name: hermes-webui
+    restart: unless-stopped
+    depends_on:
+      - hermes
+    # The agent pins some package versions as uv overrides in its
+    # pyproject.toml ([tool.uv]); without them its packages don't install
+    # (v0.23.1: two Pillow pins that disagree). Hand uv the same list, then
+    # start as the image normally does.
+    command:
+      - bash
+      - -c
+      - |
+        python3 -c 'import tomllib; print("\n".join(tomllib.load(open("/opt/hermes/pyproject.toml", "rb"))["tool"]["uv"]["override-dependencies"]))' > /tmp/uv-overrides.txt && exec /hermeswebui_init.bash
+    # OrbStack publishes this on the Mac's own address too: Caddy on wil's
+    # networking VM reaches it at 10.2.0.10:8787.
+    ports:
+      - "8787:8787"
+    environment:
+      # Same paths and owner as in the hermes container.
+      HERMES_HOME: /opt/data
+      UV_OVERRIDE: /tmp/uv-overrides.txt
+      HERMES_WEBUI_STATE_DIR: /opt/data/webui
+      HERMES_WEBUI_DEFAULT_WORKSPACE: /opt/data/home
+      WANTED_UID: "10000"
+      WANTED_GID: "10000"
+      HERMES_WEBUI_CHAT_BACKEND: gateway
+      HERMES_WEBUI_GATEWAY_BASE_URL: http://hermes:8642
+      # Shows the agent's approval prompts in the browser.
+      HERMES_WEBUI_GATEWAY_USE_RUNS_API: "true"
+    volumes:
+      - /Users/smithers/hermes/data:/opt/data
+      # Same iCloud Documents folder, at the same path as in the hermes
+      # container.
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents
+        target: /mnt/icloud/Documents
+        read_only: true
+        bind:
+          create_host_path: false
+      # Documents/Hermes: the one folder in there that Hermes may write to.
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Hermes
+        target: /mnt/icloud/Documents/Hermes
+        bind:
+          create_host_path: false
+      # The agent's code, read-only, straight from the agent image, so it
+      # always matches the version above (the web UI installs the agent's
+      # Python packages from it at start).
+      - type: image
+        source: {{ hermes_image }}
+        target: /opt/hermes
+        image:
+          subpath: opt/hermes

@@ -67,3 +67,14 @@ ldn_services:
     backend_host: 10.3.20.55
     backend_port: 8483
     proxied: false
+
+  # Calibre-Web Automated on the Mac mini in wil (custom playbook:
+  # playbooks/apps/calibre), reached over the site link. The name is here and
+  # not on wil's Caddy because wil's answers from the internet and this has
+  # no Kanidm login in front: e-readers reach it by name (OPDS, KOReader and
+  # Kobo sync) and it has its own login. ldn can't read wil's vars, so the
+  # port repeats calibre_port in site_wil/app_calibre/vars.yml: change both.
+  - name: books
+    backend_host: "{{ groups['app_calibre'] | first }}"
+    backend_port: 8083
+    proxied: true

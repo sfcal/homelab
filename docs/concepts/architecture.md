@@ -70,9 +70,9 @@ Taskfile.yaml               Root task runner entry point
 | Service | Host Group | Purpose |
 |---------|-----------|---------|
 | Media stack (Plex, *arr) | `app_mediastack` | Media management and streaming |
-| Calibre-Web Automated | `app_calibre` | E-book library in the browser |
+| Calibre-Web Automated | `app_calibre` | E-book library in the browser (the Mac mini in wil) |
 | Grist | `app_work` | Spreadsheets kept as a small database |
-| Ignis | `app_work` | Obsidian in the browser |
+| Ignis | `app_ignis` | Obsidian in the browser (the Mac mini in wil) |
 | iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
 | Kasm | `app_kasm` | Browser-based desktops |
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |

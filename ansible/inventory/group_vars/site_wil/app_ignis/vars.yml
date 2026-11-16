@@ -1,0 +1,8 @@
+---
+# Ignis (Obsidian in the browser) runs on the Mac mini in a container
+# (OrbStack), with its own playbook: playbooks/apps/ignis.
+# renovate: datasource=docker
+ignis_image: "nobbe/ignis:0.9.0"
+# The port on the Mac. The proxy entry in site_wil/proxy/wil.5am.cloud.yml
+# repeats it: change both.
+ignis_port: 8082

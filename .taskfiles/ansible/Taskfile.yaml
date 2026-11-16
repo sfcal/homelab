@@ -104,6 +104,18 @@ tasks:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/hermes/deploy.yml }
 
+  deploy-ignis:
+    desc: Deploy Ignis on the Mac mini (ENV=wil)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/ignis/deploy.yml }
+
+  deploy-calibre:
+    desc: Deploy Calibre-Web Automated on the Mac mini (ENV=wil)
+    cmds:
+      - task: _deploy
+        vars: { PLAYBOOK_PATH: apps/calibre/deploy.yml }
+
   deploy-kasm:
     desc: Deploy Kasm and build its workspace images (ENV=ldn)
     cmds:
