@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- node-exporter for wil's Prometheus (job node, port 9100). -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>cloud.5am.node-exporter</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/smithers/.local/bin/node_exporter</string>
+        <string>--web.listen-address=:9100</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>

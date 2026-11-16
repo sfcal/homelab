@@ -1,5 +1,5 @@
 ---
-- name: Deploy Gaming (Wolf, RomM)
+- name: Deploy Gaming (RomM, Steam Headless)
   hosts: app_gaming
   become: true
 
@@ -23,11 +23,11 @@
       when: gaming_nfs | default(false)
 
     # Each stack is deployed only where group_vars/site_<site>/app_gaming/vars.yml
-    # defines its image: RomM and Wolf, both on ldn.
+    # defines its image: RomM and Steam Headless, both on ldn.
     - name: Configure RomM.
       ansible.builtin.include_tasks: tasks/romm.yml
       when: romm_image is defined
 
-    - name: Configure Wolf.
-      ansible.builtin.include_tasks: tasks/wolf.yml
-      when: wolf_image is defined
+    - name: Configure Steam Headless.
+      ansible.builtin.include_tasks: tasks/steam-headless.yml
+      when: steam_headless_image is defined

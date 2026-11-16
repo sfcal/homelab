@@ -1,0 +1,65 @@
+---
+# The upstream host-networking example for image v2 (steamheadless.com,
+# "Deploy with Docker Compose"), with host paths instead of named volumes.
+# One container runs systemd, a KDE Wayland desktop, Steam, Sunshine and the
+# web interface (https://<the VM's address>:8483). It shares the VM's
+# network: Sunshine's Moonlight ports and 8483 are fixed, so only one
+# streaming host can run on this VM.
+name: steam-headless
+
+services:
+  desktop:
+    image: {{ steam_headless_image }}
+    container_name: steam-headless
+    hostname: steam-headless
+    restart: unless-stopped
+    network_mode: host
+    # Upstream's list; do not swap it for privileged: true (that breaks the
+    # container's private input devices).
+    cap_add:
+      - DAC_READ_SEARCH
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_NICE
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+      - seccomp=unconfined
+      - systempaths=unconfined
+      - writable-cgroups=true
+    cgroup: private
+    # systemd is PID 1: this signal shuts it down cleanly
+    stop_signal: SIGRTMIN+3
+    stop_grace_period: 30s
+    pids_limit: 8192
+    shm_size: 2gb
+    tty: true
+    environment:
+      PUID: '1000'
+      PGID: '1000'
+      # Browser stream: convert and scale frames on the GPU. With the default
+      # (system) a 720p stream from the B50 has its colours 32 rows too high
+      # and a green strip at the bottom (seen 2026-11-13; 1080p was fine).
+      SHUI_MEDIA_CONVERSION: vaapi
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/fuse:/dev/fuse
+      - /dev/uinput:/dev/uinput
+      - /dev/uhid:/dev/uhid
+    device_cgroup_rules:
+      - 'c 13:* rwm'
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+      - /dev/input:rw,dev,mode=0755
+    volumes:
+      - /etc/localtime:/run/host-localtime:ro
+      - /sys/devices/virtual/input:/sys/devices/virtual/input:ro
+      - /var/lib/steam-headless/state:/var/lib/steam-headless
+      - /var/log/steam-headless:/var/log/journal
+      - /var/lib/steam-headless/home:/home/steamheadless
+      - /var/lib/steam-headless/games:/mnt/games
+      # RomM's library (roms/<platform>, bios/<platform>) for the emulators,
+      # read-only: RomM stays the place where files are added.
+      - {{ romm_library_path }}:/mnt/romm:ro

@@ -46,3 +46,33 @@ services:
       - /var/lib/work/ignis/vaults:/vaults
       - /var/lib/work/ignis/data:/app/data
       - /var/lib/work/ignis/obsidian-app:/app/obsidian-app
+
+{% set grist_host = apps.work.grist.proxy.name ~ '.' ~ apps.work.grist.proxy.domain %}
+  # Spreadsheets kept as a small database: each document is one SQLite file in
+  # /var/lib/work/grist/docs. No login of its own: use it through Caddy, which
+  # puts the Kanidm login in front (auth: true). Whoever gets through is the
+  # one account below, owner of the one team site.
+  grist:
+    image: {{ apps.work.grist.image }}
+    container_name: grist
+    restart: unless-stopped
+    ports:
+      - "{{ apps.work.grist.port }}:8484"
+    environment:
+      APP_HOME_URL: https://{{ grist_host }}
+      # start in service with the settings here, without the first-run wizard
+      GRIST_IN_SERVICE: "true"
+      # formulas are Python: gVisor keeps them away from files and the network
+      GRIST_SANDBOX_FLAVOR: gvisor
+      # one team site that every document lives in
+      GRIST_SINGLE_ORG: home
+      # no login system: every visitor is signed in as this account
+      GRIST_DEFAULT_EMAIL: admin@{{ grist_host }}
+      GRIST_FORCE_LOGIN: "true"
+      GRIST_SESSION_SECRET: "{{ grist_session_secret }}"
+      # run as the image's uid 1000 (sfcal on the VM) and own the files as it.
+      # Its default, uid 1001, is the VM's node_exporter account.
+      GRIST_DOCKER_USER: node
+      GRIST_DOCKER_GROUP: node
+    volumes:
+      - /var/lib/work/grist:/persist

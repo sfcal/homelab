@@ -58,6 +58,19 @@ apps:
     # renovate: datasource=docker
     image: "ghcr.io/dmunozv04/isponsorblocktv:v2.11.0"
 
+  # Calibre-Web Automated: the e-book library in the browser, with Calibre
+  # inside for imports and conversions. No auth: true: e-readers reach it by
+  # name (OPDS, KOReader and Kobo sync) and it has its own login.
+  calibre:
+    host_group: app_calibre
+    # renovate: datasource=docker
+    image: "crocodilestick/calibre-web-automated:v4.0.8"
+    port: 8083
+    proxy:
+      name: books
+      domain: ldn.5am.cloud
+      proxied: true
+
   work:
     host_group: app_work
     microbin:
@@ -86,6 +99,20 @@ apps:
       port: 8082
       proxy:
         name: ignis
+        domain: ldn.5am.cloud
+        proxied: true
+        auth: true
+    # Spreadsheets kept as a small database (the free Community edition). It
+    # has no login of its own here, so auth: true puts the Kanidm login in
+    # front, like Ignis. Hermes (wil) writes to this port and can't read this
+    # registry: a port change goes in hermes_grist_port too
+    # (site_wil/app_hermes/vars.yml).
+    grist:
+      # renovate: datasource=docker
+      image: "gristlabs/grist-oss:1.7.22"
+      port: 8484
+      proxy:
+        name: grist
         domain: ldn.5am.cloud
         proxied: true
         auth: true

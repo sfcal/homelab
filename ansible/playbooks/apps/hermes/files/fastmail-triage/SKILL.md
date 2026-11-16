@@ -2,7 +2,7 @@
 name: fastmail-triage
 description: Sort the user's Fastmail Inbox into Receipts, Notifications, Newsletters, Finance and Subscriptions, on a weekly schedule or on request, with hard guardrails and an undo log. Use when asked to sort or clean up the inbox, explain or undo a sort, or teach where a sender's mail belongs.
 version: 2.2.0
-platforms: [linux]
+platforms: [linux, macos]
 metadata:
   hermes:
     tags: [email, fastmail, jmap, triage]

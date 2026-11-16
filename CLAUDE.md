@@ -57,7 +57,7 @@ Network ranges: wil=10.2.x.x, ldn=10.3.x.x, ovh=none (VPS 135.148.219.216, tailn
 - Section comments: `# --- Section Name ---`
 
 ### Ansible Playbook Pattern
-Every playbook follows this structure (exception: `infrastructure/proxmox/deploy.yml` targets the PVE host itself and skips the `common` role on purpose):
+Every playbook follows this structure (exceptions: `infrastructure/proxmox/deploy.yml` targets the PVE host itself and `apps/hermes/deploy.yml` the Mac mini in wil, as the user `smithers` with no root and everything under `/Users/smithers`; both skip the `common` role on purpose):
 ```yaml
 ---
 - name: Deploy <Service>
@@ -153,7 +153,7 @@ sops decrypt ansible/inventory/group_vars/site_wil/secrets.sops.yml
 
 Renovate merges that touch `ansible/inventory/group_vars/` deploy automatically via `.github/workflows/deploy.yml` (GitHub-hosted runner → Tailscale `tag:ci` → `deploy` user). See `docs/guides/gitops.md`.
 - Auto-deploy allowlist lives in `.github/scripts/deploy-plan.sh` (`PLAYBOOK_FOR`); keep it in sync with the host pattern in `ansible/playbooks/ci-access.yml` (`task ci:known-hosts` reads its hosts from that playbook)
-- Renovate never automerges image bumps CI can't deploy (`matchFileNames` rule in `renovate.json`: `infra_ca`, `infra_networking`, `app_hermes`, `site_ovh/`, Caddy's `Dockerfile.j2`); a group that pins an image and stays off the allowlist belongs in that rule. Automerges happen before 06:00 UTC on weekdays (`automergeSchedule`)
+- Renovate never automerges image bumps CI can't deploy (`matchFileNames` rule in `renovate.json`: `infra_ca`, `infra_networking`, `site_ovh/`, Caddy's `Dockerfile.j2`); a group that pins an image and stays off the allowlist belongs in that rule. Automerges happen before 06:00 UTC on weekdays (`automergeSchedule`)
 - One deploy run at a time (workflow-level `concurrency` in `deploy.yml`), so a run never plans from a `deploy/<env>` tag the run before it is about to move
 - Only commits authored by `renovate[bot]` auto-deploy; tag `deploy/<env>` marks the last successful CI deploy (don't move it by hand)
 - Compose changes must not notify restart handlers — `docker_compose_v2 state: present` recreates only changed services. Restart handlers are for bind-mounted config files, scoped with `services:`
@@ -193,7 +193,7 @@ The unified `services` list (consumed by both BIND9 and Caddy templates) is buil
    ```
    Multi-service apps nest sub-services with their own `proxy:` blocks (see `apps.work.*`). Apps without a `proxy:` block get no DNS/proxy entry.
 
-2. **Manual per-domain files** (`group_vars/site_<env>/proxy/<domain>.yml`, in the folder of the site that is primary for the domain) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (Wolf, RomM), Kasm. Same fields, plus explicit `backend_host`/`backend_port`:
+2. **Manual per-domain files** (`group_vars/site_<env>/proxy/<domain>.yml`, in the folder of the site that is primary for the domain) — ONLY for services outside the catalog: third-party devices (Proxmox, NAS, KVM, Haivision), media stack, monitoring, frigate, gaming (RomM), Kasm. Same fields, plus explicit `backend_host`/`backend_port`:
    ```yaml
    - name: vm                 # Subdomain
      backend_host: 10.2.20.7  # Backend IP

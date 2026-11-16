@@ -70,13 +70,15 @@ Taskfile.yaml               Root task runner entry point
 | Service | Host Group | Purpose |
 |---------|-----------|---------|
 | Media stack (Plex, *arr) | `app_mediastack` | Media management and streaming |
+| Calibre-Web Automated | `app_calibre` | E-book library in the browser |
+| Grist | `app_work` | Spreadsheets kept as a small database |
 | Ignis | `app_work` | Obsidian in the browser |
 | iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
 | Kasm | `app_kasm` | Browser-based desktops |
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
 | MicroBin | `app_work` | Pastebin |
 | Restreamer | `app_work` | Video streaming relay |
-| Wolf | `app_gaming` | Moonlight game streaming (Intel Arc Pro B50 SR-IOV VF) |
+| Steam Headless | `app_gaming` | Game streaming to a browser or Moonlight (Intel Arc Pro B50 SR-IOV VF) |
 | RomM | `app_gaming` | ROM manager |
 | Hermes Agent | `app_hermes` | AI agent on the Claude subscription |
 

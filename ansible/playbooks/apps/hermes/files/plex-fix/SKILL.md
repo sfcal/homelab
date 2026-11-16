@@ -2,7 +2,7 @@
 name: plex-fix
 description: "Fix a problem with something on Plex: a failed or missing download, bad sound, or the wrong HDR format. Checks the file and playback, then can swap in a different release through Radarr or Sonarr."
 version: 1.0.0
-platforms: [linux]
+platforms: [linux, macos]
 metadata:
   hermes:
     tags: [plex, radarr, sonarr, media]

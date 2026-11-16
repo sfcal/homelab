@@ -1,22 +1,4 @@
 ---
-- name: Reload udev rules
-  ansible.builtin.shell: udevadm control --reload-rules && udevadm trigger
-
-- name: Restart wolf
-  community.docker.docker_compose_v2:
-    project_src: "{{ wolf_deploy_path }}"
-    state: restarted
-
-- name: Stop wolf
-  community.docker.docker_compose_v2:
-    project_src: "{{ wolf_deploy_path }}"
-    state: stopped
-
-- name: Start wolf
-  community.docker.docker_compose_v2:
-    project_src: "{{ wolf_deploy_path }}"
-    state: present
-
 - name: Restart romm
   community.docker.docker_compose_v2:
     project_src: "{{ romm_deploy_path }}"

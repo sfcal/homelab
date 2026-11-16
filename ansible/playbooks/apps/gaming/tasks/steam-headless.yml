@@ -1,0 +1,67 @@
+---
+# --- Guest prerequisites ---
+# Upstream's host preparation. The container makes its virtual keyboards,
+# mice and gamepads through these two devices.
+- name: Load the uinput and uhid kernel modules, now and at boot.
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+    persistent: present
+  loop: [uinput, uhid]
+
+# The desktop and Steam open far more inotify instances than Ubuntu's default
+# of 128. vm.max_map_count is already at SteamOS's 1048576 on this Ubuntu
+# release.
+- name: Raise the inotify instance limit.
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_instances
+    value: "1024"
+    sysctl_file: /etc/sysctl.d/90-steam-headless.conf
+
+# --- Steam Headless ---
+- name: Create steam-headless directory structure.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /opt/steam-headless
+    - /var/lib/steam-headless
+
+# The container sets its own owner and mode on these two at every start
+# (state 0700, journal group systemd-journal); enforcing them here would
+# flip them back on every run.
+- name: Create the steam-headless state and journal directories.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /var/lib/steam-headless/state   # sign-in and TLS state
+    - /var/log/steam-headless         # the container's systemd journal
+
+# The desktop user in the container (PUID/PGID 1000 in the compose file).
+- name: Create the steam-headless home and game library.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+  loop:
+    - /var/lib/steam-headless/home
+    - /var/lib/steam-headless/games
+
+- name: Deploy steam-headless compose.yaml.
+  ansible.builtin.template:
+    src: templates/steam-headless-compose.yaml.j2
+    dest: /opt/steam-headless/compose.yaml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure Steam Headless is running.
+  community.docker.docker_compose_v2:
+    project_src: /opt/steam-headless
+    state: present

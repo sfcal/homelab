@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Hermes WebUI under launchd, after the project's docs/supervisor.md. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>cloud.5am.hermes-webui</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/smithers/hermes-webui/start.sh</string>
+        <string>--foreground</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/smithers/hermes-webui</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- The web UI takes up to 90 s to finish open chats when it stops. -->
+    <key>ExitTimeOut</key>
+    <integer>120</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/smithers/.hermes/webui/launchd-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/smithers/.hermes/webui/launchd-stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/smithers</string>
+        <key>PATH</key>
+        <string>/Users/smithers/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <!-- Caddy on wil's networking VM reaches it at 10.2.0.10:8787. -->
+        <key>HERMES_WEBUI_HOST</key>
+        <string>0.0.0.0</string>
+        <key>HERMES_WEBUI_STATE_DIR</key>
+        <string>/Users/smithers/.hermes/webui</string>
+        <key>HERMES_WEBUI_DEFAULT_WORKSPACE</key>
+        <string>/Users/smithers/.hermes/home</string>
+        <!-- Chats run in the gateway, through its API server on this Mac
+             (key: API_SERVER_KEY in ~/.hermes/.env). -->
+        <key>HERMES_WEBUI_CHAT_BACKEND</key>
+        <string>gateway</string>
+        <key>HERMES_WEBUI_GATEWAY_BASE_URL</key>
+        <string>http://127.0.0.1:8642</string>
+        <!-- Shows the agent's approval prompts in the browser. -->
+        <key>HERMES_WEBUI_GATEWAY_USE_RUNS_API</key>
+        <string>true</string>
+    </dict>
+</dict>
+</plist>

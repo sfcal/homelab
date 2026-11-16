@@ -281,7 +281,7 @@ hl task ansible:deploy-monitoring ENV=dev   # Prometheus
 
 # Applications
 hl task ansible:deploy-media ENV=dev        # Full media stack
-hl task ansible:deploy-gaming ENV=dev       # Wolf, RomM
+hl task ansible:deploy-gaming ENV=dev       # Steam Headless, RomM
 
 # Utilities
 hl task ansible:ping ENV=dev               # Test connectivity

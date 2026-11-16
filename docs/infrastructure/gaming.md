@@ -1,83 +1,109 @@
-# Gaming (Wolf, RomM)
+# Gaming (Steam Headless, RomM)
 
-One playbook, `ansible/playbooks/apps/gaming/deploy.yml`, deploys every game stack on an environment's `app_gaming` host. A stack runs only where that environment's `group_vars/site_<env>/app_gaming/vars.yml` defines its image (`romm_image`, `wolf_image`). Both run at ldn:
+One playbook, `ansible/playbooks/apps/gaming/deploy.yml`, deploys every game stack on an environment's `app_gaming` host. A stack runs only where that environment's `group_vars/site_<env>/app_gaming/vars.yml` defines its image (`romm_image`, `steam_headless_image`). Both run at ldn:
 
 | Environment | VM | Stacks |
 |-------------|----|--------|
-| ldn | `gaming` (`10.3.20.55`, VM 3005) | [Wolf and RomM](#wolf-and-romm) |
+| ldn | `gaming` (`10.3.20.55`, VM 3005) | [Steam Headless](#steam-headless), [RomM](#romm) |
 
 ```bash
-task ansible:deploy-gaming ENV=ldn   # Wolf and RomM
+task ansible:deploy-gaming ENV=ldn   # RomM and Steam Headless
 ```
 
 To run a stack in another environment, copy its vars into that environment's `group_vars/site_<env>/app_gaming/vars.yml`, along with its secrets.
+
+Wolf (Games on Whales) streamed from this VM until 2026-11-13, when Steam Headless replaced it; its containers, images and data were removed that day.
 
 ## Files
 
 | Path | Purpose |
 |------|---------|
 | `ansible/playbooks/apps/gaming/deploy.yml` | Playbook (group `app_gaming`) |
-| `ansible/playbooks/apps/gaming/templates/wolf-compose.yaml.j2` | Wolf container (matches the upstream quickstart compose) |
-| `ansible/playbooks/apps/gaming/templates/wolf-config.toml.j2` | Wolf `config.toml` (version 7), seeded once |
+| `ansible/playbooks/apps/gaming/templates/steam-headless-compose.yaml.j2` | Steam Headless container (upstream's host-networking example) |
 | `ansible/playbooks/apps/gaming/templates/romm-compose.yaml.j2` | RomM and MariaDB |
 | `ansible/playbooks/apps/gaming/templates/romm-config.yml.j2` | RomM library layout |
-| `ansible/playbooks/apps/gaming/files/85-wolf.rules` | Upstream udev rules (`/dev/uinput`, `/dev/uhid`, virtual pads off the host seat) |
-| `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml` | Wolf and RomM images, paths, render node |
+| `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml` | Steam Headless and RomM images, RomM paths |
 | `ansible/inventory/group_vars/site_ldn/secrets.sops.yml` | RomM database, auth and IGDB secrets (section `app_gaming`) |
 
-## Wolf and RomM
+## Steam Headless
 
-[Wolf](https://games-on-whales.github.io/wolf/stable/) streams games and desktops to Moonlight clients from the `gaming` VM (ldn, `10.3.20.55`, VM 3005) using an Intel Arc Pro B50 SR-IOV virtual function. [RomM](https://docs.romm.app) manages the ROM library the Wolf emulator apps read.
+[Steam Headless](https://steamheadless.com/docs/) streams games and a desktop from the `gaming` VM using an Intel Arc Pro B50 SR-IOV virtual function. One container runs systemd, a KDE Plasma desktop on Wayland, Steam, Sunshine and a web interface; it is played in a browser, from Moonlight or through Steam Remote Play.
 
-Prerequisite: the VF must be visible in the guest, which depends on the [Proxmox host play](proxmox.md). The playbook aborts if the render node (`wolf_render_node`, `/dev/dri/renderD128`) is missing.
+Prerequisite: the VF must be visible in the guest (`/dev/dri/renderD128`), which depends on the [Proxmox host play](proxmox.md).
 
-The play ends with `docker compose up -d` for both stacks. Compose recreates a container whenever its stored config hash differs from the current one, which ends any Moonlight session and restarts MariaDB, even when `compose.yaml` did not change (seen 2026-10-18). Before deploying while someone is streaming, compare the hashes on the VM; identical hashes mean no recreate:
+The image is upstream's version 2 (`josh5/steam-headless:2`, Fedora). The README and compose files in the GitHub repository still describe version 1; the version 2 documentation is on steamheadless.com, and the compose template is its host-networking example with host paths.
+
+- **Address**: the VM's own, `10.3.20.55`, with the name `steam.ldn.5am.cloud` (a plain A record in `site_ldn/proxy/ldn.5am.cloud.yml`). The container uses the VM's network (`network_mode: host`). Sunshine's Moonlight ports and the web interface's port are fixed, so only one streaming host can run on the VM.
+- **Web interface**: `https://steam.ldn.5am.cloud:8483`, with a certificate the container signs itself, so the browser warns once. On a new state folder the first sign-in is user `steamheadless` with a temporary password, and the page then asks for a permanent one of at least 12 characters:
+  ```bash
+  ssh sfcal@10.3.20.55 docker exec steam-headless cat /var/lib/steam-headless/auth/bootstrap-password
+  ```
+  Sunshine stays off until that is done. A forgotten password is reset by deleting `/var/lib/steam-headless/state/auth/state.json` on the VM and restarting the container.
+- **Moonlight**: add the host as `steam.ldn.5am.cloud` and pair it on the web interface's Sunshine page.
+- **GPU**: only the render node (`/dev/dri/renderD128`) is passed in. The desktop, Vulkan and the VA-API encoders all use the B50 virtual function, checked on 2026-11-12.
+- **Browser stream colours**: the compose file sets `SHUI_MEDIA_CONVERSION: vaapi`, so frames are converted and scaled on the GPU. With upstream's default (`system`, on the CPU) a 720p stream from the B50 showed its colours 32 rows too high with a green strip along the bottom; 1080p was not affected (2026-11-13, reproduced with `gst-launch-1.0` and a test pattern inside the container).
+- **Input**: the container has a private `/dev/input` and makes its own virtual keyboards, mice and gamepads; nothing of the VM's `/dev/input` or `/run/udev` is mounted.
+- **Kernel settings**: the play loads the `uinput` and `uhid` modules (`/etc/modules-load.d/`) and raises `fs.inotify.max_user_instances` to 1024 (`/etc/sysctl.d/90-steam-headless.conf`).
+- **Size of the VM**: upstream asks for 4 cores, 16 GB of memory and swap for one stream. The VM has 2 cores, 8 GB and no swap; the idle desktop with Steam open takes about 2 GB.
+
+| Path on the VM | Purpose |
+|----------------|---------|
+| `/opt/steam-headless/compose.yaml` | Compose file |
+| `/var/lib/steam-headless/home` | Home of the desktop user (uid 1000): Steam, Proton prefixes, saves, Sunshine pairings, RetroDECK |
+| `/var/lib/steam-headless/games` | Game library, `/mnt/games` in the container; add it as a library folder in Steam |
+| `/srv/romm/library` | RomM's library, read-only at `/mnt/romm` in the container (see [Emulators](#emulators-retrodeck)) |
+| `/var/lib/steam-headless/state` | Sign-in and certificate state, owned by root |
+| `/var/log/steam-headless` | The container's systemd journal |
 
 ```bash
-ssh sfcal@10.3.20.55 'for p in wolf romm; do docker compose --project-directory /opt/$p config --hash="*"; done; docker inspect wolf romm romm-db --format "{{.Name}} {{index .Config.Labels \"com.docker.compose.config-hash\"}}"'
+ssh sfcal@10.3.20.55 docker exec steam-headless /usr/local/bin/steam-headless-healthcheck
 ```
 
-## How Wolf is deployed
+The `2` tag moves with every upstream build and a deploy never pulls it again. To update: `docker compose --project-directory /opt/steam-headless pull` on the VM, then deploy (the container restarts, so close games first).
 
-- Wolf runs as root in one container with the Docker socket, `/dev` and `/run/udev` mounted; it starts the app containers (Wolf UI, Pegasus, RetroArch, Steam) as siblings and maps paths back to the host by introspecting its own container. No host paths are passed in.
-- State lives in `/var/lib/wolf/state` on the VM, mounted at `/etc/wolf`. Wolf reads `/etc/wolf/cfg/config.toml`, keeps TLS keys next to it and per-app data under `profile-data/<profile>/<runner name>/` (for example `profile-data/user/WolfPegasus`), which each app sees as `/home/retro`.
-- `config.toml` is seeded on the first deploy only (`force: false`). Wolf rewrites the file when a client pairs and when apps or profiles change through Wolf UI or its API, so re-rendering it would drop pairings. To add or change an app on a running host, see [Changing apps on a running Wolf](#changing-apps-on-a-running-wolf).
-- The seed contains the default Moonlight profile (Wolf UI, a synthetic "Test ball" stream useful to check the encoder) and a `User` profile with Pegasus, RetroArch (both with ROMs at `/ROMs`) and Steam, plus the upstream `[gstreamer]` encoder table. On Intel, Wolf picks the first working VA-API encoder.
-- No memory limit is set on the Wolf container: the app containers are siblings, so a limit would only starve the compositor and encoder.
-- Steam Input does not work inside the Steam container (known Wolf limitation, issues #81 and #403): it hides the Wolf pad from games and replaces it with a virtual gamepad created through uinput, whose device node never appears inside the container because no udev runs there. Do not pass `/dev/uinput` to the Steam app; that only makes Steam stop its keyboard/mouse fallback, which breaks menus and look. Disable Steam Input per game (Properties > Controller) and let the game read the "Wolf X-Box One (virtual) pad" directly. Symptom of Steam Input being on: look and jump work (emulated mouse/keys) but analog movement does not.
-- Games never see the physical controller. Moonlight sends a controller type (Xbox, PS, Nintendo, Steam or unknown) plus capability flags, and Wolf creates a matching virtual pad on the VM: "Wolf X-Box One (virtual) pad" for Xbox and unknown, "Wolf DualSense (virtual) pad" for PS, "Wolf Nintendo (virtual) pad" for Nintendo. Wolf (revision `facb8e0`) does not know the Steam type that moonlight-qt sends for a Steam Controller since August 2026, so it falls into the unknown branch: a client that also advertises gyro or accelerometer gets a DualSense pad, otherwise an Xbox pad. The game-side binds (Half-Life `autoexec.cfg`) are verified against the Xbox pad only. To keep that pad for a motion-capable controller such as the Steam Controller (2026), pin it per client in `/var/lib/wolf/state/cfg/config.toml` and restart Wolf between sessions:
-  ```toml
-  [[paired_clients]]
-  app_state_folder = '...'
-  client_cert = '''...'''
-  [paired_clients.settings]
-  motion_controller_override = "XBOX"   # or controllers_override = ["XBOX"] to force slot 0 regardless of motion
+A deploy that changes the compose file recreates the container: streams drop, running games close and the session comes back in desktop mode.
+
+### Emulators (RetroDECK)
+
+[RetroDECK](https://retrodeck.net) runs the emulators inside Steam Headless since 2026-11-13: one Flatpak with the ES-DE front end, RetroArch, Dolphin, PCSX2 and others. It reads the same files RomM manages, so RomM stays the place where ROMs are added.
+
+- **Shared library**: the compose file mounts RomM's library read-only at `/mnt/romm`. RetroDECK keeps its own data folder, `~/retrodeck` (`/var/lib/steam-headless/home/retrodeck` on the VM), with one folder per system under `roms/`. The folders of the platforms RomM has are replaced by links: `roms/gc` and `roms/wii` point at `/mnt/romm/roms/gc` and `/mnt/romm/roms/wii`. RetroDECK rebuilds its path settings from its data folder, so the links are used instead of pointing its ROM folder at the mount.
+- **Another platform**: create its folder in RomM's library under the name ES-DE uses (RomM recognises those names; `ls ~/retrodeck/roms` in the container lists them), then link it (`rmdir` refuses if RetroDECK's folder already holds games):
+  ```bash
+  ssh sfcal@10.3.20.55 "docker exec -u 1000 steam-headless sh -c 'cd ~/retrodeck/roms && rm -f snes/systeminfo.txt snes/.directory && rmdir snes && ln -s /mnt/romm/roms/snes snes'"
   ```
-  Precedence is `controllers_override` (per slot) over `motion_controller_override` over auto-detection. The Steam Controller's trackpads, gyro and grip buttons only reach a game through Steam Input, which cannot run inside the Wolf Steam container, so with the Xbox pad it behaves as a plain Xbox-layout pad. Without Steam running on the client the controller only acts as a gamepad where the client's SDL is new enough (moonlight-qt nightly/Flatpak with SDL 3.4.10 or later); on Android TV and Apple TV it appears as a keyboard and mouse (the d-pad types arrow keys, so Half-Life "moves on the d-pad" and Wolf never logs a joypad).
+- **Starting it**: from the desktop's application menu, from Steam as the non-Steam game "RetroDECK" (also in gaming mode), or from Moonlight as the app "RetroDECK", which Steam Headless adds to Sunshine by itself.
+- **Saves and states** stay in `~/retrodeck/saves` and `~/retrodeck/states`; nothing is sent to RomM. RetroArch could sync to RomM (its Cloud Sync, with RomM as the WebDAV server, which the container reaches at `http://127.0.0.1:8085`); that is not set up.
+- **BIOS files** go in `~/retrodeck/bios` in RetroDECK's own layout; RomM's `bios/` folder is at `/mnt/romm/bios` to copy from. GameCube and Wii need none.
+- **Checked on 2026-11-13**: ES-DE, RetroArch and Dolphin start on the B50 (OpenGL and Vulkan). No game has been run: the library was empty.
 
-## Changing apps on a running Wolf
+RetroDECK lives in the home folder, not in Ansible. It was installed and set up like this, and the same steps restore it on a new home:
 
-Wolf owns `config.toml` after the first seed, so editing `wolf-config.toml.j2` only affects future re-seeds. To apply an app change to the running host without re-pairing:
+1. `docker exec -u 1000 -e HOME=/home/steamheadless -e XDG_RUNTIME_DIR=/run/user/1000 steam-headless flatpak install --user -y flathub net.retrodeck.retrodeck` (6.6 GB).
+2. Start RetroDECK once from the desktop: choose **Home Directory**, answer **Yes** to adding it to Steam and **No** to the PS3 and Vita firmware.
+3. Make the links above.
 
-1. Render the template locally or deploy (the play never overwrites the live file) and copy the new `[[profiles.apps]]` block.
-2. Append it to `/var/lib/wolf/state/cfg/config.toml` under the `[[profiles]]` it belongs to (the `user` profile is last in the file, so appending at the end adds to it). Check the result parses: `python3 -c 'import tomllib; tomllib.load(open("/var/lib/wolf/state/cfg/config.toml","rb"))'`.
-3. `docker restart wolf` when no session is streaming. Wolf reads the file only at start-up; `paired_clients` are kept.
+## RomM
 
-Wolf's API (unix socket `wolf.sock` inside the Wolf container's `/run/user/wolf` volume) is not a shortcut here: `POST /api/v1/apps/add` only adds to the Moonlight profile, apps added through the API cannot stream until the next restart anyway (upstream PR #506), and any API-driven profile write drops the Test ball `[profiles.apps.video]`/`[profiles.apps.audio]` overrides from the file.
+[RomM](https://docs.romm.app) manages the ROM library and is proxied as `https://roms.ldn.5am.cloud` (container port 8080, host port 8085).
+
+The play ends with `docker compose up -d` for both stacks. Compose recreates a container whenever its stored config hash differs from the current one, which restarts RomM or ends a Steam Headless session. Before deploying while someone is playing, compare the hashes on the VM; identical hashes mean no recreate (not a guarantee: on 2026-11-12 `romm` was recreated with matching hashes):
+
+```bash
+ssh sfcal@10.3.20.55 'for p in romm steam-headless; do docker compose --project-directory /opt/$p config --hash="*"; done; docker inspect romm romm-db steam-headless --format "{{.Name}} {{index .Config.Labels \"com.docker.compose.config-hash\"}}"'
+```
+
+Back up `/var/lib/romm/db` and `/var/lib/romm/assets` (saves and states); `resources` is a regenerable metadata cache.
 
 ## Network
 
-Moonlight talks directly to the VM; it cannot go through Caddy. Ports: 47984/tcp, 47989/tcp, 47999/udp, 48010/tcp, 48100/udp, 48200/udp. `wolf.ldn.5am.cloud` is a plain A record for the VM. Pair a client by opening the PIN URL Wolf logs (`http://wolf.ldn.5am.cloud:47989/pin/#<secret>`).
-
-RomM is proxied as `https://roms.ldn.5am.cloud` (container port 8080, host port 8085).
+Moonlight and the browser stream talk directly to the VM; they cannot go through Caddy. Sunshine listens on 47984/tcp, 47989/tcp, 47990/tcp, 48010/tcp and 47998-48000/udp; the web interface on 8483/tcp and 8483/udp. `steam.ldn.5am.cloud` is a plain A record for the VM, not a Caddy name.
 
 ## ROM library
 
-`romm_library_path` (`/srv/romm/library`) holds `roms/<platform>/<game>` and `bios/<platform>`, RomM's default layout. Pegasus and RetroArch mount `roms/` at `/ROMs`. The library is local to the VM; to use a NAS, set `gaming_nfs: true` in `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml`, put the mount in `nfs_mounts` in `ansible/inventory/group_vars/site_ldn/nfs.yml` and point `romm_library_path` at the mount.
+`romm_library_path` (`/srv/romm/library`) holds `roms/<platform>/<game>` and `bios/<platform>`, RomM's default layout. The library is local to the VM; to use a NAS, set `gaming_nfs: true` in `ansible/inventory/group_vars/site_ldn/app_gaming/vars.yml`, put the mount in `nfs_mounts` in `ansible/inventory/group_vars/site_ldn/nfs.yml` and point `romm_library_path` at the mount.
 
-GameCube games go in `roms/gc/` and Wii games in `roms/wii/` (the play creates both). RomM maps `gc` to its `ngc` platform, and these are the folder names the Pegasus image scans; `roms/ngc/` would work for RomM but not Pegasus.
-
-Back up `/var/lib/romm/db` and `/var/lib/romm/assets` (saves and states); `resources` is a regenerable metadata cache.
+GameCube games go in `roms/gc/` and Wii games in `roms/wii/` (the play creates both). RomM maps `gc` to its `ngc` platform, and these are the folder names ES-DE in RetroDECK scans; `roms/ngc/` would work for RomM but not RetroDECK.
 
 ## Verify in the guest
 
@@ -86,7 +112,6 @@ ssh sfcal@10.3.20.55
 lspci -nn | grep -i display                      # Intel Battlemage G21 [8086:e212]
 sudo dmesg | grep -iE 'xe .*SR-IOV|PRELOADED'    # Running in SR-IOV VF mode
 ls -l /dev/dri                                   # renderD128
-docker logs wolf 2>&1 | grep -iE 'encoder|vendor|pin'
+docker exec steam-headless vainfo --display drm --device /dev/dri/renderD128 | grep -c EncSlice
+docker exec -u 1000 steam-headless vulkaninfo --summary | grep deviceName
 ```
-
-A successful `qm start` is not yet a successful stream: Linux-guest 3D on Battlemage VFs is still maturing upstream. Use the "Test ball" app to confirm encoding before debugging a game.

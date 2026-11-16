@@ -50,11 +50,11 @@
 - import_playbook: apps/frigate/deploy.yml
   tags: ['frigate', 'applications']
 
-# 7. Gaming (Wolf & RomM)
+# 7. Gaming (RomM & Steam Headless)
 - import_playbook: apps/gaming/deploy.yml
-  tags: ['gaming', 'wolf', 'romm', 'applications']
+  tags: ['gaming', 'romm', 'applications']
 
-# 8. Hermes Agent
+# 8. Hermes Agent (the Mac mini, wil)
 - import_playbook: apps/hermes/deploy.yml
   tags: ['hermes', 'applications']
 
@@ -77,8 +77,12 @@
   tags: ['isponsorblocktv', 'applications']
 
 - import_playbook: deploy-app.yml
+  vars: { app_name: calibre }
+  tags: ['calibre', 'applications']
+
+- import_playbook: deploy-app.yml
   vars: { app_name: work }
-  tags: ['work', 'microbin', 'restreamer', 'ignis', 'applications']
+  tags: ['work', 'microbin', 'restreamer', 'ignis', 'grist','applications']
 
 # --- Hypervisor ---
 - import_playbook: infrastructure/proxmox/deploy.yml

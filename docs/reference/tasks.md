@@ -23,8 +23,8 @@ task --list-all
 | `task ansible:deploy-proxmox ENV=ldn` | Proxmox hosts: node-exporter; on pve-ldn SR-IOV GPU VFs, PCI resource mappings |
 | `task ansible:deploy-media ENV=wil` | Plex and *arr stack |
 | `task ansible:deploy-frigate ENV=wil` | Frigate NVR |
-| `task ansible:deploy-gaming ENV=ldn` | Gaming stacks: Wolf and RomM (ldn) |
-| `task ansible:deploy-hermes ENV=ldn` | Hermes Agent, Claude Code and the Claude subscription plugin |
+| `task ansible:deploy-gaming ENV=ldn` | Gaming stacks: Steam Headless and RomM (ldn) |
+| `task ansible:deploy-hermes ENV=wil` | Hermes Agent on the Mac mini: Hermes, its web UI, Claude Code and the Claude subscription plugin |
 | `task ansible:deploy-app ENV=wil APP=<name>` | Deploy a single data-driven app |
 | `task ansible:deploy-ci-access ENV=wil` | Create the CI deploy user on hosts the deploy workflow targets |
 | `task ansible:ping ENV=wil` | Test connectivity to all hosts of the site |

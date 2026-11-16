@@ -32,8 +32,8 @@ task ansible:ping ENV=wil
 | `deploy-proxmox` | Proxmox hosts: node-exporter; on pve-ldn SR-IOV GPU VFs, PCI resource mappings |
 | `deploy-media` | Plex and *arr stack |
 | `deploy-frigate` | Frigate NVR |
-| `deploy-gaming` | Gaming stacks: Wolf and RomM (ldn) |
-| `deploy-hermes` | Hermes Agent, Claude Code and the Claude subscription plugin |
+| `deploy-gaming` | Gaming stacks: Steam Headless and RomM (ldn) |
+| `deploy-hermes` | Hermes Agent on the Mac mini (wil): Hermes, its web UI, Claude Code and the Claude subscription plugin |
 | `deploy-app APP=<name>` | Single data-driven app |
 | `ping` | Test connectivity to all hosts of the site |
 
@@ -109,8 +109,8 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 |-----|---------------------------|
 | Media stack | NFS mount, complex multi-container setup |
 | Frigate | NFS mount, dedicated compose/config tasks |
-| Gaming | Stacks selected per environment (Wolf and RomM), kernel modules and udev rules, GPU render-node check, Wolf config seeded once, optional NFS |
-| Hermes Agent | Installs Claude Code, the Claude subscription plugin and the `plex-fix` skill inside the running container |
+| Gaming | Stacks selected per environment (Steam Headless and RomM), kernel modules and inotify limit, optional NFS |
+| Hermes Agent | Runs against the Mac mini as `smithers`, without root: updates Hermes, Claude Code, the plugin and the web UI, installs the skills, and sets up the gateway, web UI and node-exporter services |
 
 ## Roles
 

@@ -53,3 +53,10 @@ wil_services:
     proxied: false
 
   # Apps (registry apps live in site_wil/apps.yml)
+
+  # Hermes web UI on the Mac mini (custom playbook: playbooks/apps/hermes)
+  - name: hermes
+    backend_host: 10.2.0.10
+    backend_port: 8787
+    proxied: true
+    auth: true

@@ -1,0 +1,24 @@
+---
+services:
+  calibre-web-automated:
+    image: {{ apps[app_name].image }}
+    container_name: calibre-web-automated
+    restart: unless-stopped
+    ports:
+      - "{{ apps[app_name].port }}:8083"
+    environment:
+      # Owner of everything it writes: uid 1000 is sfcal on the VM. Unset, the
+      # image falls back to uid 911.
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ system_timezone }}
+    volumes:
+      # Users and settings (app.db, cwa.db), logs, and a copy of every file it
+      # has imported (processed_books).
+      - /var/lib/calibre/config:/config
+      # The Calibre library: metadata.db and one folder per author. Created at
+      # the first start; a library already here is used as it is.
+      - /var/lib/calibre/library:/calibre-library
+      # Drop folder: a book put here is imported into the library, then
+      # deleted from here.
+      - /var/lib/calibre/ingest:/cwa-book-ingest

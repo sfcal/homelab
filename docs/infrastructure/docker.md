@@ -22,11 +22,11 @@ Deploy with `task ansible:deploy-media ENV=wil`.
 
 ## Gaming
 
-Wolf and RomM (ldn) share one playbook on the `app_gaming` host; an environment gets the stacks its group_vars define. Deploy with `task ansible:deploy-gaming ENV=<env>`; see [Gaming](gaming.md).
+Steam Headless and RomM (ldn) share one playbook on the `app_gaming` host; an environment gets the stacks its group_vars define. Deploy with `task ansible:deploy-gaming ENV=<env>`; see [Gaming](gaming.md).
 
 ## Hermes Agent
 
-Hermes Agent (ldn) has its own playbook, which also installs Claude Code and the Claude subscription plugin in the container. Deploy with `task ansible:deploy-hermes ENV=ldn`; see [Hermes Agent](hermes.md).
+Hermes Agent doesn't run in Docker: it is installed directly on the Mac mini in wil, and its own playbook keeps it up to date. Deploy with `task ansible:deploy-hermes ENV=wil`; see [Hermes Agent](hermes.md).
 
 ## Kasm
 
@@ -53,11 +53,46 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 
 | App | Image | Port |
 |-----|-------|------|
+| Calibre-Web Automated | `crocodilestick/calibre-web-automated` | 8083 |
+| Grist | `gristlabs/grist-oss` | 8484 |
 | Ignis (Obsidian) | `nobbe/ignis` | 8082 |
 | iSponsorBlockTV | `ghcr.io/dmunozv04/isponsorblocktv` | — |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
+
+### Calibre-Web Automated
+
+[Calibre-Web Automated](https://github.com/crocodilestick/Calibre-Web-Automated) (ldn, on the `web` VM) is the e-book library at `https://books.ldn.5am.cloud`: browse, read and download in the browser, with Calibre inside the image for imports and conversions. It has its own login and no `auth: true`, because e-readers use the same name: the OPDS catalog at `/opds` takes an account's username and password, and so do KOReader sync and Kobo sync (both off until turned on in its settings).
+
+Everything is under `/var/lib/calibre/` on the VM, owned by uid 1000 (`sfcal`):
+
+| Folder | Holds |
+|--------|-------|
+| `config/` | `app.db` (users and settings), `cwa.db`, logs, and `processed_books/`, a copy of every file it has imported |
+| `library/` | The Calibre library: `metadata.db` and one folder per author |
+| `ingest/` | Drop folder: a book copied here is imported within seconds, then deleted from here |
+
+To add books, use the upload button in the web page or copy files into `ingest/` (`scp book.epub 10.3.20.70:/var/lib/calibre/ingest/`). Other formats are converted to EPUB on the way in.
+
+A new install has one account, `admin`, with the image's default password `admin123`: change it at the first login, under the account's profile. A password needs 8 characters with upper and lower case, a digit and a special character.
+
+Once a mail server is set up in its settings, the login form gains a **Forgot Password?** button, and in v4.0.8 pressing Enter in the form then sends that in place of **Login** ([upstream issue 1585](https://github.com/crocodilestick/Calibre-Web-Automated/issues/1585)): the account's password is replaced with a random one and mailed to its address. From then on click the Login button, and give `admin` a real address first (it starts as `admin@example.org`). Without a mail server the button is not there and Enter logs in. To set a password from the VM, for a locked-out account too:
+
+```bash
+ssh 10.3.20.70 "docker exec -e CALIBRE_DBPATH=/config -w /app/calibre-web-automated calibre-web-automated s6-setuidgid abc python3 cps.py -s '<user>:<new password>'"
+```
+
+### Grist
+
+[Grist](https://www.getgrist.com/) (ldn, on the `work` VM) is a spreadsheet kept as a small database, at `https://grist.ldn.5am.cloud`. It runs the free Community edition, which has no login of its own here: the Kanidm login is in front (`auth: true`), and whoever gets through is the one Grist account, `admin@grist.ldn.5am.cloud`, owner of the one team site, `home`. Logging in to Grist with Kanidm itself (OIDC) is part of Grist's full edition, which needs an activation key.
+
+- **Files:** everything is under `/var/lib/work/grist/` on the VM, owned by uid 1000 (`sfcal`): `docs/` holds one SQLite file per document (`<document id>.grist`), `home.sqlite3` the list of documents and workspaces, `grist-sessions.db` the browser sessions.
+- **Formulas:** they are Python and run in a gVisor sandbox (`GRIST_SANDBOX_FLAVOR`), which keeps them away from the VM's files and the network.
+- **Settings:** all of them are in the compose file, and `GRIST_IN_SERVICE` skips Grist's first-run wizard, so a rebuilt VM starts the same way, with no documents. The key that signs browser sessions is `grist_session_secret` in `site_ldn/secrets.sops.yml`.
+- **Getting data out:** a document's share menu exports it to Excel or CSV, or downloads the whole document as its `.grist` file. An Excel export holds the values, not the formulas.
+- **Scripts:** port 8484 on the VM answers Grist's [API](https://support.getgrist.com/rest-api/) without the Kanidm login, to a request that carries an API key (`Authorization: Bearer <key>`). Make the key in the web page: your picture → Account settings → Developer. It can do everything the account can. [Hermes](hermes.md#update-grist) updates tables this way.
+- **The port:** like Ignis's, it also lets anyone on the ldn network in as the one account, without the login.
 
 ### Ignis
 

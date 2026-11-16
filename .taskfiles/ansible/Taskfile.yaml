@@ -93,13 +93,13 @@ tasks:
         vars: { PLAYBOOK_PATH: apps/frigate/deploy.yml }
 
   deploy-gaming:
-    desc: Deploy gaming stacks (Wolf, RomM)
+    desc: Deploy gaming stacks (RomM, Steam Headless)
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/gaming/deploy.yml }
 
   deploy-hermes:
-    desc: Deploy Hermes Agent
+    desc: Deploy Hermes Agent on the Mac mini (ENV=wil)
     cmds:
       - task: _deploy
         vars: { PLAYBOOK_PATH: apps/hermes/deploy.yml }
