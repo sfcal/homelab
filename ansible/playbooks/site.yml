@@ -85,6 +85,10 @@
   tags: ['isponsorblocktv', 'applications']
 
 - import_playbook: deploy-app.yml
+  vars: { app_name: squid }
+  tags: ['squid', 'applications']
+
+- import_playbook: deploy-app.yml
   vars: { app_name: work }
   tags: ['work', 'microbin', 'restreamer', 'grist','applications']
 

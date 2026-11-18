@@ -53,6 +53,25 @@
     - /var/lib/steam-headless/home
     - /var/lib/steam-headless/games
 
+# The Steam Controller dongle (USB device of the VM, from pve-ldn) shows up
+# as hidraw1 and up; hidraw0 is QEMU's tablet. The compose file hands these
+# nodes to the container. 239 is hidraw's major number on this kernel
+# (/proc/devices): if a kernel upgrade changes it, delete the folder and
+# change the number here.
+- name: Create the folder for the dongle's device nodes.
+  ansible.builtin.file:
+    path: /var/lib/steam-headless/hidraw
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create the dongle's device nodes.
+  ansible.builtin.command:
+    cmd: mknod -m 666 /var/lib/steam-headless/hidraw/hidraw{{ item }} c 239 {{ item }}
+    creates: /var/lib/steam-headless/hidraw/hidraw{{ item }}
+  loop: "{{ range(1, 9) | list }}"
+
 - name: Deploy steam-headless compose.yaml.
   ansible.builtin.template:
     src: templates/steam-headless-compose.yaml.j2

@@ -46,6 +46,13 @@ services:
       - /dev/fuse:/dev/fuse
       - /dev/uinput:/dev/uinput
       - /dev/uhid:/dev/uhid
+      # The Steam Controller dongle, passed to the VM from pve-ldn (usb0 of
+      # VM 3005): Steam talks to it through the VM's hidraw devices. These are
+      # nodes the playbook made, not the VM's /dev/hidrawN, so the container
+      # also starts with the dongle unplugged.
+{% for n in range(1, 9) %}
+      - /var/lib/steam-headless/hidraw/hidraw{{ n }}:/dev/hidraw{{ n }}
+{% endfor %}
     device_cgroup_rules:
       - 'c 13:* rwm'
     tmpfs:

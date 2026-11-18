@@ -8,6 +8,18 @@ hermes_image: "nousresearch/hermes-agent:v0.23.1"
 # renovate: datasource=docker
 hermes_webui_image: "ghcr.io/nesquena/hermes-webui:0.52.678"
 
+# --- browser ---
+# The Chromium that Hermes drives, and the small proxy in front of its
+# DevTools port.
+# renovate: datasource=docker
+hermes_chrome_image: "lscr.io/linuxserver/chromium:7b8e918f-ls63"
+# renovate: datasource=docker
+hermes_chrome_proxy_image: "nginx:1.31-alpine"
+# The browser goes out through Squid on ldn's web VM, so sites see ldn's
+# address. wil can't read ldn's registry, so this repeats apps.squid.port
+# from site_ldn/apps.yml: change both.
+hermes_squid_port: 3128
+
 # --- fastmail-triage ---
 hermes_fastmail_deliver: telegram
 

@@ -56,7 +56,8 @@
       ansible.builtin.template:
         src: "{{ playbook_dir }}/templates/compose.yaml.j2"
         dest: /Users/smithers/hermes/compose.yaml
-        mode: "0644"
+        # It holds the password of the browser's viewer.
+        mode: "0600"
 
     # No restart on a compose or image change: `compose up` pulls a missing
     # image and recreates only the services whose definition changed.

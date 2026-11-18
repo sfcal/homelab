@@ -9,9 +9,13 @@ services:
     command: gateway run
     # Chromium for the browser tools needs more than Docker's 64 MB default.
     shm_size: 1g
+    # The API server, for clients on the LAN (http://10.2.0.10:8642, key in
+    # the data directory's .env).
+    ports:
+      - "8642:8642"
     environment:
-      # The API server (8642, key in the data directory's .env) listens on the
-      # compose network so the web UI can reach it. The port is not published.
+      # The API server listens on every address of the container, so the web
+      # UI and the published port reach it.
       API_SERVER_HOST: 0.0.0.0
       # Where the agent's file tools may write, as a colon-separated list.
       # The image's own value is /opt/data alone; this adds the writable
@@ -95,3 +99,85 @@ services:
         target: /opt/hermes
         image:
           subpath: opt/hermes
+
+  # A real Chromium with a window, for sites Hermes needs you to log in to.
+  # You see and use it at https://10.2.0.10:3001 (user hermes). Hermes drives
+  # it through the proxy below (`browser.cdp_url` in its config is
+  # http://tesco-chrome:9223); that port is not published.
+  chrome:
+    image: {{ hermes_chrome_image }}
+    container_name: tesco-chrome
+    # Chromium locks its profile to the hostname: keep it fixed so a
+    # recreated container can open the profile.
+    hostname: tesco-chrome
+    restart: unless-stopped
+    shm_size: 1g
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Europe/London
+      LC_ALL: en_GB.UTF-8
+      CUSTOM_USER: hermes
+      PASSWORD: {{ hermes_chrome_viewer_password | to_json }}
+      # Chromium refuses remote debugging on its default profile, so it gets
+      # one of its own. DevTools listens on 127.0.0.1:9222 in the container.
+      # Everything it loads goes through Squid in ldn (apps.squid in
+      # site_ldn/apps.yml): Tesco refuses wil's US address.
+      CHROME_CLI: >-
+        --user-data-dir=/config/hermes-profile --remote-debugging-port=9222
+        --proxy-server=http://{{ groups['app_squid'] | first }}:{{ hermes_squid_port }}
+        --lang=en-GB https://www.tesco.com/groceries/en-GB/
+    ports:
+      - "3001:3001"
+    volumes:
+      # A Docker volume, not a folder of the Mac: Chromium's profile is many
+      # small databases.
+      - chrome-config:/config
+
+  # Chromium answers DevTools only on localhost and refuses a Host header
+  # that is a name. This shares the chrome container's network, sends
+  # "localhost" as Host, and rewrites the websocket addresses Chromium hands
+  # back so they point at this proxy.
+  chrome-cdp-proxy:
+    image: {{ hermes_chrome_proxy_image }}
+    container_name: tesco-chrome-cdp-proxy
+    restart: unless-stopped
+    network_mode: service:chrome
+    depends_on:
+      - chrome
+    configs:
+      - source: chrome_cdp_proxy
+        target: /etc/nginx/nginx.conf
+
+volumes:
+  chrome-config:
+
+# "$$" is Compose's way to write one "$".
+configs:
+  chrome_cdp_proxy:
+    content: |
+      events {}
+      http {
+        map $$http_upgrade $$connection_upgrade {
+          default upgrade;
+          ''      close;
+        }
+        server {
+          listen 9223;
+          location / {
+            proxy_pass http://127.0.0.1:9222;
+            proxy_http_version 1.1;
+            proxy_set_header Host localhost:9222;
+            proxy_set_header Origin "";
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection $$connection_upgrade;
+            proxy_set_header Accept-Encoding "";
+            proxy_read_timeout 1d;
+            proxy_send_timeout 1d;
+            sub_filter_types application/json;
+            sub_filter_once off;
+            sub_filter 'ws://localhost:9222/' 'ws://$$http_host/';
+            sub_filter 'ws=localhost:9222/' 'ws=$$http_host/';
+          }
+        }
+      }

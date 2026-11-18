@@ -58,6 +58,18 @@ apps:
     # renovate: datasource=docker
     image: "ghcr.io/dmunozv04/isponsorblocktv:v2.11.0"
 
+  # Forward proxy with no web UI and no proxy entry. The browser Hermes
+  # drives on the Mac mini in wil sends its traffic through it, so sites
+  # see ldn's address (Tesco refuses the US one). Only connections that
+  # come over the site link may use it. wil can't read this registry, so
+  # the port is repeated as hermes_squid_port in site_wil/app_hermes/vars.yml:
+  # change both.
+  squid:
+    host_group: app_squid
+    # renovate: datasource=docker
+    image: "ubuntu/squid:6.13-25.04_beta"
+    port: 3128
+
   work:
     host_group: app_work
     microbin:

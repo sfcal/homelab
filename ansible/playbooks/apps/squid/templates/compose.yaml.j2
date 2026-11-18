@@ -1,0 +1,22 @@
+services:
+  squid:
+    image: {{ apps[app_name].image }}
+    container_name: squid
+    restart: unless-stopped
+    mem_limit: 256m
+    ports:
+      - "{{ apps[app_name].port }}:3128"
+    configs:
+      # Takes the place of the image's own file, which lets every private
+      # address use the proxy.
+      - source: squid_access
+        target: /etc/squid/conf.d/debian.conf
+
+configs:
+  squid_access:
+    content: |
+      logfile_rotate 0
+      # Connections from wil arrive from this site's Tailscale router.
+      acl site_link src {{ groups['infra_networking'] | intersect(groups['site_' ~ site]) | first }}
+      http_access allow site_link
+      cache deny all

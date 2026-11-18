@@ -83,6 +83,14 @@ One folder inside it is the exception: `Documents/Hermes` is mounted a second ti
 - **Files still in iCloud:** a file or folder the Mac hasn't downloaded yet is fetched when Hermes first reads it. One file takes a second or two; a search through a large folder that has never been opened on this Mac can take very long.
 - **Signed out of iCloud:** the folder disappears and the containers won't start until you sign in again or remove the entries. This is on purpose: Docker would otherwise create an empty folder inside iCloud Drive.
 
+## Browser
+
+Hermes has a Chromium with a window, for sites that need you to log in by hand. It runs next to Hermes as the container `tesco-chrome`, and its profile (logins, cookies) is the Docker volume `hermes_chrome-config`.
+
+- **You:** open `https://10.2.0.10:3001` (the certificate is self-signed), user `hermes`, password `hermes_chrome_viewer_password` in wil's secrets. You see the same window Hermes uses, so log in to a site there and Hermes can use it afterwards.
+- **Hermes:** drives it through `tesco-chrome-cdp-proxy` at `http://tesco-chrome:9223`, which is `browser.cdp_url` in its `config.yaml`. That port is not published: only the compose network reaches it.
+- **Where it browses from:** ldn. Everything the browser loads goes through Squid on ldn's `web` VM (`apps.squid` in `site_ldn/apps.yml`, port 3128), because Tesco refuses wil's US address. Squid accepts only connections that arrive over the site link. If ldn or the link is down, the browser loads nothing.
+
 ## Fix Plex problems
 
 Text the bot about something on Plex, such as a failed download, bad sound or the wrong HDR format. The `plex-fix` skill checks the file and how Plex is playing it, suggests a replacement and asks before grabbing it. The old file stays until the new one imports, and Hermes checks back about 30 minutes later. `/plex-fix` also starts it.
@@ -166,15 +174,15 @@ Run `task ansible:deploy-hermes ENV=wil` to update everything:
 | Path | Purpose |
 |------|---------|
 | `ansible/playbooks/apps/hermes/deploy.yml` | Playbook (group `app_hermes`); runs as `smithers`, without root |
-| `ansible/playbooks/apps/hermes/templates/compose.yaml.j2` | Hermes and web UI containers |
+| `ansible/playbooks/apps/hermes/templates/compose.yaml.j2` | Hermes, web UI and browser containers |
 | `ansible/playbooks/apps/hermes/files/plex-fix/` | The `plex-fix` skill and its helper script |
 | `ansible/playbooks/apps/hermes/files/fastmail-triage/` | The `fastmail-triage` skill, its public defaults and design notes |
 | `ansible/playbooks/apps/hermes/files/grist/` | The `grist` skill and its helper script |
 | `ansible/playbooks/apps/hermes/files/cloud.5am.node-exporter.plist` | The node-exporter service |
 | `ansible/playbooks/apps/hermes/tests/` | Offline tests for `fastmail-triage` |
-| `ansible/inventory/group_vars/site_wil/app_hermes/vars.yml` | Hermes and web UI images, where the email report goes, Grist's port and the node-exporter release |
+| `ansible/inventory/group_vars/site_wil/app_hermes/vars.yml` | Hermes, web UI and browser images, where the email report goes, Grist's port and the node-exporter release |
 | `ansible/inventory/group_vars/site_wil/proxy/wil.5am.cloud.yml` | DNS and Caddy entry `hermes` for the web UI |
-| `ansible/inventory/group_vars/site_wil/secrets.sops.yml` | Section `app_hermes`: Radarr, Sonarr and Plex keys, and your addresses and private protection lists for `fastmail-triage` (`hermes_fastmail_site_config`) |
+| `ansible/inventory/group_vars/site_wil/secrets.sops.yml` | Section `app_hermes`: Radarr, Sonarr and Plex keys, the password of the browser's viewer, and your addresses and private protection lists for `fastmail-triage` (`hermes_fastmail_site_config`) |
 | `/Users/smithers/hermes` on the Mac | `compose.yaml` |
 | `/Users/smithers/hermes/data` on the Mac | Hermes config, chats, memory, skills and its own scripts, Claude Code, the plugin and the Claude login |
 | `/Users/smithers/hermes/data/data/fastmail-triage` on the Mac | The Fastmail token, private settings, undo journals and last report |

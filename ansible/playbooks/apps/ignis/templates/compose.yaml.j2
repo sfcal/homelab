@@ -26,12 +26,11 @@ services:
       # The Obsidian download, fetched again when missing.
       - /Users/smithers/ignis/obsidian-app:/app/obsidian-app
       # The Documents folder of the Mac's iCloud Drive as the vault
-      # "Documents", read-only. If the folder is missing (iCloud signed out)
-      # the container doesn't start, instead of Docker making an empty folder
-      # inside iCloud Drive.
+      # "Documents", writable: what Ignis changes syncs to iCloud. If the
+      # folder is missing (iCloud signed out) the container doesn't start,
+      # instead of Docker making an empty folder inside iCloud Drive.
       - type: bind
         source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents
         target: /mnt/vaults/Documents
-        read_only: true
         bind:
           create_host_path: false

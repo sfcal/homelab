@@ -32,7 +32,7 @@ Hermes Agent runs in two containers on the Mac mini in wil, in OrbStack, with it
 
 [Ignis](https://github.com/Nystik-gh/ignis) runs Obsidian in the browser at `https://ignis.wil.5am.cloud`, behind the Kanidm login: it has no login of its own. It is a container on the Mac mini in wil, in OrbStack next to [Hermes](hermes.md), with its own playbook. Deploy with `task ansible:deploy-ignis ENV=wil`.
 
-- **Vaults:** every folder under `/Users/smithers/ignis/vaults` on the Mac is a vault, plain Markdown. `Documents` is the `Documents` folder of the Mac's iCloud Drive, mounted read-only: Ignis shows it and can't change it.
+- **Vaults:** every folder under `/Users/smithers/ignis/vaults` on the Mac is a vault, plain Markdown. `Documents` is the `Documents` folder of the Mac's iCloud Drive, mounted writable: what Ignis changes there syncs to iCloud.
 - **Other files:** `data/` (Ignis settings) and `obsidian-app/` (the Obsidian download, fetched again when missing), next to `vaults/`.
 - **iCloud:** what holds for Hermes's mount holds here too (see [Files on the Mac](hermes.md#files-on-the-mac)): macOS asks once on the Mac's screen, and a file still in iCloud is slow the first time it is read. A vault opens slowly until the Mac has downloaded its files.
 - **Vault root:** the compose file sets `VAULT_ROOT=/mnt/vaults`. At each start the image changes the owner of everything under its own `/vaults`, which would walk the whole iCloud folder.
@@ -98,6 +98,7 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
 | Restreamer | `datarhei/restreamer` | 8710 |
+| Squid | `ubuntu/squid` | 3128 |
 
 ### Grist
 

@@ -76,6 +76,7 @@ Taskfile.yaml               Root task runner entry point
 | iSponsorBlockTV | `app_isponsorblocktv` | Skips sponsor segments on YouTube TV apps |
 | Kasm | `app_kasm` | Browser-based desktops |
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
+| Squid | `app_squid` | Forward proxy: the browser Hermes drives in wil goes out through ldn |
 | MicroBin | `app_work` | Pastebin |
 | Restreamer | `app_work` | Video streaming relay |
 | Steam Headless | `app_gaming` | Game streaming to a browser or Moonlight (Intel Arc Pro B50 SR-IOV VF) |
