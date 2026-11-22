@@ -95,14 +95,9 @@
       changed_when: "'already at' not in hermes_plugin_update.stdout"
       notify: Restart hermes
 
-    - name: Install the plex-fix skill.
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/plex-fix/"
-        dest: /Users/smithers/hermes/data/skills/media/plex-fix/
-        mode: "0644"
-        directory_mode: "0755"
-      notify: Restart hermes
-
+    # The skills themselves aren't in this repo: they stay in the data
+    # folder's skills on the Mac. The tasks below only give them their keys
+    # and settings.
     - name: Give Hermes the Radarr, Sonarr and Plex credentials.
       ansible.builtin.lineinfile:
         path: /Users/smithers/hermes/data/.env
@@ -113,14 +108,6 @@
         - { name: SONARR_API_KEY, value: "{{ hermes_sonarr_api_key }}" }
         - { name: PLEX_TOKEN, value: "{{ hermes_plex_token }}" }
       no_log: true
-      notify: Restart hermes
-
-    - name: Install the fastmail-triage skill.
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/fastmail-triage/"
-        dest: /Users/smithers/hermes/data/skills/email/fastmail-triage/
-        mode: "0644"
-        directory_mode: "0755"
       notify: Restart hermes
 
     - name: Create the fastmail-triage data directory.
@@ -137,23 +124,6 @@
         dest: /Users/smithers/hermes/data/data/fastmail-triage/site-config.json
         mode: "0600"
       no_log: true
-
-    # Keeps any schedule or pause set on the Mac. Only the report's
-    # destination comes from group_vars.
-    - name: Create or repair the fastmail-triage cron jobs.
-      ansible.builtin.command: >-
-        docker exec -u hermes hermes python3
-        /opt/data/skills/email/fastmail-triage/scripts/install.py
-        --deliver {{ hermes_fastmail_deliver }}
-      changed_when: false
-
-    - name: Install the grist skill.
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/grist/"
-        dest: /Users/smithers/hermes/data/skills/productivity/grist/
-        mode: "0644"
-        directory_mode: "0755"
-      notify: Restart hermes
 
     # Grist's own port on ldn's work VM: its name has the Kanidm login in
     # front, which a script can't pass. The API key isn't here: it's set by

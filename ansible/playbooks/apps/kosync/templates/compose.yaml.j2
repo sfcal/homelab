@@ -12,8 +12,22 @@ services:
       - "{{ apps[app_name].port }}:17200"
     environment:
       - ENABLE_USER_REGISTRATION={{ apps[app_name].user_registration | default(false) | ternary('true', 'false') }}
+    # The image writes its logs to files. Link them to the container's
+    # output so Vector ships them, and drop nginx's 16k access-log buffer so
+    # lines arrive as they happen. Not stderr: gin sends nginx's to
+    # /dev/null. The last line is the image's own CMD.
+    command:
+      - sh
+      - -c
+      - |
+        cd /app/koreader-sync-server
+        sed -i 's/ buffer=16k//' config/nginx.conf
+        mkdir -p logs
+        ln -sf /dev/stdout logs/production-access.log
+        ln -sf /dev/stdout logs/production-error.log
+        ln -sf /dev/stdout logs/error.log
+        ln -sf /dev/stdout /var/log/redis/redis-server.log
+        exec /usr/bin/runsvdir -P /etc/service
     volumes:
       # Redis (bundled in the image) holds all user + progress data.
       - /var/lib/kosync/redis:/var/lib/redis
-      - /var/log/kosync/app:/app/koreader-sync-server/logs
-      - /var/log/kosync/redis:/var/log/redis

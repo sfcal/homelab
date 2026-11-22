@@ -452,7 +452,7 @@ The role pulls Vector's image in a task of its own, before `compose up`. Compose
 - The Proxmox hosts and the Mac mini: their playbooks don't run `common`. The Proxmox hosts have no Docker, so they would need a different sender
 - `10.3.20.80`, which is in no role group
 - Kasm's inner containers (sessions, its API): they run in Kasm's own Docker inside the `kasm` container, and only that container's output is sent
-- Log files an app writes itself instead of printing: KOSync (`/var/log/kosync`), Steam Headless's own journal
+- Log files an app writes itself instead of printing: Steam Headless's own journal. KOSync's are linked to its output by the `command:` in its compose template
 - Anything from before 2026-11-16, and what a container prints while Vector is stopped (its restarts and upgrades, the first seconds after a boot)
 - Docker's own `json-file` logs on each host still have no size limit
 

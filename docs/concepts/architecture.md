@@ -78,6 +78,7 @@ Taskfile.yaml               Root task runner entry point
 | KOReader Sync | `app_kosync` | KOReader reading-progress sync server |
 | Squid | `app_squid` | Forward proxy: the browser Hermes drives in wil goes out through ldn |
 | MicroBin | `app_work` | Pastebin |
+| Miniflux | `app_miniflux` | RSS reader |
 | Restreamer | `app_work` | Video streaming relay |
 | Steam Headless | `app_gaming` | Game streaming to a browser or Moonlight (Intel Arc Pro B50 SR-IOV VF) |
 | RomM | `app_gaming` | ROM manager |

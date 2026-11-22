@@ -97,6 +97,7 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 | iSponsorBlockTV | `ghcr.io/dmunozv04/isponsorblocktv` | — |
 | KOReader Sync | `koreader/kosync` | 17200 |
 | MicroBin | `danielszabo99/microbin` | 8081 |
+| Miniflux | `miniflux/miniflux`, `postgres` | 8080 |
 | Restreamer | `datarhei/restreamer` | 8710 |
 | Squid | `ubuntu/squid` | 3128 |
 
@@ -108,7 +109,7 @@ Most applications use the shared `deploy-app.yml` playbook and are defined in th
 - **Formulas:** they are Python and run in a gVisor sandbox (`GRIST_SANDBOX_FLAVOR`), which keeps them away from the VM's files and the network.
 - **Settings:** all of them are in the compose file, and `GRIST_IN_SERVICE` skips Grist's first-run wizard, so a rebuilt VM starts the same way, with no documents. The key that signs browser sessions is `grist_session_secret` in `site_ldn/secrets.sops.yml`.
 - **Getting data out:** a document's share menu exports it to Excel or CSV, or downloads the whole document as its `.grist` file. An Excel export holds the values, not the formulas.
-- **Scripts:** port 8484 on the VM answers Grist's [API](https://support.getgrist.com/rest-api/) without the Kanidm login, to a request that carries an API key (`Authorization: Bearer <key>`). Make the key in the web page: your picture → Account settings → Developer. It can do everything the account can. [Hermes](hermes.md#update-grist) updates tables this way.
+- **Scripts:** port 8484 on the VM answers Grist's [API](https://support.getgrist.com/rest-api/) without the Kanidm login, to a request that carries an API key (`Authorization: Bearer <key>`). Make the key in the web page: your picture → Account settings → Developer. It can do everything the account can. [Hermes](hermes.md#skills) updates tables this way.
 - **The port:** it also lets anyone on the ldn network in as the one account, without the login.
 
 ### iSponsorBlockTV
@@ -122,6 +123,15 @@ cd /opt/isponsorblocktv
 docker compose run --rm isponsorblocktv setup      # setup-cli for plain prompts
 docker compose restart
 ```
+
+### Miniflux
+
+[Miniflux](https://miniflux.app/) (ldn, on the `web` VM) is the RSS reader, at `https://rss.ldn.5am.cloud`. It logs in to Kanidm itself ([SSO](networking/sso.md#miniflux)), so it has no `auth: true`.
+
+- **Files:** its Postgres database is in `/var/lib/miniflux/postgres` on the VM (`18/docker` under it). Nothing backs it up; an OPML export (Settings → Import / Export) keeps the subscriptions only, not what was read or starred.
+- **Secrets:** `kanidm_miniflux_client_secret` and `miniflux_db_password` in the `app_miniflux` section of `site_ldn/secrets.sops.yml`. The password is hex (`openssl rand -hex 32`) because it goes into the database URL.
+- **Apps:** in Miniflux, Settings → Integrations → Google Reader: turn it on and set a username and password for apps. NetNewsWire adds it as a FreshRSS account, Reeder as Google Reader, both with the URL `https://rss.ldn.5am.cloud` and no trailing slash.
+- **Postgres upgrades:** Renovate opens a PR for a new major Postgres version but never merges it. That version starts with an empty folder next to the old one, so dump the database with the old image and restore it into the new one.
 
 ## Infrastructure Services
 

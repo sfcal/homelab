@@ -80,6 +80,23 @@
       "versioning": "loose"
     },
     {
+      "description": "Never offer pulsarr 1.1.6: a tag from February 2025 (app version 0.1.1) that sorts above the real 1.1.x releases. It ran with an empty database from 2026-11-11 to 2026-11-22",
+      "matchPackageNames": [
+        "lakker/pulsarr"
+      ],
+      "allowedVersions": "!/^1\\.1\\.6$/"
+    },
+    {
+      "description": "A major Postgres version can't read the last one's data (Miniflux's database): open the PR, never automerge. Dump and restore by hand",
+      "matchPackageNames": [
+        "postgres"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
       "description": "Kanidm upgrades go one minor version at a time and can't be rolled back: open the PR, never automerge. kanidm/tools (the mail sender) moves with the server, in the same PR",
       "matchPackageNames": [
         "kanidm/server",

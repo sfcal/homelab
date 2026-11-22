@@ -9,7 +9,7 @@
 3. oauth2-proxy then sets a cookie for the service's domain, so the other flagged services on that domain open directly.
 4. The first visit to a flagged service on another domain passes through Kanidm without asking for the password again.
 
-The login is a gate in front of a service, not a replacement for its own login: a service that has its own (the NAS, for example) still asks for it. Sonarr, Radarr, Prowlarr, SABnzbd and Pulsarr have theirs turned off. [Proxmox](#proxmox), the [backup server](#proxmox-backup-server) and [Kasm](#kasm) log in to Kanidm themselves.
+The login is a gate in front of a service, not a replacement for its own login: a service that has its own (the NAS, for example) still asks for it. Sonarr, Radarr, Prowlarr, SABnzbd and Pulsarr have theirs turned off. [Proxmox](#proxmox), the [backup server](#proxmox-backup-server), [Kasm](#kasm) and [Miniflux](#miniflux) log in to Kanidm themselves.
 
 | Piece | Where |
 |-------|-------|
@@ -228,6 +228,28 @@ sops decrypt --extract '["kanidm_kasm_client_secret"]' ansible/inventory/group_v
 The first login creates a Kasm user in the default group; add it to Administrators as `admin@kasm.local`. A Kasm user created through one OpenID config cannot log in through another (`OIDC login rejected: different OIDC ID expected for user`), and a local user of the same name is refused (`Non OIDC user`): delete the old user first.
 
 Kasm's own login page is at `https://kasm.ldn.5am.cloud/#/staticlogin`. It is the way in for `admin@kasm.local`, also when Kanidm is down.
+
+## Miniflux
+
+Miniflux (`https://rss.ldn.5am.cloud`) has no `auth: true`: feed apps reach its Google Reader API through the name. It logs in to Kanidm itself as client `miniflux`, with PKCE on; its side is the `OAUTH2_*` settings in its compose file. The client was created as `idm_admin`:
+
+```bash
+kanidm system oauth2 create miniflux Miniflux https://rss.ldn.5am.cloud
+```
+
+```bash
+kanidm system oauth2 add-redirect-url miniflux https://rss.ldn.5am.cloud/oauth2/oidc/callback
+```
+
+```bash
+kanidm system oauth2 update-scope-map miniflux sso_users openid profile email
+```
+
+```bash
+kanidm system oauth2 prefer-short-username miniflux
+```
+
+Its secret is `kanidm_miniflux_client_secret` in LDN's secrets (section `app_miniflux`). A member of `sso_users` gets a Miniflux account at their first login, named after their short username. Nobody is a Miniflux admin, which only matters for managing users; the way in when Kanidm is down is a local admin made on the VM: `ssh 10.3.20.70 docker exec -it miniflux /usr/bin/miniflux -create-admin`.
 
 ## Upgrades and Backups
 

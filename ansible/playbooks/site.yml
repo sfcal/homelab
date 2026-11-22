@@ -89,6 +89,10 @@
   tags: ['squid', 'applications']
 
 - import_playbook: deploy-app.yml
+  vars: { app_name: miniflux }
+  tags: ['miniflux', 'applications']
+
+- import_playbook: deploy-app.yml
   vars: { app_name: work }
   tags: ['work', 'microbin', 'restreamer', 'grist','applications']
 

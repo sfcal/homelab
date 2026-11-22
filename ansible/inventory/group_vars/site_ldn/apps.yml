@@ -50,6 +50,23 @@ apps:
       domain: ldn.5am.cloud
       proxied: true
 
+  # RSS reader. Logs in to Kanidm itself (client `miniflux`), so no
+  # auth: true: feed apps (NetNewsWire, Reeder) call its Google Reader API
+  # by hostname, and the login page would turn them away.
+  miniflux:
+    host_group: app_miniflux
+    # renovate: datasource=docker
+    image: "miniflux/miniflux:2.3.5"
+    # A major Postgres version can't read the last one's data: Renovate
+    # opens that PR without merging it (dump and restore by hand).
+    # renovate: datasource=docker
+    db_image: "postgres:18.7-alpine"
+    port: 8080
+    proxy:
+      name: rss
+      domain: ldn.5am.cloud
+      proxied: true
+
   # Skips SponsorBlock segments on YouTube TV apps. No web UI, no port, no
   # proxy: it only talks out to YouTube. TVs are paired once by hand (see
   # docs/infrastructure/docker.md).

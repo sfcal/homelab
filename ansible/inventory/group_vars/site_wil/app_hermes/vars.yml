@@ -20,9 +20,6 @@ hermes_chrome_proxy_image: "nginx:1.31-alpine"
 # from site_ldn/apps.yml: change both.
 hermes_squid_port: 3128
 
-# --- fastmail-triage ---
-hermes_fastmail_deliver: telegram
-
 # --- grist ---
 # Grist's own port on ldn's work VM. wil can't read ldn's registry, so this
 # repeats apps.work.grist.port from site_ldn/apps.yml: change both.

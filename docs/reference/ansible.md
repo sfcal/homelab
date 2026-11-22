@@ -114,7 +114,7 @@ Apps that need more than Docker Compose (e.g., media stack with NFS mounts) have
 | Media stack | NFS mount, complex multi-container setup |
 | Frigate | NFS mount, dedicated compose/config tasks |
 | Gaming | Stacks selected per environment (Steam Headless and RomM), kernel modules and inotify limit, optional NFS |
-| Hermes Agent | Runs against the Mac mini as `smithers`, without root: starts the Hermes and web UI containers in OrbStack, updates Claude Code and the plugin, installs the skills, and sets up node-exporter on macOS itself |
+| Hermes Agent | Runs against the Mac mini as `smithers`, without root: starts the Hermes and web UI containers in OrbStack, updates Claude Code and the plugin, gives the skills their keys and settings, and sets up node-exporter on macOS itself |
 | Ignis | Runs against the Mac mini as `smithers`, without root: starts the Ignis container in OrbStack |
 | Calibre-Web Automated | Runs against the Mac mini as `smithers`, without root: starts its container in OrbStack |
 

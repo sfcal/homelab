@@ -19,8 +19,8 @@ services:
       API_SERVER_HOST: 0.0.0.0
       # Where the agent's file tools may write, as a colon-separated list.
       # The image's own value is /opt/data alone; this adds the writable
-      # iCloud folder mounted below.
-      HERMES_WRITE_SAFE_ROOT: /opt/data:/mnt/icloud/Documents/Hermes
+      # iCloud folders mounted below.
+      HERMES_WRITE_SAFE_ROOT: /opt/data:/mnt/icloud/Documents/Hermes:/mnt/icloud/Documents/Projects/Homelab
     volumes:
       - /Users/smithers/hermes/data:/opt/data
       # The Documents folder of the Mac's iCloud Drive, read-only. Keep it
@@ -35,10 +35,16 @@ services:
         read_only: true
         bind:
           create_host_path: false
-      # Documents/Hermes: the one folder in there that Hermes may write to.
+      # Documents/Hermes and Documents/Projects/Homelab: the two folders in
+      # there that Hermes may write to.
       - type: bind
         source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Hermes
         target: /mnt/icloud/Documents/Hermes
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Projects/Homelab
+        target: /mnt/icloud/Documents/Projects/Homelab
         bind:
           create_host_path: false
 
@@ -85,10 +91,16 @@ services:
         read_only: true
         bind:
           create_host_path: false
-      # Documents/Hermes: the one folder in there that Hermes may write to.
+      # Documents/Hermes and Documents/Projects/Homelab: the two folders in
+      # there that Hermes may write to.
       - type: bind
         source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Hermes
         target: /mnt/icloud/Documents/Hermes
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /Users/smithers/Library/Mobile Documents/com~apple~CloudDocs/Documents/Projects/Homelab
+        target: /mnt/icloud/Documents/Projects/Homelab
         bind:
           create_host_path: false
       # The agent's code, read-only, straight from the agent image, so it

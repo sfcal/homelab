@@ -1,0 +1,47 @@
+---
+{% set miniflux_url = 'https://' ~ apps[app_name].proxy.name ~ '.' ~ apps[app_name].proxy.domain %}
+services:
+  miniflux:
+    image: {{ apps[app_name].image }}
+    container_name: miniflux
+    restart: unless-stopped
+    mem_limit: 256m
+    ports:
+      - "{{ apps[app_name].port }}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # miniflux_db_password is hex (openssl rand -hex 32): it goes into a URL
+      DATABASE_URL: "postgres://miniflux:{{ miniflux_db_password }}@db/miniflux?sslmode=disable"
+      RUN_MIGRATIONS: "1"
+      BASE_URL: "{{ miniflux_url }}"
+      # Caddy terminates TLS: secure cookies, HSTS
+      HTTPS: "1"
+      # Login with Kanidm (client miniflux); the first login of a member of
+      # sso_users creates their account
+      OAUTH2_PROVIDER: oidc
+      OAUTH2_CLIENT_ID: miniflux
+      OAUTH2_CLIENT_SECRET: "{{ kanidm_miniflux_client_secret }}"
+      OAUTH2_REDIRECT_URL: "{{ miniflux_url }}/oauth2/oidc/callback"
+      OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://auth.5am.cloud/oauth2/openid/miniflux
+      OAUTH2_OIDC_PROVIDER_NAME: Kanidm
+      OAUTH2_USER_CREATION: "1"
+
+  db:
+    image: {{ apps[app_name].db_image }}
+    container_name: miniflux-db
+    restart: unless-stopped
+    mem_limit: 256m
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: "{{ miniflux_db_password }}"
+      POSTGRES_DB: miniflux
+    volumes:
+      # Postgres 18+ keeps its data in a folder named after the major version
+      # under this one (18/docker)
+      - /var/lib/miniflux/postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s
