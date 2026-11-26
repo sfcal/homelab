@@ -1,3 +1,3 @@
 # Controller toolchain for the CI deploy workflow (.github/workflows/deploy-env.yml).
 # Keep in step with the Ansible on your own machine (`ansible --version`).
-ansible==14.5.0
+ansible==14.6.0
