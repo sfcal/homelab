@@ -4,7 +4,7 @@
 # the agent release of the same date. Claude Code and the plugin aren't
 # pinned: each deploy moves them to their current release.
 # renovate: datasource=docker
-hermes_image: "nousresearch/hermes-agent:v0.23.1"
+hermes_image: "nousresearch/hermes-agent:v0.23.5"
 # renovate: datasource=docker
 hermes_webui_image: "ghcr.io/nesquena/hermes-webui:0.52.678"
 
