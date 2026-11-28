@@ -6,7 +6,7 @@
 # renovate: datasource=docker
 hermes_image: "nousresearch/hermes-agent:v0.23.1"
 # renovate: datasource=docker
-hermes_webui_image: "ghcr.io/nesquena/hermes-webui:0.52.678"
+hermes_webui_image: "ghcr.io/nesquena/hermes-webui:0.52.761"
 
 # --- browser ---
 # The Chromium that Hermes drives, and the small proxy in front of its
